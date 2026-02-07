@@ -74,6 +74,7 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Tests avanzados](03-evolucion/04-tests-avanzados.md)
 - [Trade-offs y riesgos](03-evolucion/05-trade-offs.md)
 - [SwiftData como ProductStore](03-evolucion/06-swiftdata-store.md)
+- [Backend Firebase](03-evolucion/07-backend-firebase.md)
 - [Entregables Etapa 3](03-evolucion/entregables-etapa-3.md)
 
 ### Etapa 4 — Arquitecto: Plataforma y gobernanza

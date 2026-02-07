@@ -77,6 +77,18 @@ Evidencia mínima:
 Aceptación:
 - cada decisión mayor puede auditarse con contexto.
 
+## 6) Integración backend real (Firebase)
+
+Evidencia mínima:
+
+- documentación de setup local (Auth + Firestore),
+- reglas de seguridad básicas y advertencias de entorno,
+- mapeo de errores backend a semántica de dominio,
+- plan de fallback cuando backend no esté disponible.
+
+Aceptación:
+- el alumno puede ejecutar el flujo local y explicar límites de la integración.
+
 ---
 
 ## Rubrica de evaluación
@@ -171,6 +183,7 @@ La etapa se considera cerrada cuando pasan todos los gates.
 - [ ] Observabilidad estructurada implementada en rutas críticas.
 - [ ] Pruebas avanzadas estables y útiles.
 - [ ] Trade-offs y riesgos documentados con revisión prevista.
+- [ ] Integración Firebase documentada y alineada con contratos de la arquitectura.
 
 ---
 

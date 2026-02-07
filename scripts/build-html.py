@@ -50,6 +50,7 @@ FILE_ORDER = [
     "03-evolucion/04-tests-avanzados.md",
     "03-evolucion/05-trade-offs.md",
     "03-evolucion/06-swiftdata-store.md",
+    "03-evolucion/07-backend-firebase.md",
     "03-evolucion/entregables-etapa-3.md",
     "04-arquitecto/00-introduccion.md",
     "04-arquitecto/01-bounded-contexts.md",
