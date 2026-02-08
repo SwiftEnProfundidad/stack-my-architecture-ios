@@ -1,38 +1,23 @@
 # Estructura Feature-First: paso a paso en Xcode
 
-## Construyendo el proyecto desde cero
+## Partimos del setup ya completado
 
-En la lección anterior explicamos la teoría de cada pieza del stack. Ahora vamos a crear el proyecto real en Xcode, paso a paso, para que veas exactamente cómo se materializa la estructura Feature-First en un proyecto iOS. Al terminar esta lección tendrás un proyecto vacío pero con toda la estructura de carpetas correcta, listo para empezar a implementar la Feature de Login con TDD en la siguiente lección.
+En la lección anterior explicamos la teoría de cada pieza del stack. En esta lección vamos a materializarla en Xcode con una estructura Feature-First clara y lista para trabajar con TDD.
+
+Si todavía no creaste el proyecto base, vuelve primero a [Setup: Preparación del entorno](00-setup.md). Aquí **no** repetimos el asistente completo de creación ni la configuración inicial de Firebase; nos enfocamos en organizar el código con límites arquitectónicos correctos.
 
 ---
 
-## Paso 1: Crear el proyecto en Xcode
+## Paso 1: Verificar punto de partida
 
-Abre Xcode y selecciona **File → New → Project**. Elige la plantilla **App** (bajo iOS). Configúralo así:
+Antes de reorganizar carpetas, confirma que tienes el baseline de Setup:
 
-**Product Name:** StackMyArchitecture
-**Team:** tu equipo de desarrollo (o "None" si es personal)
-**Organization Identifier:** com.tudominio (por ejemplo, com.stackmyarch)
-**Interface:** SwiftUI
-**Language:** Swift
-**Testing System:** XCTest
+- Proyecto `StackMyArchitecture` creado y abriendo correctamente en Xcode.
+- Build en verde con `Cmd + B`.
+- App ejecutando en simulador con `Cmd + R`.
+- Target de tests operativo con `Cmd + U`.
 
-Fíjate en que elegimos XCTest como sistema de testing. Este será el framework de testing que usaremos en todo el curso.
-
-Elige una ubicación en disco y pulsa **Create**. Xcode te genera un proyecto con la estructura por defecto:
-
-```
-StackMyArchitecture/
-├── StackMyArchitectureApp.swift
-├── ContentView.swift
-├── Assets.xcassets
-└── Preview Content/
-
-StackMyArchitectureTests/
-└── StackMyArchitectureTests.swift
-```
-
-Esta es la estructura que Xcode crea por defecto, y es exactamente la que **no** queremos mantener. Vamos a reorganizarla.
+Con ese baseline validado, ahora sí empezamos la reorganización Feature-First.
 
 ---
 

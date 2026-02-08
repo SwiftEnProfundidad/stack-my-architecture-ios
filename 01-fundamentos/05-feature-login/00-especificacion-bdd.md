@@ -6,6 +6,10 @@ Esta es la primera lección donde aplicamos BDD en la práctica. Vamos a sentarn
 
 Al terminar esta lección tendrás una especificación completa del Login: todos los casos posibles (éxito, errores, edge cases), los términos del dominio que usaremos en el código, las decisiones de diseño que los escenarios nos obligan a tomar, y una tabla de trazabilidad que conecta cada escenario con el test que lo verificará.
 
+### Recordatorio de principios
+
+¿Recuerdas el **Principio 1** de [Principios de ingeniería](../01-principios-ingenieria.md)? "Aclarar la intención antes de codificar". Esta lección es exactamente esa práctica aplicada de forma operativa: primero definimos comportamiento, luego diseñamos, y solo después implementamos.
+
 ---
 
 ## El contexto de negocio
@@ -285,4 +289,4 @@ En la siguiente lección empezaremos a implementar, empezando por la capa Domain
 
 ---
 
-**Anterior:** [Estructura Feature-First ←](../04-estructura-feature-first.md) · **Siguiente:** [Domain →](01-domain.md)
+**Anterior:** [Setup: Preparación del entorno ←](../00-setup.md) · **Siguiente:** [Domain →](01-domain.md)

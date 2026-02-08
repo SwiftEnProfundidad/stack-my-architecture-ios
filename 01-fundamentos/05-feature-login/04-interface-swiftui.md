@@ -8,6 +8,10 @@ Ahora llegamos a la capa más externa: la Interface. Esta es la capa que el usua
 
 La regla fundamental de esta capa es: **no contiene lógica de negocio**. La vista no valida emails. No decide si el login fue exitoso. No traduce errores. Solo muestra lo que el ViewModel le dice y envía las acciones del usuario al ViewModel. Es la capa más "tonta" del sistema, y eso es exactamente lo que queremos.
 
+### Recordatorio de principios
+
+Aquí reaparece el **Principio 4** de [Principios de ingeniería](../01-principios-ingenieria.md): la UI se mantiene cohesionada en presentación y desacoplada del core de negocio.
+
 ---
 
 ## Diagrama: cómo fluyen los datos entre Vista y ViewModel

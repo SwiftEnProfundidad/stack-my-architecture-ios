@@ -189,4 +189,4 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 
 ---
 
-**Anterior:** [Introducción ←](00-introduccion.md) · **Siguiente:** [Metodología BDD + TDD →](02-metodologia-bdd-tdd.md)
+**Anterior:** [Introducción ←](00-introduccion.md) · **Siguiente:** [Metodología BDD: especificación y descubrimiento →](02-metodologia-bdd-tdd.md)

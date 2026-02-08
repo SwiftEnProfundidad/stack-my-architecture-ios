@@ -12,6 +12,10 @@ El **`RemoteAuthGateway`**, que implementa el protocolo `AuthGateway` llamando a
 
 Todo con tests XCTest.
 
+### Recordatorio de principios
+
+En esta capa se ve muy claro el **Principio 4** de [Principios de ingeniería](../01-principios-ingenieria.md): bajo acoplamiento y alta cohesión. Infrastructure adapta el mundo externo sin contaminar Domain ni Application.
+
 ---
 
 ## El concepto de adaptador

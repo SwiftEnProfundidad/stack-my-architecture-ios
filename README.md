@@ -35,7 +35,8 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 
 - [Introducción y objetivos](01-fundamentos/00-introduccion.md)
 - [Principios de ingeniería](01-fundamentos/01-principios-ingenieria.md)
-- [Metodología BDD + TDD](01-fundamentos/02-metodologia-bdd-tdd.md)
+- [Metodología BDD: especificación y descubrimiento](01-fundamentos/02-metodologia-bdd-tdd.md)
+- [Metodología TDD: práctica Red-Green-Refactor](01-fundamentos/02-metodologia-tdd-practica.md)
 - [Stack tecnológico](01-fundamentos/03-stack-tecnologico.md)
 - [Estructura Feature-First](01-fundamentos/04-estructura-feature-first.md)
 - **Feature Login:**

@@ -8,6 +8,13 @@ En esta lección vamos a construir los siguientes tipos, todos con TDD (test pri
 
 El Value Object `Email`, que garantiza que un email tiene formato válido. El Value Object `Password`, que garantiza que una contraseña no está vacía. El tipo `Credentials` que agrupa ambos. El enum `AuthError` con los errores de autenticación. El enum `LoginEvent` con los eventos del dominio. Y el struct `Session` que representa una autenticación exitosa.
 
+### Recordatorio de principios
+
+Aquí aplicamos explícitamente dos principios de [Principios de ingeniería](../01-principios-ingenieria.md):
+
+- **Principio 2 (lotes pequeños):** un test a la vez, un comportamiento a la vez.
+- **Principio 3 (tests como feedback):** cada decisión de diseño del Domain se valida con XCTest antes de avanzar.
+
 ---
 
 ## Diagrama: todos los tipos del Domain y cómo se relacionan

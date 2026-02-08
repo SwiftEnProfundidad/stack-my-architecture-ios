@@ -308,4 +308,4 @@ Cada pieza tiene su razón de ser. Si quitas una, las demás se debilitan. Por e
 
 ---
 
-**Anterior:** [Metodología BDD + TDD ←](02-metodologia-bdd-tdd.md) · **Siguiente:** [Estructura Feature-First →](04-estructura-feature-first.md)
+**Anterior:** [Metodología TDD: práctica Red-Green-Refactor ←](02-metodologia-tdd-practica.md) · **Siguiente:** [Estructura Feature-First →](04-estructura-feature-first.md)

@@ -14,6 +14,13 @@ El **caso de uso** `LoginUseCase`, que orquesta el flujo completo: valida email,
 
 Todo con TDD usando XCTest, un test a la vez.
 
+### Recordatorio de principios
+
+Antes de implementar el caso de uso, conecta esta lección con [Principios de ingeniería](../01-principios-ingenieria.md):
+
+- **¿Recuerdas el Principio 1?** Primero dejamos claro qué orquesta el caso de uso y qué no debe hacer.
+- **Principio 4 (bajo acoplamiento):** por eso introducimos `AuthGateway` como puerto en lugar de acoplar `LoginUseCase` a red directa.
+
 ---
 
 ## Qué es un puerto y por qué lo necesitamos

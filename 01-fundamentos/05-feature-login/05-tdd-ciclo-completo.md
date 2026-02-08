@@ -232,7 +232,7 @@ Cada test crea su propio stub con su propia configuración. No hay estado compar
 
 ### El patrón de spy (verificación de llamadas)
 
-Nuestros stubs son en realidad **spies** (si leíste la guía de test doubles en la lección de Metodología BDD+TDD, ya sabes la diferencia): además de devolver datos configurados, **registran las llamadas que reciben**:
+Nuestros stubs son en realidad **spies** (si leíste la guía de test doubles en la lección de [Metodología TDD: práctica Red-Green-Refactor](../02-metodologia-tdd-practica.md), ya sabes la diferencia): además de devolver datos configurados, **registran las llamadas que reciben**:
 
 ```swift
 // El spy registra las credenciales que recibió:
