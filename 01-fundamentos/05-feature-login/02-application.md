@@ -18,11 +18,11 @@ Todo con TDD usando XCTest, un test a la vez.
 
 ## Qué es un puerto y por qué lo necesitamos
 
-Un puerto es simplemente un protocolo que define una interfaz que el caso de uso necesita pero que no implementa. Es la materialización del principio de inversión de dependencias que explicamos en lecciones anteriores.
+Un puerto/protocolo es simplemente un protocolo Swift que define una interfaz que el caso de uso necesita pero que no implementa. Es la materialización del principio de inversión de dependencias que explicamos en lecciones anteriores.
 
 Piensa en ello así: el `LoginUseCase` necesita autenticar credenciales contra un servidor. Pero si el caso de uso llamara directamente a `URLSession`, estaría acoplado a la red. No podrías testearlo sin un servidor real. No podrías hacer previews sin conexión. No podrías cambiar de URLSession a otra librería sin modificar el caso de uso.
 
-La solución es definir un protocolo que diga "necesito algo que pueda recibir credenciales y devolver una sesión o un error". El caso de uso depende de ese protocolo, no de una implementación concreta. Y la implementación concreta (que vive en la capa Infrastructure) implementa ese protocolo. Es como el enchufe y la bombilla que mencionamos en la lección de principios: la interfaz estándar que permite cambiar una pieza sin afectar a la otra.
+La solución es definir un protocolo/puerto que diga "necesito algo que pueda recibir credenciales y devolver una sesión o un error". El caso de uso depende de este protocolo/puerto, no de una implementación concreta. Y la implementación concreta (que vive en la capa Infrastructure) implementa ese protocolo/puerto. Es como el enchufe y la bombilla que mencionamos en la lección de principios: la interfaz estándar que permite cambiar una pieza sin afectar a la otra.
 
 ### El protocolo AuthGateway
 
@@ -36,7 +36,7 @@ protocol AuthGateway: Sendable {
 
 Vamos a analizar cada aspecto de esta declaración, porque cada palabra está ahí por una razón:
 
-**`protocol`** — es un protocolo, no una clase ni un struct. Esto es fundamental: define una interfaz sin implementación. Cualquier tipo que conforme este protocolo puede ser usado por el caso de uso.
+**`protocol`** — es un protocolo/puerto, no una clase ni un struct. Esto es fundamental: define una interfaz sin implementación. Cualquier tipo que conforme este protocolo/puerto puede ser usado por el caso de uso.
 
 **`AuthGateway`** — el nombre usa el lenguaje ubicuo del dominio. No es `NetworkService`, ni `APIClient`, ni `AuthManager`. Es un "gateway de autenticación": una puerta de entrada al servicio de autenticación, sea cual sea su implementación.
 
@@ -92,7 +92,7 @@ sequenceDiagram
 
 Fíjate en que el UseCase hace **tres cosas** en orden:
 1. **Valida** los datos de entrada usando los Value Objects del Domain
-2. **Delega** la autenticación al gateway a través del protocolo
+2. **Delega** la autenticación al gateway a través del protocolo/puerto
 3. **Propaga** el resultado (éxito o error) al caller
 
 No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. Esas responsabilidades pertenecen a otras capas.
@@ -113,13 +113,13 @@ graph LR
     style Prod fill:#cce5ff,stroke:#007bff
 ```
 
-El mismo `LoginUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthGateway`. **Esto es inyección de dependencias en acción.**
+El mismo `LoginUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthGateway` (su protocolo/puerto). **Esto es inyección de dependencias en acción.**
 
 ---
 
 ## Construyendo el LoginUseCase con TDD
 
-Ahora viene la parte más importante de esta lección: implementar el caso de uso con TDD. Vamos a necesitar un doble de test (un stub) del protocolo `AuthGateway` para poder testear el caso de uso sin depender de infraestructura real. Lo construiremos conforme lo necesitemos.
+Ahora viene la parte más importante de esta lección: implementar el caso de uso con TDD. Vamos a necesitar un doble de test (un stub) del protocolo/puerto `AuthGateway` para poder testear el caso de uso sin depender de infraestructura real. Lo construiremos conforme lo necesitemos.
 
 ### Primero: el doble de test (AuthGatewayStub)
 

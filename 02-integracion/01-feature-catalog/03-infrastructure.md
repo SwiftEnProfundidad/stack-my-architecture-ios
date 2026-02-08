@@ -91,7 +91,7 @@ Regla de oro:
 
 ## Contratos base (puertos)
 
-Supuesto: el puerto `ProductRepository` ya está definido en Application/Domain así:
+Supuesto: el puerto/protocolo `ProductRepository` ya está definido en Application/Domain así:
 
 ```swift
 import Foundation

@@ -177,7 +177,7 @@ flowchart LR
     style HTTP fill:#fff3cd,stroke:#ffc107
 ```
 
-`struct RemoteAuthGateway: AuthGateway, Sendable` — Conforma el protocolo `AuthGateway` (definido en Application). Esto significa que implementa el método `authenticate(credentials:)`. Es `Sendable` para poder usarse en funciones `async`.
+`struct RemoteAuthGateway: AuthGateway, Sendable` — Conforma el protocolo/puerto `AuthGateway` (definido en Application). Esto significa que implementa el método `authenticate(credentials:)`. Es `Sendable` para poder usarse en funciones `async`.
 
 `private let httpClient: any HTTPClient` — La dependencia para hacer peticiones HTTP. Es un protocolo, no `URLSession` directamente. En producción será un wrapper de `URLSession`. En tests será un `HTTPClientStub`. El gateway no sabe cuál es.
 

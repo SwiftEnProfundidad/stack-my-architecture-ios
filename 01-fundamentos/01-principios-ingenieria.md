@@ -139,6 +139,8 @@ La cohesión es la otra cara de la moneda. Un módulo es **cohesivo** cuando tod
 
 El test mental de la cohesión es intentar describir lo que hace un módulo en una sola frase, sin usar la palabra "y". Si puedes decir "este módulo valida direcciones de email", es cohesivo. Si tienes que decir "este módulo valida emails **y** formatea fechas **y** gestiona la navegación", la cohesión es baja.
 
+> **💡 Conexión con SOLID (SRP):** Esta es la práctica concreta del *Single Responsibility Principle*. Cada clase debe tener una, y solo una, razón para cambiar. Cuando un módulo tiene alta cohesión, todos sus elementos cambian por la misma razón. Cuando tiene baja cohesión, diferentes partes cambian por razones diferentes, forzándote a modificar el archivo constantemente por causas no relacionadas.
+
 ### Cómo se aplica esto en el curso
 
 En este curso, cada feature se organiza en cuatro capas (Domain, Application, Infrastructure, Interface), y cada capa tiene una responsabilidad clara y no invade las demás. Esto es bajo acoplamiento entre capas. Dentro de cada capa, los archivos están agrupados por función: los Value Objects van juntos, los casos de uso van juntos, los adaptadores de red van juntos. Esto es alta cohesión dentro de cada capa.

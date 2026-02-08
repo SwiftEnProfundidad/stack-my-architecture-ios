@@ -62,7 +62,7 @@ Application no hace parseo ni renderizado, pero sí mantiene contrato semántico
 ### Sí hace
 
 - define casos de uso con intención de negocio;
-- define puertos requeridos por el caso de uso;
+- define puertos/protocolos requeridos por el caso de uso;
 - orquesta flujo y decisiones de alto nivel;
 - conserva semántica de errores para capa superior.
 
@@ -77,7 +77,25 @@ Si ves `URLRequest` o `@State` dentro de Application, estás cruzando límites.
 
 ---
 
+## Manos a Xcode: crear los archivos de Application de Catalog
+
+Crea estos archivos de produccion (Target = **StackMyArchitecture**):
+
+1. **Catalog/Application/Ports/ProductRepository.swift**
+2. **Catalog/Application/UseCases/LoadProductsUseCase.swift**
+
+Crea estos archivos de test (Target = **StackMyArchitectureTests**):
+
+1. **Tests/Features/Catalog/Application/LoadProductsUseCaseTests.swift**
+2. **Tests/Features/Catalog/Helpers/ProductRepositoryStub.swift** (incluira el stub y el spy)
+
+Borra el contenido por defecto de todos.
+
+---
+
 ## Contrato principal: ProductRepository
+
+Abre `ProductRepository.swift` y escribe:
 
 ```swift
 import Foundation
@@ -87,16 +105,22 @@ protocol ProductRepository: Sendable {
 }
 ```
 
-Por qué este puerto está bien diseñado para etapa 2:
+**Por que `Sendable` en un protocolo:** Cuando escribes `protocol ProductRepository: Sendable`, le dices a Swift: "cualquier tipo que implemente este protocolo debe ser seguro para concurrencia". Esto es necesario porque el `LoadProductsUseCase` guarda una referencia al repositorio (`any ProductRepository`) y lo llama desde una funcion `async`. Si el protocolo no fuera `Sendable`, Swift 6 no te dejaria guardar esa referencia ni llamar al repositorio desde un contexto concurrente.
 
-- expresa intención de negocio (“cargar todos los productos”);
-- no filtra detalles técnicos;
-- es fácil de stubear en TDD;
-- permite implementaciones múltiples (remote, cached, híbrida).
+**Por que `async throws`:** `async` porque cargar productos implica una operacion lenta (red o disco) que no debe bloquear la interfaz. `throws` porque esa operacion puede fallar (sin internet, datos corruptos). El tipo de retorno `[Product]` devuelve modelos de dominio, no DTOs — el repositorio traduce internamente.
+
+Por que este puerto/protocolo esta bien disenado para etapa 2:
+
+- expresa intencion de negocio ("cargar todos los productos");
+- no filtra detalles tecnicos;
+- es facil de stubear en TDD;
+- permite implementaciones multiples (remote, cached, hibrida).
 
 ---
 
 ## Caso de uso: LoadProductsUseCase
+
+Abre `LoadProductsUseCase.swift` y escribe:
 
 ```swift
 import Foundation
@@ -114,12 +138,16 @@ struct LoadProductsUseCase: Sendable {
 }
 ```
 
+**Por que `Sendable` en el UseCase:** El ViewModel (que vive en `@MainActor`) guarda una referencia al `LoadProductsUseCase` y lo llama con `await`. Eso significa que el UseCase cruza la frontera entre el hilo principal y el contexto `async`. Swift 6 exige que sea `Sendable`. Como es un `struct` con una sola propiedad `let` (el repositorio, que tambien es `Sendable` por protocolo), Swift verifica automaticamente que es seguro.
+
+**Por que `any ProductRepository`:** La palabra `any` le dice a Swift: "no se cual es el tipo concreto, solo se que conforma `ProductRepository`". Esto es inyeccion de dependencias — en produccion sera un `RemoteProductRepository`, en tests sera un `ProductRepositoryStub`, en previews sera un `StubProductRepository`. El UseCase no sabe ni le importa cual es.
+
 Parece simple, y es correcto que lo sea en esta etapa.
 
-Punto arquitectónico importante:
+Punto arquitectonico importante:
 
 - la simplicidad actual no invalida el caso de uso;
-- el caso de uso es el punto de extensión para reglas futuras sin tocar UI.
+- el caso de uso es el punto de extension para reglas futuras sin tocar UI.
 
 ---
 
@@ -164,8 +192,11 @@ Aunque el caso de uso sea pequeño, el test-first sigue siendo valioso porque de
 
 ### Mínimo imprescindible
 
+Abre `LoadProductsUseCaseTests.swift` y escribe:
+
 ```swift
 import XCTest
+@testable import StackMyArchitecture
 
 final class LoadProductsUseCaseTests: XCTestCase {
     func test_execute_returnsProductsOnRepositorySuccess() async throws {
@@ -238,8 +269,11 @@ final class LoadProductsUseCaseContractTests: XCTestCase {
 
 ## Dobles de test seguros en concurrencia
 
+Abre `ProductRepositoryStub.swift` y escribe ambos tipos (stub y spy) en el mismo archivo:
+
 ```swift
 import Foundation
+@testable import StackMyArchitecture
 
 struct ProductRepositoryStub: ProductRepository, Sendable {
     let result: Result<[Product], CatalogError>
@@ -436,6 +470,22 @@ Trigger para pasar de A a diseño más complejo:
 - [ ] Application define puertos y casos de uso sin detalles técnicos.
 - [ ] `LoadProductsUseCase` está cubierto por tests de contrato.
 - [ ] Errores semánticos de la feature son observables desde Interface.
+- [ ] Tipos/puertos de Application son `Sendable`.
+- [ ] UseCase sigue siendo punto de entrada único para UI.
+
+---
+
+## Manos a Xcode: checkpoint de la leccion
+
+1. Pulsa **Cmd + B**. Deberia decir **"Build Succeeded"**.
+2. Pulsa **Cmd + U**. Deberia decir **"Test Succeeded"** con los tests de E1 + Catalog Domain + Catalog Application pasando.
+
+### Checklist de calidad
+
+- [ ] 2 archivos de produccion creados (ProductRepository, LoadProductsUseCase).
+- [ ] 2 archivos de test creados (LoadProductsUseCaseTests, ProductRepositoryStub).
+- [ ] Todos los tests pasando en verde (Cmd + U).
+- [ ] Application define puertos/protocolos y casos de uso sin detalles tecnicos.
 - [ ] Tipos/puertos de Application son `Sendable`.
 - [ ] UseCase sigue siendo punto de entrada único para UI.
 

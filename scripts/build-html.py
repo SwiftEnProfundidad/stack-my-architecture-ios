@@ -29,6 +29,7 @@ FILE_ORDER = [
     "01-fundamentos/05-feature-login/04-interface-swiftui.md",
     "01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md",
     "01-fundamentos/05-feature-login/ADR-001-login.md",
+    "01-fundamentos/06-conectando-la-app.md",
     "01-fundamentos/entregables-etapa-1.md",
     "02-integracion/00-introduccion.md",
     "02-integracion/01-feature-catalog/00-especificacion-bdd.md",
@@ -42,6 +43,9 @@ FILE_ORDER = [
     "02-integracion/04-infra-real-network.md",
     "02-integracion/05-integration-tests.md",
     "02-integracion/06-composition-root.md",
+    "02-integracion/07-swiftui-enterprise.md",
+    "02-integracion/08-swift-concurrency-enterprise.md",
+    "02-integracion/09-app-final-etapa-2.md",
     "02-integracion/entregables-etapa-2.md",
     "03-evolucion/00-introduccion.md",
     "03-evolucion/01-caching-offline.md",
@@ -70,9 +74,26 @@ FILE_ORDER = [
     "05-maestria/07-composicion-avanzada.md",
     "05-maestria/08-memory-leaks-y-diagnostico.md",
     "05-maestria/09-migracion-swift6.md",
+    "05-maestria/10-debugging-xcode.md",
+    "05-maestria/11-entrevista-arquitecto.md",
+    "05-maestria/12-arquitectura-adaptativa.md",
     "05-maestria/entregables-etapa-5.md",
     "anexos/diagramas/atlas-arquitectura.md",
+    "anexos/guia-nueva-feature.md",
+    "anexos/git-workflow-curso.md",
+    "anexos/xcode-cheat-sheet.md",
+    "anexos/como-leer-documentacion.md",
+    "anexos/simulator-tips.md",
+    "anexos/mental-models.md",
+    "anexos/errores-compilacion.md",
+    "anexos/guia-solid.md",
+    "anexos/guia-cqs-cqrs.md",
+    "anexos/preguntas-entrevista.md",
+    "anexos/hallazgos-y-correcciones.md",
+    "anexos/adrs/INDICE-ADRS.md",
+    "anexos/apendice-banca-ledger.md",
     "anexos/glosario.md",
+    "anexos/proyecto-final.md",
 ]
 
 
@@ -103,18 +124,21 @@ def md_to_html(md_text, file_id):
             continue
 
         if line.strip().startswith("```") and in_code:
-            code_content = "\n".join(code_buffer)
-            code_content = (
-                code_content.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-            )
-            if code_lang == "mermaid":
-                html += f'<pre class="mermaid">{code_content}</pre>\n'
-            elif code_lang:
-                html += f'<pre><code class="language-{code_lang}">{code_content}</code></pre>\n'
+            raw_code_content = "\n".join(code_buffer)
+            if code_lang.lower() == "mermaid":
+                # Mermaid must be kept raw, otherwise entities like --> and <br/>
+                # are escaped and diagrams fail to parse/render.
+                html += f'<pre class="mermaid">{raw_code_content}</pre>\n'
             else:
-                html += f"<pre><code>{code_content}</code></pre>\n"
+                code_content = (
+                    raw_code_content.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                )
+                if code_lang:
+                    html += f'<pre><code class="language-{code_lang}">{code_content}</code></pre>\n'
+                else:
+                    html += f"<pre><code>{code_content}</code></pre>\n"
             in_code = False
             code_lang = ""
             i += 1
@@ -308,46 +332,258 @@ def build_html():
         body_html += md_to_html(content, file_id)
         body_html += "</section>\n<hr class='lesson-separator'>\n"
 
-    html = f"""<!DOCTYPE html>
+    html_template = """<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stack: My Architecture iOS</title>
 
+<!-- Google Fonts - Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+
 <!-- Mermaid.js para diagramas -->
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
 <!-- Highlight.js para syntax highlighting -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
 
 <style>
+/* ============================================
+   SISTEMA DE DISEÑO: Stack My Architecture iOS
+   ============================================ */
+
 :root {{
+    /* ============================================
+       VISUAL STYLES: enterprise, bold, paper
+       ============================================ */
+    --visual-style: 'enterprise';
+}}
+
+/* ============================================
+   STYLE: ENTERPRISE (Default)
+   Profesional, limpio, corporativo
+   ============================================ */
+[data-style="enterprise"] {{
+    /* Paleta de colores */
     --bg: #ffffff;
+    --bg-elevated: #fafbfc;
+    --bg-surface: #f6f8fa;
+    
     --text: #1a1a2e;
-    --sidebar-bg: #f8f9fa;
-    --sidebar-width: 300px;
-    --accent: #007bff;
-    --code-bg: #f6f8fa;
-    --border: #e1e4e8;
-    --success: #28a745;
+    --text-secondary: #4a4a5a;
+    --text-muted: #6a6a7a;
+    
+    --accent: #2563eb;
+    --accent-light: #3b82f6;
+    --accent-dark: #1d4ed8;
+    --accent-soft: rgba(37, 99, 235, 0.1);
+    
+    --success: #10b981;
+    --success-soft: rgba(16, 185, 129, 0.1);
+    --warning: #f59e0b;
+    --warning-soft: rgba(245, 158, 11, 0.1);
+    --danger: #ef4444;
+    --danger-soft: rgba(239, 68, 68, 0.1);
+    --info: #06b6d4;
+    --info-soft: rgba(6, 182, 212, 0.1);
+    
+    --sidebar-bg: #f8fafc;
+    --code-bg: #f1f5f9;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    
+    --font-weight-body: 500;
+    --font-weight-heading: 700;
+    --heading-letter-spacing: -0.02em;
+    --border-radius: 8px;
+}}
+
+/* ============================================
+   STYLE: ENTERPRISE - Dark Mode overrides
+   Profesional, azul corporativo
+   ============================================ */
+[data-theme="dark"][data-style="enterprise"] {{
+    --bg: #0c1821;
+    --bg-elevated: #152a3d;
+    --bg-surface: #1e3a5f;
+    
+    --text: #e8f4ff;
+    --text-secondary: #a8c5e0;
+    --text-muted: #6b8fb0;
+    
+    --accent: #60a5fa;
+    --accent-light: #93c5fd;
+    --accent-dark: #3b82f6;
+    --accent-soft: rgba(96, 165, 250, 0.15);
+    
+    --sidebar-bg: #0f2335;
+    --code-bg: #152a3d;
+    --border: #2a4a6d;
+    --border-light: #1e3a5f;
+}}
+
+/* ============================================
+   STYLE: BOLD
+   Alto contraste, impactante, moderno
+   ============================================ */
+[data-style="bold"] {{
+    --bg: #0a0a0f;
+    --bg-elevated: #141419;
+    --bg-surface: #1e1e24;
+    
+    --text: #ffffff;
+    --text-secondary: #d0d0e0;
+    --text-muted: #a0a0b0;
+    
+    --accent: #ff6b35;
+    --accent-light: #ff8c5a;
+    --accent-dark: #e55a2b;
+    --accent-soft: rgba(255, 107, 53, 0.15);
+    
+    --success: #00d9a3;
+    --success-soft: rgba(0, 217, 163, 0.15);
     --warning: #ffc107;
-    --danger: #dc3545;
+    --warning-soft: rgba(255, 193, 7, 0.15);
+    --danger: #ff4757;
+    --danger-soft: rgba(255, 71, 87, 0.15);
+    --info: #00d4ff;
+    --info-soft: rgba(0, 212, 255, 0.15);
+    
+    --sidebar-bg: #0f0f14;
+    --code-bg: #1a1a22;
+    --border: #3a3a45;
+    --border-light: #2a2a35;
+    
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+    
+    --font-weight-body: 500;
+    --font-weight-heading: 800;
+    --heading-letter-spacing: -0.03em;
+    --border-radius: 12px;
+}}
+
+/* ============================================
+   STYLE: PAPER
+   Cálido, orgánico, académico
+   ============================================ */
+[data-style="paper"] {{
+    --bg: #fdfbf7;
+    --bg-elevated: #f5f1e8;
+    --bg-surface: #f0ebe0;
+    
+    --text: #2c241b;
+    --text-secondary: #5a5045;
+    --text-muted: #8a8075;
+    
+    --accent: #8b4513;
+    --accent-light: #a0522d;
+    --accent-dark: #654321;
+    --accent-soft: rgba(139, 69, 19, 0.08);
+    
+    --success: #2e7d32;
+    --success-soft: rgba(46, 125, 50, 0.1);
+    --warning: #ed6c02;
+    --warning-soft: rgba(237, 108, 2, 0.1);
+    --danger: #c62828;
+    --danger-soft: rgba(198, 40, 40, 0.1);
+    --info: #1565c0;
+    --info-soft: rgba(21, 101, 192, 0.1);
+    
+    --sidebar-bg: #f7f3ec;
+    --code-bg: #f5f0e6;
+    --border: #e0d5c5;
+    --border-light: #ebe5d8;
+    
+    --shadow-sm: 0 1px 3px rgba(44, 36, 27, 0.08);
+    --shadow: 0 4px 8px rgba(44, 36, 27, 0.12);
+    --shadow-lg: 0 8px 16px rgba(44, 36, 27, 0.15);
+    
+    --font-weight-body: 400;
+    --font-weight-heading: 600;
+    --heading-letter-spacing: -0.01em;
+    --border-radius: 4px;
+}}
+
+/* ============================================
+   STYLE: PAPER - Dark Mode overrides
+   Marrón cálido, estilo parchment
+   ============================================ */
+[data-theme="dark"][data-style="paper"] {{
+    --bg: #2d2419;
+    --bg-elevated: #3d3124;
+    --bg-surface: #4a3d2e;
+    
+    --text: #f5e6d3;
+    --text-secondary: #d4c4b0;
+    --text-muted: #a89080;
+    
+    --accent: #c4956a;
+    --accent-light: #d4a87a;
+    --accent-dark: #a87b5a;
+    --accent-soft: rgba(196, 149, 106, 0.15);
+    
+    --sidebar-bg: #3d3124;
+    --code-bg: #4a3d2e;
+    --border: #5a4d3e;
+    --border-light: #4a3d2e;
+}}
+
+/* ============================================
+   COMMON VARIABLES (No cambian entre estilos)
+   ============================================ */
+:root {{
+    --sidebar-width: 300px;
+    
+    /* Tipografía */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    
+    /* Espaciado */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    /* Radios */
+    --radius-sm: calc(var(--border-radius) / 2);
+    --radius-md: var(--border-radius);
+    --radius-lg: calc(var(--border-radius) * 1.5);
+    --radius-xl: calc(var(--border-radius) * 2);
 }}
 
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
 
+html {{ scroll-behavior: smooth; }}
+
 body {{
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-sans);
     color: var(--text);
     background: var(--bg);
-    line-height: 1.7;
+    line-height: 1.75;
+    font-size: 16px;
+    font-weight: var(--font-weight-body);
     display: flex;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }}
 
-/* Sidebar */
+/* ============================================
+   SIDEBAR NAVEGACIÓN
+   ============================================ */
 #sidebar {{
     position: fixed;
     top: 0;
@@ -357,147 +593,377 @@ body {{
     overflow-y: auto;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
-    padding: 20px 16px;
-    font-size: 0.85rem;
+    padding: var(--space-lg) var(--space-md);
+    font-size: 0.875rem;
     z-index: 100;
+    scrollbar-width: thin;
+}}
+
+#sidebar::-webkit-scrollbar {{
+    width: 6px;
+}}
+
+#sidebar::-webkit-scrollbar-thumb {{
+    background: var(--border);
+    border-radius: 3px;
 }}
 
 #sidebar h2 {{
-    font-size: 1.1rem;
-    margin-bottom: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: var(--space-md);
     color: var(--accent);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
 }}
 
-#sidebar ul {{
-    list-style: none;
-    padding-left: 0;
-}}
+#sidebar ul {{ list-style: none; padding-left: 0; }}
 
-#sidebar li {{
-    margin-bottom: 4px;
-}}
+#sidebar li {{ margin-bottom: 2px; }}
 
 #sidebar li.nav-section {{
-    margin-top: 16px;
+    margin-top: var(--space-lg);
+}}
+
+#sidebar li.nav-section:first-child {{
+    margin-top: 0;
 }}
 
 #sidebar li.nav-section > strong {{
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: block;
+    padding: var(--space-xs) var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
 }}
 
 #sidebar a {{
-    color: #586069;
+    color: var(--text-secondary);
     text-decoration: none;
     display: block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    transition: background 0.15s;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    font-weight: 450;
+    border-left: 2px solid transparent;
 }}
 
 #sidebar a:hover {{
-    background: #e2e6ea;
+    background: var(--accent-soft);
     color: var(--accent);
+    border-left-color: var(--accent);
 }}
 
-/* Main content */
+/* ============================================
+   CONTENIDO PRINCIPAL
+   ============================================ */
 #content {{
     margin-left: var(--sidebar-width);
-    max-width: 860px;
-    padding: 40px 48px;
+    max-width: none;
+    padding: var(--space-3xl) var(--space-2xl);
     width: calc(100% - var(--sidebar-width));
+    min-height: 100vh;
 }}
 
-/* Typography */
-h1 {{ font-size: 2rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }}
-h2 {{ font-size: 1.5rem; margin: 36px 0 12px; color: #24292e; }}
-h3 {{ font-size: 1.25rem; margin: 28px 0 10px; }}
-h4 {{ font-size: 1.1rem; margin: 20px 0 8px; }}
-p {{ margin: 12px 0; }}
-hr {{ border: none; border-top: 1px solid var(--border); margin: 32px 0; }}
-hr.lesson-separator {{ border-top: 3px solid var(--accent); margin: 64px 0; }}
+/* ============================================
+   TIPOGRAFÍA - JERARQUÍA VISUAL
+   ============================================ */
+h1, h2, h3, h4 {{
+    font-weight: var(--font-weight-heading);
+    line-height: 1.3;
+    letter-spacing: var(--heading-letter-spacing);
+    color: var(--text);
+}}
 
-/* Code */
+h1 {{
+    font-size: 2.5rem;
+    margin: 0 0 var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 3px solid var(--accent);
+    color: var(--text);
+    position: relative;
+}}
+
+h1::after {{
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+}}
+
+h2 {{
+    font-size: 1.75rem;
+    margin: var(--space-2xl) 0 var(--space-md);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}}
+
+h2::before {{
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: var(--accent);
+    border-radius: 2px;
+}}
+
+h3 {{
+    font-size: 1.375rem;
+    margin: var(--space-xl) 0 var(--space-sm);
+    color: var(--text);
+    font-weight: 600;
+}}
+
+h4 {{
+    font-size: 1.125rem;
+    margin: var(--space-lg) 0 var(--space-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+}}
+
+p {{
+    margin: var(--space-md) 0;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-weight: var(--font-weight-body);
+}}
+
+/* ============================================
+   SEPARADORES Y SECCIONES
+   ============================================ */
+hr {{
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: var(--space-2xl) 0;
+}}
+
+hr.lesson-separator {{
+    border: none;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--info) 50%, var(--success) 100%);
+    margin: var(--space-3xl) 0;
+    border-radius: 2px;
+}}
+
+/* ============================================
+   BLOQUES DE CÓDIGO
+   ============================================ */
 pre {{
     background: var(--code-bg);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
     overflow-x: auto;
-    margin: 16px 0;
-    font-size: 0.88rem;
-    line-height: 1.5;
+    margin: var(--space-lg) 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    box-shadow: var(--shadow-sm);
 }}
 
 code {{
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
-    font-size: 0.88em;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
 }}
 
 p code, li code, td code {{
     background: var(--code-bg);
-    padding: 2px 6px;
-    border-radius: 3px;
-    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    color: var(--danger);
+    font-weight: 500;
+    font-size: 0.85em;
 }}
 
-/* Mermaid */
+/* Mermaid diagrams */
 pre.mermaid {{
     background: white;
     border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     text-align: center;
-    padding: 20px;
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
 }}
 
-/* Tables */
+/* ============================================
+   TABLAS MODERNAS
+   ============================================ */
 table {{
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
-    margin: 16px 0;
+    margin: var(--space-lg) 0;
     font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }}
+
 th, td {{
-    border: 1px solid var(--border);
-    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
     text-align: left;
 }}
+
 th {{
-    background: var(--sidebar-bg);
+    background: linear-gradient(180deg, var(--bg-surface) 0%, var(--sidebar-bg) 100%);
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--accent);
+}}
+
+tr:hover {{
+    background: var(--bg-surface);
+}}
+
+tr:last-child td {{
+    border-bottom: none;
+}}
+
+/* ============================================
+   LISTAS
+   ============================================ */
+ul, ol {{
+    margin: var(--space-md) 0;
+    padding-left: var(--space-xl);
+}}
+
+li {{
+    margin: var(--space-sm) 0;
+    color: var(--text-secondary);
+}}
+
+li strong {{
+    color: var(--text);
     font-weight: 600;
 }}
-tr:nth-child(even) {{ background: #fafbfc; }}
 
-/* Lists */
-ul, ol {{
-    margin: 12px 0;
-    padding-left: 28px;
+/* Checkboxes en listas */
+li:has(> input[type="checkbox"]) {{
+    list-style: none;
+    margin-left: -1.5em;
 }}
-li {{ margin: 6px 0; }}
 
-/* Links */
-a {{ color: var(--accent); text-decoration: none; }}
-a:hover {{ text-decoration: underline; }}
+/* ============================================
+   LINKS
+   ============================================ */
+a {{
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}}
 
-/* Lesson path badge */
+a:hover {{
+    color: var(--accent-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}}
+
+/* ============================================
+   BADGE DE RUTA DE LECCIÓN
+   ============================================ */
 .lesson-path {{
     font-size: 0.75rem;
-    color: #6a737d;
-    background: var(--sidebar-bg);
-    padding: 4px 10px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 8px;
-    font-family: monospace;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--space-md);
+    font-family: var(--font-mono);
+    border: 1px solid var(--border-light);
+    font-weight: 500;
 }}
 
-/* Strong in lists */
-li strong {{ color: #24292e; }}
+.lesson-path::before {{
+    content: '📁';
+    font-size: 0.9em;
+}}
 
-/* Responsive */
-@media (max-width: 900px) {{
+/* ============================================
+   CALLOUTS / BLOQUES DESTACADOS
+   ============================================ */
+/* Notas con > blockquote */
+blockquote {{
+    margin: var(--space-lg) 0;
+    padding: var(--space-md) var(--space-lg);
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-style: italic;
+    color: var(--text-secondary);
+}}
+
+blockquote p {{
+    margin: 0;
+}}
+
+/* ============================================
+   Responsive - MOBILE FIRST
+   ============================================ */
+@media (max-width: 1024px) {{
+    :root {{ --sidebar-width: 260px; }}
+    #content {{ padding: 32px 28px; }}
+}}
+
+@media (max-width: 768px) {{
+    :root {{ --sidebar-width: 0; }}
     #sidebar {{ display: none; }}
-    #content {{ margin-left: 0; padding: 20px; }}
+    #content {{ 
+        margin-left: 0; 
+        padding: 20px 16px;
+        width: 100%;
+    }}
+    h1 {{ font-size: 1.6rem; margin: 32px 0 12px; }}
+    h2 {{ font-size: 1.3rem; margin: 28px 0 10px; }}
+    h3 {{ font-size: 1.1rem; margin: 20px 0 8px; }}
+    h4 {{ font-size: 1rem; margin: 16px 0 6px; }}
+    pre {{ padding: 12px; font-size: 0.82rem; }}
+    th, td {{ padding: 8px 10px; font-size: 0.85rem; }}
 }}
+
+@media (max-width: 480px) {{
+    #content {{ padding: 16px 12px; }}
+    h1 {{ font-size: 1.4rem; }}
+    h2 {{ font-size: 1.2rem; }}
+    pre {{ padding: 10px; font-size: 0.78rem; overflow-x: scroll; }}
+}}
+
+/* Dark theme */
+[data-theme="dark"] {{
+    --bg: #0d1117;
+    --text: #c9d1d9;
+    --sidebar-bg: #161b22;
+    --accent: #58a6ff;
+    --code-bg: #161b22;
+    --border: #30363d;
+}}
+
+[data-theme="dark"] h1 {{ color: #f0f6fc; }}
+[data-theme="dark"] h2 {{ color: #c9d1d9; }}
+[data-theme="dark"] h3 {{ color: #c9d1d9; }}
+[data-theme="dark"] th {{ background: #21262d; }}
+[data-theme="dark"] tr:nth-child(even) {{ background: #161b22; }}
+[data-theme="dark"] li strong {{ color: #f0f6fc; }}
+[data-theme="dark"] #sidebar a {{ color: #8b949e; }}
+[data-theme="dark"] #sidebar a:hover {{ background: #21262d; color: var(--accent); }}
+[data-theme="dark"] #sidebar li.nav-section > strong {{ color: #f0f6fc; }}
+[data-theme="dark"] pre.mermaid {{ background: #161b22; }}
+[data-theme="dark"] .lesson-path {{ color: #8b949e; }}
 
 /* Back to top */
 #back-to-top {{
@@ -516,9 +982,125 @@ li strong {{ color: #24292e; }}
     display: none;
     z-index: 200;
 }}
+
+/* Theme controls container */
+#theme-controls {{
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}}
+
+#theme-controls button {{
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: 2px solid transparent;
+}}
+
+#theme-controls button:hover {{
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}}
+
+/* Style cycle button - dynamic colors set by JS */
+#style-cycle-btn {{
+    background: #2563eb;
+    color: white;
+    border-color: #3b82f6;
+}}
+
+/* Code theme button */
+#code-theme-cycle-btn {{
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-color: var(--border);
+}}
+
+/* Theme toggle button */
+#theme-toggle {{
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent-light);
+}}
+
+/* Mobile responsive */
+@media (max-width: 768px) {{
+    #theme-controls {{
+        top: 12px;
+        right: 12px;
+        gap: 8px;
+    }}
+    
+    #theme-controls button {{
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }}
+}}
+
+@media (max-width: 600px) {{
+    #theme-controls {{
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+    }}
+    
+    #theme-controls button {{
+        width: 120px;
+        padding: 6px 10px;
+        font-size: 0.7rem;
+    }}
+}}
+
+/* Style selector dropdowns - ensure they inherit theme colors */
+#style-selector select {{
+    background-color: var(--bg-elevated) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}}
+
+#style-selector select option {{
+    background-color: var(--bg-elevated);
+    color: var(--text);
+}}
+#menu-toggle {{
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    background: var(--sidebar-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    z-index: 250;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}}
+
+@media (max-width: 768px) {{
+    #menu-toggle {{ display: block; }}
+}}
 </style>
 </head>
 <body>
+
+<button id="menu-toggle" onclick="toggleSidebar()" title="Abrir menú">&#9776;</button>
+
+<div id="theme-controls">
+    <button id="style-cycle-btn" onclick="cycleStyle()">Estilo: Enterprise</button>
+    <button id="code-theme-cycle-btn" onclick="cycleCodeTheme()">Codigo: Monokai</button>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema claro/oscuro">Tema: Claro</button>
+</div>
 
 {nav}
 
@@ -529,8 +1111,130 @@ li strong {{ color: #24292e; }}
 <button id="back-to-top" onclick="window.scrollTo({{top:0, behavior:'smooth'}})">&#8593;</button>
 
 <script>
+// Theme management
+function getPreferredTheme() {{
+    const saved = localStorage.getItem('course-theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}}
+
+function getPreferredStyle() {{
+    return localStorage.getItem('course-style') || 'enterprise';
+}}
+
+function getPreferredCodeTheme() {{
+    return localStorage.getItem('course-code-theme') || 'monokai';
+}}
+
+function applyStyle(style) {{
+    document.documentElement.setAttribute('data-style', style);
+    localStorage.setItem('course-style', style);
+    
+    const btn = document.getElementById('style-cycle-btn');
+    if (btn) {{
+        btn.textContent = 'Estilo: ' + style.charAt(0).toUpperCase() + style.slice(1);
+        
+        // Set button colors based on style
+        const styleColors = {{
+            'enterprise': {{ bg: '#2563eb', border: '#3b82f6', text: '#ffffff' }},
+            'bold': {{ bg: '#ff6b35', border: '#ff8c5a', text: '#ffffff' }},
+            'paper': {{ bg: '#c4956a', border: '#d4a87a', text: '#2d2419' }}
+        }};
+        
+        const colors = styleColors[style] || styleColors['enterprise'];
+        btn.style.backgroundColor = colors.bg;
+        btn.style.borderColor = colors.border;
+        btn.style.color = colors.text;
+    }}
+}}
+
+function cycleStyle() {{
+    const styles = ['enterprise', 'bold', 'paper'];
+    const current = document.documentElement.getAttribute('data-style') || 'enterprise';
+    const currentIndex = styles.indexOf(current);
+    const nextIndex = (currentIndex + 1) % styles.length;
+    const nextStyle = styles[nextIndex];
+    applyStyle(nextStyle);
+    renderMermaid();
+}}
+
+function applyCodeTheme(theme) {{
+    localStorage.setItem('course-code-theme', theme);
+    const btn = document.getElementById('code-theme-cycle-btn');
+    if (btn) {{
+        btn.textContent = 'Codigo: ' + theme.charAt(0).toUpperCase() + theme.slice(1).replace(/-/g, ' ');
+    }}
+    
+    const hljsLink = document.getElementById('hljs-theme');
+    const themeMap = {{
+        'monokai': 'monokai.min.css',
+        'github': 'github.min.css',
+        'github-dark': 'github-dark.min.css',
+        'atom-one-dark': 'atom-one-dark.min.css'
+    }};
+    hljsLink.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${{themeMap[theme] || 'monokai.min.css'}}`;
+    
+    // Re-highlight all code blocks
+    document.querySelectorAll('pre code').forEach(block => {{
+        hljs.highlightElement(block);
+    }});
+}}
+
+function cycleCodeTheme() {{
+    const themes = ['monokai', 'github', 'github-dark', 'atom-one-dark'];
+    const current = localStorage.getItem('course-code-theme') || 'monokai';
+    const currentIndex = themes.indexOf(current);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const nextTheme = themes[nextIndex];
+    applyCodeTheme(nextTheme);
+}}
+
+function applyTheme(theme) {{
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('course-theme', theme);
+    const btn = document.getElementById('theme-toggle');
+    btn.textContent = theme === 'dark' ? 'Tema: Oscuro' : 'Tema: Claro';
+    btn.title = theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+    // Keep code theme as selected, don't override
+}}
+
+function toggleTheme() {{
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+    renderMermaid();
+}}
+
+// Apply saved preferences immediately
+applyStyle(getPreferredStyle());
+applyCodeTheme(getPreferredCodeTheme());
+applyTheme(getPreferredTheme());
+
+function currentMermaidTheme() {{
+    const theme = document.documentElement.getAttribute('data-theme') || 'light';
+    return theme === 'dark' ? 'dark' : 'default';
+}}
+
+function renderMermaid() {{
+    if (typeof mermaid === 'undefined') {{
+        console.warn('Mermaid no cargado. Revisa conexión a internet/CDN.');
+        return;
+    }}
+
+    mermaid.initialize({{
+        startOnLoad: false,
+        theme: currentMermaidTheme(),
+        securityLevel: 'loose'
+    }});
+
+    document.querySelectorAll('pre.mermaid').forEach(el => {{
+        el.removeAttribute('data-processed');
+    }});
+
+    mermaid.run({{ querySelector: 'pre.mermaid' }});
+}}
+
 // Init Mermaid
-mermaid.initialize({{ startOnLoad: true, theme: 'default' }});
+renderMermaid();
 
 // Init Highlight.js
 document.querySelectorAll('pre code').forEach(block => {{
@@ -558,10 +1262,32 @@ const observer = new IntersectionObserver(entries => {{
 }}, {{ rootMargin: '-20% 0px -70% 0px' }});
 
 sections.forEach(s => observer.observe(s));
+
+// Mobile sidebar toggle
+function toggleSidebar() {{
+    const sidebar = document.getElementById('sidebar');
+    const current = sidebar.style.display;
+    sidebar.style.display = current === 'block' ? 'none' : 'block';
+}}
+
+// Close sidebar when clicking a link on mobile
+document.querySelectorAll('#sidebar a').forEach(link => {{
+    link.addEventListener('click', () => {{
+        if (window.innerWidth <= 768) {{
+            document.getElementById('sidebar').style.display = 'none';
+        }}
+    }});
+}});
 </script>
 
 </body>
 </html>"""
+
+    # This template includes lots of CSS/JS braces. We keep the template as a
+    # plain string, unescape doubled braces from previous formatting, then inject
+    # dynamic sections explicitly.
+    html = html_template.replace("{{", "{").replace("}}", "}")
+    html = html.replace("{nav}", nav).replace("{body_html}", body_html)
 
     OUTPUT_DIR.mkdir(exist_ok=True)
     OUTPUT_FILE.write_text(html, encoding="utf-8")

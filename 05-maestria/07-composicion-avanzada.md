@@ -424,6 +424,8 @@ La composición avanzada te permite:
 - Testear cada capa de forma independiente con tests unitarios simples.
 - Cumplir el Open/Closed Principle: el código está **abierto** a extensión (nuevos decoradores) pero **cerrado** a modificación (no tocas el código existente).
 
+> **💡 SOLID en acción:** Este patrón es la manifestación práctica del *Open/Closed Principle* (OCP). Cuando necesitas añadir logging, no modificas el repositorio existente (cerrado a modificación), creas un nuevo `LoggingRepository` que envuelve al original (abierto a extensión). El caso de uso ni sabe que ahora hay logging.
+
 ---
 
 **Anterior:** [SwiftUI performance ←](06-swiftui-performance.md) · **Siguiente:** [Memory leaks y diagnóstico →](08-memory-leaks-y-diagnostico.md)
