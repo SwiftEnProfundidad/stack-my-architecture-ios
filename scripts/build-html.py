@@ -777,6 +777,49 @@ pre {{
     box-shadow: var(--shadow-sm);
 }}
 
+pre.sma-code-enhanced {{
+    position: relative;
+    padding-top: calc(var(--space-lg) + 1.2rem);
+}}
+
+.sma-code-tools {{
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+}}
+
+.sma-code-lang {{
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
+}}
+
+.sma-code-copy-btn {{
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    cursor: pointer;
+}}
+
+.sma-code-copy-btn:hover {{
+    border-color: var(--accent);
+    color: var(--accent);
+}}
+
 code {{
     font-family: var(--font-mono);
     font-size: 0.9em;
@@ -1112,9 +1155,8 @@ blockquote p {{
 </div>
 
 <div id="course-switcher" class="course-switcher" aria-label="Selector de cursos">
-    <button id="course-switcher-toggle" class="course-switcher-toggle" type="button">☰ Cursos</button>
-    <div id="course-switcher-menu" class="course-switcher-menu" hidden>
-        <a id="course-switcher-home" href="#">Hub</a>
+    <div id="course-switcher-menu" class="course-switcher-menu">
+        <a id="course-switcher-home" href="#">Cursos</a>
         <a id="course-switcher-ios" href="#">Curso iOS</a>
         <a id="course-switcher-android" href="#">Curso Android</a>
     </div>
@@ -1203,6 +1245,80 @@ function applyCodeTheme(theme) {{
     document.querySelectorAll('pre code').forEach(block => {{
         hljs.highlightElement(block);
     }});
+    enhanceCodeBlocks();
+}}
+
+function detectSnippetLang(codeEl) {{
+    const className = (codeEl.className || '').toLowerCase();
+    if (className.includes('language-swift')) return 'Swift';
+    if (className.includes('language-kotlin') || className.includes('language-kt')) return 'KT';
+    if (className.includes('language-js') || className.includes('language-javascript')) return 'JS';
+    if (className.includes('language-ts') || className.includes('language-typescript')) return 'TS';
+    if (className.includes('language-json')) return 'JSON';
+    if (className.includes('language-bash') || className.includes('language-shell')) return 'SH';
+    if (className.includes('language-yaml') || className.includes('language-yml')) return 'YAML';
+    return 'Swift';
+}}
+
+function copyCodeToClipboard(text) {{
+    if (navigator.clipboard && navigator.clipboard.writeText) {{
+        return navigator.clipboard.writeText(text);
+    }}
+    return new Promise((resolve, reject) => {{
+        try {{
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', 'readonly');
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (ok) resolve();
+            else reject(new Error('copy-failed'));
+        }} catch (err) {{
+            reject(err);
+        }}
+    }});
+}}
+
+function enhanceCodeBlocks() {{
+    document.querySelectorAll('pre code').forEach(code => {{
+        const pre = code.closest('pre');
+        if (!pre || pre.classList.contains('mermaid')) return;
+        if (pre.dataset.codeEnhanced === '1') return;
+        pre.dataset.codeEnhanced = '1';
+        pre.classList.add('sma-code-enhanced');
+
+        const tools = document.createElement('div');
+        tools.className = 'sma-code-tools';
+
+        const lang = document.createElement('span');
+        lang.className = 'sma-code-lang';
+        lang.textContent = detectSnippetLang(code);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'sma-code-copy-btn';
+        copyBtn.textContent = 'Copy code';
+        copyBtn.addEventListener('click', () => {{
+            const originalText = copyBtn.textContent;
+            copyCodeToClipboard(code.textContent || '')
+                .then(() => {{
+                    copyBtn.textContent = 'Copied';
+                    setTimeout(() => {{ copyBtn.textContent = originalText; }}, 1200);
+                }})
+                .catch(() => {{
+                    copyBtn.textContent = 'Error';
+                    setTimeout(() => {{ copyBtn.textContent = originalText; }}, 1200);
+                }});
+        }});
+
+        tools.appendChild(lang);
+        tools.appendChild(copyBtn);
+        pre.appendChild(tools);
+    }});
 }}
 
 function cycleCodeTheme() {{
@@ -1265,6 +1381,7 @@ renderMermaid();
 document.querySelectorAll('pre code').forEach(block => {{
     hljs.highlightElement(block);
 }});
+enhanceCodeBlocks();
 
 // Back to top button
 window.addEventListener('scroll', () => {{
@@ -1318,7 +1435,13 @@ document.querySelectorAll('#sidebar a').forEach(link => {{
     OUTPUT_FILE.write_text(html, encoding="utf-8")
 
     ASSETS_DIST_DIR.mkdir(parents=True, exist_ok=True)
-    for asset_name in ["study-ux.js", "study-ux.css", "course-switcher.js", "course-switcher.css", "theme-controls.js"]:
+    for asset_name in [
+        "study-ux.js",
+        "study-ux.css",
+        "course-switcher.js",
+        "course-switcher.css",
+        "theme-controls.js",
+    ]:
         src = ASSETS_SRC_DIR / asset_name
         if src.exists():
             shutil.copy2(src, ASSETS_DIST_DIR / asset_name)

@@ -20,7 +20,7 @@
     home.href = withFileSchemeIfNeeded('/index.html');
     ios.href = withFileSchemeIfNeeded('/ios/index.html');
     android.href = withFileSchemeIfNeeded('/android/index.html');
-    home.textContent = '🏠 Hub';
+    home.textContent = '🏠 Cursos';
     ios.textContent = '📱 Curso iOS';
     android.textContent = '🤖 Curso Android';
   }
@@ -28,25 +28,13 @@
   function setupToggle() {
     var toggle = document.getElementById('course-switcher-toggle');
     var menu = document.getElementById('course-switcher-menu');
-    if (!toggle || !menu) return;
+    if (!menu) return;
 
-    toggle.textContent = '☰ Cursos';
-    toggle.title = 'Cambiar entre Hub, iOS y Android';
+    if (toggle && toggle.parentNode) {
+      toggle.parentNode.removeChild(toggle);
+    }
 
-    toggle.addEventListener('click', function (event) {
-      event.stopPropagation();
-      var isHidden = menu.hasAttribute('hidden');
-      if (isHidden) menu.removeAttribute('hidden');
-      else menu.setAttribute('hidden', 'hidden');
-    });
-
-    document.addEventListener('click', function () {
-      if (!menu.hasAttribute('hidden')) menu.setAttribute('hidden', 'hidden');
-    });
-
-    menu.addEventListener('click', function (event) {
-      event.stopPropagation();
-    });
+    menu.removeAttribute('hidden');
   }
 
   setLinks();
