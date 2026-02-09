@@ -1,0 +1,209 @@
+body.with-global-topbar {
+  padding-top: 86px;
+}
+
+.global-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 12000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-elevated, #0f172a);
+  border-bottom: 1px solid var(--border, #334155);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.18));
+}
+
+.global-topbar > * {
+  position: static !important;
+}
+
+#study-ux-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #334155);
+  background: var(--bg, #111827);
+}
+
+#study-ux-controls button,
+#theme-controls button,
+.study-topic-nav button,
+.study-ux-index-actions button {
+  border: 1px solid var(--border, #334155);
+  background: var(--bg-elevated, #0f172a);
+  color: var(--text, #e5e7eb);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#study-ux-controls button:hover,
+#theme-controls button:hover,
+.study-topic-nav button:hover,
+.study-ux-index-actions button:hover {
+  border-color: var(--accent, #60a5fa);
+  color: var(--accent, #60a5fa);
+}
+
+#study-ux-controls button:disabled,
+.study-topic-nav button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#study-filter-review.active {
+  border-color: var(--accent, #60a5fa);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent, #60a5fa), transparent 78%);
+}
+
+.study-progress {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #cbd5e1);
+  white-space: nowrap;
+}
+
+#theme-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.study-ux-index-actions {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.study-ux-index-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-ux-panel {
+  border: 1px solid var(--border, #334155);
+  border-radius: 10px;
+  background: var(--bg-surface, #0f172a);
+  padding: 10px 12px;
+}
+
+.study-ux-panel h4 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+}
+
+.study-ux-panel p {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.study-topic-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border, #334155);
+}
+
+.study-topic-nav-complete {
+  font-weight: 700;
+}
+
+.study-ux-completed-badge,
+.study-ux-review-badge {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.study-ux-completed-badge {
+  color: var(--success, #34d399);
+}
+
+.study-ux-review-badge {
+  color: var(--accent, #60a5fa);
+}
+
+a.doc-nav-link.study-nav-active {
+  font-weight: 700 !important;
+  border-left-color: var(--accent, #60a5fa) !important;
+}
+
+hr.lesson-separator,
+.lesson hr,
+section.lesson > hr,
+#content hr,
+main hr {
+  display: none !important;
+}
+
+.study-ux-zen #sidebar,
+.study-ux-zen nav {
+  display: none !important;
+}
+
+.study-ux-zen #content,
+.study-ux-zen main {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 980px !important;
+  margin-right: auto !important;
+}
+
+.study-ux-zen .layout {
+  grid-template-columns: 1fr !important;
+}
+
+.study-ux-zen #menu-toggle {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  body.with-global-topbar {
+    padding-top: 122px;
+  }
+
+  .global-topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #study-ux-controls,
+  #theme-controls {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  body.with-global-topbar {
+    padding-top: 132px;
+  }
+
+  #study-ux-controls button,
+  #theme-controls button,
+  .study-topic-nav button,
+  .study-ux-index-actions button {
+    font-size: 0.72rem;
+    padding: 6px 8px;
+  }
+
+  .study-progress {
+    font-size: 0.7rem;
+  }
+}

@@ -8,11 +8,14 @@ Mermaid.js y highlight.js se cargan desde CDN.
 import os
 import re
 import sys
+import shutil
 from pathlib import Path
 
 COURSE_ROOT = Path(__file__).parent.parent
 OUTPUT_DIR = COURSE_ROOT / "dist"
 OUTPUT_FILE = OUTPUT_DIR / "curso-stack-my-architecture.html"
+ASSETS_SRC_DIR = COURSE_ROOT / "assets"
+ASSETS_DIST_DIR = OUTPUT_DIR / "assets"
 
 # Orden de los archivos (segun README)
 FILE_ORDER = [
@@ -303,7 +306,7 @@ def build_nav(files_content):
         h1_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
         title = h1_match.group(1) if h1_match else Path(filepath).stem
         file_id = filepath.replace("/", "-").replace(".md", "")
-        nav += f'  <li><a href="#{file_id}">{title}</a></li>\n'
+        nav += f'  <li><a class="doc-nav-link" data-lesson-path="{filepath}" href="#{file_id}">{title}</a></li>\n'
 
     nav += "</ul></li>\n</ul>\n</nav>\n"
     return nav
@@ -327,17 +330,23 @@ def build_html():
     body_html = ""
     for filepath, content in files_content:
         file_id = filepath.replace("/", "-").replace(".md", "")
-        body_html += f'<section id="{file_id}" class="lesson">\n'
+        body_html += f'<section id="{file_id}" class="lesson" data-topic-id="{file_id}" data-lesson-path="{filepath}">\n'
         body_html += f'<div class="lesson-path">{filepath}</div>\n'
         body_html += md_to_html(content, file_id)
-        body_html += "</section>\n<hr class='lesson-separator'>\n"
+        body_html += "</section>\n"
 
     html_template = """<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="course-id" content="stack-my-architecture-ios">
 <title>Stack: My Architecture iOS</title>
+<link rel="stylesheet" href="assets/study-ux.css">
+<link rel="stylesheet" href="assets/course-switcher.css">
+<script defer src="assets/study-ux.js"></script>
+<script defer src="assets/course-switcher.js"></script>
+<script defer src="assets/theme-controls.js"></script>
 
 <!-- Google Fonts - Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1096,6 +1105,21 @@ blockquote p {{
 
 <button id="menu-toggle" onclick="toggleSidebar()" title="Abrir menú">&#9776;</button>
 
+<div id="study-ux-controls" class="study-ux-controls" aria-label="Controles de estudio">
+    <button id="study-completion-toggle" type="button">✅ Marcar completado</button>
+    <button id="study-zen-toggle" type="button">🧘 Enfoque</button>
+    <span id="study-progress" class="study-progress">Progreso: 0/0 (0%)</span>
+</div>
+
+<div id="course-switcher" class="course-switcher" aria-label="Selector de cursos">
+    <button id="course-switcher-toggle" class="course-switcher-toggle" type="button">☰ Cursos</button>
+    <div id="course-switcher-menu" class="course-switcher-menu" hidden>
+        <a id="course-switcher-home" href="#">Hub</a>
+        <a id="course-switcher-ios" href="#">Curso iOS</a>
+        <a id="course-switcher-android" href="#">Curso Android</a>
+    </div>
+</div>
+
 <div id="theme-controls">
     <button id="style-cycle-btn" onclick="cycleStyle()">Estilo: Enterprise</button>
     <button id="code-theme-cycle-btn" onclick="cycleCodeTheme()">Codigo: Monokai</button>
@@ -1105,6 +1129,7 @@ blockquote p {{
 {nav}
 
 <main id="content">
+<section id="study-ux-index-actions" class="study-ux-index-actions" aria-label="Study UX index actions"></section>
 {body_html}
 </main>
 
@@ -1291,6 +1316,13 @@ document.querySelectorAll('#sidebar a').forEach(link => {{
 
     OUTPUT_DIR.mkdir(exist_ok=True)
     OUTPUT_FILE.write_text(html, encoding="utf-8")
+
+    ASSETS_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    for asset_name in ["study-ux.js", "study-ux.css", "course-switcher.js", "course-switcher.css", "theme-controls.js"]:
+        src = ASSETS_SRC_DIR / asset_name
+        if src.exists():
+            shutil.copy2(src, ASSETS_DIST_DIR / asset_name)
+
     print(f"  HTML generado: {OUTPUT_FILE}")
     print(f"  Tamano: {OUTPUT_FILE.stat().st_size / 1024:.0f} KB")
 

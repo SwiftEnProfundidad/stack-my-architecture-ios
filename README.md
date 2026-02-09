@@ -16,6 +16,19 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 - [Rúbrica de empleabilidad iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
 - [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
 
+## HTML Hub
+
+Puedes abrir ambos cursos desde un único portal: `../stack-my-architecture-hub/index.html`.
+
+1. Ejecuta `../stack-my-architecture-hub/scripts/build-hub.sh`
+2. Abre `../stack-my-architecture-hub/index.html`
+3. Cambia entre cursos con el menú burger **Course Switcher** dentro de cada HTML
+
+La capa Study UX (progress, resume, scroll restore, zen mode, shortcuts) se mantiene aislada por `course-id`:
+
+- iOS: `stack-my-architecture-ios`
+- Android: `stack-my-architecture-android`
+
 ---
 
 ## Navegación
