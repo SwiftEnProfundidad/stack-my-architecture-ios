@@ -9,11 +9,19 @@
   const keyScroll = `sma:${courseId}:topics:scroll`;
   const keyZen = `sma:${courseId}:zen`;
   const keyStats = `sma:${courseId}:stats`;
+  const keyFontSize = `sma:${courseId}:font:size`;
 
   const completionBtn = document.getElementById('study-completion-toggle');
   const zenBtn = document.getElementById('study-zen-toggle');
   const progressEl = document.getElementById('study-progress');
   const indexActions = document.getElementById('study-ux-index-actions');
+
+  const baseFontSize = 16;
+  const minFontSize = 13;
+  const maxFontSize = 19;
+
+  let fontDownBtn = null;
+  let fontUpBtn = null;
 
   const completed = readJson(keyCompleted, {});
   const review = readJson(keyReview, {});
@@ -38,6 +46,11 @@
   setupTopBarLayout();
 
   const reviewBtn = ensureReviewTopButton();
+
+  setupFontControls();
+  applySavedFontSize();
+  reorderTopControls();
+  observeTopControlsOrder();
 
   let currentTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
   if (!currentTopic) return;
@@ -102,6 +115,87 @@
     body.classList.add('with-global-topbar');
   }
 
+  function setupFontControls() {
+    const controls = document.getElementById('study-ux-controls');
+    if (!controls) return;
+
+    fontDownBtn = document.getElementById('study-font-down');
+    fontUpBtn = document.getElementById('study-font-up');
+
+    if (!fontDownBtn) {
+      fontDownBtn = document.createElement('button');
+      fontDownBtn.id = 'study-font-down';
+      fontDownBtn.type = 'button';
+      fontDownBtn.textContent = 'A-';
+      fontDownBtn.title = 'Disminuir tamaño del texto';
+      fontDownBtn.addEventListener('click', function () {
+        setFontSize(readFontSize() - 1);
+      });
+    }
+
+    if (!fontUpBtn) {
+      fontUpBtn = document.createElement('button');
+      fontUpBtn.id = 'study-font-up';
+      fontUpBtn.type = 'button';
+      fontUpBtn.textContent = 'A+';
+      fontUpBtn.title = 'Aumentar tamaño del texto';
+      fontUpBtn.addEventListener('click', function () {
+        setFontSize(readFontSize() + 1);
+      });
+    }
+  }
+
+  function readFontSize() {
+    const value = Number(localStorage.getItem(keyFontSize) || baseFontSize);
+    if (!Number.isFinite(value)) return baseFontSize;
+    return Math.min(maxFontSize, Math.max(minFontSize, value));
+  }
+
+  function applySavedFontSize() {
+    setFontSize(readFontSize(), false);
+  }
+
+  function setFontSize(px, persist = true) {
+    const next = Math.min(maxFontSize, Math.max(minFontSize, Number(px) || baseFontSize));
+    document.documentElement.style.fontSize = `${next}px`;
+    if (persist) localStorage.setItem(keyFontSize, String(next));
+    if (fontDownBtn) fontDownBtn.disabled = next <= minFontSize;
+    if (fontUpBtn) fontUpBtn.disabled = next >= maxFontSize;
+  }
+
+  function reorderTopControls() {
+    const controls = document.getElementById('study-ux-controls');
+    if (!controls) return;
+
+    const assistantBtn = document.getElementById('study-ai-open-btn');
+
+    const desired = [
+      progressEl,
+      fontDownBtn,
+      fontUpBtn,
+      completionBtn,
+      reviewBtn,
+      zenBtn,
+      assistantBtn
+    ].filter(Boolean);
+
+    const current = Array.from(controls.children).filter((el) => desired.includes(el));
+    const alreadyOrdered = current.length === desired.length && current.every((el, idx) => el === desired[idx]);
+    if (alreadyOrdered) return;
+
+    desired.forEach((el) => controls.appendChild(el));
+  }
+
+  function observeTopControlsOrder() {
+    const controls = document.getElementById('study-ux-controls');
+    if (!controls || typeof MutationObserver === 'undefined') return;
+
+    const observer = new MutationObserver(function () {
+      reorderTopControls();
+    });
+    observer.observe(controls, { childList: true });
+  }
+
   function ensureReviewTopButton() {
     const controls = document.getElementById('study-ux-controls');
     if (!controls) return null;
@@ -110,7 +204,7 @@
       btn = document.createElement('button');
       btn.id = 'study-review-toggle';
       btn.type = 'button';
-      controls.insertBefore(btn, zenBtn || progressEl || null);
+      controls.appendChild(btn);
     }
     return btn;
   }
@@ -274,7 +368,7 @@
 
     const rowPrimary = document.createElement('div');
     rowPrimary.className = 'study-ux-index-row';
-    rowPrimary.appendChild(createButton('▶ Continuar donde lo dejaste', goResume));
+    rowPrimary.appendChild(createButton('▶ Continuar donde lo dejaste', goResume, 'study-resume-btn'));
     rowPrimary.appendChild(createButton('➡ Ir al primer tema pendiente', goFirstIncomplete));
     rowPrimary.appendChild(createButton('🔁 Mostrar solo temas para repaso', toggleReviewFilter, 'study-filter-review'));
 
@@ -286,12 +380,22 @@
     actionsBox.className = 'study-ux-panel';
     actionsBox.id = 'study-actions';
     actionsBox.appendChild(createButton('⬇ Exportar progreso', exportProgress));
+    actionsBox.appendChild(createButton('⬆ Importar progreso', importProgress));
     actionsBox.appendChild(createButton('🗑 Resetear progreso', resetProgress));
+
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = '.json,application/json';
+    importInput.id = 'study-import-input';
+    importInput.style.display = 'none';
+    importInput.addEventListener('change', handleImportFileChange);
+    actionsBox.appendChild(importInput);
 
     indexActions.appendChild(rowPrimary);
     indexActions.appendChild(statsBox);
     indexActions.appendChild(actionsBox);
 
+    updateResumeButtonState();
     renderStats();
     updateProgressUi();
   }
@@ -306,9 +410,39 @@
   }
 
   function goResume() {
+    if (currentTopic) {
+      scrollMap[currentTopic.id] = Math.max(0, Math.round(window.scrollY || 0));
+      localStorage.setItem(keyScroll, JSON.stringify(scrollMap));
+    }
+
+    const last = localStorage.getItem(keyLastTopic) || (currentTopic && currentTopic.id) || null;
+    const target = last ? topics.find((t) => t.id === last) : null;
+
+    if (target) {
+      if (currentTopic && currentTopic.id === target.id) {
+        restoreScrollForTopic(target.id);
+      } else {
+        renderTopic(target.id, true);
+      }
+      return;
+    }
+
+    const pending = topics.find((t) => !completed[t.id]) || topics[0] || null;
+    if (!pending) return;
+    if (currentTopic && currentTopic.id === pending.id) {
+      restoreScrollForTopic(pending.id);
+      return;
+    }
+    renderTopic(pending.id, true);
+  }
+
+  function updateResumeButtonState() {
+    const btn = document.getElementById('study-resume-btn');
+    if (!btn) return;
     const last = localStorage.getItem(keyLastTopic);
-    if (!last) return;
-    renderTopic(last, true);
+    const exists = !!topics.find((t) => t.id === last);
+    btn.disabled = !exists;
+    btn.title = exists ? 'Abrir el último tema visitado' : 'Aún no hay un tema previo guardado';
   }
 
   function goInicio() {
@@ -484,13 +618,21 @@
   function exportProgress() {
     stopTopicTimer();
     const prefix = `sma:${courseId}:`;
-    const payload = {};
+    const data = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(prefix)) {
-        payload[key] = localStorage.getItem(key);
+        data[key] = localStorage.getItem(key);
       }
     }
+
+    const payload = {
+      courseId: courseId,
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      data: data
+    };
+
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -500,6 +642,100 @@
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  function importProgress() {
+    const input = document.getElementById('study-import-input');
+    if (!input) return;
+    input.value = '';
+    input.click();
+  }
+
+  function handleImportFileChange(event) {
+    const input = event && event.target;
+    if (!input || !input.files || !input.files.length) return;
+    const file = input.files[0];
+    if (!file) return;
+
+    const lower = String(file.name || '').toLowerCase();
+    if (!lower.endsWith('.json')) {
+      alert('Archivo inválido o no compatible con este curso');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(String(reader.result || ''));
+      } catch (_err) {
+        alert('Archivo inválido o no compatible con este curso');
+        return;
+      }
+
+      const validation = validateImportPayload(parsed);
+      if (!validation.ok) {
+        alert(validation.message || 'Archivo inválido o no compatible con este curso');
+        return;
+      }
+
+      const confirmed = window.confirm('Esto reemplazará tu progreso actual de este curso. ¿Continuar?');
+      if (!confirmed) return;
+
+      const prefix = `sma:${courseId}:`;
+      const keysToDelete = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) keysToDelete.push(key);
+      }
+
+      keysToDelete.forEach((k) => localStorage.removeItem(k));
+
+      const data = parsed.data;
+      Object.keys(data).forEach((key) => {
+        localStorage.setItem(key, data[key]);
+      });
+
+      alert('Progreso importado correctamente');
+      window.location.reload();
+    };
+
+    reader.onerror = function () {
+      alert('Archivo inválido o no compatible con este curso');
+    };
+
+    reader.readAsText(file);
+  }
+
+  function validateImportPayload(payload) {
+    if (!payload || typeof payload !== 'object') {
+      return { ok: false, message: 'Archivo inválido o no compatible con este curso' };
+    }
+
+    if (!('courseId' in payload) || !('schemaVersion' in payload) || !('exportedAt' in payload) || !('data' in payload)) {
+      return { ok: false, message: 'Archivo inválido o no compatible con este curso' };
+    }
+
+    if (String(payload.courseId) !== String(courseId)) {
+      return { ok: false, message: 'El archivo no pertenece a este curso' };
+    }
+
+    if (!(payload.schemaVersion === 1 || String(payload.schemaVersion) === '1')) {
+      return { ok: false, message: 'Versión de archivo no compatible' };
+    }
+
+    if (!payload.data || typeof payload.data !== 'object' || Array.isArray(payload.data)) {
+      return { ok: false, message: 'Archivo inválido o no compatible con este curso' };
+    }
+
+    const prefix = `sma:${courseId}:`;
+    const keys = Object.keys(payload.data);
+    const invalid = keys.find((k) => !String(k).startsWith(prefix));
+    if (invalid) {
+      return { ok: false, message: 'Archivo inválido o no compatible con este curso' };
+    }
+
+    return { ok: true };
   }
 
   function resetProgress() {

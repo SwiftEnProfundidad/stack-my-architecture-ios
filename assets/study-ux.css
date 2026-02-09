@@ -46,6 +46,18 @@ body.with-global-topbar {
   cursor: pointer;
 }
 
+#study-font-down,
+#study-font-up {
+  flex: 0 0 42px;
+  width: 42px;
+  min-width: 42px;
+  max-width: 42px;
+  padding: 8px 0;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+}
+
 #study-ux-controls button:hover,
 #theme-controls button:hover,
 .study-topic-nav button:hover,
@@ -201,6 +213,16 @@ main hr {
   .study-ux-index-actions button {
     font-size: 0.72rem;
     padding: 6px 8px;
+  }
+
+  #study-font-down,
+  #study-font-up {
+    flex-basis: 42px;
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    padding: 6px 0;
+    font-size: 12px;
   }
 
   .study-progress {
