@@ -344,9 +344,12 @@ def build_html():
 <title>Stack: My Architecture iOS</title>
 <link rel="stylesheet" href="assets/study-ux.css">
 <link rel="stylesheet" href="assets/course-switcher.css">
+<link rel="stylesheet" href="assets/assistant-panel.css">
 <script defer src="assets/study-ux.js"></script>
 <script defer src="assets/course-switcher.js"></script>
 <script defer src="assets/theme-controls.js"></script>
+<script defer src="assets/assistant-panel.js"></script>
+<script defer src="assets/assistant-bridge.js"></script>
 
 <!-- Google Fonts - Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1441,6 +1444,9 @@ document.querySelectorAll('#sidebar a').forEach(link => {{
         "course-switcher.js",
         "course-switcher.css",
         "theme-controls.js",
+        "assistant-panel.js",
+        "assistant-panel.css",
+        "assistant-bridge.js",
     ]:
         src = ASSETS_SRC_DIR / asset_name
         if src.exists():

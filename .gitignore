@@ -3,3 +3,6 @@ dist/
 
 # macOS
 .DS_Store
+
+# assistant-bridge local secrets
+assistant-bridge/.env
