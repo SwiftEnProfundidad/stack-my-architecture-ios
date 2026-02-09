@@ -41,6 +41,13 @@ La split view de asistente funciona **solo** contra proxy local para no exponer 
 
 El panel usa por defecto `http://localhost:8787` y consulta métricas en [`/metrics`](assistant-bridge/server.js:77).
 
+#### Adjuntos de imágenes
+
+- Máximo `3` imágenes por consulta.
+- Tipos permitidos: `PNG` y `JPEG`.
+- Límite por imagen tras compresión en cliente: `3MB`.
+- Si el modelo elegido no soporta visión, el proxy aplica fallback automático a `gpt-4o-mini` y devuelve aviso.
+
 ---
 
 ## Navegación
