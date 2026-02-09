@@ -261,6 +261,18 @@ El objetivo es que las skills no queden asociadas a "leer un capítulo", sino a 
 
 ---
 
+## Completion Gate (cierre obligatorio de etapa)
+
+La etapa 5 no se considera cerrada solo por completar lecciones. El cierre formal exige pasar la rúbrica final iOS y presentar el paquete de evidencias.
+
+- [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](10-rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Checklist de entrevista (5 minutos)](10-rubrica-final/03-checklist-entrega-para-entrevista.md)
+
+Regla de aprobación: cumplir umbral de puntuación, no activar hard blockers y entregar evidencia verificable para decisiones críticas.
+
+---
+
 ## Qué no debes hacer en esta etapa
 
 Hay cuatro trampas típicas que frenan el salto a arquitecto:

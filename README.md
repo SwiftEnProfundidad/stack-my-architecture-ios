@@ -11,12 +11,18 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
 
+## Final Rubric (iOS)
+
+- [Rúbrica de empleabilidad iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
+
 ---
 
 ## Navegación
 
 - [Objetivo del curso](#objetivo)
 - [Core Mobile (iOS + Android)](#core-mobile-ios--android)
+- [Final Rubric (iOS)](#final-rubric-ios)
 - [Índice de contenidos](#índice-de-contenidos)
 - [Progresión formativa](#progresión-formativa)
 - [Cómo usar este material](#cómo-usar-este-material)
@@ -114,6 +120,8 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Memory leaks y diagnóstico](05-maestria/08-memory-leaks-y-diagnostico.md)
 - [Migración a Swift 6](05-maestria/09-migracion-swift6.md)
 - [Entregables Etapa 5](05-maestria/entregables-etapa-5.md)
+- [Rúbrica final iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
 
 ### Anexos
 
