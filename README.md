@@ -4,9 +4,19 @@
 
 ---
 
+## Core Mobile (iOS + Android)
+
+This is a Mobile Architecture framework: iOS depth + Android parity via shared decision-making, quality, operations, and governance.
+
+- [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
+- [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
+
+---
+
 ## Navegación
 
 - [Objetivo del curso](#objetivo)
+- [Core Mobile (iOS + Android)](#core-mobile-ios--android)
 - [Índice de contenidos](#índice-de-contenidos)
 - [Progresión formativa](#progresión-formativa)
 - [Cómo usar este material](#cómo-usar-este-material)
@@ -30,6 +40,8 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 ### Informe fundacional
 
 - [Informe completo del curso](00-informe/INFORME-CURSO.md)
+- [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
+- [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
 
 ### Etapa 1 — Junior: Fundamentos operables
 

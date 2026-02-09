@@ -8,9 +8,9 @@ Existe por una razón práctica: cuando iOS y Android evolucionan con marcos dis
 
 ## Cómo usar este Core junto a iOS/Android
 
-Usa este bloque como “capa de decisión” transversal.
+Usa este bloque como capa de decisión transversal.
 
-Si estás en iOS, estudia este Core en paralelo con Fundamentos, Integración, Evolución, Arquitecto y Maestría.
+Si estás en iOS, estúdialo en paralelo con Fundamentos, Integración, Evolución, Arquitecto y Maestría.
 
 Si estás en Android, estúdialo en paralelo con Nivel 0, Junior, Mid, Senior y Maestría.
 
@@ -18,23 +18,19 @@ Regla operativa: cada vez que en tu track aparezca una decisión crítica (arqui
 
 ## Principios del Core: decide, validate, operate, evolve
 
-### 1) Decide
+### Decide
 
 No se decide por preferencia personal. Se decide por contexto, restricciones y trade-offs explícitos.
 
-### 2) Validate
+### Validate
 
 No basta “suena bien”. Toda decisión debe tener evidencia verificable: tests, métricas, señales operativas.
 
-### 3) Operate
+### Operate
 
 Lo que no se puede observar ni recuperar en incidente no está listo para producción.
 
-### 4) Evolve
+### Evolve
 
 La arquitectura no es foto estática. Debe soportar cambios incrementales sin caos ni reescrituras de alto riesgo.
-
-## Resultado esperado de usar este Core
-
-Cuando terminas este bloque y lo aplicas en tu track, puedes alinear iOS y Android en decisiones críticas, reducir deuda arquitectónica accidental y defender técnicamente tus decisiones frente a equipo, producto y operación.
 
