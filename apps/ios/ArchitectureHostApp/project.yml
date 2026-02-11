@@ -1,0 +1,52 @@
+name: ArchitectureHostApp
+options:
+  minimumXcodeGenVersion: 2.44.1
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+packages:
+  ArchitectureKit:
+    path: ../ArchitectureKit
+targets:
+  ArchitectureHostApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.stackmyarchitecture.hostapp
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - package: ArchitectureKit
+        product: AppComposition
+      - package: ArchitectureKit
+        product: AppContracts
+      - package: ArchitectureKit
+        product: FeatureCatalogDomain
+      - package: ArchitectureKit
+        product: FeatureLoginData
+  ArchitectureHostAppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - UITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.stackmyarchitecture.hostapp.uitests
+        TEST_TARGET_NAME: ArchitectureHostApp
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: ArchitectureHostApp
+schemes:
+  ArchitectureHostApp:
+    build:
+      targets:
+        ArchitectureHostApp: all
+    test:
+      gatherCoverageData: false
+      targets:
+        - name: ArchitectureHostAppUITests

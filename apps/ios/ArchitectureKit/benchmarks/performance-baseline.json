@@ -1,0 +1,7 @@
+{
+  "cold_ms_max": 500,
+  "warm_ms_max": 120,
+  "warm_to_cold_ratio_max": 0.35,
+  "remote_delay_ns": 120000000
+}
+

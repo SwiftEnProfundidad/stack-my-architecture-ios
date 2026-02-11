@@ -1,0 +1,67 @@
+name: ArchitectureKit Quality
+
+on:
+  push:
+    paths:
+      - "apps/ios/ArchitectureKit/**"
+      - "apps/ios/ArchitectureHostApp/**"
+      - "docs/adr/**"
+      - ".github/workflows/architecturekit-quality.yml"
+  pull_request:
+    paths:
+      - "apps/ios/ArchitectureKit/**"
+      - "apps/ios/ArchitectureHostApp/**"
+      - "docs/adr/**"
+      - ".github/workflows/architecturekit-quality.yml"
+
+jobs:
+  quality-gates:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Run quality gates
+        working-directory: apps/ios/ArchitectureKit
+        run: UI_SMOKE_RESULT_BUNDLE_PATH="$RUNNER_TEMP/architecturehostapp-ui-smoke.xcresult" RUN_UI_SMOKE=1 ./scripts/quality-gates.sh
+
+      - name: Upload UI smoke xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecturehostapp-ui-smoke-xcresult
+          path: ${{ runner.temp }}/architecturehostapp-ui-smoke.xcresult
+          if-no-files-found: warn
+
+      - name: Extract UI smoke evidence
+        if: always()
+        run: |
+          EVIDENCE_DIR="$RUNNER_TEMP/architecturehostapp-ui-smoke-evidence"
+          SUMMARY_FILE="$RUNNER_TEMP/architecturehostapp-ui-smoke-evidence-summary.md"
+          bash apps/ios/ArchitectureHostApp/scripts/extract-xcresult-evidence.sh "$RUNNER_TEMP/architecturehostapp-ui-smoke.xcresult" "$EVIDENCE_DIR" > "$SUMMARY_FILE"
+
+      - name: Upload UI smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecturehostapp-ui-smoke-evidence
+          path: ${{ runner.temp }}/architecturehostapp-ui-smoke-evidence
+          if-no-files-found: warn
+
+      - name: Publish UI smoke summary
+        if: always()
+        run: |
+          SUMMARY_FILE="$RUNNER_TEMP/architecturehostapp-ui-smoke-summary.md"
+          EVIDENCE_SUMMARY_FILE="$RUNNER_TEMP/architecturehostapp-ui-smoke-evidence-summary.md"
+          HISTORY_SUMMARY_FILE="$RUNNER_TEMP/architecturehostapp-ui-smoke-history-summary.md"
+          bash apps/ios/ArchitectureHostApp/scripts/summarize-xcresult.sh "$RUNNER_TEMP/architecturehostapp-ui-smoke.xcresult" > "$SUMMARY_FILE"
+          bash apps/ios/ArchitectureHostApp/scripts/summarize-ui-smoke-history.sh "apps/ios/ArchitectureHostApp/artifacts/ui-smoke-history.jsonl" 25 > "$HISTORY_SUMMARY_FILE"
+          cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          cat "$EVIDENCE_SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          cat "$HISTORY_SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
