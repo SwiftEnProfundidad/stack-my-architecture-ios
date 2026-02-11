@@ -229,9 +229,9 @@ graph LR
     C(("Circulo: un punto de INICIO o FIN"))
 ```
 
-- **Rectangulo** (las cajas con esquinas rectas `["texto"]`): representan **componentes**, **acciones** o **datos**. Es lo mas comun. Cuando ves una caja rectangular que dice "LoginUseCase", significa que hay un componente llamado LoginUseCase que hace algo.
-- **Rombo** (las cajas con forma de diamante `{"texto"}`): representan **decisiones** o **preguntas**. Siempre tienen dos o mas flechas saliendo de ellas, una por cada respuesta posible. Por ejemplo: "Usuario autenticado?" con flechas "SI" y "NO".
-- **Circulo** (las formas redondas `(("texto"))` o `(( ))`): representan **puntos de inicio o fin** de un flujo. Es como decir "aqui empieza" o "aqui termina".
+- **Rectángulo**: representa **componentes**, **acciones** o **datos**. Es la forma más común. Cuando ves una caja rectangular que dice “LoginUseCase”, significa que hay un componente con esa responsabilidad.
+- **Rombo**: representa **decisiones** o **preguntas**. Siempre tiene dos o más flechas saliendo, una por cada resultado posible. Por ejemplo: “¿Usuario autenticado?” con salida “sí” y salida “no”.
+- **Círculo**: representa **inicio** o **fin** de flujo. Es la forma de marcar “aquí empieza” o “aquí termina”.
 
 ### Las flechas: qué significa cada conexión
 
@@ -239,12 +239,12 @@ graph LR
 
 Aquí fijamos una convención única para todo el curso. No es decoración: sirve para que, cuando veas un diagrama en cualquier etapa, entiendas rápidamente si una relación es de uso en runtime, de ensamblado o de contrato.
 
-- **Línea continua + punta cerrada** (`-->`): **dependencia directa en runtime**. A invoca o usa B en el flujo principal.
-- **Línea discontinua + punta cerrada** (`-.->`): **wiring/configuración**. Se usa para composición, inicialización o conexión de piezas, no para lógica de dominio.
+- **Línea continua + punta cerrada** (notación Mermaid: flecha continua): **dependencia directa en runtime**. A invoca o usa B en el flujo principal.
+- **Línea discontinua + punta cerrada** (notación Mermaid: flecha discontinua): **wiring/configuración**. Se usa para composición, inicialización o conexión de piezas, no para lógica de dominio.
 - **Línea discontinua + punta abierta** (referencia visual de la imagen): **contrato/abstracción**. Implementa o depende de interfaz/protocolo.
 - **Línea continua + punta abierta** (referencia visual de la imagen): **salida/evento**. Propagación o notificación desacoplada (callbacks, streams, delegación, bus de eventos).
 
-Cuando el diagrama se escriba en Mermaid, la convención se mantiene con **línea + etiqueta textual** para no perder semántica (`"contrato/protocolo"` o `"evento"`), aunque la punta visual no siempre tenga toda la granularidad de una lámina estática.
+Cuando el diagrama se escriba en Mermaid, la convención se mantiene con **línea + etiqueta textual** para no perder semántica (por ejemplo “contrato/protocolo” o “evento”), aunque la punta visual no siempre tenga toda la granularidad de una lámina estática.
 
 Regla práctica: antes de dibujar, decide si la flecha representa **uso directo**, **wiring**, **contrato** o **evento**. Si no puedes decirlo en una frase, el diagrama está mezclando conceptos.
 
