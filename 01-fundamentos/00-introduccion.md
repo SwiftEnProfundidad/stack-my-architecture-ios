@@ -23,45 +23,45 @@ La diferencia entre esos dos escenarios no es talento ni años de experiencia. E
 Antes de empezar, mira dónde estás y a dónde vas. Este diagrama muestra el camino completo del curso. Cada etapa construye sobre la anterior, sin saltos:
 
 ```mermaid
-graph LR
+graph TD
     subgraph E1["Etapa 1: Junior"]
-        direction TB
+        direction LR
         E1A["Principios de ingeniería"]
-        E1B["BDD + TDD"]
-        E1C["Clean Architecture"]
+        E1B["BDD (escenarios)"]
+        E1C["TDD (Red-Green-Refactor)"]
         E1D["Feature Login completa"]
     end
 
     subgraph E2["Etapa 2: Mid"]
-        direction TB
-        E2A["Segunda feature: Catálogo"]
-        E2B["Integración entre features"]
-        E2C["Navegación desacoplada"]
-        E2D["Composition Root"]
+        direction LR
+        E2A["Feature Catalog + contratos"]
+        E2B["Navegación desacoplada"]
+        E2C["Infra real + integration tests"]
+        E2D["Swift Concurrency aplicada"]
     end
 
     subgraph E3["Etapa 3: Senior"]
-        direction TB
-        E3A["Cache y offline"]
-        E3B["Decorator pattern"]
+        direction LR
+        E3A["Cache/offline + consistencia"]
+        E3B["SwiftData como adaptador"]
         E3C["Observabilidad"]
-        E3D["Quality gates"]
+        E3D["Tests avanzados + trade-offs"]
     end
 
     subgraph E4["Etapa 4: Arquitecto"]
-        direction TB
+        direction LR
         E4A["Bounded contexts"]
-        E4B["Gobernanza técnica"]
-        E4C["ADRs de sistema"]
-        E4D["Multi-módulo"]
+        E4B["Deep links como plataforma"]
+        E4C["Reglas de dependencia + quality gates"]
+        E4D["SPM + ADRs de gobernanza"]
     end
 
     subgraph E5["Etapa 5: Maestria"]
-        direction TB
-        E5A["Swift Concurrency"]
-        E5B["SwiftUI performance"]
-        E5C["Composición avanzada"]
-        E5D["Migración Swift 6"]
+        direction LR
+        E5A["Isolation domains + actors"]
+        E5B["Testing concurrente"]
+        E5C["SwiftUI estado/performance"]
+        E5D["Composición, diagnóstico y evolución"]
     end
 
     E1 --> E2 --> E3 --> E4 --> E5
@@ -237,14 +237,22 @@ graph LR
 
 ```mermaid
 graph LR
-    A["Componente A"] --> B["Componente B"]
-    C["Componente C"] -.-> D["Componente D"]
-    E["Componente E"] -->|"con mensaje"| F["Componente F"]
+    A["A"] -->|"uso directo"| B["B"]
+    C["A"] -.->|"wiring / configuración"| D["B"]
+    E["A"] -->|"contrato/protocolo"| F["B"]
+    G["A"] -.->|"evento / notificación"| H["B"]
 ```
 
-- **Flecha solida** (`-->`): significa que A **depende de** B, o que A **llama a** B, o que A **se conecta con** B. Es una relacion directa y real que existe en el codigo.
-- **Flecha punteada** (`-.->`): significa una relacion **indirecta**, **prohibida**, o **futura**. Cuando ves una flecha punteada que dice "PROHIBIDO", quiere decir que esa conexion NO debe existir en el codigo. Cuando dice "futuro", significa que todavia no existe pero existira mas adelante.
-- **Flecha con texto** (`-->|"texto"|`): la etiqueta en la flecha te dice **que tipo de relacion** es. Por ejemplo, `-->|"protocolo"|` significa que la conexion es a traves de un protocolo. `-->|"SI"|` y `-->|"NO"|` te dicen que camino se sigue segun la respuesta a una decision.
+Aquí fijamos una convención única para todo el curso. No es decoración: sirve para que, cuando veas un diagrama en cualquier etapa, entiendas rápidamente si una relación es de uso en runtime, de ensamblado o de contrato.
+
+- **Línea continua + punta cerrada** (`-->`): **dependencia directa en runtime**. A invoca o usa B en el flujo principal.
+- **Línea discontinua + punta cerrada** (`-.->`): **wiring/configuración**. Se usa para composición, inicialización o conexión de piezas, no para lógica de dominio.
+- **Línea continua + etiqueta de contrato** (`-->|"contrato/protocolo"|`): A depende de una abstracción, no de un detalle concreto. Se usa para remarcar inversión de dependencias.
+- **Línea discontinua + etiqueta de evento** (`-.->|"evento"|`): propagación o notificación desacoplada (callbacks, streams, delegación, bus de eventos).
+
+Importante para no generar ambigüedad: Mermaid en `flowchart` no ofrece todos los tipos de punta visual (abierta/cerrada) con la misma granularidad que herramientas de dibujo manual. Por eso la semántica oficial del curso se apoya en **línea + etiqueta textual**. Lo que manda es el significado, no el “adorno” gráfico.
+
+Regla práctica: antes de dibujar, decide si la flecha representa **uso directo**, **wiring**, **contrato** o **evento**. Si no puedes decirlo en una frase, el diagrama está mezclando conceptos.
 
 ### Las cajas grandes (subgraphs): agrupaciones
 
@@ -318,10 +326,10 @@ flowchart TD
 
 ## Cómo avanzar por el curso
 
-El curso está dividido en cuatro etapas que progresan en complejidad. La Etapa 1 (Junior) establece los fundamentos. La Etapa 2 (Mid) añade una segunda feature y la integración entre ambas. La Etapa 3 (Senior) introduce problemas reales de producción como caching, offline y observabilidad. La Etapa 4 (Arquitecto) escala el sistema a nivel de plataforma con gobernanza y quality gates.
+El curso está dividido en cinco etapas que progresan en complejidad sin saltos. La Etapa 1 (Junior) fija fundamentos. La Etapa 2 (Mid) integra features y trae concurrencia a tiempo para soportar red real. La Etapa 3 (Senior) trabaja resiliencia (cache, consistencia y observabilidad). La Etapa 4 (Arquitecto) establece gobernanza de plataforma (contextos, reglas, quality gates, deep links). La Etapa 5 (Maestría) consolida concurrencia avanzada, performance de UI y composición de largo plazo.
 
-**Sigue el orden.** Cada etapa construye sobre la anterior. Si saltas a la Etapa 3 sin haber interiorizado la 1 y la 2, vas a sentir que todo es abstracto y desconectado. Si sigues el orden, cada concepto nuevo encaja naturalmente con lo que ya sabes.
+**Sigue el orden.** Cada etapa construye sobre la anterior. Si saltas directamente a Senior o Arquitecto sin dominar Junior y Mid, lo que verás será una lista de técnicas sueltas. En cambio, si sigues la secuencia, cada técnica aparece justo cuando la necesitas para resolver un problema real.
 
-**No leas por encima.** Lee cada lección completa, escribe el código en Xcode (no solo lo leas), ejecuta los tests, y asegúrate de que entiendes por qué cada pieza está donde está. Si algo no te queda claro, vuelve a leerlo. El curso está escrito para que no necesites buscar en otro sitio.
+**No leas por encima.** Lee cada lección completa, escribe el código en Xcode (no solo lo mires), ejecuta tests, y verbaliza con tus palabras por qué cada decisión está tomada así. Si algo no te queda claro, detente ahí: el progreso rápido con ambigüedad termina saliendo caro en las etapas siguientes.
 
 **Siguiente lección:** [Principios de ingeniería →](01-principios-ingenieria.md)

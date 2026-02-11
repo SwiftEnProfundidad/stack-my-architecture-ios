@@ -903,6 +903,13 @@ pre.mermaid {{
     text-align: center;
     padding: var(--space-xl);
     box-shadow: var(--shadow);
+    overflow-x: auto;
+    overflow-y: hidden;
+}}
+
+pre.mermaid svg {{
+    max-width: none;
+    height: auto;
 }}
 
 /* ============================================

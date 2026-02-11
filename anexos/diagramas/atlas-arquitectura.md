@@ -4,6 +4,27 @@
 
 ---
 
+## 0. Convención de flechas del curso (léela una vez)
+
+Antes de interpretar cualquier diagrama, usa esta clave semántica:
+
+```mermaid
+graph LR
+    A["A"] -->|"uso directo"| B["B"]
+    C["A"] -.->|"wiring / configuración"| D["B"]
+    E["A"] -->|"contrato/protocolo"| F["B"]
+    G["A"] -.->|"evento / notificación"| H["B"]
+```
+
+- `-->` = dependencia o llamada directa en runtime.
+- `-.->` = relación de ensamblado/wiring o notificación desacoplada (según etiqueta).
+- Etiqueta `"contrato/protocolo"` = dependencia hacia abstracción.
+- Etiqueta `"evento/notificación"` = salida de información, no uso fuerte.
+
+Nota de herramienta: en Mermaid `flowchart` no todos los estilos de punta (abierta/cerrada) son igual de expresivos que en herramientas de dibujo manual. Por eso la convención oficial del curso usa **línea + etiqueta textual** como fuente de verdad.
+
+---
+
 ## 1. Clean Architecture: las capas y la regla de dependencia
 
 Clean Architecture organiza el código en **anillos concéntricos**. La regla fundamental es una sola: **las dependencias siempre apuntan hacia el centro**. Nunca al revés.

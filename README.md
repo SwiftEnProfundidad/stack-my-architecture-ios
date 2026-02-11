@@ -83,7 +83,7 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 
 - [Informe completo del curso](00-informe/INFORME-CURSO.md)
 - [Decisiones tomadas](00-informe/DECISIONES-TOMADAS.md)
-- [Backlog técnico del curso](00-informe/TODO.md)
+- [Backlog técnico del repo (mantenimiento interno)](00-informe/TODO.md)
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Marco de decisiones](00-core-mobile/01-marco-de-decisiones.md)
 - [Core Mobile: Invariantes y contratos](00-core-mobile/02-invariantes-y-contratos.md)
