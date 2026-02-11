@@ -2,17 +2,7 @@ name: ArchitectureKit Quality
 
 on:
   push:
-    paths:
-      - "apps/ios/ArchitectureKit/**"
-      - "apps/ios/ArchitectureHostApp/**"
-      - "docs/adr/**"
-      - ".github/workflows/architecturekit-quality.yml"
   pull_request:
-    paths:
-      - "apps/ios/ArchitectureKit/**"
-      - "apps/ios/ArchitectureHostApp/**"
-      - "docs/adr/**"
-      - ".github/workflows/architecturekit-quality.yml"
 
 jobs:
   quality-gates:
