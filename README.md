@@ -43,7 +43,7 @@ La split view de asistente funciona **solo** contra proxy local para no exponer 
    - `node assistant-bridge/server.js`
 4. Abre el curso por localhost como siempre.
 
-El panel usa por defecto `http://localhost:8787` y consulta métricas en [`/metrics`](assistant-bridge/server.js:77).
+El panel usa por defecto `http://localhost:8787` y consulta métricas en [`/metrics`](assistant-bridge/server.js).
 
 #### Adjuntos de imágenes
 

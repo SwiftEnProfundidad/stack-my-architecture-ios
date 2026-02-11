@@ -260,14 +260,14 @@ final class AppCoordinator: ObservableObject {
 sequenceDiagram
     participant OS as iOS (URL/Push/Widget)
     participant APP as App Entry
-    participant PAR as DeepLinkParser
+    participant DLP as DeepLinkParser
     participant COORD as AppCoordinator
     participant POL as NavigationPolicy
     participant NAV as NavigationStack
 
-    OS->>APP: myapp://product?id=123
-    APP->>PAR: parse(url)
-    PAR-->>APP: AppDestination.productDetail(123)
+    OS->>APP: deep link product id 123
+    APP->>DLP: parse(url)
+    DLP-->>APP: AppDestination.productDetail(123)
     APP->>COORD: handle(destination)
     COORD->>POL: evaluate(destination, isAuthenticated)
     alt no autenticado
