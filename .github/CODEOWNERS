@@ -1,0 +1,15 @@
+# Default owner for all files
+* @SwiftEnProfundidad
+
+# iOS architecture scaffold
+/apps/ios/ArchitectureKit/ @SwiftEnProfundidad
+/apps/ios/ArchitectureHostApp/ @SwiftEnProfundidad
+
+# Assistant bridge and panel
+/assistant-bridge/ @SwiftEnProfundidad
+/assets/assistant-panel.js @SwiftEnProfundidad
+
+# Governance and docs
+/.github/ @SwiftEnProfundidad
+/docs/adr/ @SwiftEnProfundidad
+/plans/ @SwiftEnProfundidad
