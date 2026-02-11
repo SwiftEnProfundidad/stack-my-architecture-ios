@@ -20,9 +20,26 @@ ASSETS_DIST_DIR = OUTPUT_DIR / "assets"
 # Orden de los archivos (segun README)
 FILE_ORDER = [
     "00-informe/INFORME-CURSO.md",
+    "00-informe/DECISIONES-TOMADAS.md",
+    "00-informe/TODO.md",
+    "00-core-mobile/00-introduccion.md",
+    "00-core-mobile/01-marco-de-decisiones.md",
+    "00-core-mobile/02-invariantes-y-contratos.md",
+    "00-core-mobile/03-variabilidad-y-evolucion.md",
+    "00-core-mobile/04-calidad-pr-ready.md",
+    "00-core-mobile/05-observabilidad-operacion.md",
+    "00-core-mobile/06-release-rollback-flags.md",
+    "00-core-mobile/07-apis-contratos-versionado.md",
+    "00-core-mobile/08-seguridad-privacidad-threat-modeling.md",
+    "00-core-mobile/09-dependency-governance-supply-chain.md",
+    "00-core-mobile/10-plantillas.md",
+    "00-core-mobile/11-crosswalk-ios-android.md",
+    "00-core-mobile/12-mobile-architect-parity-ios-android.md",
     "01-fundamentos/00-introduccion.md",
+    "01-fundamentos/00-setup.md",
     "01-fundamentos/01-principios-ingenieria.md",
     "01-fundamentos/02-metodologia-bdd-tdd.md",
+    "01-fundamentos/02-metodologia-tdd-practica.md",
     "01-fundamentos/03-stack-tecnologico.md",
     "01-fundamentos/04-estructura-feature-first.md",
     "01-fundamentos/05-feature-login/00-especificacion-bdd.md",
@@ -78,6 +95,9 @@ FILE_ORDER = [
     "05-maestria/08-memory-leaks-y-diagnostico.md",
     "05-maestria/09-migracion-swift6.md",
     "05-maestria/10-debugging-xcode.md",
+    "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
+    "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
+    "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
     "05-maestria/11-entrevista-arquitecto.md",
     "05-maestria/12-arquitectura-adaptativa.md",
     "05-maestria/entregables-etapa-5.md",
@@ -264,16 +284,29 @@ def inline_format(text):
     """Aplica formato inline: bold, italic, code, links."""
     # Inline code (before other formatting to avoid conflicts)
     text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+    # Color chips: render `fill:#xxxxxx` or `stroke:#xxxxxx` as visual swatches
+    text = re.sub(
+        r"<code>\s*(fill|stroke)\s*:\s*(#[0-9a-fA-F]{3,8})\s*</code>",
+        lambda m: (
+            f'<span class="color-chip" title="{m.group(1).lower()}:{m.group(2).lower()}">'
+            f'<span class="color-chip-swatch" style="background:{m.group(2).lower()};"></span>'
+            f'<span class="color-chip-label">{m.group(2).lower()}</span>'
+            "</span>"
+        ),
+        text,
+    )
     # Bold + italic
     text = re.sub(r"\*\*\*(.+?)\*\*\*", r"<strong><em>\1</em></strong>", text)
     # Bold
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
     # Italic
     text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
-    # Links
-    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
     # Images
     text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img alt="\1" src="\2">', text)
+    # Normalize markdown-relative asset paths to dist-local asset paths.
+    text = re.sub(r'src="(?:\.\./)+assets/', 'src="assets/', text)
+    # Links
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
     return text
 
 
@@ -838,6 +871,32 @@ p code, li code, td code {{
     font-size: 0.85em;
 }}
 
+.color-chip {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    vertical-align: middle;
+}}
+
+.color-chip-swatch {{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}}
+
+.color-chip-label {{
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    color: var(--text);
+    letter-spacing: 0.01em;
+}}
+
 /* Mermaid diagrams */
 pre.mermaid {{
     background: white;
@@ -846,6 +905,25 @@ pre.mermaid {{
     text-align: center;
     padding: var(--space-xl);
     box-shadow: var(--shadow);
+    overflow-x: auto;
+    overflow-y: hidden;
+}}
+
+pre.mermaid svg {{
+    max-width: none;
+    height: auto;
+}}
+
+img {{
+    max-width: 100%;
+    height: auto;
+}}
+
+p > img {{
+    display: block;
+    margin: var(--space-md) auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
 }}
 
 /* ============================================
@@ -1438,19 +1516,9 @@ document.querySelectorAll('#sidebar a').forEach(link => {{
     OUTPUT_FILE.write_text(html, encoding="utf-8")
 
     ASSETS_DIST_DIR.mkdir(parents=True, exist_ok=True)
-    for asset_name in [
-        "study-ux.js",
-        "study-ux.css",
-        "course-switcher.js",
-        "course-switcher.css",
-        "theme-controls.js",
-        "assistant-panel.js",
-        "assistant-panel.css",
-        "assistant-bridge.js",
-    ]:
-        src = ASSETS_SRC_DIR / asset_name
-        if src.exists():
-            shutil.copy2(src, ASSETS_DIST_DIR / asset_name)
+    for src in ASSETS_SRC_DIR.iterdir():
+        if src.is_file():
+            shutil.copy2(src, ASSETS_DIST_DIR / src.name)
 
     print(f"  HTML generado: {OUTPUT_FILE}")
     print(f"  Tamano: {OUTPUT_FILE.stat().st_size / 1024:.0f} KB")

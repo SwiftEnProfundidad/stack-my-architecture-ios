@@ -4,6 +4,21 @@
 
 ---
 
+## 0. Convención de flechas del curso (léela una vez)
+
+Antes de interpretar cualquier diagrama, usa esta clave semántica:
+
+![Leyenda de flechas para diagramas (genérica)](../../assets/leyenda-flechas-generica.svg)
+
+- Línea continua + punta cerrada = dependencia o llamada directa en runtime.
+- Línea discontinua + punta cerrada = relación de ensamblado/wiring.
+- Línea discontinua + punta abierta = contrato/abstracción (relación de tipo).
+- Línea continua + punta abierta = salida/notificación desacoplada.
+
+Nota de herramienta: en Mermaid `flowchart` no todos los estilos de punta (abierta/cerrada) tienen la misma expresividad que una lámina estática. Cuando uses Mermaid, preserva la semántica con etiquetas textuales (`"contrato/protocolo"` y `"evento"`).
+
+---
+
 ## 1. Clean Architecture: las capas y la regla de dependencia
 
 Clean Architecture organiza el código en **anillos concéntricos**. La regla fundamental es una sola: **las dependencias siempre apuntan hacia el centro**. Nunca al revés.
