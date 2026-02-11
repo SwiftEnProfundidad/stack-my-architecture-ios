@@ -301,10 +301,12 @@ def inline_format(text):
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
     # Italic
     text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
-    # Links
-    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
     # Images
     text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img alt="\1" src="\2">', text)
+    # Normalize markdown-relative asset paths to dist-local asset paths.
+    text = re.sub(r'src="(?:\.\./)+assets/', 'src="assets/', text)
+    # Links
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
     return text
 
 
@@ -912,6 +914,18 @@ pre.mermaid svg {{
     height: auto;
 }}
 
+img {{
+    max-width: 100%;
+    height: auto;
+}}
+
+p > img {{
+    display: block;
+    margin: var(--space-md) auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}}
+
 /* ============================================
    TABLAS MODERNAS
    ============================================ */
@@ -1502,19 +1516,9 @@ document.querySelectorAll('#sidebar a').forEach(link => {{
     OUTPUT_FILE.write_text(html, encoding="utf-8")
 
     ASSETS_DIST_DIR.mkdir(parents=True, exist_ok=True)
-    for asset_name in [
-        "study-ux.js",
-        "study-ux.css",
-        "course-switcher.js",
-        "course-switcher.css",
-        "theme-controls.js",
-        "assistant-panel.js",
-        "assistant-panel.css",
-        "assistant-bridge.js",
-    ]:
-        src = ASSETS_SRC_DIR / asset_name
-        if src.exists():
-            shutil.copy2(src, ASSETS_DIST_DIR / asset_name)
+    for src in ASSETS_SRC_DIR.iterdir():
+        if src.is_file():
+            shutil.copy2(src, ASSETS_DIST_DIR / src.name)
 
     print(f"  HTML generado: {OUTPUT_FILE}")
     print(f"  Tamano: {OUTPUT_FILE.stat().st_size / 1024:.0f} KB")

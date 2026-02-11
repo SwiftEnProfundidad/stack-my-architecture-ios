@@ -235,22 +235,16 @@ graph LR
 
 ### Las flechas: qué significa cada conexión
 
-```mermaid
-graph LR
-    A["A"] -->|"uso directo"| B["B"]
-    C["A"] -.->|"wiring / configuración"| D["B"]
-    E["A"] -->|"contrato/protocolo"| F["B"]
-    G["A"] -.->|"evento / notificación"| H["B"]
-```
+![Leyenda de flechas para diagramas (genérica)](../assets/leyenda-flechas-generica.svg)
 
 Aquí fijamos una convención única para todo el curso. No es decoración: sirve para que, cuando veas un diagrama en cualquier etapa, entiendas rápidamente si una relación es de uso en runtime, de ensamblado o de contrato.
 
 - **Línea continua + punta cerrada** (`-->`): **dependencia directa en runtime**. A invoca o usa B en el flujo principal.
 - **Línea discontinua + punta cerrada** (`-.->`): **wiring/configuración**. Se usa para composición, inicialización o conexión de piezas, no para lógica de dominio.
-- **Línea continua + etiqueta de contrato** (`-->|"contrato/protocolo"|`): A depende de una abstracción, no de un detalle concreto. Se usa para remarcar inversión de dependencias.
-- **Línea discontinua + etiqueta de evento** (`-.->|"evento"|`): propagación o notificación desacoplada (callbacks, streams, delegación, bus de eventos).
+- **Línea discontinua + punta abierta** (referencia visual de la imagen): **contrato/abstracción**. Implementa o depende de interfaz/protocolo.
+- **Línea continua + punta abierta** (referencia visual de la imagen): **salida/evento**. Propagación o notificación desacoplada (callbacks, streams, delegación, bus de eventos).
 
-Importante para no generar ambigüedad: Mermaid en `flowchart` no ofrece todos los tipos de punta visual (abierta/cerrada) con la misma granularidad que herramientas de dibujo manual. Por eso la semántica oficial del curso se apoya en **línea + etiqueta textual**. Lo que manda es el significado, no el “adorno” gráfico.
+Cuando el diagrama se escriba en Mermaid, la convención se mantiene con **línea + etiqueta textual** para no perder semántica (`"contrato/protocolo"` o `"evento"`), aunque la punta visual no siempre tenga toda la granularidad de una lámina estática.
 
 Regla práctica: antes de dibujar, decide si la flecha representa **uso directo**, **wiring**, **contrato** o **evento**. Si no puedes decirlo en una frase, el diagrama está mezclando conceptos.
 
