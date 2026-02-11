@@ -4,9 +4,9 @@ Este servicio evita exponer la API key en el navegador.
 
 ## Qué hace
 
-- Expone [`/ask`](assistant-bridge/server.js:85) para consultas del panel IA.
-- Expone [`/metrics`](assistant-bridge/server.js:77) para coste/tokens/requests.
-- Expone [`/config`](assistant-bridge/server.js:65) para modelos y límites.
+- Expone [`/ask`](assistant-bridge/server.js) para consultas del panel IA.
+- Expone [`/metrics`](assistant-bridge/server.js) para coste/tokens/requests.
+- Expone [`/config`](assistant-bridge/server.js) para modelos y límites.
 - Guarda la API key solo en servidor vía [`.env`](assistant-bridge/.env.example:1).
 
 ## Flujo de datos
@@ -21,7 +21,9 @@ Este servicio evita exponer la API key en el navegador.
 
 1. Copia [`.env.example`](assistant-bridge/.env.example:1) a `.env`.
 2. Rellena `OPENAI_API_KEY`.
-3. Opcional: ajusta `ASSISTANT_SOFT_DAILY_BUDGET_USD`.
+3. Opcional: ajusta `ASSISTANT_SOFT_DAILY_BUDGET_USD` y `ASSISTANT_MAX_TOKENS_CAP`.
+
+El panel permite ajustar el presupuesto diario en runtime y lo sincroniza con el proxy.
 
 ### Nota importante sobre modelos GPT-5.x
 
@@ -48,6 +50,7 @@ curl http://localhost:8787/metrics
 
 - `GET /health`
 - `GET /config`
+- `POST /config/runtime`
 - `GET /metrics`
 - `POST /ask`
 

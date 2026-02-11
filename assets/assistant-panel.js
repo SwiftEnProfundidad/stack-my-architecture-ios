@@ -5,6 +5,7 @@
     var KEY_MODEL = STORAGE_PREFIX + 'model';
     var KEY_MAX_TOKENS = STORAGE_PREFIX + 'max_tokens';
     var KEY_PROXY_BASE = STORAGE_PREFIX + 'proxy_base';
+    var KEY_DAILY_BUDGET = STORAGE_PREFIX + 'daily_budget_usd';
 
     var VISION_FALLBACK_MODEL = 'gpt-4o-mini';
     var MEMORY_RECENT_LIMIT = 8;
@@ -23,6 +24,7 @@
         isOpen: localStorage.getItem(KEY_OPEN) === '1',
         model: localStorage.getItem(KEY_MODEL) || 'gpt-4o-mini',
         maxTokens: Number(localStorage.getItem(KEY_MAX_TOKENS) || 600),
+        maxTokensCap: 8192,
         proxyBase: normalizeProxyBase(localStorage.getItem(KEY_PROXY_BASE) || defaultProxyBase()),
         queryPath: '/assistant/query',
         messages: readMessages(),
@@ -30,6 +32,7 @@
         isLoading: false,
         metrics: null,
         lastRequest: null,
+        softDailyBudgetUsd: Number(localStorage.getItem(KEY_DAILY_BUDGET) || 2.0),
         dailyWarningUsd: DAILY_WARNING_DEFAULT,
         availableModels: ['gpt-5.3', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-4o-mini', 'gpt-4.1-mini'],
         maxAttachments: IMAGE_MAX_ATTACHMENTS,
@@ -45,6 +48,7 @@
         status: null,
         modelSelect: null,
         tokensInput: null,
+        dailyBudgetInput: null,
         proxyInput: null,
         metricsBox: null,
         sendBtn: null,
@@ -182,10 +186,35 @@
         return text.slice(0, Math.max(1, maxLen - 1)).trim() + '…';
     }
 
+    function clampNumber(value, min, max, fallback) {
+        var n = Number(value);
+        if (!Number.isFinite(n)) return fallback;
+        if (n < min) return min;
+        if (n > max) return max;
+        return Math.round(n);
+    }
+
+    function normalizeBudgetValue(value, fallback) {
+        var n = Number(value);
+        if (!Number.isFinite(n) || n < 0) return fallback;
+        return Math.round(n * 100) / 100;
+    }
+
+    function formatBudgetValue(value) {
+        return String(normalizeBudgetValue(value, 2.0));
+    }
+
+    function sanitizeLocalStateConfig() {
+        state.maxTokensCap = clampNumber(state.maxTokensCap, 100, 50000, 8192);
+        state.maxTokens = clampNumber(state.maxTokens, 100, state.maxTokensCap, 600);
+        state.softDailyBudgetUsd = normalizeBudgetValue(state.softDailyBudgetUsd, 2.0);
+    }
+
     function saveConfig() {
         localStorage.setItem(KEY_MODEL, state.model);
         localStorage.setItem(KEY_MAX_TOKENS, String(state.maxTokens));
         localStorage.setItem(KEY_PROXY_BASE, state.proxyBase);
+        localStorage.setItem(KEY_DAILY_BUDGET, String(state.softDailyBudgetUsd));
     }
 
     function setOpen(isOpen) {
@@ -244,18 +273,34 @@
         var tokensInput = document.createElement('input');
         tokensInput.type = 'number';
         tokensInput.min = '100';
-        tokensInput.max = '1200';
-        tokensInput.step = '50';
+        tokensInput.max = String(state.maxTokensCap);
+        tokensInput.step = '100';
         tokensInput.value = String(state.maxTokens);
         tokensInput.addEventListener('change', function () {
-            var value = Number(tokensInput.value || 600);
-            if (!value || value < 100) value = 600;
-            if (value > 1200) value = 1200;
+            var value = clampNumber(tokensInput.value, 100, state.maxTokensCap, state.maxTokens);
             state.maxTokens = value;
             tokensInput.value = String(value);
             saveConfig();
         });
         tokensLabel.appendChild(tokensInput);
+
+        var dailyBudgetLabel = document.createElement('label');
+        dailyBudgetLabel.textContent = 'Presupuesto diario (USD)';
+        var dailyBudgetInput = document.createElement('input');
+        dailyBudgetInput.type = 'number';
+        dailyBudgetInput.min = '0';
+        dailyBudgetInput.step = '0.10';
+        dailyBudgetInput.value = formatBudgetValue(state.softDailyBudgetUsd);
+        dailyBudgetInput.addEventListener('change', function () {
+            var value = normalizeBudgetValue(dailyBudgetInput.value, state.softDailyBudgetUsd);
+            state.softDailyBudgetUsd = value;
+            dailyBudgetInput.value = formatBudgetValue(value);
+            saveConfig();
+            syncRuntimeConfig().then(function () {
+                refreshMetrics();
+            });
+        });
+        dailyBudgetLabel.appendChild(dailyBudgetInput);
 
         var proxyLabel = document.createElement('label');
         proxyLabel.textContent = 'Proxy local';
@@ -274,6 +319,7 @@
 
         grid.appendChild(modelLabel);
         grid.appendChild(tokensLabel);
+        grid.appendChild(dailyBudgetLabel);
         grid.appendChild(proxyLabel);
         config.appendChild(grid);
 
@@ -369,6 +415,7 @@
         refs.status = status;
         refs.modelSelect = modelSelect;
         refs.tokensInput = tokensInput;
+        refs.dailyBudgetInput = dailyBudgetInput;
         refs.proxyInput = proxyInput;
         refs.metricsBox = metricsBox;
         refs.sendBtn = sendBtn;
@@ -815,6 +862,9 @@
 
         var normalized = normalizeMetrics(state.metrics || {});
         var last = state.lastRequest;
+        var activeDailyBudgetUsd = normalized.softDailyBudgetUsd > 0
+            ? normalized.softDailyBudgetUsd
+            : state.softDailyBudgetUsd;
         var lines = [];
 
         if (last) {
@@ -835,8 +885,8 @@
         lines.push('<div><strong>Coste total de sesión</strong>: ' + normalized.totalEstimatedCostUsd.toFixed(6) + ' USD</div>');
         lines.push('<div><strong>Requests totales</strong>: ' + normalized.totalRequests + '</div>');
 
-        if (normalized.softDailyBudgetUsd > 0) {
-            lines.push('<div><strong>Presupuesto diario</strong>: ' + normalized.dailyCostUsd.toFixed(6) + ' / ' + normalized.softDailyBudgetUsd.toFixed(2) + ' USD</div>');
+        if (activeDailyBudgetUsd > 0) {
+            lines.push('<div><strong>Presupuesto diario</strong>: ' + normalized.dailyCostUsd.toFixed(6) + ' / ' + activeDailyBudgetUsd.toFixed(2) + ' USD</div>');
         }
 
         if (normalized.dailyCostUsd >= state.dailyWarningUsd) {
@@ -934,6 +984,43 @@
         return tryPath(0);
     }
 
+    function syncRuntimeConfig(options) {
+        var opts = options || {};
+        return ensureProxyBaseReachable()
+            .then(function (ok) {
+                if (!ok) return null;
+                return fetch(proxyUrl('/config/runtime'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        softDailyBudgetUsd: state.softDailyBudgetUsd
+                    })
+                });
+            })
+            .then(function (res) {
+                if (!res) return null;
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            })
+            .then(function (json) {
+                if (!json) return null;
+                var budget = normalizeBudgetValue(
+                    json.soft_daily_budget_usd ?? json.softDailyBudgetUsd,
+                    state.softDailyBudgetUsd
+                );
+                state.softDailyBudgetUsd = budget;
+                if (refs.dailyBudgetInput) refs.dailyBudgetInput.value = formatBudgetValue(budget);
+                saveConfig();
+                return json;
+            })
+            .catch(function () {
+                if (!opts.silent) {
+                    setStatus('No se pudo actualizar el presupuesto diario en el proxy.', 'warning');
+                }
+                return null;
+            });
+    }
+
     function fetchBridgeConfig() {
         return ensureProxyBaseReachable()
             .then(function (ok) {
@@ -975,6 +1062,16 @@
                     if (refs.tokensInput) refs.tokensInput.value = String(state.maxTokens);
                 }
 
+                if (cfg.max_tokens_cap || cfg.maxTokensCap) {
+                    var maxTokensCap = clampNumber(cfg.max_tokens_cap || cfg.maxTokensCap, 100, 50000, state.maxTokensCap);
+                    state.maxTokensCap = maxTokensCap;
+                    state.maxTokens = clampNumber(state.maxTokens, 100, maxTokensCap, state.maxTokens);
+                    if (refs.tokensInput) {
+                        refs.tokensInput.max = String(maxTokensCap);
+                        refs.tokensInput.value = String(state.maxTokens);
+                    }
+                }
+
                 if (cfg.query_path || cfg.queryPath) {
                     state.queryPath = String(cfg.query_path || cfg.queryPath);
                 }
@@ -1003,7 +1100,20 @@
                     }
                 }
 
+                var localBudgetStored = localStorage.getItem(KEY_DAILY_BUDGET);
+                if (!localBudgetStored && (cfg.soft_daily_budget_usd || cfg.softDailyBudgetUsd || cfg.soft_daily_budget_usd === 0 || cfg.softDailyBudgetUsd === 0)) {
+                    state.softDailyBudgetUsd = normalizeBudgetValue(
+                        cfg.soft_daily_budget_usd ?? cfg.softDailyBudgetUsd,
+                        state.softDailyBudgetUsd
+                    );
+                    saveConfig();
+                }
+                if (refs.dailyBudgetInput) refs.dailyBudgetInput.value = formatBudgetValue(state.softDailyBudgetUsd);
+
                 renderPendingAttachments();
+                if (localBudgetStored) {
+                    return syncRuntimeConfig({ silent: true });
+                }
             })
             .catch(function () {
                 setStatus('Asistente no disponible. Inicia open-proxy.command', 'warning');
@@ -1200,5 +1310,6 @@
         }
     };
 
+    sanitizeLocalStateConfig();
     createPanel();
 })();

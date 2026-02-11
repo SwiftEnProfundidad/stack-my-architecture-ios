@@ -10,6 +10,10 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
+- [Roadmap V2 (práctico)](plans/roadmap-v2.md)
+- [Scaffold ejecutable iOS (SPM)](apps/ios/ArchitectureKit/README.md)
+- [Host App UI smoke (XCUITest)](apps/ios/ArchitectureHostApp/README.md)
+- [ADRs del scaffold](docs/adr)
 
 ## Final Rubric (iOS)
 
@@ -182,6 +186,7 @@ BDD/TDD base   Navegación   Observabilidad Gobernanza         SwiftUI moderno
 2. **No saltes a código sin BDD**: primero escenarios, luego contratos, luego TDD.
 3. **Cada lección incluye**: explicación, código completo (producción + tests), diagramas, ADRs y checklist de smells.
 4. **Formato**: Markdown versionable en Git. HTML navegable se genera a partir de estos fuentes.
+5. **Práctica ejecutable**: usa `apps/ios/ArchitectureKit` para correr `swift test` y validar Etapa 1 en código real.
 
 ---
 

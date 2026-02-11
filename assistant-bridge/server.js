@@ -19,14 +19,20 @@ const VISION_MODELS = (process.env.OPENAI_VISION_MODELS || 'gpt-4o-mini')
     .map((s) => s.trim())
     .filter(Boolean);
 const DEFAULT_QUERY_PATH = '/ask';
-const MAX_TOKENS_DEFAULT = Number(process.env.ASSISTANT_MAX_TOKENS_DEFAULT || 600);
-const MAX_TOKENS_CAP = Number(process.env.ASSISTANT_MAX_TOKENS_CAP || 1200);
-const SOFT_DAILY_BUDGET_USD = Number(process.env.ASSISTANT_SOFT_DAILY_BUDGET_USD || 2.0);
-const DAILY_WARNING_USD = Number(process.env.ASSISTANT_DAILY_WARNING_USD || 0.25);
+const MAX_TOKENS_DEFAULT_RAW = Number(process.env.ASSISTANT_MAX_TOKENS_DEFAULT || 600);
+const MAX_TOKENS_CAP = Math.max(8192, Number(process.env.ASSISTANT_MAX_TOKENS_CAP || 1200));
+const MAX_TOKENS_DEFAULT = clampNumber(MAX_TOKENS_DEFAULT_RAW, 100, MAX_TOKENS_CAP, 600);
+const SOFT_DAILY_BUDGET_USD_DEFAULT = Number(process.env.ASSISTANT_SOFT_DAILY_BUDGET_USD || 2.0);
+const DAILY_WARNING_USD_DEFAULT = Number(process.env.ASSISTANT_DAILY_WARNING_USD || 0.25);
 const MAX_IMAGES_PER_QUERY = 3;
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 const MAX_BODY_BYTES = 16 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg'];
+
+const runtimeConfig = {
+    softDailyBudgetUsd: normalizeNonNegativeNumber(SOFT_DAILY_BUDGET_USD_DEFAULT, 2.0),
+    dailyWarningUsd: normalizeNonNegativeNumber(DAILY_WARNING_USD_DEFAULT, 0.25)
+};
 
 const PRICES_PER_1K = {
     'gpt-5.3': { in: 0.0015, out: 0.006 },
@@ -75,12 +81,33 @@ const server = http.createServer(async (req, res) => {
             default_model: DEFAULT_MODEL,
             max_tokens_default: MAX_TOKENS_DEFAULT,
             max_tokens_cap: MAX_TOKENS_CAP,
-            soft_daily_budget_usd: SOFT_DAILY_BUDGET_USD,
-            daily_warning_usd: DAILY_WARNING_USD,
+            soft_daily_budget_usd: runtimeConfig.softDailyBudgetUsd,
+            daily_warning_usd: runtimeConfig.dailyWarningUsd,
             max_images: MAX_IMAGES_PER_QUERY,
             max_image_bytes: MAX_IMAGE_BYTES,
             vision_models: VISION_MODELS,
             query_path: DEFAULT_QUERY_PATH
+        });
+        return;
+    }
+
+    if (req.method === 'POST' && req.url === '/config/runtime') {
+        const body = await readJsonBody(req, res);
+        if (!body) return;
+
+        runtimeConfig.softDailyBudgetUsd = normalizeNonNegativeNumber(
+            body.soft_daily_budget_usd ?? body.softDailyBudgetUsd,
+            runtimeConfig.softDailyBudgetUsd
+        );
+        runtimeConfig.dailyWarningUsd = normalizeNonNegativeNumber(
+            body.daily_warning_usd ?? body.dailyWarningUsd,
+            runtimeConfig.dailyWarningUsd
+        );
+
+        writeJson(res, 200, {
+            ok: true,
+            soft_daily_budget_usd: runtimeConfig.softDailyBudgetUsd,
+            daily_warning_usd: runtimeConfig.dailyWarningUsd
         });
         return;
     }
@@ -121,7 +148,7 @@ const server = http.createServer(async (req, res) => {
         rollDailyIfNeeded();
 
         let warning = null;
-        if (SOFT_DAILY_BUDGET_USD > 0 && usage.daily.estimatedCostUSD >= SOFT_DAILY_BUDGET_USD) {
+        if (runtimeConfig.softDailyBudgetUsd > 0 && usage.daily.estimatedCostUSD >= runtimeConfig.softDailyBudgetUsd) {
             warning = 'Presupuesto diario superado (soft limit).';
         }
 
@@ -479,8 +506,8 @@ function metricsPayload() {
         total_estimated_cost_usd: usage.totalEstimatedCostUSD,
         total_images_count: usage.totalImagesCount,
         session_total_cost_usd: usage.totalEstimatedCostUSD,
-        soft_daily_budget_usd: SOFT_DAILY_BUDGET_USD,
-        daily_warning_usd: DAILY_WARNING_USD,
+        soft_daily_budget_usd: runtimeConfig.softDailyBudgetUsd,
+        daily_warning_usd: runtimeConfig.dailyWarningUsd,
         daily: {
             date_key: usage.daily.dateKey,
             requests: usage.daily.requests,
@@ -522,6 +549,12 @@ function clampNumber(value, min, max, fallback) {
     if (n < min) return min;
     if (n > max) return max;
     return Math.round(n);
+}
+
+function normalizeNonNegativeNumber(value, fallback) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return fallback;
+    return Number(n.toFixed(6));
 }
 
 function loadEnv(filePath) {
