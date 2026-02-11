@@ -284,6 +284,17 @@ def inline_format(text):
     """Aplica formato inline: bold, italic, code, links."""
     # Inline code (before other formatting to avoid conflicts)
     text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+    # Color chips: render `fill:#xxxxxx` or `stroke:#xxxxxx` as visual swatches
+    text = re.sub(
+        r"<code>\s*(fill|stroke)\s*:\s*(#[0-9a-fA-F]{3,8})\s*</code>",
+        lambda m: (
+            f'<span class="color-chip" title="{m.group(1).lower()}:{m.group(2).lower()}">'
+            f'<span class="color-chip-swatch" style="background:{m.group(2).lower()};"></span>'
+            f'<span class="color-chip-label">{m.group(2).lower()}</span>'
+            "</span>"
+        ),
+        text,
+    )
     # Bold + italic
     text = re.sub(r"\*\*\*(.+?)\*\*\*", r"<strong><em>\1</em></strong>", text)
     # Bold
@@ -856,6 +867,32 @@ p code, li code, td code {{
     color: var(--danger);
     font-weight: 500;
     font-size: 0.85em;
+}}
+
+.color-chip {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    vertical-align: middle;
+}}
+
+.color-chip-swatch {{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}}
+
+.color-chip-label {{
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    color: var(--text);
+    letter-spacing: 0.01em;
 }}
 
 /* Mermaid diagrams */
