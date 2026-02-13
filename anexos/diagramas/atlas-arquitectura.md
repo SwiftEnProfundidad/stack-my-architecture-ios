@@ -504,4 +504,4 @@ Si mañana migras de Firebase a Supabase, solo cambias `BackendFirebase` por `Ba
 - **Si quieres ver la estructura de modulos futura:** mira el diagrama 7 (SPM).
 - **Si quieres saber como encaja Firebase:** mira el diagrama 8 (backend).
 
-**Anterior:** [Glosario](../glosario.md) · **Inicio:** [README](../../README.md)
+**Anterior:** [Glosario](../glosario.md) · **Inicio:** [Informe del curso](../../00-informe/INFORME-CURSO.md)

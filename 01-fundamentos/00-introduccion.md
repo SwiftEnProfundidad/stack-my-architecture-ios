@@ -268,12 +268,12 @@ Los **subgraphs** (cajas grandes que contienen otras cajas) representan **agrupa
 
 En los diagramas de este curso usamos colores de forma consistente:
 
-- **Verde** (`fill:#d4edda`): algo **positivo**, **correcto**, o la capa **Domain** (la mas interna y pura).
-- **Azul** (`fill:#cce5ff`): la capa **Application**, o algo **intermedio/neutro**.
-- **Amarillo** (`fill:#fff3cd`): la capa **Infrastructure**, o algo que requiere **atencion/precaucion**.
-- **Naranja** (`fill:#ffe0cc`): la capa **Interface**, o algo que esta en la **periferia**.
-- **Rojo** (`fill:#f8d7da`): algo **negativo**, **incorrecto**, o un **error**.
-- **Gris** (`fill:#f8f9fa`): algo **neutro**, de **referencia**, o **documentacion**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#d4edda;border:1px solid #2d5a3a;vertical-align:middle;margin-right:6px;"></span> **Verde**: algo **positivo**, **correcto**, o la capa **Domain** (la mas interna y pura).
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#cce5ff;border:1px solid #2f5f8a;vertical-align:middle;margin-right:6px;"></span> **Azul**: la capa **Application**, o algo **intermedio/neutro**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fff3cd;border:1px solid #8a6b1f;vertical-align:middle;margin-right:6px;"></span> **Amarillo**: la capa **Infrastructure**, o algo que requiere **atencion/precaucion**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ffe0cc;border:1px solid #8b5e3c;vertical-align:middle;margin-right:6px;"></span> **Naranja**: la capa **Interface**, o algo que esta en la **periferia**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f8d7da;border:1px solid #8a434a;vertical-align:middle;margin-right:6px;"></span> **Rojo**: algo **negativo**, **incorrecto**, o un **error**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f8f9fa;border:1px solid #6e7378;vertical-align:middle;margin-right:6px;"></span> **Gris**: algo **neutro**, de **referencia**, o **documentacion**.
 
 ### Los diagramas de secuencia: quién habla con quién
 

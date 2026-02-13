@@ -6,10 +6,11 @@ Mermaid.js y highlight.js se cargan desde CDN.
 """
 
 import os
+import posixpath
 import re
 import sys
 import shutil
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 COURSE_ROOT = Path(__file__).parent.parent
 OUTPUT_DIR = COURSE_ROOT / "dist"
@@ -114,13 +115,34 @@ FILE_ORDER = [
     "anexos/preguntas-entrevista.md",
     "anexos/hallazgos-y-correcciones.md",
     "anexos/adrs/INDICE-ADRS.md",
+    "anexos/adrs/ADR-003-composition-root-unico.md",
+    "anexos/adrs/ADR-004-navegacion-event-driven.md",
+    "anexos/adrs/ADR-005-contratos-features.md",
+    "anexos/adrs/ADR-006-infra-network-urlsession.md",
+    "anexos/adrs/ADR-007-cache-network-first-ttl.md",
+    "anexos/adrs/ADR-008-consistencia-invalidation-policy.md",
+    "anexos/adrs/ADR-009-observabilidad-por-decoradores.md",
+    "anexos/adrs/ADR-010-firebase-backend-principal.md",
+    "anexos/adrs/ADR-011-bounded-contexts-governance.md",
+    "anexos/adrs/ADR-012-reglas-dependencia-progresivas.md",
+    "anexos/adrs/ADR-013-versionado-spm-progresivo.md",
+    "anexos/adrs/ADR-014-quality-gates-conceptuales.md",
+    "anexos/adrs/TEMPLATE-ADR.md",
     "anexos/apendice-banca-ledger.md",
     "anexos/glosario.md",
     "anexos/proyecto-final.md",
 ]
 
 
-def md_to_html(md_text, file_id):
+def file_id_for_path(rel_path):
+    return rel_path.replace("/", "-").replace(".md", "")
+
+
+def slugify_heading(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower().strip()).strip("-")
+
+
+def md_to_html(md_text, file_id, file_path, file_id_by_path):
     """Convierte markdown a HTML basico con soporte para Mermaid."""
     html = ""
     lines = md_text.split("\n")
@@ -184,7 +206,7 @@ def md_to_html(md_text, file_id):
             i += 1
             continue
         elif in_table:
-            html += render_table(table_buffer)
+            html += render_table(table_buffer, file_path, file_id, file_id_by_path)
             in_table = False
             table_buffer = []
             # Don't increment, process current line
@@ -196,9 +218,9 @@ def md_to_html(md_text, file_id):
                 html += "</ul>\n"
                 in_list = False
             level = len(header_match.group(1))
-            text = inline_format(header_match.group(2))
-            anchor = re.sub(r"[^a-z0-9]+", "-", text.lower().strip())
-            anchor = f"{file_id}-{anchor}"
+            raw_heading = header_match.group(2).strip()
+            text = inline_format(raw_heading, file_path, file_id, file_id_by_path)
+            anchor = f"{file_id}-{slugify_heading(raw_heading)}"
             html += f'<h{level} id="{anchor}">{text}</h{level}>\n'
             i += 1
             continue
@@ -220,7 +242,7 @@ def md_to_html(md_text, file_id):
             content = re.sub(r"^\s*[-*]\s+", "", line)
             # Handle checkbox
             content = content.replace("[ ]", "&#9744;").replace("[x]", "&#9745;")
-            html += f"  <li>{inline_format(content)}</li>\n"
+            html += f"  <li>{inline_format(content, file_path, file_id, file_id_by_path)}</li>\n"
             i += 1
             continue
 
@@ -230,7 +252,7 @@ def md_to_html(md_text, file_id):
                 html += "<ol>\n"
                 in_list = True
             content = re.sub(r"^\s*\d+[.)]\s+", "", line)
-            html += f"  <li>{inline_format(content)}</li>\n"
+            html += f"  <li>{inline_format(content, file_path, file_id, file_id_by_path)}</li>\n"
             i += 1
             continue
 
@@ -248,39 +270,72 @@ def md_to_html(md_text, file_id):
             continue
 
         # Paragraphs
-        html += f"<p>{inline_format(line)}</p>\n"
+        html += f"<p>{inline_format(line, file_path, file_id, file_id_by_path)}</p>\n"
         i += 1
 
     if in_list:
         html += "</ul>\n"
     if in_table:
-        html += render_table(table_buffer)
+        html += render_table(table_buffer, file_path, file_id, file_id_by_path)
 
     return html
 
 
-def render_table(rows):
+def render_table(rows, current_file_path, current_file_id, file_id_by_path):
     """Renderiza una tabla markdown a HTML."""
     if len(rows) < 2:
         return ""
     html = '<table>\n<thead>\n<tr>\n'
     headers = [c.strip() for c in rows[0].strip().strip("|").split("|")]
     for h in headers:
-        html += f"  <th>{inline_format(h)}</th>\n"
+        html += f"  <th>{inline_format(h, current_file_path, current_file_id, file_id_by_path)}</th>\n"
     html += "</tr>\n</thead>\n<tbody>\n"
 
     for row in rows[2:]:  # Skip header separator
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
         html += "<tr>\n"
         for c in cells:
-            html += f"  <td>{inline_format(c)}</td>\n"
+            html += f"  <td>{inline_format(c, current_file_path, current_file_id, file_id_by_path)}</td>\n"
         html += "</tr>\n"
 
     html += "</tbody>\n</table>\n"
     return html
 
 
-def inline_format(text):
+def rewrite_md_link_target(href, current_file_path, current_file_id, file_id_by_path):
+    if href.startswith(("http://", "https://", "mailto:", "data:")):
+        return href
+
+    if href.startswith("#"):
+        fragment = href[1:]
+        if not fragment:
+            return href
+        if fragment.startswith(f"{current_file_id}-"):
+            return f"#{fragment}"
+        return f"#{current_file_id}-{slugify_heading(fragment.replace('-', ' '))}"
+
+    path_part = href
+    anchor = ""
+    if "#" in href:
+        path_part, anchor = href.split("#", 1)
+
+    if not path_part.endswith(".md"):
+        return href
+
+    base = PurePosixPath(current_file_path).parent
+    normalized = posixpath.normpath((base / path_part).as_posix())
+    target_file_id = file_id_by_path.get(normalized)
+    if not target_file_id:
+        return href
+
+    if anchor:
+        if anchor.startswith(f"{target_file_id}-"):
+            return f"#{anchor}"
+        return f"#{target_file_id}-{slugify_heading(anchor.replace('-', ' '))}"
+    return f"#{target_file_id}"
+
+
+def inline_format(text, current_file_path, current_file_id, file_id_by_path):
     """Aplica formato inline: bold, italic, code, links."""
     # Inline code (before other formatting to avoid conflicts)
     text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
@@ -290,7 +345,6 @@ def inline_format(text):
         lambda m: (
             f'<span class="color-chip" title="{m.group(1).lower()}:{m.group(2).lower()}">'
             f'<span class="color-chip-swatch" style="background:{m.group(2).lower()};"></span>'
-            f'<span class="color-chip-label">{m.group(2).lower()}</span>'
             "</span>"
         ),
         text,
@@ -306,7 +360,13 @@ def inline_format(text):
     # Normalize markdown-relative asset paths to dist-local asset paths.
     text = re.sub(r'src="(?:\.\./)+assets/', 'src="assets/', text)
     # Links
-    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
+    def _link_repl(match):
+        label = match.group(1)
+        href = match.group(2).strip()
+        rewritten = rewrite_md_link_target(href, current_file_path, current_file_id, file_id_by_path)
+        return f'<a href="{rewritten}">{label}</a>'
+
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", _link_repl, text)
     return text
 
 
@@ -338,7 +398,7 @@ def build_nav(files_content):
         # Extract first h1 or filename
         h1_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
         title = h1_match.group(1) if h1_match else Path(filepath).stem
-        file_id = filepath.replace("/", "-").replace(".md", "")
+        file_id = file_id_for_path(filepath)
         nav += f'  <li><a class="doc-nav-link" data-lesson-path="{filepath}" href="#{file_id}">{title}</a></li>\n'
 
     nav += "</ul></li>\n</ul>\n</nav>\n"
@@ -358,14 +418,16 @@ def build_html():
 
     print(f"  Procesando {len(files_content)} archivos...")
 
+    file_id_by_path = {path: file_id_for_path(path) for path, _ in files_content}
+
     nav = build_nav(files_content)
 
     body_html = ""
     for filepath, content in files_content:
-        file_id = filepath.replace("/", "-").replace(".md", "")
+        file_id = file_id_for_path(filepath)
         body_html += f'<section id="{file_id}" class="lesson" data-topic-id="{file_id}" data-lesson-path="{filepath}">\n'
         body_html += f'<div class="lesson-path">{filepath}</div>\n'
-        body_html += md_to_html(content, file_id)
+        body_html += md_to_html(content, file_id, filepath, file_id_by_path)
         body_html += "</section>\n"
 
     html_template = """<!DOCTYPE html>
@@ -1240,6 +1302,7 @@ blockquote p {{
         <a id="course-switcher-home" href="#">Cursos</a>
         <a id="course-switcher-ios" href="#">Curso iOS</a>
         <a id="course-switcher-android" href="#">Curso Android</a>
+        <a id="course-switcher-sdd" href="#">Curso IA + SDD</a>
     </div>
 </div>
 
@@ -1338,7 +1401,32 @@ function detectSnippetLang(codeEl) {{
     if (className.includes('language-json')) return 'JSON';
     if (className.includes('language-bash') || className.includes('language-shell')) return 'SH';
     if (className.includes('language-yaml') || className.includes('language-yml')) return 'YAML';
-    return 'Swift';
+    if (className.includes('language-python') || className.includes('language-py')) return 'PY';
+    if (className.includes('language-mermaid')) return 'Mermaid';
+    if (className.includes('language-xml') || className.includes('language-html')) return 'XML';
+    if (className.includes('language-sql')) return 'SQL';
+    if (className.includes('language-markdown') || className.includes('language-md')) return 'MD';
+    if (className.includes('language-gherkin') || className.includes('language-feature')) return 'Gherkin';
+
+    const content = (codeEl.textContent || '').trim();
+    if (!content) return 'TXT';
+
+    if (
+        content.startsWith('flowchart') ||
+        content.startsWith('sequenceDiagram') ||
+        content.startsWith('classDiagram') ||
+        content.startsWith('stateDiagram') ||
+        content.startsWith('erDiagram')
+    ) return 'Mermaid';
+
+    if (/^(\\$\\s*)?(swift|xcodebuild|npm|yarn|pnpm|git|python3|node|bash|sh)\\b/m.test(content)) return 'SH';
+    if (/^\\s*(import\\s+SwiftUI|import\\s+Foundation|struct\\s+\\w+\\s*[:\\{{]|enum\\s+\\w+\\s*[:\\{{]|actor\\s+\\w+\\s*[:\\{{]|protocol\\s+\\w+\\s*[:\\{{])/m.test(content)) return 'Swift';
+    if (/^\\s*(\\{{|\\[\\s*\\{{|\"[^\"]+\"\\s*:)/m.test(content)) return 'JSON';
+    if (/^\\s*[a-zA-Z0-9_-]+\\s*:\\s*.+$/m.test(content) && !/;\\s*$/m.test(content)) return 'YAML';
+    if (/^\\s*SELECT\\b|^\\s*INSERT\\b|^\\s*UPDATE\\b|^\\s*DELETE\\b|^\\s*CREATE\\s+TABLE\\b/im.test(content)) return 'SQL';
+    if (/^\\s*<[^>]+>/m.test(content)) return 'XML';
+
+    return 'TXT';
 }}
 
 function copyCodeToClipboard(text) {{
@@ -1382,12 +1470,13 @@ function enhanceCodeBlocks() {{
         const copyBtn = document.createElement('button');
         copyBtn.type = 'button';
         copyBtn.className = 'sma-code-copy-btn';
-        copyBtn.textContent = 'Copy code';
+        copyBtn.textContent = 'Copiar';
+        copyBtn.setAttribute('aria-label', `Copiar snippet ${lang.textContent}`);
         copyBtn.addEventListener('click', () => {{
             const originalText = copyBtn.textContent;
             copyCodeToClipboard(code.textContent || '')
                 .then(() => {{
-                    copyBtn.textContent = 'Copied';
+                    copyBtn.textContent = 'Copiado';
                     setTimeout(() => {{ copyBtn.textContent = originalText; }}, 1200);
                 }})
                 .catch(() => {{

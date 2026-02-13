@@ -199,12 +199,30 @@ Riesgo residual aceptado:
 
 Fecha de revisión:
 
-Ejemplo resumido:
+Ejemplo completo (curso Login + Catálogo):
 
-- Sistema/flujo evaluado: login + sesión + carga de catálogo.
-- Activos críticos: token de sesión, email, telemetría.
-- Amenazas priorizadas: exfiltración de token, PII en logs, deep link sin auth.
-- Controles faltantes: Keychain, redacción automática de PII, test de deep links protegidos.
+- Sistema/flujo evaluado: autenticación de usuario, persistencia de sesión y navegación a catálogo con deep links.
+- Activos críticos: token de sesión, identificador de usuario, email (PII), trazas operativas.
+- Actores potenciales: atacante con dispositivo comprometido, actor con acceso a logs, app maliciosa que intenta invocar deep links.
+- Superficie de ataque:
+  - almacenamiento local de sesión,
+  - transporte de credenciales/token,
+  - eventos/logs con contexto de usuario,
+  - rutas de navegación/deep links.
+- Amenazas priorizadas:
+  - T1: exfiltración de token desde almacenamiento inseguro,
+  - T2: fuga de PII en logging/analytics,
+  - T3: acceso a pantallas protegidas vía deep link sin sesión válida.
+- Controles existentes:
+  - validación de credenciales y errores tipados en Domain/Application,
+  - contratos de navegación desacoplada con chequeo de sesión en coordinador,
+  - tests de integración en gateways/repositorios.
+- Controles faltantes:
+  - persistencia de sesión en Keychain (no UserDefaults),
+  - redacción automática de PII en logger,
+  - test automático de deep links protegidos en CI.
+- Riesgo residual aceptado: medio-bajo durante etapa formativa; no aceptable para release público sin completar controles faltantes.
+- Fecha de revisión: 2026-02-11.
 
 Referencia con ejemplo completo:
 [`00-core-mobile/08-seguridad-privacidad-threat-modeling.md`](08-seguridad-privacidad-threat-modeling.md)
