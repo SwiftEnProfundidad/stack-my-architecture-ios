@@ -505,4 +505,6 @@ actor ProductStore {
 
 ---
 
-**Anterior:** [Isolation domains ←](01-isolation-domains.md) · **Siguiente:** [Structured concurrency →](03-structured-concurrency.md)
+---
+
+**Anterior:** [Isolation domains y Sendable ←](01-isolation-domains.md) · **Siguiente:** [Structured concurrency →](03-structured-concurrency.md)

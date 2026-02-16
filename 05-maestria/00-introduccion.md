@@ -305,4 +305,8 @@ Eso es exactamente lo que diferencia a alguien que "sabe conceptos" de alguien q
 
 Ahora sí: pasa a `01-isolation-domains.md` y estúdialo con el contrato anterior en mano. No lo leas como capítulo aislado; léelo como la primera pieza del sistema operativo mental que necesitas para trabajar a nivel arquitecto.
 
-**Siguiente:** [Isolation domains y Sendable →](01-isolation-domains.md)
+> **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](10-rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
+
+---
+
+**Anterior:** [Consolidación: Etapa 4 - Arquitecto ←](../anexos/consolidacion-etapa-4-arquitecto.md) · **Siguiente:** [Isolation domains y Sendable →](01-isolation-domains.md)

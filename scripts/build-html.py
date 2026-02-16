@@ -10,6 +10,7 @@ import posixpath
 import re
 import sys
 import shutil
+import html
 from pathlib import Path, PurePosixPath
 
 COURSE_ROOT = Path(__file__).parent.parent
@@ -18,7 +19,43 @@ OUTPUT_FILE = OUTPUT_DIR / "curso-stack-my-architecture.html"
 ASSETS_SRC_DIR = COURSE_ROOT / "assets"
 ASSETS_DIST_DIR = OUTPUT_DIR / "assets"
 
-# Orden de los archivos (segun README)
+# Directorios a incluir en orden (para autodiscovery)
+CONTENT_DIRS = [
+    "00-informe",
+    "00-core-mobile",
+    "01-fundamentos",
+    "02-integracion",
+    "03-evolucion",
+    "04-arquitecto",
+    "05-maestria",
+    "anexos",
+]
+
+def discover_files() -> list[str]:
+    """
+    Descubre archivos .md automáticamente ordenados por directorio y nombre.
+    Fallback si FILE_ORDER no está mantenido.
+    """
+    discovered = []
+    for dir_name in CONTENT_DIRS:
+        dir_path = COURSE_ROOT / dir_name
+        if not dir_path.exists():
+            continue
+        # Obtener todos los .md recursivamente, excluyendo ciertos patrones
+        md_files = []
+        for md_file in dir_path.rglob("*.md"):
+            # Excluir archivos que no son contenido principal
+            if any(excluded in md_file.name for excluded in ["README", "CHANGELOG", "TODO"]):
+                continue
+            rel_path = md_file.relative_to(COURSE_ROOT)
+            md_files.append(str(rel_path))
+        # Ordenar alfabéticamente
+        md_files.sort()
+        discovered.extend(md_files)
+    return discovered
+
+# Orden de los archivos (manual - usa FILE_ORDER)
+# O usa discover_files() para autodiscovery
 FILE_ORDER = [
     "00-informe/INFORME-CURSO.md",
     "00-informe/DECISIONES-TOMADAS.md",
@@ -68,6 +105,7 @@ FILE_ORDER = [
     "02-integracion/08-swift-concurrency-enterprise.md",
     "02-integracion/09-app-final-etapa-2.md",
     "02-integracion/entregables-etapa-2.md",
+    "anexos/consolidacion-etapa-2-integracion.md",
     "03-evolucion/00-introduccion.md",
     "03-evolucion/01-caching-offline.md",
     "03-evolucion/02-consistencia.md",
@@ -77,6 +115,7 @@ FILE_ORDER = [
     "03-evolucion/06-swiftdata-store.md",
     "03-evolucion/07-backend-firebase.md",
     "03-evolucion/entregables-etapa-3.md",
+    "anexos/calentamiento-etapa-3-evolucion.md",
     "04-arquitecto/00-introduccion.md",
     "04-arquitecto/01-bounded-contexts.md",
     "04-arquitecto/02-reglas-dependencia-ci.md",
@@ -85,6 +124,7 @@ FILE_ORDER = [
     "04-arquitecto/05-guia-arquitectura.md",
     "04-arquitecto/06-quality-gates.md",
     "04-arquitecto/entregables-etapa-4.md",
+    "anexos/consolidacion-etapa-4-arquitecto.md",
     "05-maestria/00-introduccion.md",
     "05-maestria/01-isolation-domains.md",
     "05-maestria/02-actors-en-arquitectura.md",
@@ -102,6 +142,9 @@ FILE_ORDER = [
     "05-maestria/11-entrevista-arquitecto.md",
     "05-maestria/12-arquitectura-adaptativa.md",
     "05-maestria/entregables-etapa-5.md",
+    "anexos/calentamiento-etapa-5-maestria.md",
+    "anexos/quizzes-autoevaluacion.md",
+    "anexos/guia-recuperacion-ios.md",
     "anexos/diagramas/atlas-arquitectura.md",
     "anexos/guia-nueva-feature.md",
     "anexos/git-workflow-curso.md",
@@ -142,26 +185,105 @@ def slugify_heading(text):
     return re.sub(r"[^a-z0-9]+", "-", text.lower().strip()).strip("-")
 
 
+def render_meta_block(yaml_content):
+    """Renderiza el bloque de metadata YAML como HTML visual."""
+    import html as html_module
+    result = '<div class="sma-meta-block">\n'
+    result += '  <div class="sma-meta-header">📋 Metadata de la lección</div>\n'
+    result += '  <div class="sma-meta-grid">\n'
+
+    # Parse simple YAML key: value
+    for line in yaml_content.strip().split('\n'):
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if ':' in line:
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            # Format key and escape HTML
+            key_display = html_module.escape(key.replace('_', ' ').title())
+            value_escaped = html_module.escape(value)
+            result += f'    <div class="sma-meta-item"><span class="sma-meta-key">{key_display}:</span> <span class="sma-meta-value">{value_escaped}</span></div>\n'
+
+    result += '  </div>\n</div>\n'
+    return result
+
+
 def md_to_html(md_text, file_id, file_path, file_id_by_path):
-    """Convierte markdown a HTML basico con soporte para Mermaid."""
+    """Convierte markdown a HTML basico con soporte para Mermaid y HTML raw (details/summary)."""
     html = ""
     lines = md_text.split("\n")
     i = 0
     in_code = False
-    in_list = False
+    in_list = ""
     in_table = False
+    in_raw_html = False
+    raw_html_buffer = []
     code_lang = ""
     code_buffer = []
     table_buffer = []
 
+    # Tags HTML que deben pasar como raw (no envueltos en <p>)
+    RAW_HTML_TAGS = ('<details', '</details>', '<summary', '</summary>')
+
+    # Meta block handling
+    in_meta = False
+    meta_buffer = []
+
     while i < len(lines):
         line = lines[i]
+
+        # Meta block handling (<!-- sma:meta:v1 --> ... <!-- /sma:meta:v1 -->)
+        if not in_code and not in_table and not in_list and not in_raw_html:
+            stripped = line.strip()
+            if stripped == '<!-- sma:meta:v1 -->':
+                in_meta = True
+                meta_buffer = []
+                i += 1
+                continue
+            elif stripped == '<!-- /sma:meta:v1 -->' and in_meta:
+                in_meta = False
+                # Parse YAML and render as visual meta block
+                meta_html = render_meta_block('\n'.join(meta_buffer))
+                html += meta_html
+                meta_buffer = []
+                i += 1
+                continue
+            elif in_meta:
+                meta_buffer.append(line)
+                i += 1
+                continue
+
+        # Raw HTML blocks (details, summary, etc.)
+        if not in_code and not in_table and not in_list:
+            stripped = line.strip()
+            # Check if line starts with a raw HTML tag
+            if any(stripped.startswith(tag) for tag in RAW_HTML_TAGS):
+                if not in_raw_html:
+                    in_raw_html = True
+                    raw_html_buffer = []
+                raw_html_buffer.append(line)
+                i += 1
+                continue
+            elif in_raw_html:
+                # We were in raw HTML block but current line doesn't match
+                # Flush the buffer and continue processing
+                html += "\n".join(raw_html_buffer) + "\n"
+                raw_html_buffer = []
+                in_raw_html = False
+                # Don't increment, process current line normally
+        elif in_raw_html:
+            # Inside raw HTML block, keep collecting
+            raw_html_buffer.append(line)
+            i += 1
+            continue
 
         # Code blocks
         if line.strip().startswith("```") and not in_code:
             if in_list:
-                html += "</ul>\n"
-                in_list = False
+                html += f"</{in_list}>\n"
+                in_list = ""
             code_lang = line.strip()[3:].strip()
             in_code = True
             code_buffer = []
@@ -198,8 +320,8 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
         if "|" in line and line.strip().startswith("|"):
             if not in_table:
                 if in_list:
-                    html += "</ul>\n"
-                    in_list = False
+                    html += f"</{in_list}>\n"
+                    in_list = ""
                 in_table = True
                 table_buffer = []
             table_buffer.append(line)
@@ -215,8 +337,8 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
         header_match = re.match(r"^(#{1,6})\s+(.+)$", line)
         if header_match:
             if in_list:
-                html += "</ul>\n"
-                in_list = False
+                html += f"</{in_list}>\n"
+                in_list = ""
             level = len(header_match.group(1))
             raw_heading = header_match.group(2).strip()
             text = inline_format(raw_heading, file_path, file_id, file_id_by_path)
@@ -228,17 +350,19 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
         # Horizontal rule
         if re.match(r"^---+\s*$", line):
             if in_list:
-                html += "</ul>\n"
-                in_list = False
+                html += f"</{in_list}>\n"
+                in_list = ""
             html += "<hr>\n"
             i += 1
             continue
 
         # List items
         if re.match(r"^\s*[-*]\s+", line):
-            if not in_list:
+            if in_list != "ul":
+                if in_list:
+                    html += f"</{in_list}>\n"
                 html += "<ul>\n"
-                in_list = True
+                in_list = "ul"
             content = re.sub(r"^\s*[-*]\s+", "", line)
             # Handle checkbox
             content = content.replace("[ ]", "&#9744;").replace("[x]", "&#9745;")
@@ -248,9 +372,11 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
 
         # Numbered list
         if re.match(r"^\s*\d+[.)]\s+", line):
-            if not in_list:
+            if in_list != "ol":
+                if in_list:
+                    html += f"</{in_list}>\n"
                 html += "<ol>\n"
-                in_list = True
+                in_list = "ol"
             content = re.sub(r"^\s*\d+[.)]\s+", "", line)
             html += f"  <li>{inline_format(content, file_path, file_id, file_id_by_path)}</li>\n"
             i += 1
@@ -258,11 +384,8 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
 
         # Close list if we hit non-list content
         if in_list and line.strip():
-            if html.rstrip().endswith("</ol>") or "<ol>" in html[-200:]:
-                html += "</ol>\n"
-            else:
-                html += "</ul>\n"
-            in_list = False
+            html += f"</{in_list}>\n"
+            in_list = ""
 
         # Empty lines
         if not line.strip():
@@ -274,9 +397,11 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
         i += 1
 
     if in_list:
-        html += "</ul>\n"
+        html += f"</{in_list}>\n"
     if in_table:
         html += render_table(table_buffer, file_path, file_id, file_id_by_path)
+    if in_raw_html:
+        html += "\n".join(raw_html_buffer) + "\n"
 
     return html
 
@@ -338,7 +463,7 @@ def rewrite_md_link_target(href, current_file_path, current_file_id, file_id_by_
 def inline_format(text, current_file_path, current_file_id, file_id_by_path):
     """Aplica formato inline: bold, italic, code, links."""
     # Inline code (before other formatting to avoid conflicts)
-    text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+    text = re.sub(r"`([^`]+)`", lambda m: "<code>" + m.group(1).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") + "</code>", text)
     # Color chips: render `fill:#xxxxxx` or `stroke:#xxxxxx` as visual swatches
     text = re.sub(
         r"<code>\s*(fill|stroke)\s*:\s*(#[0-9a-fA-F]{3,8})\s*</code>",
@@ -431,7 +556,7 @@ def build_html():
         body_html += "</section>\n"
 
     html_template = """<!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-code-theme="monokai">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -455,7 +580,6 @@ def build_html():
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
 <!-- Highlight.js para syntax highlighting -->
-<link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
 
@@ -578,6 +702,30 @@ def build_html():
     --font-weight-heading: 800;
     --heading-letter-spacing: -0.03em;
     --border-radius: 12px;
+}}
+
+/* ============================================
+   STYLE: BOLD - Dark Mode overrides
+   Alto contraste, manteniendo la identidad naranja
+   ============================================ */
+[data-theme="dark"][data-style="bold"] {{
+    --bg: #0a0a0f;
+    --bg-elevated: #141419;
+    --bg-surface: #1e1e24;
+    
+    --text: #ffffff;
+    --text-secondary: #d0d0e0;
+    --text-muted: #a0a0b0;
+    
+    --accent: #ff6b35;
+    --accent-light: #ff8c5a;
+    --accent-dark: #e55a2b;
+    --accent-soft: rgba(255, 107, 53, 0.15);
+    
+    --sidebar-bg: #0f0f14;
+    --code-bg: #1a1a22;
+    --border: #3a3a45;
+    --border-light: #2a2a35;
 }}
 
 /* ============================================
@@ -774,6 +922,21 @@ body {{
     padding: var(--space-3xl) var(--space-2xl);
     width: calc(100% - var(--sidebar-width));
     min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}}
+
+section.lesson {{
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}}
+
+section.lesson > * {{
+    max-width: 100%;
+    box-sizing: border-box;
 }}
 
 /* ============================================
@@ -787,7 +950,7 @@ h1, h2, h3, h4 {{
 }}
 
 h1 {{
-    font-size: 2.5rem;
+    font-size: 2.5em;
     margin: 0 0 var(--space-lg);
     padding-bottom: var(--space-md);
     border-bottom: 3px solid var(--accent);
@@ -806,7 +969,7 @@ h1::after {{
 }}
 
 h2 {{
-    font-size: 1.75rem;
+    font-size: 1.75em;
     margin: var(--space-2xl) 0 var(--space-md);
     color: var(--text);
     display: flex;
@@ -823,14 +986,14 @@ h2::before {{
 }}
 
 h3 {{
-    font-size: 1.375rem;
+    font-size: 1.375em;
     margin: var(--space-xl) 0 var(--space-sm);
     color: var(--text);
     font-weight: 600;
 }}
 
 h4 {{
-    font-size: 1.125rem;
+    font-size: 1.125em;
     margin: var(--space-lg) 0 var(--space-sm);
     color: var(--text-secondary);
     font-weight: 600;
@@ -864,19 +1027,32 @@ hr.lesson-separator {{
    BLOQUES DE CÓDIGO
    ============================================ */
 pre {{
-    background: var(--code-bg);
+    background: transparent;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--space-lg);
+    padding: 0;
     overflow-x: auto;
     margin: var(--space-lg) 0;
-    font-size: 0.875rem;
+    font-size: 0.875em;
     line-height: 1.6;
     box-shadow: var(--shadow-sm);
 }}
 
+pre > code {{
+    display: block;
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+}}
+
+pre > code:not(.hljs) {{
+    background: var(--code-bg);
+}}
+
 pre.sma-code-enhanced {{
     position: relative;
+}}
+
+pre.sma-code-enhanced > code {{
     padding-top: calc(var(--space-lg) + 1.2rem);
 }}
 
@@ -916,6 +1092,45 @@ pre.sma-code-enhanced {{
 .sma-code-copy-btn:hover {{
     border-color: var(--accent);
     color: var(--accent);
+}}
+
+/* Meta block styles */
+.sma-meta-block {{
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin: var(--space-lg) 0;
+    box-shadow: var(--shadow-sm);
+}}
+
+.sma-meta-header {{
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--accent);
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border-light);
+}}
+
+.sma-meta-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-sm);
+}}
+
+.sma-meta-item {{
+    font-size: 0.85em;
+}}
+
+.sma-meta-key {{
+    color: var(--text-secondary);
+    font-weight: 500;
+}}
+
+.sma-meta-value {{
+    color: var(--text);
+    font-weight: 600;
 }}
 
 code {{
@@ -972,7 +1187,7 @@ pre.mermaid {{
 }}
 
 pre.mermaid svg {{
-    max-width: none;
+    max-width: 100%;
     height: auto;
 }}
 
@@ -1123,19 +1338,19 @@ blockquote p {{
         padding: 20px 16px;
         width: 100%;
     }}
-    h1 {{ font-size: 1.6rem; margin: 32px 0 12px; }}
-    h2 {{ font-size: 1.3rem; margin: 28px 0 10px; }}
-    h3 {{ font-size: 1.1rem; margin: 20px 0 8px; }}
-    h4 {{ font-size: 1rem; margin: 16px 0 6px; }}
-    pre {{ padding: 12px; font-size: 0.82rem; }}
+    h1 {{ font-size: 1.6em; margin: 32px 0 12px; }}
+    h2 {{ font-size: 1.3em; margin: 28px 0 10px; }}
+    h3 {{ font-size: 1.1em; margin: 20px 0 8px; }}
+    h4 {{ font-size: 1em; margin: 16px 0 6px; }}
+    pre {{ padding: 0; font-size: 0.82em; }}
     th, td {{ padding: 8px 10px; font-size: 0.85rem; }}
 }}
 
 @media (max-width: 480px) {{
     #content {{ padding: 16px 12px; }}
-    h1 {{ font-size: 1.4rem; }}
-    h2 {{ font-size: 1.2rem; }}
-    pre {{ padding: 10px; font-size: 0.78rem; overflow-x: scroll; }}
+    h1 {{ font-size: 1.4em; }}
+    h2 {{ font-size: 1.2em; }}
+    pre {{ padding: 0; font-size: 0.78em; overflow-x: scroll; }}
 }}
 
 /* Dark theme */
@@ -1158,6 +1373,7 @@ blockquote p {{
 [data-theme="dark"] #sidebar a:hover {{ background: #21262d; color: var(--accent); }}
 [data-theme="dark"] #sidebar li.nav-section > strong {{ color: #f0f6fc; }}
 [data-theme="dark"] pre.mermaid {{ background: #161b22; }}
+[data-theme="dark"] pre.mermaid svg {{ filter: invert(93%) hue-rotate(180deg); }}
 [data-theme="dark"] .lesson-path {{ color: #8b949e; }}
 
 /* Back to top */
@@ -1285,6 +1501,48 @@ blockquote p {{
 @media (max-width: 768px) {{
     #menu-toggle {{ display: block; }}
 }}
+
+/* ============================================
+   HLJS CODE THEMES (embedded - no CDN dependency)
+   ============================================ */
+[data-code-theme="monokai"] pre > code.hljs {{ background: #272822; color: #ddd; }}
+[data-code-theme="monokai"] .hljs-keyword,[data-code-theme="monokai"] .hljs-literal,[data-code-theme="monokai"] .hljs-selector-tag,[data-code-theme="monokai"] .hljs-tag {{ color: #f92672; }}
+[data-code-theme="monokai"] .hljs-string,[data-code-theme="monokai"] .hljs-title,[data-code-theme="monokai"] .hljs-type,[data-code-theme="monokai"] .hljs-built_in,[data-code-theme="monokai"] .hljs-variable {{ color: #a6e22e; }}
+[data-code-theme="monokai"] .hljs-comment,[data-code-theme="monokai"] .hljs-meta {{ color: #75715e; }}
+[data-code-theme="monokai"] .hljs-number,[data-code-theme="monokai"] .hljs-symbol {{ color: #ae81ff; }}
+[data-code-theme="monokai"] .hljs-attr {{ color: #a6e22e; }}
+[data-code-theme="monokai"] .hljs-params {{ color: #fd971f; }}
+
+[data-code-theme="github"] pre > code.hljs {{ background: #ffffff; color: #24292e; }}
+[data-code-theme="github"] .hljs-keyword,[data-code-theme="github"] .hljs-type {{ color: #d73a49; }}
+[data-code-theme="github"] .hljs-title,[data-code-theme="github"] .hljs-title.function_ {{ color: #6f42c1; }}
+[data-code-theme="github"] .hljs-string {{ color: #032f62; }}
+[data-code-theme="github"] .hljs-number,[data-code-theme="github"] .hljs-literal {{ color: #005cc5; }}
+[data-code-theme="github"] .hljs-comment {{ color: #6a737d; }}
+[data-code-theme="github"] .hljs-built_in,[data-code-theme="github"] .hljs-symbol {{ color: #e36209; }}
+[data-code-theme="github"] .hljs-attr {{ color: #005cc5; }}
+[data-code-theme="github"] .hljs-params {{ color: #24292e; }}
+
+[data-code-theme="github-dark"] pre > code.hljs {{ background: #0d1117; color: #c9d1d9; }}
+[data-code-theme="github-dark"] .hljs-keyword,[data-code-theme="github-dark"] .hljs-type {{ color: #ff7b72; }}
+[data-code-theme="github-dark"] .hljs-title,[data-code-theme="github-dark"] .hljs-title.function_ {{ color: #d2a8ff; }}
+[data-code-theme="github-dark"] .hljs-string {{ color: #a5d6ff; }}
+[data-code-theme="github-dark"] .hljs-number,[data-code-theme="github-dark"] .hljs-literal {{ color: #79c0ff; }}
+[data-code-theme="github-dark"] .hljs-comment {{ color: #8b949e; }}
+[data-code-theme="github-dark"] .hljs-built_in,[data-code-theme="github-dark"] .hljs-symbol {{ color: #ffa657; }}
+[data-code-theme="github-dark"] .hljs-attr {{ color: #79c0ff; }}
+[data-code-theme="github-dark"] .hljs-params {{ color: #c9d1d9; }}
+
+[data-code-theme="atom-one-dark"] pre > code.hljs {{ background: #282c34; color: #abb2bf; }}
+[data-code-theme="atom-one-dark"] .hljs-keyword {{ color: #c678dd; }}
+[data-code-theme="atom-one-dark"] .hljs-title,[data-code-theme="atom-one-dark"] .hljs-title.function_ {{ color: #61afef; }}
+[data-code-theme="atom-one-dark"] .hljs-string {{ color: #98c379; }}
+[data-code-theme="atom-one-dark"] .hljs-number,[data-code-theme="atom-one-dark"] .hljs-literal {{ color: #d19a66; }}
+[data-code-theme="atom-one-dark"] .hljs-comment {{ color: #5c6370; font-style: italic; }}
+[data-code-theme="atom-one-dark"] .hljs-built_in {{ color: #e6c07b; }}
+[data-code-theme="atom-one-dark"] .hljs-type {{ color: #e5c07b; }}
+[data-code-theme="atom-one-dark"] .hljs-attr {{ color: #d19a66; }}
+[data-code-theme="atom-one-dark"] .hljs-params {{ color: #abb2bf; }}
 </style>
 </head>
 <body>
@@ -1298,6 +1556,7 @@ blockquote p {{
 </div>
 
 <div id="course-switcher" class="course-switcher" aria-label="Selector de cursos">
+    <button id="course-switcher-toggle" type="button">&#9776; Cursos</button>
     <div id="course-switcher-menu" class="course-switcher-menu">
         <a id="course-switcher-home" href="#">Cursos</a>
         <a id="course-switcher-ios" href="#">Curso iOS</a>
@@ -1322,6 +1581,18 @@ blockquote p {{
 <button id="back-to-top" onclick="window.scrollTo({{top:0, behavior:'smooth'}})">&#8593;</button>
 
 <script>
+// Fix browser HTML5 parser nesting: move non-li children out of ol/ul
+(function fixListNesting() {{
+    document.querySelectorAll('ol, ul').forEach(function(list) {{
+        var children = Array.from(list.children);
+        for (var i = children.length - 1; i >= 0; i--) {{
+            var child = children[i];
+            if (child.tagName !== 'LI' && child.tagName !== 'SCRIPT' && child.tagName !== 'TEMPLATE') {{
+                list.parentNode.insertBefore(child, list.nextSibling);
+            }}
+        }}
+    }});
+}})();
 // Theme management
 function getPreferredTheme() {{
     const saved = localStorage.getItem('course-theme');
@@ -1371,22 +1642,14 @@ function cycleStyle() {{
 
 function applyCodeTheme(theme) {{
     localStorage.setItem('course-code-theme', theme);
+    document.documentElement.setAttribute('data-code-theme', theme);
     const btn = document.getElementById('code-theme-cycle-btn');
     if (btn) {{
         btn.textContent = 'Codigo: ' + theme.charAt(0).toUpperCase() + theme.slice(1).replace(/-/g, ' ');
     }}
     
-    const hljsLink = document.getElementById('hljs-theme');
-    const themeMap = {{
-        'monokai': 'monokai.min.css',
-        'github': 'github.min.css',
-        'github-dark': 'github-dark.min.css',
-        'atom-one-dark': 'atom-one-dark.min.css'
-    }};
-    hljsLink.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${{themeMap[theme] || 'monokai.min.css'}}`;
-    
-    // Re-highlight all code blocks
-    document.querySelectorAll('pre code').forEach(block => {{
+    document.querySelectorAll('pre code[data-highlighted]').forEach(block => {{
+        block.removeAttribute('data-highlighted');
         hljs.highlightElement(block);
     }});
     enhanceCodeBlocks();
@@ -1531,17 +1794,23 @@ function renderMermaid() {{
         return;
     }}
 
+    document.querySelectorAll('pre.mermaid').forEach(function(el) {{
+        if (!el.dataset.originalMermaid) {{
+            el.dataset.originalMermaid = el.textContent;
+        }}
+    }});
+
     mermaid.initialize({{
         startOnLoad: false,
         theme: currentMermaidTheme(),
         securityLevel: 'loose'
     }});
 
-    document.querySelectorAll('pre.mermaid').forEach(el => {{
+    document.querySelectorAll('pre.mermaid').forEach(function(el) {{
         el.removeAttribute('data-processed');
     }});
 
-    mermaid.run({{ querySelector: 'pre.mermaid' }});
+    mermaid.run({{ querySelector: 'pre.mermaid' }}).catch(function() {{}});
 }}
 
 // Init Mermaid

@@ -93,7 +93,7 @@ Con inversión de dependencias, Application define un protocolo y no sabe quién
 ```mermaid
 graph LR
     subgraph CON_INV["CON inversion: desacoplamiento por protocolo"]
-        UC2["LoginUseCase"] --> PROTO["AuthGateway<br/>(protocolo)"]
+        UC2["LoginUseCase"] ..> PROTO["AuthGateway<br/>(protocolo)"]
         PROTO -.->|"implementa"| RG2["RemoteAuthGateway"]
         PROTO -.->|"implementa"| STUB["AuthGatewayStub<br/>(tests)"]
         RG2 --> URL2["URLSession"]
@@ -505,3 +505,7 @@ Si mañana migras de Firebase a Supabase, solo cambias `BackendFirebase` por `Ba
 - **Si quieres saber como encaja Firebase:** mira el diagrama 8 (backend).
 
 **Anterior:** [Glosario](../glosario.md) · **Inicio:** [Informe del curso](../../00-informe/INFORME-CURSO.md)
+
+---
+
+**Anterior:** [Guía de Recuperación - Curso iOS ←](../guia-recuperacion-ios.md) · **Siguiente:** [Como anadir una feature nueva →](../guia-nueva-feature.md)

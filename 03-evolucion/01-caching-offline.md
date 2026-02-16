@@ -1,5 +1,7 @@
 # Caching y offline
 
+> **Nota de nomenclatura:** Esta lección usa nombres genéricos (`ProductRepository`, `ProductStore`, `CachedProductRepository`) para explicar el patrón. En el scaffold real (`apps/ios/ArchitectureKit`), los equivalentes son `CatalogRepository`, `CatalogCacheStore` y `CachedCatalogRepository`. El patrón es idéntico; los nombres reflejan que el dominio concreto es Catalog.
+
 ## Qué problema resolvemos realmente
 
 Si una app móvil solo funciona con red perfecta, no está lista para producción. El usuario entra al metro, cambia de zona de cobertura, recibe latencia alta o pierde conexión por segundos. En esos momentos, el sistema no debe derrumbarse en "error y reintentar" si tiene datos recientes que todavía aportan valor.
@@ -457,9 +459,6 @@ Corrección:
 ## Siguiente paso
 
 Con cache funcional, toca resolver una pregunta crítica: **cuánta desactualización es aceptable y cuándo invalidar datos**.
-
-**Siguiente:** [Consistencia e invalidación →](02-consistencia.md)
-
 ---
 
 ## Máquina de estados de UI para cache/offline
@@ -561,3 +560,73 @@ Con esta visión, eliges políticas de cache por impacto total, no por preferenc
 ## Criterio de UX mínimo
 
 Si se sirve cache, la interfaz nunca debe dar impresión de “dato en tiempo real” sin indicador o semántica de frescura adecuada.
+
+---
+
+## Ejercicio guiado: verificar política network-first con TTL
+
+**Objetivo:** Confirmar que `CachedProductRepository` sirve datos de cache cuando la red falla y que respeta el TTL configurado.
+
+**Instrucciones:**
+
+1. Abre `Tests/FeatureCatalogDataIntegrationTests/` en el scaffold.
+2. Localiza los tests de `CachedProductRepository` (o créalos si no existen).
+3. Escribe un test que simule este escenario:
+   - El repositorio remoto devuelve `[Product(name: "Widget", price: 9.99)]`.
+   - Se llama `loadProducts()` → debe devolver los productos remotos y guardarlos en cache.
+   - Se configura el repositorio remoto para lanzar error de conectividad.
+   - Se llama `loadProducts()` de nuevo → debe devolver los productos cacheados.
+4. Escribe un segundo test que verifique TTL:
+   - Guarda productos con timestamp de hace 10 minutos.
+   - Configura TTL a 5 minutos.
+   - Llama `loadProducts()` con red disponible → debe ir a red (cache expirado), no servir cache.
+
+**Criterios de éxito:**
+
+- Ambos tests pasan con `swift test --filter CachedProductRepository`.
+- El `CachedProductRepository` no importa SwiftData ni ningún detalle de persistencia concreto.
+- El test usa stubs/fakes para red y store, no implementaciones reales.
+
+**Solución razonada:**
+
+```swift
+// Test 1: fallback a cache cuando la red falla
+func test_loadProducts_returnsCache_whenRemoteFails() async throws {
+    let remoteProducts = [Product(name: "Widget", price: Decimal(9.99))]
+    let stubRemote = StubProductRemote(result: .success(remoteProducts))
+    let memoryStore = InMemoryProductStore()
+    let sut = CachedProductRepository(remote: stubRemote, store: memoryStore, ttlSeconds: 300)
+
+    // Primera carga: red OK → guarda en cache
+    let first = try await sut.loadProducts()
+    XCTAssertEqual(first, remoteProducts)
+
+    // Red falla
+    stubRemote.result = .failure(NSError(domain: "net", code: -1))
+
+    // Segunda carga: cache sirve
+    let second = try await sut.loadProducts()
+    XCTAssertEqual(second, remoteProducts)
+}
+
+// Test 2: cache expirado fuerza recarga remota
+func test_loadProducts_ignoresExpiredCache() async throws {
+    let staleProducts = [Product(name: "Old", price: Decimal(1.00))]
+    let freshProducts = [Product(name: "New", price: Decimal(2.00))]
+    let memoryStore = InMemoryProductStore()
+    // Simular cache guardado hace 10 min
+    try await memoryStore.save(staleProducts, timestamp: Date().addingTimeInterval(-600))
+
+    let stubRemote = StubProductRemote(result: .success(freshProducts))
+    let sut = CachedProductRepository(remote: stubRemote, store: memoryStore, ttlSeconds: 300)
+
+    let result = try await sut.loadProducts()
+    XCTAssertEqual(result, freshProducts, "Cache expirado: debe ir a red")
+}
+```
+
+La clave es que `CachedProductRepository` depende de protocolos (`ProductRemote`, `ProductStore`), no de implementaciones concretas. Esto permite testear la política de cache sin red real ni SwiftData.
+
+---
+
+**Anterior:** [Etapa 3: Evolución — Resiliencia y calidad de producción ←](00-introduccion.md) · **Siguiente:** [Consistencia e invalidación →](02-consistencia.md)

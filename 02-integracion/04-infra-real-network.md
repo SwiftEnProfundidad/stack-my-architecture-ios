@@ -400,9 +400,6 @@ Trigger para revisar B:
 ## Cierre
 
 Con esta pieza, el curso pasa de “arquitectura bien dibujada” a “arquitectura conectada al mundo real”. La clave no es usar `URLSession`; la clave es usarla sin romper los límites que hacen que el sistema siga siendo evolutivo.
-
-**Siguiente:** [Integration tests →](05-integration-tests.md)
-
 ---
 
 ## Ejercicio guiado para consolidar la skill
@@ -451,3 +448,7 @@ Una buena infraestructura no se mide por “cuánto framework usa”, sino por c
 ## Nota final de práctica
 
 Si un cambio de proveedor HTTP obliga a tocar UseCases o Domain, no cambiaste infraestructura: rompiste la arquitectura. Ese test mental te protege en cada refactor.
+
+---
+
+**Anterior:** [Contratos entre features ←](03-contratos-features.md) · **Siguiente:** [Integration Tests →](05-integration-tests.md)

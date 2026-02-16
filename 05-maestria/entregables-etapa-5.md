@@ -211,5 +211,70 @@ La maestría no se conserva por memoria, se conserva por práctica disciplinada.
 ## Cierre
 
 Si llegaste aquí con evidencia sólida, ya no estás estudiando "patrones". Estás entrenando una forma de construir y operar software iOS enterprise de manera predecible, mantenible y segura. Ese es el objetivo real del curso.
+---
 
-**Anterior:** [Migración a Swift 6 ←](09-migracion-swift6.md)
+## Si no cumples todos los entregables
+
+La maestría es un viaje, no un destino. Incluso los arquitectos senior siguen aprendiendo.
+
+### Paso 1: Diagnóstico común
+
+| Síntoma | Probable causa | Solución rápida |
+|---------|----------------|-----------------|
+| "Actor isolation" error | Acceso a estado mutable desde fuera del actor | Usa `await` para llamar métodos del actor |
+| Tests concurrentes flaky | Race conditions o falta de sincronización | Usa `TaskGroup` o `async let` con cuidado |
+| Memory leak no detectado | Retain cycle en closures | Usa `[weak self]` y revisa con Instruments |
+| Swift 6 migration abruma | Demasiados errores a la vez | Migra módulo por módulo, no todo de una |
+| No entiendo Sendable | Confusión sobre qué puede cruzar límites | Empieza con structs; las clases requieren más cuidado |
+
+### Paso 2: Plan de recuperación
+
+Orden de prioridad:
+1. **Entender actores** - Serialización de acceso, no magia
+2. **Sendable básico** - Structs y enums son Sendable por defecto
+3. **Evitar data races** - Regla: si compartes estado mutable, usa actor
+4. **Tests concurrentes** - Uno que verifique serialización es suficiente
+5. **Migración Swift 6** - Opcional; puedes seguir con Swift 5.9+
+
+### Paso 3: Checkpoint alternativo
+
+Si no puedes completar todo, asegúrate de:
+- [ ] Explicar qué es un data race y por qué es peligroso
+- [ ] Saber cuándo usar `@MainActor`
+- [ ] Identificar un retain cycle y cómo solucionarlo
+- [ ] Entender que `await` en un actor libera el hilo
+
+Con eso, has completado el curso a nivel conceptual. La práctica vendrá con el tiempo.
+
+---
+
+## Lo que ya sabes hacer
+
+Aunque no cierres todos los entregables:
+- ✅ Diseñar arquitectura con bounded contexts
+- ✅ Establecer reglas de dependencia
+- ✅ Pensar en trade-offs y tomar decisiones técnicas
+- ✅ Evolucionar sistemas manteniendo calidad
+
+**Esto ya es nivel staff/principal.** Puedes liderar equipos y tomar decisiones arquitectónicas.
+
+---
+
+## Cierre final
+
+Si llegaste aquí, hayas completado todos los entregables o no, has recorrido un camino enorme:
+
+- Desde "hola mundo" en Swift
+- Hasta pensar en sistemas enterprise con concurrencia segura
+
+**Eso no es poca cosa.**
+
+El mejor código que escribiste en la Etapa 5 es mejor que el mejor código que escribiste en la Etapa 1. Y eso es el verdadero objetivo: **mejorar continuamente**.
+
+---
+
+**¡Felicidades por completar el curso!** 🎉
+
+---
+
+**Anterior:** [12. Arquitectura Adaptativa: Más Allá del Patrón ←](12-arquitectura-adaptativa.md) · **Siguiente:** [Propósito y Alcance →](10-rubrica-final/01-rubrica-empleabilidad-ios.md)

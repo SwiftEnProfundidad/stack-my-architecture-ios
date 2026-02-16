@@ -502,4 +502,6 @@ Ambas features siguen el mismo patrón arquitectónico (ViewModel con @Observabl
 
 ---
 
-**Anterior:** [Infrastructure ←](03-infrastructure.md) · **Siguiente:** [ADR-002: Catalog →](ADR-002-catalog.md)
+---
+
+**Anterior:** [Feature Catalog: Capa Infrastructure ←](03-infrastructure.md) · **Siguiente:** [ADR-002: Diseño de la Feature Catalog →](ADR-002-catalog.md)

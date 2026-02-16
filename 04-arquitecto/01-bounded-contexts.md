@@ -329,9 +329,6 @@ Trigger para revisar A:
 ## Cierre
 
 Bounded contexts bien definidos reducen discusiones inútiles y regresiones cruzadas. Son la base para que varios equipos trabajen en paralelo sin pisarse. Esa capacidad, más que cualquier patrón de moda, es lo que convierte un código en plataforma escalable.
-
-**Anterior:** [Introducción ←](00-introduccion.md) · **Siguiente:** [Reglas de dependencia y CI →](02-reglas-dependencia-ci.md)
-
 ---
 
 ## Procedimiento paso a paso para delimitar contextos
@@ -408,7 +405,7 @@ Regla práctica:
 
 ```mermaid
 flowchart TD
-    NEED["Contexto A necesita datos de B"] --> STABLE{"Contrato de B es estable\ny compartido por ambos?"}
+    NEED["Contexto A necesita datos de B"] ..> STABLE{"Contrato de B es estable\ny compartido por ambos?"}
     STABLE -->|"Si"| SHARED["Shared Kernel minimo"]
     STABLE -->|"No"| DEP{"A puede aceptar\nsemantica de B?"}
     DEP -->|"Si"| CS["Customer/Supplier"]
@@ -459,3 +456,38 @@ Este checklist evita regresiones organizativas, no solo técnicas.
 ## Cierre extendido
 
 Bounded context no es un dibujo de workshop. Es la unidad real de responsabilidad que define cómo escala tu arquitectura y cómo colabora tu equipo. Cuando los límites son claros, la velocidad aumenta porque hay menos sorpresas; cuando son difusos, cada release se convierte en negociación constante.
+
+---
+
+## Ejercicio guiado: mapear bounded contexts del scaffold
+
+**Objetivo:** Identificar los bounded contexts reales en `ArchitectureKit` y verificar que sus fronteras están protegidas por el compilador.
+
+**Instrucciones:**
+
+1. Abre `apps/ios/ArchitectureKit/Package.swift` y lista todos los targets de Domain.
+2. Para cada target de Domain, identifica: qué entidades contiene, qué eventos emite y de qué otros targets depende.
+3. Dibuja un diagrama (en papel o Mermaid) con los contextos y sus dependencias.
+4. Ejecuta `./scripts/check-dependencies.sh` y verifica que no hay imports cruzados entre contextos de Domain.
+
+**Criterios de éxito:**
+
+- Identificas al menos 2 bounded contexts: Identity (Login) y Catalog.
+- El diagrama muestra que `FeatureLoginDomain` y `FeatureCatalogDomain` solo dependen de `CoreDomain`, nunca entre sí.
+- `check-dependencies.sh` pasa sin errores.
+
+**Solución razonada:**
+
+```mermaid
+graph TD
+    CD["CoreDomain"] --> FLD["FeatureLoginDomain<br/>(Email, Password, Session, AuthError)"]
+    CD --> FCD["FeatureCatalogDomain<br/>(Product, CatalogError)"]
+    FLD -.->|"NO import"| FCD
+    FCD -.->|"NO import"| FLD
+```
+
+Los dos contextos comparten `CoreDomain` (tipos base compartidos) pero no se conocen entre sí. La comunicación entre ellos pasa por `AppContracts` y `AppComposition`, nunca por import directo. Esto garantiza que un cambio en Login no rompe Catalog y viceversa.
+
+---
+
+**Anterior:** [Etapa 4: Arquitecto — Plataforma y gobernanza ←](00-introduccion.md) · **Siguiente:** [Reglas de dependencia y CI →](02-reglas-dependencia-ci.md)

@@ -1,137 +1,137 @@
-# Purpose and Scope
+# Propósito y Alcance
 
-This rubric defines the **minimum professional bar** for an iOS engineer and the **higher bar** expected from a Mobile Architect.
+Esta rúbrica define el **mínimo profesional exigible** para un ingeniero iOS y el **listón superior** esperado de un Mobile Architect.
 
-It is not designed to reward familiarity with APIs or frameworks in isolation, but to evaluate **decision-making quality under real-world constraints**: correctness, safety, operability, and long-term maintainability.
+No está diseñada para premiar la familiaridad con APIs o frameworks de forma aislada, sino para evaluar la **calidad de las decisiones bajo restricciones reales**: corrección, seguridad, operabilidad y mantenibilidad a largo plazo.
 
-The rubric assumes an enterprise context where:
-- Systems evolve over time.
-- Teams change.
-- Failures are inevitable.
-- Poor decisions compound silently.
+La rúbrica asume un contexto empresarial donde:
+- Los sistemas evolucionan con el tiempo.
+- Los equipos cambian.
+- Los fallos son inevitables.
+- Las malas decisiones se acumulan silenciosamente.
 
-Its goal is to distinguish between code that merely works and systems that can be **safely evolved, operated, and governed**.
-
----
-
-# What This Rubric Evaluates
-
-This rubric evaluates **outcomes and evidence**, not intent.
-
-It focuses on:
-- Architectural boundaries and contracts.
-- Correctness and safety (including concurrency).
-- Quality gates and test discipline.
-- Operability (observability, release, rollback).
-- Security and privacy posture.
-- Traceability of decisions through explicit artifacts.
-
-A submission is evaluated as a **system**, not as a collection of files.
+Su objetivo es distinguir entre código que simplemente funciona y sistemas que pueden ser **evolucionados, operados y gobernados de forma segura**.
 
 ---
 
-# What This Rubric Does Not Evaluate
+# Qué evalúa esta rúbrica
 
-This rubric does **not** evaluate:
-- Knowledge of specific APIs or syntactic features.
-- Code volume, cleverness, or stylistic preferences.
-- Pattern usage without contextual justification.
-- Personal opinions or undocumented assumptions.
+Esta rúbrica evalúa **resultados y evidencia**, no intenciones.
 
-Technology choices are acceptable **only when justified by explicit constraints, trade-offs, and evidence**.
+Se centra en:
+- Límites arquitectónicos y contratos.
+- Corrección y seguridad (incluyendo concurrencia).
+- Quality gates y disciplina de testing.
+- Operabilidad (observabilidad, release, rollback).
+- Postura de seguridad y privacidad.
+- Trazabilidad de decisiones a través de artefactos explícitos.
 
----
-
-# Evaluation Principles
-
-## Principle 1 — Context Over Patterns
-There are no universally correct architectures.
-Decisions are evaluated based on how well they respond to **explicit constraints** (time, risk, scale, team composition), not on theoretical purity.
-
-Pattern application without contextual justification is considered a weakness.
+Una entrega se evalúa como un **sistema**, no como una colección de archivos.
 
 ---
 
-## Principle 2 — Explicit Trade-offs
-Every architectural decision introduces trade-offs.
+# Qué no evalúa esta rúbrica
 
-Strong solutions:
-- Acknowledge alternatives.
-- Explain why options were rejected.
-- Make accepted trade-offs explicit.
+Esta rúbrica **no** evalúa:
+- Conocimiento de APIs específicas o características sintácticas.
+- Volumen de código, ingeniosidad o preferencias estilísticas.
+- Uso de patrones sin justificación contextual.
+- Opiniones personales o suposiciones no documentadas.
 
-Unacknowledged trade-offs indicate shallow reasoning.
-
----
-
-## Principle 3 — Invariants First
-Invariants define what must **never** happen in the system
-(e.g., data corruption, loss of confirmed user actions, security or privacy violations).
-
-Any solution that violates an invariant, regardless of other benefits, is automatically disqualified.
+Las elecciones tecnológicas son aceptables **solo cuando están justificadas por restricciones, trade-offs y evidencia explícitos**.
 
 ---
 
-## Principle 4 — Design for Change, Not Prediction
-Architectures are evaluated on their ability to **absorb change**, not to predict the future.
+# Principios de evaluación
 
-Strong designs:
-- Make frequent changes easy.
-- Protect stable areas from accidental coupling.
-- Favor incremental evolution over big-bang rewrites.
+## Principio 1 — Contexto sobre patrones
+No existen arquitecturas universalmente correctas.
+Las decisiones se evalúan en función de lo bien que responden a **restricciones explícitas** (tiempo, riesgo, escala, composición del equipo), no por pureza teórica.
 
-Over-engineering for hypothetical futures is penalized.
+La aplicación de patrones sin justificación contextual se considera una debilidad.
 
 ---
 
-## Principle 5 — Evidence Over Opinion
-Claims must be supported by **observable evidence**.
+## Principio 2 — Trade-offs explícitos
+Toda decisión arquitectónica introduce trade-offs.
 
-Acceptable evidence includes:
-- Tests and coverage.
-- Metrics before and after changes.
-- ADRs and RFCs.
-- Operational artifacts (logs, alerts, runbooks).
+Las soluciones sólidas:
+- Reconocen alternativas.
+- Explican por qué se descartaron opciones.
+- Hacen explícitos los trade-offs aceptados.
 
-Statements without evidence are treated as opinions and do not contribute to the score.
-
----
-
-## Principle 6 — Operability Is Part of Correctness
-A system that cannot be observed, rolled back, or safely operated is considered incomplete.
-
-Correctness includes:
-- Knowing when the system is failing.
-- Limiting blast radius.
-- Recovering safely from incidents.
-
-Operability is a core architectural responsibility, not an optional add-on.
+Los trade-offs no reconocidos indican razonamiento superficial.
 
 ---
 
-## Principle 7 — Governance Enables Scale
-Systems fail at scale not because of individual mistakes, but because of **ungoverned evolution**.
+## Principio 3 — Invariantes primero
+Las invariantes definen lo que **nunca** debe ocurrir en el sistema
+(por ejemplo, corrupción de datos, pérdida de acciones confirmadas del usuario, violaciones de seguridad o privacidad).
 
-Architectural governance is evaluated through:
-- Dependency rules.
+Cualquier solución que viole una invariante, independientemente de otros beneficios, queda automáticamente descalificada.
+
+---
+
+## Principio 4 — Diseñar para el cambio, no para la predicción
+Las arquitecturas se evalúan por su capacidad de **absorber cambios**, no de predecir el futuro.
+
+Los diseños sólidos:
+- Hacen fáciles los cambios frecuentes.
+- Protegen las áreas estables del acoplamiento accidental.
+- Favorecen la evolución incremental sobre las reescrituras masivas.
+
+La sobre-ingeniería para futuros hipotéticos se penaliza.
+
+---
+
+## Principio 5 — Evidencia sobre opinión
+Las afirmaciones deben estar respaldadas por **evidencia observable**.
+
+Evidencia aceptable incluye:
+- Tests y cobertura.
+- Métricas antes y después de cambios.
+- ADRs y RFCs.
+- Artefactos operacionales (logs, alertas, runbooks).
+
+Las afirmaciones sin evidencia se tratan como opiniones y no contribuyen a la puntuación.
+
+---
+
+## Principio 6 — La operabilidad es parte de la corrección
+Un sistema que no puede ser observado, revertido u operado de forma segura se considera incompleto.
+
+La corrección incluye:
+- Saber cuándo el sistema está fallando.
+- Limitar el radio de impacto.
+- Recuperarse de forma segura de incidentes.
+
+La operabilidad es una responsabilidad arquitectónica fundamental, no un complemento opcional.
+
+---
+
+## Principio 7 — La gobernanza habilita la escala
+Los sistemas fallan a escala no por errores individuales, sino por **evolución no gobernada**.
+
+La gobernanza arquitectónica se evalúa a través de:
+- Reglas de dependencias.
 - Quality gates.
-- Decision traceability.
-- Shared standards enforced by tooling and process.
+- Trazabilidad de decisiones.
+- Estándares compartidos aplicados mediante tooling y proceso.
 
-Absence of governance mechanisms is a structural risk.
+La ausencia de mecanismos de gobernanza es un riesgo estructural.
 
 ---
 
-# Threshold Interpretation
+# Interpretación de umbrales
 
-The **Minimum Hireable** threshold represents a professional baseline suitable for working safely in an enterprise codebase.
+El umbral **Minimum Hireable** representa una línea base profesional adecuada para trabajar de forma segura en un codebase empresarial.
 
-The **Architect Ready** threshold represents the ability to:
-- Make and defend architectural decisions.
-- Reduce systemic risk.
-- Enable teams to move faster without degrading quality.
+El umbral **Architect Ready** representa la capacidad de:
+- Tomar y defender decisiones arquitectónicas.
+- Reducir el riesgo sistémico.
+- Habilitar a los equipos para moverse más rápido sin degradar la calidad.
 
-The difference between the two is not knowledge, but **judgment**.
+La diferencia entre ambos no es conocimiento, sino **criterio**.
 
 ---
 
@@ -285,3 +285,7 @@ Sin este set mínimo, aplica hard blocker de trazabilidad:
 | No apto | Total < 70 |
 | Minimum Hireable | Total >= 70 y sin hard blockers |
 | Architect Ready | Total >= 85, sin hard blockers y mínimos por categoría crítica |
+
+---
+
+**Anterior:** [Entregables Etapa 5 — Maestría ←](../entregables-etapa-5.md) · **Siguiente:** [Evidencias obligatorias iOS (cierre defendible) →](02-evidencias-obligatorias-ios.md)

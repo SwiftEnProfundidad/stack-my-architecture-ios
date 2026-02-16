@@ -31,8 +31,8 @@ Piensa cada feature como un mini-producto con su API pública.
 
 ```mermaid
 flowchart LR
-    LOGIN["Feature Login"] -->|"Contrato"| APP["AppCoordinator / Composition Root"]
-    APP -->|"Contrato"| CATALOG["Feature Catalog"]
+    LOGIN["Feature Login"] ..>|"Contrato"| APP["AppCoordinator / Composition Root"]
+    APP ..>|"Contrato"| CATALOG["Feature Catalog"]
 
     LOGIN -. "NO import directo" .-> CATALOG
 ```
@@ -358,9 +358,6 @@ Trigger para endurecer B:
 ## Cierre
 
 La diferencia entre integración frágil e integración profesional está en los contratos. Cuando defines bien qué cruza fronteras, las features pueden evolucionar en paralelo sin pisarse. Ese es el primer paso real hacia arquitectura enterprise escalable.
-
-**Anterior:** [Navegación por eventos ←](02-navegacion-eventos.md) · **Siguiente:** [Infraestructura real: Network →](04-infra-real-network.md)
-
 ---
 
 ## Ejercicio guiado (para fijar skill)
@@ -417,3 +414,7 @@ Este checklist simple reduce muchísimo errores de integración tardíos.
 Cuando un contrato está bien definido, los equipos dejan de negociar detalles internos y pueden concentrarse en entregar valor. Esa reducción de fricción diaria es uno de los mayores multiplicadores de productividad en arquitectura enterprise.
 
 Además, un buen contrato sirve como herramienta de onboarding: un junior puede entender cómo conectar una feature sin leer implementaciones internas de otras. Ese efecto acumulativo reduce dependencia de “personas clave” y fortalece la continuidad del equipo.
+
+---
+
+**Anterior:** [Navegación por eventos: el AppCoordinator ←](02-navegacion-eventos.md) · **Siguiente:** [Infraestructura real: URLSessionHTTPClient →](04-infra-real-network.md)

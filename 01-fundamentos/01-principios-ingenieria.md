@@ -117,7 +117,7 @@ graph LR
 
     subgraph Bajo["Bajo acoplamiento - enchufado"]
         direction TB
-        VM2["LoginViewModel"] -->|"protocolo"| AUTH["any AuthGateway"]
+        VM2["LoginViewModel"] ..>|"protocolo"| AUTH["any AuthGateway"]
         VM2 -->|"closure"| ONLOGIN["onLoginSuccess closure"]
         AUTH -.->|"impl. A"| REMOTE["RemoteAuthGateway<br/>URLSession"]
         AUTH -.->|"impl. B"| STUB["StubAuthGateway<br/>datos falsos"]
@@ -189,4 +189,6 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 
 ---
 
-**Anterior:** [Introducción ←](00-introduccion.md) · **Siguiente:** [Metodología BDD: especificación y descubrimiento →](02-metodologia-bdd-tdd.md)
+---
+
+**Anterior:** [Setup: Preparación del entorno ←](00-setup.md) · **Siguiente:** [Metodología BDD: especificación y descubrimiento →](02-metodologia-bdd-tdd.md)

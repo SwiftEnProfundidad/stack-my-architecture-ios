@@ -251,9 +251,6 @@ Etapa 3 está cerrada solo si se puede demostrar:
 ## Siguiente paso
 
 Empieza por `01-caching-offline.md` con mentalidad de sistema, no de feature. Vas a aprender a diseñar comportamiento degradado sin romper contratos.
-
-**Siguiente:** [Caching y offline →](01-caching-offline.md)
-
 ---
 
 ## Indicadores prácticos de que Etapa 3 está funcionando
@@ -371,3 +368,7 @@ Para evitar desviaciones:
 - no cubrir casos irrelevantes solo para subir conteo de tests.
 
 El foco es resiliencia útil y sostenible, no complejidad ornamental.
+
+---
+
+**Anterior:** [Consolidación: Etapa 2 - Integración ←](../anexos/consolidacion-etapa-2-integracion.md) · **Siguiente:** [Caching y offline →](01-caching-offline.md)

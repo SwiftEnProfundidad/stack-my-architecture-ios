@@ -49,3 +49,7 @@
 ## Referencias
 
 - [Links a lecciones, código o documentos relacionados]
+
+---
+
+**Anterior:** [ADR-014: Quality gates conceptuales orientados a arquitec... ←](ADR-014-quality-gates-conceptuales.md) · **Siguiente:** [Apendice: Dominio Banca / Ledger →](../apendice-banca-ledger.md)

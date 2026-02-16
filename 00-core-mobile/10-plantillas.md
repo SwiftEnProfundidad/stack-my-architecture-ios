@@ -226,3 +226,7 @@ Ejemplo completo (curso Login + Catálogo):
 
 Referencia con ejemplo completo:
 [`00-core-mobile/08-seguridad-privacidad-threat-modeling.md`](08-seguridad-privacidad-threat-modeling.md)
+
+---
+
+**Anterior:** [Dependency governance y supply chain ←](09-dependency-governance-supply-chain.md) · **Siguiente:** [Crosswalk iOS ↔ Android →](11-crosswalk-ios-android.md)

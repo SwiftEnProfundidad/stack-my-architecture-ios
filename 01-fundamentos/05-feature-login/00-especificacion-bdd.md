@@ -289,4 +289,6 @@ En la siguiente lección empezaremos a implementar, empezando por la capa Domain
 
 ---
 
-**Anterior:** [Setup: Preparación del entorno ←](../00-setup.md) · **Siguiente:** [Domain →](01-domain.md)
+---
+
+**Anterior:** [Estructura Feature-First: paso a paso en Xcode ←](../04-estructura-feature-first.md) · **Siguiente:** [Feature Login: Capa Domain →](01-domain.md)

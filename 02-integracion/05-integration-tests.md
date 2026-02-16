@@ -327,4 +327,6 @@ Si aún falla, reducir el caso hasta reproducir en 10 ejecuciones consecutivas l
 
 Un equipo junior suele confiar demasiado en unit tests y un equipo cansado suele abusar de E2E. Un equipo senior domina el punto medio: integration tests que protegen ensamblaje real con coste controlado. Esa es la habilidad que te prepara para enterprise diario.
 
-**Anterior:** [Infraestructura real ←](04-infra-real-network.md) · **Siguiente:** [Entregables Etapa 2 →](entregables-etapa-2.md)
+---
+
+**Anterior:** [Infraestructura real: URLSessionHTTPClient ←](04-infra-real-network.md) · **Siguiente:** [Composition Root: donde se ensambla todo →](06-composition-root.md)

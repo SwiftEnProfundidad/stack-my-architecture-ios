@@ -351,4 +351,6 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
 
 ---
 
-**Anterior:** [Memory leaks y diagnóstico ←](08-memory-leaks-y-diagnostico.md) · **Siguiente:** [Entregables Etapa 5 →](entregables-etapa-5.md)
+---
+
+**Anterior:** [Memory leaks y diagnóstico ←](08-memory-leaks-y-diagnostico.md) · **Siguiente:** [Debugging en Xcode: Encuentra y arregla bugs como un prof... →](10-debugging-xcode.md)

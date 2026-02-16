@@ -103,3 +103,7 @@ No aceptable: lista genérica de amenazas sin priorización.
 ## Criterio de completitud
 
 Se considera paquete completo cuando el 100% de ítems obligatorios están presentes y son verificables por un tercero sin contexto oral adicional.
+
+---
+
+**Anterior:** [Propósito y Alcance ←](01-rubrica-empleabilidad-ios.md) · **Siguiente:** [Checklist de entrega para entrevista (1 página) →](03-checklist-entrega-para-entrevista.md)

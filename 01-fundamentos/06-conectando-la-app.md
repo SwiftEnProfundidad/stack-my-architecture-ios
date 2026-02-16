@@ -307,4 +307,6 @@ Pero primero, asegúrate de completar los entregables de la Etapa 1.
 
 ---
 
-**Siguiente paso:** [Entregables Etapa 1](entregables-etapa-1.md)
+---
+
+**Anterior:** [ADR-001: Diseño de la Feature Login ←](05-feature-login/ADR-001-login.md) · **Siguiente:** [Entregables — Etapa 1: Junior →](entregables-etapa-1.md)

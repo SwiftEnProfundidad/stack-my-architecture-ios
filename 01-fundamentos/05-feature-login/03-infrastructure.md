@@ -532,4 +532,6 @@ En la siguiente lección llegaremos a la última capa: Interface. Allí construi
 
 ---
 
-**Anterior:** [Application ←](02-application.md) · **Siguiente:** [Interface SwiftUI →](04-interface-swiftui.md)
+---
+
+**Anterior:** [Feature Login: Capa Application ←](02-application.md) · **Siguiente:** [Feature Login: Capa Interface (SwiftUI) →](04-interface-swiftui.md)

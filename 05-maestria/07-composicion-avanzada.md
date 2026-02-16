@@ -428,4 +428,6 @@ La composición avanzada te permite:
 
 ---
 
+---
+
 **Anterior:** [SwiftUI performance ←](06-swiftui-performance.md) · **Siguiente:** [Memory leaks y diagnóstico →](08-memory-leaks-y-diagnostico.md)

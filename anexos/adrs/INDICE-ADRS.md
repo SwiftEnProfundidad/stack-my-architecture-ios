@@ -4,12 +4,14 @@ Este documento centraliza todas las decisiones arquitectónicas de la edición v
 
 ---
 
-## Como usar este indice
+## Cómo usar este índice
 
 - Cada ADR tiene un identificador único (`ADR-XXX`).
 - El estado indica si la decisión sigue activa.
 - La ubicación apunta al archivo ADR completo.
 - Las lecciones pueden incluir contexto inline, pero la fuente formal es este índice + archivos ADR.
+
+> **Nota:** Este índice contiene los ADRs **pedagógicos** del curso (uno por decisión enseñada en cada etapa). El directorio `docs/adr/` contiene los ADRs **operativos** del scaffold SPM (`apps/ios/ArchitectureKit`), que son más breves y están vinculados directamente al código. Ambos conjuntos son complementarios: los pedagógicos explican el razonamiento en detalle; los operativos documentan la decisión ejecutada en el scaffold.
 
 ---
 
@@ -52,3 +54,7 @@ No crear ADR para cambios locales de bajo impacto y fácil reversión.
 - Revisar este índice al cierre de cada etapa.
 - Marcar reemplazos cuando una decisión quede obsoleta.
 - Mantener trazabilidad entre ADR y lecciones correspondientes.
+
+---
+
+**Anterior:** [Hallazgos y correcciones pedagógicas ←](../hallazgos-y-correcciones.md) · **Siguiente:** [ADR-003: Composition Root único para ensamblaje →](ADR-003-composition-root-unico.md)

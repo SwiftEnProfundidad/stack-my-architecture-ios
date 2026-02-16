@@ -449,4 +449,6 @@ Antes de considerar una vista "terminada":
 
 ---
 
+---
+
 **Anterior:** [SwiftUI state moderno ←](05-swiftui-state-moderno.md) · **Siguiente:** [Composición avanzada →](07-composicion-avanzada.md)

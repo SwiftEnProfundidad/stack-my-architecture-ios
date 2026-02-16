@@ -106,7 +106,7 @@ if [[ "${RUN_UI_SMOKE}" == "1" ]]; then
     UI_SMOKE_ENV+=("UI_SMOKE_ATTEMPTS=${UI_SMOKE_ATTEMPTS}")
   fi
 
-  env "${UI_SMOKE_ENV[@]}" "${UI_SMOKE_SCRIPT}"
+  env ${UI_SMOKE_ENV[@]+"${UI_SMOKE_ENV[@]}"} "${UI_SMOKE_SCRIPT}"
 fi
 
 echo "All quality gates passed."

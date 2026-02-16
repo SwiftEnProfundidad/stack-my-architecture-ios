@@ -375,9 +375,6 @@ La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 ## Cierre
 
 Las pruebas avanzadas son el puente entre “funciona hoy” y “seguirá funcionando cuando el sistema evolucione”. Cuando las dominas, puedes refactorizar con seguridad real, que es la moneda principal de la arquitectura enterprise.
-
-**Siguiente:** [Trade-offs y riesgos →](05-trade-offs.md)
-
 ---
 
 ## Laboratorio guiado de 45 minutos
@@ -423,3 +420,55 @@ Esta rúbrica evita la falsa métrica de “cantidad de tests” y prioriza valo
 - conviertes bugs de timing en casos reproducibles y protegidos.
 
 Cuando puedes hacer esto de forma sistemática, tus refactors dejan de ser apuestas.
+
+---
+
+## Ejercicio guiado: test de cancelación en caso de uso
+
+**Objetivo:** Verificar que un caso de uso respeta la cancelación de `Task` y no produce efectos secundarios tras ser cancelado.
+
+**Instrucciones:**
+
+1. En `Tests/FeatureCatalogDataIntegrationTests/`, crea un test para `LoadProductsUseCase` (o equivalente).
+2. Configura un stub remoto que introduzca un `Task.sleep` de 2 segundos antes de responder.
+3. Lanza el caso de uso dentro de un `Task`, y cancélalo tras 100ms.
+4. Verifica que el resultado es `CancellationError` (o que el caso de uso no completa con datos).
+5. Verifica que el store de cache NO se actualizó (la cancelación interrumpió antes de guardar).
+
+**Criterios de éxito:**
+
+- El test pasa de forma determinista (no flaky).
+- El caso de uso usa `try Task.checkCancellation()` o `withTaskCancellationHandler` internamente.
+- No se usa `Task.sleep` en el test para esperar resultados (usa `Task.value` con expectativa de error).
+
+**Solución razonada:**
+
+```swift
+func test_loadProducts_respectsCancellation() async throws {
+    let slowRemote = SlowStubRemote(delay: .seconds(2), result: .success([Product(name: "A", price: 1)]))
+    let store = InMemoryProductStore()
+    let sut = CachedProductRepository(remote: slowRemote, store: store, ttlSeconds: 300)
+
+    let task = Task { try await sut.loadProducts() }
+
+    // Cancelar rápido
+    try await Task.sleep(for: .milliseconds(100))
+    task.cancel()
+
+    do {
+        _ = try await task.value
+        XCTFail("Debería haber lanzado CancellationError")
+    } catch is CancellationError {
+        // Esperado
+    }
+
+    let cached = try await store.load()
+    XCTAssertNil(cached, "Cache no debe actualizarse tras cancelación")
+}
+```
+
+La cancelación es un caso funcional, no una excepción ignorable. Si el caso de uso no la respeta, el usuario puede ver datos de una operación que ya descartó.
+
+---
+
+**Anterior:** [Observabilidad ←](03-observabilidad.md) · **Siguiente:** [Trade-offs y riesgos →](05-trade-offs.md)

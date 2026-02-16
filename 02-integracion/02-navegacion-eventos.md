@@ -342,9 +342,6 @@ Nuestro enfoque con closures directos es más simple y más seguro: cada conexi�
 Si en el futuro la app crece a 20+ features con eventos cross-cutting (analytics, logging, deep links), consideraremos un bus de eventos formal. Pero para 2-3 features, los closures son la solución correcta.
 
 ---
-
-**Anterior:** [Feature Catalog ←](01-feature-catalog/04-interface-swiftui.md) · **Siguiente:** [Contratos entre features →](03-contratos-features.md)
-
 ---
 
 ## Matriz de rutas y origen de evento
@@ -363,3 +360,7 @@ Esta matriz evita rutas huérfanas y simplifica soporte de deep links futuros.
 ## Verificación rápida de navegación desacoplada
 
 Si puedes cambiar destino de un evento sin editar la feature emisora, la navegación está correctamente desacoplada.
+
+---
+
+**Anterior:** [ADR-002: Diseño de la Feature Catalog ←](01-feature-catalog/ADR-002-catalog.md) · **Siguiente:** [Contratos entre features →](03-contratos-features.md)

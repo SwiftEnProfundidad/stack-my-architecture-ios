@@ -390,9 +390,6 @@ Regla del curso:
 ## Cierre
 
 Un arquitecto no acierta siempre. Un arquitecto reduce el coste de equivocarse porque decide con método, deja rastro y define cuándo girar el volante. Esa habilidad, repetida semana a semana, es la que transforma a un equipo junior en un equipo enterprise fiable.
-
-**Anterior:** [Tests avanzados ←](04-tests-avanzados.md) · **Siguiente:** [Entregables Etapa 3 →](entregables-etapa-3.md)
-
 ---
 
 ## Cadencia de revisión de decisiones
@@ -424,3 +421,34 @@ Usarla en decisiones pequeñas evita acumular deuda tácita.
 ## Nota de disciplina
 
 Decidir también es renunciar. Documentar explícitamente a qué renuncias hoy evita discusiones circulares y acelera futuras revisiones con contexto real.
+
+---
+
+## Ejercicio guiado: documentar un trade-off real del scaffold
+
+**Objetivo:** Practicar la documentación de trade-offs usando la ficha rápida sobre una decisión real del scaffold.
+
+**Instrucciones:**
+
+1. Abre `apps/ios/ArchitectureKit/Sources/FeatureCatalogData/` y revisa cómo se implementa la política de cache (network-first con TTL).
+2. Rellena la ficha de trade-off para esta decisión:
+   - **Problema:** ¿Qué problema resuelve network-first vs cache-first?
+   - **Opción elegida:** Network-first con fallback a cache.
+   - **Coste aceptado:** Latencia mayor en primera carga (siempre va a red primero).
+   - **Riesgo asumido:** Si la red es lenta pero disponible, el usuario espera más que con cache-first.
+   - **Trigger de revisión:** Métricas de latencia P95 > 2s en carga de catálogo.
+3. Compara tu ficha con el ADR `anexos/adrs/ADR-007-cache-network-first-ttl.md`.
+
+**Criterios de éxito:**
+
+- La ficha identifica correctamente el trade-off principal (frescura vs latencia).
+- El trigger de revisión es medible y accionable (no "cuando haya problemas").
+- La ficha es coherente con lo que dice el ADR existente.
+
+**Solución razonada:**
+
+La decisión de network-first prioriza frescura de datos sobre velocidad percibida. El coste es que la primera carga siempre paga latencia de red. La alternativa (cache-first) habría dado velocidad inmediata pero con riesgo de mostrar datos obsoletos sin que el usuario lo sepa. El trigger de revisión ("P95 > 2s") convierte una opinión ("es lento") en un dato accionable. Si se alcanza ese umbral, se evalúa cambiar a stale-while-revalidate o cache-first con indicador de frescura.
+
+---
+
+**Anterior:** [Tests avanzados ←](04-tests-avanzados.md) · **Siguiente:** [SwiftData como ProductStore →](06-swiftdata-store.md)

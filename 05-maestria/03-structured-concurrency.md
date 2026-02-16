@@ -519,4 +519,6 @@ await withTaskGroup(of: Product.self) { group in
 
 ---
 
+---
+
 **Anterior:** [Actors en arquitectura ←](02-actors-en-arquitectura.md) · **Siguiente:** [Testing concurrente →](04-testing-concurrente.md)

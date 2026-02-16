@@ -200,5 +200,56 @@ La etapa se considera cerrada cuando pasan todos los gates.
 ## Cierre y continuidad
 
 Etapa 3 deja preparada la base para la siguiente fase: gobernanza de arquitectura y escalado de plataforma/equipo.
+---
 
-**Anterior:** [Trade-offs y riesgos ←](05-trade-offs.md) · **Siguiente:** [Etapa 4: Arquitecto →](../04-arquitecto/00-introduccion.md)
+## Si no cumples todos los entregables
+
+La evolución (cache, offline, observabilidad) es donde muchos developers se sienten abrumados. No estás solo.
+
+### Paso 1: Diagnóstico común
+
+| Síntoma | Probable causa | Solución rápida |
+|---------|----------------|-----------------|
+| Cache sirve datos muy viejos | TTL mal configurado o sin invalidación | Revisa [Caching offline](01-caching-offline.md) |
+| SwiftData crash en tests | Contexto usado en hilo incorrecto | Asegúrate de usar `@MainActor` o `MainActor.run` |
+| No sabes si el cache funciona | Falta observabilidad | Añade logs de hit/miss como en [Observabilidad](03-observabilidad.md) |
+| Tests flaky (intermitentes) | Race conditions o sleeps | Usa `await fulfillment` y evita `sleep` |
+
+### Paso 2: Plan de recuperación
+
+Orden de prioridad:
+1. **Cache básico** - Network-first + fallback simple
+2. **TTL** - Invalidación por tiempo (1 hora es razonable para empezar)
+3. **Tests de integración** - Al menos 1 que valide offline
+4. **Observabilidad** - Logs básicos de qué pasa
+5. **SwiftData** - Solo si tienes tiempo; puedes usar UserDefaults para simplificar
+
+### Paso 3: Checkpoint alternativo
+
+Si no puedes completar todo, asegúrate de entender:
+- [ ] Por qué cacheamos (offline, velocidad, reducir datos móviles)
+- [ ] Qué es TTL y por qué es necesario
+- [ ] Cómo invalidar cache manualmente
+- [ ] Qué métricas básicas necesitas (hit rate, latency)
+
+Con eso, puedes pasar a Etapa 4 y volver a E3 más adelante.
+
+---
+
+## Lo que ya sabes hacer
+
+Aunque no cierres todos los entregables:
+- ✅ Integrar múltiples features sin acoplamiento
+- ✅ Navegar con eventos y coordinator
+- ✅ Escribir tests de integración
+- ✅ Separar contratos de implementaciones
+
+**Esto ya es nivel mid.** Estás por encima de muchos developers con experiencia.
+
+---
+
+## Siguiente etapa
+
+---
+
+**Anterior:** [Backend Firebase: integracion enterprise ←](07-backend-firebase.md) · **Siguiente:** [Calentamiento: Etapa 3 - Evolución →](../anexos/calentamiento-etapa-3-evolucion.md)

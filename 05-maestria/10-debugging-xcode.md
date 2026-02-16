@@ -398,4 +398,6 @@ Fix: Normalizar el email en el init.
 
 ---
 
-**Siguiente lección:** [Testing Concurrente](04-testing-concurrente.md)
+---
+
+**Anterior:** [Migración a Swift 6 ←](09-migracion-swift6.md) · **Siguiente:** [11. Cómo Hablar de Arquitectura en una Entrevista →](11-entrevista-arquitecto.md)

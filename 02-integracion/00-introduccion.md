@@ -173,7 +173,7 @@ La etapa se ejecuta con un ciclo fijo:
 
 ```mermaid
 flowchart TD
-    B["BDD"] --> C["Contratos"]
+    B["BDD"] ..> C["Contratos"]
     C --> T["TDD Core"]
     T --> I["Implementación"]
     I --> IT["Integration Tests"]
@@ -309,9 +309,6 @@ Si falta cualquiera, el cierre está incompleto.
 ## Siguiente paso
 
 Empieza por la especificación BDD de Catalog y recorre la etapa completa en orden. No saltes directamente a infraestructura o tests: en esta etapa, el orden es parte de la arquitectura.
-
-**Siguiente:** [Feature Catalog →](01-feature-catalog/00-especificacion-bdd.md)
-
 ---
 
 ## Señales de progreso dentro de la etapa
@@ -353,3 +350,7 @@ La meta de esta etapa es cerrar fuerte en nivel 2-3 para preparar nivel 4.
 ## Resultado esperado del alumno al cerrar etapa
 
 Debe poder explicar y defender el flujo completo Login -> evento -> Coordinator -> Catalog con contratos y pruebas, sin depender de imports cruzados.
+
+---
+
+**Anterior:** [Entregables — Etapa 1: Junior ←](../01-fundamentos/entregables-etapa-1.md) · **Siguiente:** [Feature Catalog: Especificación BDD →](01-feature-catalog/00-especificacion-bdd.md)

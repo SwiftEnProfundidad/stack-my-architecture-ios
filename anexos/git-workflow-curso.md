@@ -327,3 +327,7 @@ Git es tu **red de seguridad**. No es solo para compartir código, es para:
 **Recursos adicionales:**
 - [Git Documentation](https://git-scm.com/doc)
 - [Oh Shit, Git!?](https://ohshitgit.com/) - Soluciones rápidas a problemas comunes
+
+---
+
+**Anterior:** [Como anadir una feature nueva ←](guia-nueva-feature.md) · **Siguiente:** [Xcode Cheat Sheet: Atajos Esenciales para Productividad →](xcode-cheat-sheet.md)

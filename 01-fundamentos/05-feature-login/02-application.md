@@ -14,6 +14,8 @@ El **caso de uso** `LoginUseCase`, que orquesta el flujo completo: valida email,
 
 Todo con TDD usando XCTest, un test a la vez.
 
+> **Nota de nomenclatura lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase` como nombres pedagógicos. En el scaffold SPM del repositorio (`apps/ios/ArchitectureKit`), los equivalentes son `AuthRepository` (protocolo en `Sources/FeatureLoginDomain/AuthRepository.swift`) y `AuthenticateUserUseCase` (en `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift`). El patrón es idéntico; solo cambia el nombre.
+
 ### Recordatorio de principios
 
 Antes de implementar el caso de uso, conecta esta lección con [Principios de ingeniería](../01-principios-ingenieria.md):
@@ -109,11 +111,11 @@ No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. E
 ```mermaid
 graph LR
     subgraph Test["En TESTS - rapido, determinista"]
-        UC1["LoginUseCase"] -->|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
+        UC1["LoginUseCase"] ..>|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
     end
 
     subgraph Prod["En PRODUCCION - real"]
-        UC2["LoginUseCase"] -->|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
+        UC2["LoginUseCase"] ..>|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
     end
 
     style Test fill:#d4edda,stroke:#28a745
@@ -703,4 +705,6 @@ En la siguiente lección implementaremos la capa Infrastructure: la implementaci
 
 ---
 
-**Anterior:** [Domain ←](01-domain.md) · **Siguiente:** [Infrastructure →](03-infrastructure.md)
+---
+
+**Anterior:** [Feature Login: Capa Domain ←](01-domain.md) · **Siguiente:** [Feature Login: Capa Infrastructure →](03-infrastructure.md)

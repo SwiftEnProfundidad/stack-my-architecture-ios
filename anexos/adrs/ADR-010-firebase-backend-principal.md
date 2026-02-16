@@ -1,6 +1,93 @@
-## ADR-010: Firebase como backend principal encapsulado
-- Estado: Aprobado
-- Contexto: Curso requiere backend gratuito, integrable y didáctico para Auth + datos.
-- Decisión: Adoptar Firebase Auth + Firestore encapsulados en Infrastructure.
-- Consecuencias: Arranque rápido del alumno, separación limpia de capas y tests de integración guiados.
-- Fecha: 2026-02-07
+# ADR-010: Firebase como backend principal encapsulado
+
+**Estado:** Aceptado  
+**Fecha:** 2026-02-07  
+**Contexto:** Etapa 3 - Evolución / Lección: Backend Firebase
+
+---
+
+## Decisión
+
+Adoptar Firebase Auth + Firestore encapsulados en Infrastructure.
+
+---
+
+## Contexto
+
+### El problema
+
+Curso requiere backend gratuito, integrable y didáctico para Auth + datos.
+
+### Las restricciones
+
+- Mantener Clean Architecture (Domain sin dependencias de infraestructura)
+- Facilitar testing con mocks/stubs
+- Ser comprensible para un junior (sin magia de frameworks)
+- Escalar a múltiples features sin caos
+
+---
+
+## Opciones consideradas
+
+### Opción A: Crear backend propio (requiere servidor, más complejo para el curso)
+
+- **Pros:** Simplicidad inicial, menos código
+- **Contras:** Acoplamiento fuerte, difícil de testear, no escala
+
+### Opción B: Usar mock estático sin backend real (no demuestra integración real)
+
+- **Pros:** [Beneficios de esta opción]
+- **Contras:** [Desventajas significativas]
+
+### Opción C: Firebase como backend principal encapsulado (elegida)
+
+- **Pros:** Balance entre simplicidad y arquitectura limpia, testeable, escalable
+- **Contras:** Más boilerplate que las opciones naive, requiere disciplina
+
+---
+
+## Decisión detallada
+
+Elegimos la **Opción C** porque:
+
+1. **Respeta Clean Architecture**: Las capas internas (Domain/Application) permanecen puras
+2. **Testabilidad**: Podemos inyectar mocks sin modificar código productivo
+3. **Escalabilidad**: El patrón funciona tanto para 2 features como para 20
+4. **Claridad pedagógica**: Un junior puede entender el flujo de datos
+
+Descartamos las opciones A y B por los problemas de acoplamiento y complejidad que introducen.
+
+### Implementación en el curso
+
+Ver la lección [07-backend-firebase](../03-evolucion/07-backend-firebase.md) para el código completo.
+
+---
+
+## Consecuencias
+
+### Positivas
+
+- Arranque rápido del alumno, separación limpia de capas, tests de integración guiados
+- Facilita testing unitario e integración
+- Código más mantenible a largo plazo
+
+### Negativas
+
+- Vendor lock-in a Firebase; dependencia de servicio externo
+- Requiere más archivos y estructura inicial
+
+### Riesgos
+
+- Cambios en APIs de Firebase pueden romper ejemplos; requiere mantenimiento de versiones
+- Requiere code reviews consistentes para mantener el patrón
+
+---
+
+## Referencias
+
+- [Lección relacionada](../03-evolucion/07-backend-firebase.md)
+- [Template ADR](./TEMPLATE-ADR.md)
+
+---
+
+**Anterior:** [ADR-009: Observabilidad por decoradores y logger de aplic... ←](ADR-009-observabilidad-por-decoradores.md) · **Siguiente:** [ADR-011: Bounded contexts con ownership y contratos →](ADR-011-bounded-contexts-governance.md)

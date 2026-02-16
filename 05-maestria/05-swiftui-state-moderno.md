@@ -446,4 +446,6 @@ En el código del curso, verifica que usamos las APIs modernas:
 
 ---
 
+---
+
 **Anterior:** [Testing concurrente ←](04-testing-concurrente.md) · **Siguiente:** [SwiftUI performance →](06-swiftui-performance.md)

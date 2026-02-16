@@ -162,3 +162,7 @@ Sabes que estás aprendiendo de verdad cuando puedes:
 4. defender un trade-off con A/B/C y riesgos.
 
 Ese es el objetivo del curso: convertir criterio técnico en hábito de trabajo diario.
+
+---
+
+**Anterior:** [Anexo: Batería de Preguntas para Entrevistas Técnicas ←](preguntas-entrevista.md) · **Siguiente:** [Indice de ADRs (Architecture Decision Records) →](adrs/INDICE-ADRS.md)

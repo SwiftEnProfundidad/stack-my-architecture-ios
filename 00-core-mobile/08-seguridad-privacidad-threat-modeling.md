@@ -1,5 +1,13 @@
 # Seguridad, privacidad y threat modeling
 
+## Modelo mental
+
+La seguridad en mobile no es un checklist que se aplica al final. Es una lente que se usa desde el diseño: cada flujo tiene activos que proteger, actores que podrían atacarlos y superficie por donde podrían entrar. El threat model es el mapa de esas tres dimensiones. Sin mapa, las defensas son aleatorias.
+
+## Cuándo sí / cuándo no
+
+Haz threat modeling explícito para todo flujo que maneje autenticación, datos de usuario o transacciones de negocio. No lo hagas para pantallas puramente informativas sin datos sensibles ni interacción con backend. El ejemplo completo de Login + Catálogo más abajo muestra el nivel de detalle esperado.
+
 ## Threat modeling móvil (alto nivel)
 
 Modela amenazas desde activos, actores y superficie de ataque.
@@ -104,3 +112,7 @@ Se acepta riesgo temporal de no aplicar pinning de certificados mientras no haya
 
 Fecha de revisión:
 2026-06-30.
+
+---
+
+**Anterior:** [APIs, contratos y versionado ←](07-apis-contratos-versionado.md) · **Siguiente:** [Dependency governance y supply chain →](09-dependency-governance-supply-chain.md)

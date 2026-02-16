@@ -461,4 +461,6 @@ Cómo depurarlo:
 
 Si Application es el director de orquesta, Infrastructure es el técnico de sonido: nadie le aplaude cuando todo va bien, pero si falla, el concierto se cae. Esta capa bien diseñada te da algo muy enterprise: cambiar proveedores externos sin romper reglas de negocio.
 
-**Anterior:** [Application ←](02-application.md) · **Siguiente:** [Interface SwiftUI →](04-interface-swiftui.md)
+---
+
+**Anterior:** [Feature Catalog: Capa Application ←](02-application.md) · **Siguiente:** [Feature Catalog: Capa Interface (SwiftUI) →](04-interface-swiftui.md)

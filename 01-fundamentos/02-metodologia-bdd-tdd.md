@@ -212,4 +212,6 @@ En la siguiente lección pasamos al **cómo**: implementar cada comportamiento c
 
 ---
 
+---
+
 **Anterior:** [Principios de ingeniería ←](01-principios-ingenieria.md) · **Siguiente:** [Metodología TDD: práctica Red-Green-Refactor →](02-metodologia-tdd-practica.md)

@@ -545,4 +545,29 @@ Trigger para pasar de A a B:
 
 Cuando la navegación es plataforma, añadir una nueva feature no implica tocar cinco pantallas y rezar. Implica registrar un contrato claro y dejar que el sistema haga su trabajo. Ese cambio de mentalidad es arquitectura enterprise real.
 
-**Anterior:** [Reglas de dependencia ←](02-reglas-dependencia-ci.md) · **Siguiente:** [Versionado y SPM →](04-versionado-spm.md)
+---
+
+## Ejercicio guiado: trazar un deep link de Login a Catalog
+
+**Objetivo:** Verificar que el flujo de navegación Login → Catalog funciona por eventos, no por acoplamiento directo.
+
+**Instrucciones:**
+
+1. Abre `Tests/AppCompositionTests/` y localiza el smoke test de flujo Login → Catalog.
+2. Revisa cómo el test simula un login exitoso y verifica que la navegación llega a Catalog.
+3. Identifica qué evento emite Login al completarse y qué componente lo consume para navegar.
+4. Escribe (o revisa) un test que verifique: si Login emite `.success(session)`, el coordinador navega a Catalog sin que Login importe `FeatureCatalogUI`.
+
+**Criterios de éxito:**
+
+- El test pasa con `swift test --filter Smoke`.
+- `LoginViewModel` no importa `FeatureCatalogUI` ni `FeatureCatalogDomain`.
+- La navegación se resuelve en `AppComposition` mediante un closure o coordinador, no por import directo.
+
+**Solución razonada:**
+
+El patrón es: `LoginViewModel` recibe un closure `onLoginSuccess: (Session) -> Void`. El `AppComposition` conecta ese closure con la presentación de Catalog. El test verifica que al invocar el closure, se activa la navegación esperada. Esto permite que Login y Catalog evolucionen independientemente: si mañana Catalog cambia su pantalla inicial, Login no se entera.
+
+---
+
+**Anterior:** [Reglas de dependencia y CI ←](02-reglas-dependencia-ci.md) · **Siguiente:** [Versionado y SPM →](04-versionado-spm.md)

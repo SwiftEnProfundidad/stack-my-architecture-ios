@@ -34,3 +34,6 @@ Lo que no se puede observar ni recuperar en incidente no está listo para produc
 
 La arquitectura no es foto estática. Debe soportar cambios incrementales sin caos ni reescrituras de alto riesgo.
 
+---
+
+**Siguiente:** [Marco de decisiones arquitectónicas →](01-marco-de-decisiones.md)

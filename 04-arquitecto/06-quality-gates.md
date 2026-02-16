@@ -410,4 +410,37 @@ Trigger para pasar de B a C:
 
 ---
 
-**Anterior:** [Guía de arquitectura del repo ←](05-guia-arquitectura.md) · **Siguiente:** [Entregables de Etapa 4 →](entregables-etapa-4.md)
+## Ejercicio guiado: ejecutar todos los quality gates y analizar resultados
+
+**Objetivo:** Ejecutar la suite completa de quality gates del scaffold y entender qué verifica cada uno.
+
+**Instrucciones:**
+
+1. Desde `apps/ios/ArchitectureKit/`, ejecuta cada gate por separado y anota el resultado:
+   - `swift test` → ¿cuántos tests pasan? ¿cuántos suites?
+   - `./scripts/check-dependencies.sh` → ¿qué reglas verifica?
+   - `./scripts/check-performance-baseline.sh` → ¿qué métricas mide? ¿cuáles son los umbrales?
+   - `./scripts/quality-gates.sh` → ¿qué cobertura reporta por capa?
+2. Para cada gate, escribe una frase que explique: qué protege, qué riesgo mitiga y cuándo debería fallar.
+3. Identifica si hay algún gate que falta (por ejemplo: ¿hay gate de concurrency safety? ¿de tamaño de binario?).
+
+**Criterios de éxito:**
+
+- Los 4 gates pasan en verde.
+- Puedes explicar en una frase qué protege cada gate.
+- Identificas al menos un gate que podría añadirse (con justificación de qué riesgo mitiga).
+
+**Solución razonada:**
+
+| Gate | Protege | Riesgo que mitiga |
+|------|---------|-------------------|
+| `swift test` | Comportamiento correcto | Regresiones funcionales |
+| `check-dependencies.sh` | Direcciones de dependencia | Acoplamiento accidental entre módulos |
+| `check-performance-baseline.sh` | Latencia de carga | Regresiones de rendimiento |
+| `quality-gates.sh` | Cobertura mínima por capa | Código sin protección de tests |
+
+Un gate que podría añadirse es verificación de strict concurrency (`-strict-concurrency=complete`), que protege contra data races. Otro candidato es tamaño de binario, que protege contra dependencias pesadas inadvertidas.
+
+---
+
+**Anterior:** [Guía de arquitectura del repositorio ←](05-guia-arquitectura.md) · **Siguiente:** [Entregables — Etapa 4: Arquitecto →](entregables-etapa-4.md)

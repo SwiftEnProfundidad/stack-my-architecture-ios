@@ -157,7 +157,8 @@
 
   function setFontSize(px, persist = true) {
     const next = Math.min(maxFontSize, Math.max(minFontSize, Number(px) || baseFontSize));
-    document.documentElement.style.fontSize = `${next}px`;
+    const content = document.getElementById('content');
+    if (content) content.style.fontSize = `${next}px`;
     if (persist) localStorage.setItem(keyFontSize, String(next));
     if (fontDownBtn) fontDownBtn.disabled = next <= minFontSize;
     if (fontUpBtn) fontUpBtn.disabled = next >= maxFontSize;
@@ -285,7 +286,14 @@
     navLinks.forEach((link) => {
       const active = link.dataset.topicId === topicId;
       link.classList.toggle('study-nav-active', active);
-      if (active) link.scrollIntoView({ block: 'nearest' });
+      if (active) {
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+          var linkTop = link.offsetTop;
+          var sidebarH = sidebar.clientHeight;
+          sidebar.scrollTop = Math.max(0, linkTop - sidebarH / 3);
+        }
+      }
     });
 
     currentTopic = target;

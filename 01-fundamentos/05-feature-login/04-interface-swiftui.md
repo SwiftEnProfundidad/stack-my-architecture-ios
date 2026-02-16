@@ -310,9 +310,9 @@ Pero hay un detalle: el ViewModel depende de `LoginUseCase`, que es un struct (n
 
 ```mermaid
 graph LR
-    TEST["Test"] -->|"crea y configura"| STUB["AuthGatewayStub<br/>tu decides que devuelve"]
-    STUB -->|"se inyecta en"| UC["LoginUseCase"]
-    UC -->|"se inyecta en"| VM["LoginViewModel<br/>el SUT"]
+    TEST["Test"] -.->|"crea y configura"| STUB["AuthGatewayStub<br/>tu decides que devuelve"]
+    STUB -.->|"se inyecta en"| UC["LoginUseCase"]
+    UC -.->|"se inyecta en"| VM["LoginViewModel<br/>el SUT"]
 
     style TEST fill:#cce5ff,stroke:#007bff
     style STUB fill:#d4edda,stroke:#28a745
@@ -688,4 +688,6 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ---
 
-**Anterior:** [Infrastructure ←](03-infrastructure.md) · **Siguiente:** [TDD: ciclo completo →](05-tdd-ciclo-completo.md)
+---
+
+**Anterior:** [Feature Login: Capa Infrastructure ←](03-infrastructure.md) · **Siguiente:** [Feature Login: Retrospectiva del ciclo TDD completo →](05-tdd-ciclo-completo.md)

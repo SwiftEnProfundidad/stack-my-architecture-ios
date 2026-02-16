@@ -229,9 +229,6 @@ Gobernanza sin política de concurrencia deja un hueco crítico en arquitectura 
 ## Cierre
 
 Esta etapa es el puente entre “programar bien” y “construir un sistema que escala con gente real trabajando dentro”. Si la haces bien, los siguientes cambios del proyecto serán más seguros, más rápidos y menos dramáticos.
-
-**Siguiente:** [Bounded contexts →](01-bounded-contexts.md)
-
 ---
 
 ## Señales de madurez: de senior a arquitecto
@@ -298,7 +295,7 @@ Este ciclo evita dos extremos:
 ```mermaid
 flowchart TD
     PAIN["Dolor real de coordinacion"] --> ANALYZE{"Repetitivo y costoso?"}
-    ANALYZE -->|"No"| LOCAL["Resolver localmente"]
+    ANALYZE -.->|"No"| LOCAL["Resolver localmente"]
     ANALYZE -->|"Si"| RULE["Definir regla de plataforma"]
     RULE --> PILOT["Pilotar en 1-2 features"]
     PILOT --> VALUE{"Reduce incidentes/friccion?"}
@@ -388,3 +385,7 @@ Si no cumple estos criterios, probablemente aún debe quedarse como convención 
 ## Puente hacia Etapa 5 (maestría)
 
 Al cerrar Arquitecto, el siguiente salto es optimización fina de concurrencia, rendimiento y operaciones avanzadas. El objetivo de esta etapa no es competir con Etapa 5, sino dejar una plataforma lo bastante sólida para que esas optimizaciones sean seguras y acumulativas.
+
+---
+
+**Anterior:** [Calentamiento: Etapa 3 - Evolución ←](../anexos/calentamiento-etapa-3-evolucion.md) · **Siguiente:** [Bounded Contexts →](01-bounded-contexts.md)

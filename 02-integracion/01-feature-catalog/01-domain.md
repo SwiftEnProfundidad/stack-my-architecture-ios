@@ -41,7 +41,7 @@ flowchart LR
     EXT["Mundo externo\nHTTP/JSON"] --> INFRA["Infrastructure\ntraduce formato"]
     INFRA --> DOMAIN["Domain\nsemantica de negocio"]
     DOMAIN --> APP["Application\norquesta casos"]
-    APP --> UI["Interface\npresenta estados"]
+    APP ..> UI["Interface\npresenta estados"]
 ```
 
 Si Domain acepta cualquier cosa sin criterio, todo lo demás hereda ruido.
@@ -336,9 +336,6 @@ Trigger para A -> B:
 ## Cierre
 
 Cuando tu Domain está bien definido, el resto de capas dejan de discutir “qué significan los datos” y se concentran en su trabajo. Ese orden semántico es uno de los multiplicadores más fuertes de productividad en sistemas enterprise.
-
-**Anterior:** [Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Application →](02-application.md)
-
 ---
 
 ## Ejercicio de consolidación de dominio
@@ -357,3 +354,7 @@ Este ejercicio entrena evolución de dominio con impacto controlado por tests.
 ## Señal de dominio saludable
 
 Si puedes cambiar proveedor de datos o presentación sin renombrar conceptos de negocio (`Product`, `Price`, `CatalogError`), el dominio está bien aislado.
+
+---
+
+**Anterior:** [Feature Catalog: Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Feature Catalog: Capa Application →](02-application.md)

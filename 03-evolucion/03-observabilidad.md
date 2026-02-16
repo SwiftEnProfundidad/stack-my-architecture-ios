@@ -1,5 +1,7 @@
 # Observabilidad
 
+> **Nota de nomenclatura:** Esta lección usa nombres genéricos (`ProductRepository`, `LoggingProductRepository`) para explicar el patrón decorador. En el scaffold real, el repositorio es `CatalogRepository` y la observabilidad se implementa mediante `CatalogObservability` protocol.
+
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a ser capaz de diseñar observabilidad útil para una arquitectura iOS modular sin caer en dos extremos: ni ceguera total (`print` suelto) ni sobreingeniería prematura.
@@ -427,9 +429,6 @@ Trigger para pasar de B a C:
 ## Cierre
 
 La observabilidad madura no se nota cuando todo va bien. Se nota el día que algo falla a las 3 de la mañana y puedes encontrar la causa en minutos, no en horas. Esa diferencia separa un proyecto “funciona en mi máquina” de una base enterprise operable.
-
-**Anterior:** [Consistencia ←](02-consistencia.md) · **Siguiente:** [Tests avanzados →](04-tests-avanzados.md)
-
 ---
 
 ## Runbook operativo de incidentes (práctico)
@@ -474,3 +473,70 @@ Si cada feature inventa nomenclatura distinta, pierdes capacidad de consulta tra
 - los incidentes recurrentes reducen tras incorporar señales.
 
 Cuando esas señales aparecen, la observabilidad deja de ser un adorno y se vuelve ventaja operativa real.
+
+---
+
+## Ejercicio guiado: decorador de logging para ProductRepository
+
+**Objetivo:** Crear un decorador que registre eventos de carga de productos sin modificar el repositorio original.
+
+**Instrucciones:**
+
+1. En `FeatureCatalogData`, crea un `LoggingProductRepository` que implemente `ProductRepository`.
+2. El decorador recibe un `ProductRepository` interno y un closure `log: @Sendable (String) -> Void`.
+3. Antes de llamar al repositorio interno, loguea `"catalog.load.started"`.
+4. Si la carga tiene éxito, loguea `"catalog.load.succeeded count=\(products.count)"`.
+5. Si falla, loguea `"catalog.load.failed error=\(error.localizedDescription)"`.
+6. Escribe un test que verifique que los mensajes se emiten en el orden correcto.
+
+**Criterios de éxito:**
+
+- El test pasa con `swift test --filter LoggingProduct`.
+- El decorador no modifica el comportamiento del repositorio interno (solo observa).
+- El closure de log es `@Sendable` para ser seguro en concurrencia.
+
+**Solución razonada:**
+
+```swift
+final class LoggingProductRepository: ProductRepository, @unchecked Sendable {
+    private let inner: ProductRepository
+    private let log: @Sendable (String) -> Void
+
+    init(inner: ProductRepository, log: @escaping @Sendable (String) -> Void) {
+        self.inner = inner
+        self.log = log
+    }
+
+    func loadProducts() async throws -> [Product] {
+        log("catalog.load.started")
+        do {
+            let products = try await inner.loadProducts()
+            log("catalog.load.succeeded count=\(products.count)")
+            return products
+        } catch {
+            log("catalog.load.failed error=\(error.localizedDescription)")
+            throw error
+        }
+    }
+}
+
+// Test
+func test_loggingDecorator_emitsEventsInOrder() async throws {
+    var logs: [String] = []
+    let stub = StubProductRepository(result: .success([Product(name: "A", price: 1)]))
+    let sut = LoggingProductRepository(inner: stub) { logs.append($0) }
+
+    _ = try await sut.loadProducts()
+
+    XCTAssertEqual(logs, [
+        "catalog.load.started",
+        "catalog.load.succeeded count=1"
+    ])
+}
+```
+
+El patrón decorador permite componer logging, métricas y tracing sin tocar el repositorio original. En `AppComposition`, se envuelve el repositorio real con tantos decoradores como se necesiten.
+
+---
+
+**Anterior:** [Consistencia e invalidación ←](02-consistencia.md) · **Siguiente:** [Tests avanzados →](04-tests-avanzados.md)

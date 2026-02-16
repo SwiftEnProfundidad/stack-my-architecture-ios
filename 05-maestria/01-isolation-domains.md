@@ -569,4 +569,6 @@ func loadData(viewModel: ViewModel) async {
 
 ---
 
-**Anterior:** [Introducción ←](00-introduccion.md) · **Siguiente:** [Actors en arquitectura →](02-actors-en-arquitectura.md)
+---
+
+**Anterior:** [Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patron... ←](00-introduccion.md) · **Siguiente:** [Actors en arquitectura →](02-actors-en-arquitectura.md)

@@ -47,3 +47,7 @@ Términos clave del curso ordenados alfabéticamente.
 | **Unit Test** | Test que verifica un componente aislado, rápido, determinista, y sin dependencias externas |
 | **Value Object** | Objeto sin identidad, definido por sus valores, inmutable (ej: `Price`, `Email`) |
 | **Vertical Slicing** | Sinónimo de Feature-First: organización por features completas de arriba a abajo |
+
+---
+
+**Anterior:** [Apendice: Dominio Banca / Ledger ←](apendice-banca-ledger.md) · **Siguiente:** [Proyecto Final: Demuestra lo que has aprendido →](proyecto-final.md)

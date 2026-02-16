@@ -1,7 +1,7 @@
 # ADR-0004: SwiftData aislado detrás de adaptadores
 
 - Fecha: 2026-02-11
-- Estado: Propuesto
+- Estado: Aprobado
 
 ## Contexto
 
@@ -16,7 +16,6 @@ Mantener contratos de persistencia (`SessionStore`, `CatalogCacheStore`) y encap
 - Positivo: reemplazo de tecnología de persistencia sin tocar use cases ni view models.
 - Negativo: coste inicial de mapeo DTO/Entity.
 
-## Acción pendiente
+## Implementación
 
-Implementar adaptador SwiftData para `CatalogCacheStore` en Etapa 3 avanzada.
-
+Adaptador implementado en `Sources/FeatureCatalogPersistenceSwiftData/SwiftDataCatalogCacheStore.swift`, verificado con 3 tests en `Tests/FeatureCatalogPersistenceSwiftDataTests/`.

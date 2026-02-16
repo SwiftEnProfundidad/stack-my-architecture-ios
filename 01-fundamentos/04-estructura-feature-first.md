@@ -139,7 +139,7 @@ Ahora que tienes la estructura, es importante que entiendas las reglas de depend
 
 ```mermaid
 graph TD
-    CR["Composition Root<br/>App/<br/>Importa TODO"] --> UI["Interface<br/>import SwiftUI<br/>import Application"]
+    CR["Composition Root<br/>App/<br/>Importa TODO"] ..> UI["Interface<br/>import SwiftUI<br/>import Application"]
     CR --> INFRA["Infrastructure<br/>import Foundation<br/>import Application"]
     CR --> APP["Application<br/>import Domain<br/>NADA MAS"]
     
@@ -193,6 +193,8 @@ Al terminar esta lección tienes:
 Un proyecto Xcode llamado `StackMyArchitecture` con la estructura Feature-First completa. La carpeta `App/` para el Composition Root. La carpeta `Features/Login/` con las cuatro capas (Domain, Application, Infrastructure, Interface) y sus subcarpetas. La carpeta `SharedKernel/` vacía, esperando. El target de tests con estructura espejo. El proyecto configurado para Swift 6 strict concurrency.
 
 No tienes código de producción todavía. Eso viene en la siguiente lección, donde empezaremos por la especificación BDD de la feature de Login: los escenarios de comportamiento que definirán exactamente qué tiene que hacer el sistema antes de escribir ni una sola línea de Swift.
+
+---
 
 ---
 

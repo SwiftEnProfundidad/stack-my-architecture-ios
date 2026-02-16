@@ -326,4 +326,6 @@ El curso está dividido en cinco etapas que progresan en complejidad sin saltos.
 
 **No leas por encima.** Lee cada lección completa, escribe el código en Xcode (no solo lo mires), ejecuta tests, y verbaliza con tus palabras por qué cada decisión está tomada así. Si algo no te queda claro, detente ahí: el progreso rápido con ambigüedad termina saliendo caro en las etapas siguientes.
 
-**Siguiente lección:** [Principios de ingeniería →](01-principios-ingenieria.md)
+---
+
+**Anterior:** [1) Purpose of This Document ←](../00-core-mobile/12-mobile-architect-parity-ios-android.md) · **Siguiente:** [Setup: Preparación del entorno →](00-setup.md)

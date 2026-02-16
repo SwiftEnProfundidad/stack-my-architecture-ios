@@ -150,7 +150,7 @@ Hay 5 tipos de test doubles. Cada uno tiene un propósito diferente:
 graph TD
     TD["Test Doubles<br/>Objetos falsos para tests"] --> DUMMY["Dummy<br/>No hace nada.<br/>Solo rellena un parametro."]
     TD --> STUB["Stub<br/>Devuelve datos fijos.<br/>Tu configuras que devuelve."]
-    TD --> SPY["Spy<br/>Registra las llamadas.<br/>Puedes verificar que se llamo."]
+    TD -.-> SPY["Spy<br/>Registra las llamadas.<br/>Puedes verificar que se llamo."]
     TD --> MOCK["Mock<br/>Verifica expectativas.<br/>Falla si no se cumple lo esperado."]
     TD --> FAKE["Fake<br/>Implementacion real simplificada.<br/>Funciona pero con atajos."]
 
@@ -431,6 +431,8 @@ Hay muchas confusiones comunes sobre ambas prácticas. Vamos a aclararlas para q
 **TDD no es "testear todo obsesivamente".** No todo necesita un test unitario. Los tests triviales (getters que devuelven una propiedad, por ejemplo) no aportan valor. TDD te lleva a testear **comportamientos**, no líneas de código. Si un comportamiento es tan simple que no puede fallar, no necesita test.
 
 **BDD y TDD no son mutuamente excluyentes.** No es "o BDD o TDD". En este curso usamos ambos, en ese orden: BDD para especificar, TDD para implementar. Son complementarios, no competidores.
+
+---
 
 ---
 

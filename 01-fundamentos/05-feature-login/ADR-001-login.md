@@ -139,3 +139,7 @@ Cada decisión está demostrada con código real y tests en las lecciones corres
 **Capa Infrastructure:** [03-infrastructure.md](03-infrastructure.md) — Gateway, DTOs, contract tests.
 **Capa Interface:** [04-interface-swiftui.md](04-interface-swiftui.md) — ViewModel, Vista, Composition Root.
 **Retrospectiva TDD:** [05-tdd-ciclo-completo.md](05-tdd-ciclo-completo.md) — Patrones y lecciones aprendidas.
+
+---
+
+**Anterior:** [Feature Login: Retrospectiva del ciclo TDD completo ←](05-tdd-ciclo-completo.md) · **Siguiente:** [Conectando la App: Tu Primera App Funcional →](../06-conectando-la-app.md)

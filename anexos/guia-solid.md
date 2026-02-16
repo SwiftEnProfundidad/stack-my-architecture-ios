@@ -412,3 +412,7 @@ class PaymentService {
 ---
 
 > *"SOLID no es un destino, es un camino. No busques perfección desde el día 1. Busca reconocer violaciones y entender su coste."*
+
+---
+
+**Anterior:** [Errores de Compilación: Cómo Leerlos y Solucionarlos ←](errores-compilacion.md) · **Siguiente:** [Anexo: Guía CQS y CQRS →](guia-cqs-cqrs.md)

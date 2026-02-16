@@ -577,4 +577,6 @@ En la siguiente lección vamos a subir una capa: la Application. Allí construir
 
 ---
 
-**Anterior:** [Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Application →](02-application.md)
+---
+
+**Anterior:** [Feature Login: Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Feature Login: Capa Application →](02-application.md)

@@ -441,3 +441,7 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 ---
 
 **Anexo relacionado:** [Debugging en Xcode](../05-maestria/10-debugging-xcode.md)
+
+---
+
+**Anterior:** [Mental Models: Cómo Pensar en Clean Architecture ←](mental-models.md) · **Siguiente:** [Anexo: Guía SOLID →](guia-solid.md)

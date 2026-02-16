@@ -400,3 +400,7 @@ func updateUserName(_ name: String)  // Command
 ---
 
 > *"CQS separa métodos. CQRS separa modelos. Ambos buscan claridad: haz una cosa y hazla bien."*
+
+---
+
+**Anterior:** [Anexo: Guía SOLID ←](guia-solid.md) · **Siguiente:** [Anexo: Batería de Preguntas para Entrevistas Técnicas →](preguntas-entrevista.md)

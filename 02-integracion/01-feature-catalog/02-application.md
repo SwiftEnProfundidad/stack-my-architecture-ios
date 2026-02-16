@@ -42,7 +42,7 @@ Lenguaje ubicuo en esta lección:
 
 ```mermaid
 flowchart LR
-    UI["Interface\nViewModel/View"] --> UC["LoadProductsUseCase"]
+    UI["Interface\nViewModel/View"] ..> UC["LoadProductsUseCase"]
     UC --> PORT["ProductRepository (port)"]
     PORT --> INFRA["Remote/Cached Repository"]
     INFRA --> API["API / Storage"]
@@ -495,4 +495,6 @@ Trigger para pasar de A a diseño más complejo:
 
 Una capa Application buena no se juzga por cuántas líneas tiene, sino por cuánto protege la arquitectura cuando cambian requisitos. En `Catalog`, este diseño te permite crecer sin deuda lateral: puedes evolucionar infraestructura y UI sin romper el corazón semántico del flujo.
 
-**Anterior:** [Domain ←](01-domain.md) · **Siguiente:** [Infrastructure →](03-infrastructure.md)
+---
+
+**Anterior:** [Feature Catalog: Capa Domain ←](01-domain.md) · **Siguiente:** [Feature Catalog: Capa Infrastructure →](03-infrastructure.md)

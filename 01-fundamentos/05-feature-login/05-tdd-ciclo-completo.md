@@ -40,6 +40,8 @@ graph TD
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
 
+> **Nota:** Los 28 tests descritos aquí son el diseño conceptual completo de la feature Login. El scaffold SPM del repositorio (`apps/ios/ArchitectureKit`) consolida algunos de estos tests y tiene 26 tests totales incluyendo Login, Catalog y Composition. La diferencia se debe a que el scaffold agrupa ciertos escenarios en tests de integración de mayor nivel.
+
 ---
 
 ## El mapa completo de tests que escribimos
@@ -351,4 +353,6 @@ Esta es la primera feature completa del curso. Es pequeña (un formulario de log
 
 ---
 
-**Anterior:** [Interface SwiftUI ←](04-interface-swiftui.md) · **Siguiente:** [ADR-001: Login →](ADR-001-login.md)
+---
+
+**Anterior:** [Feature Login: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [ADR-001: Diseño de la Feature Login →](ADR-001-login.md)

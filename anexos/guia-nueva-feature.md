@@ -1,39 +1,39 @@
-# Como anadir una feature nueva
+# Cómo añadir una feature nueva
 
-## Proposito
+## Propósito
 
-Esta guia es un playbook paso a paso para cuando necesites crear una feature nueva en el proyecto. Sigue el orden exacto y no te saltaras nada. Cada paso tiene su checklist.
+Esta guía es un playbook paso a paso para cuando necesites crear una feature nueva en el proyecto. Sigue el orden exacto y no te saltarás nada. Cada paso tiene su checklist.
 
 ---
 
 ## Prerequisitos
 
-Antes de empezar, asegurate de:
+Antes de empezar, asegúrate de:
 
-- [ ] tener claro el requisito de negocio (en lenguaje de usuario, no tecnico);
-- [ ] saber en que bounded context vive la feature (Identity, Catalog, o uno nuevo);
+- [ ] tener claro el requisito de negocio (en lenguaje de usuario, no técnico);
+- [ ] saber en qué bounded context vive la feature (Identity, Catalog, o uno nuevo);
 - [ ] tener acceso al repositorio y los tests pasando en verde.
 
 ---
 
-## Paso 1: Especificacion BDD
+## Paso 1: Especificación BDD
 
-**Donde:** `XX-etapa/YY-feature-nombre/00-especificacion-bdd.md`
+**Dónde:** `XX-etapa/YY-feature-nombre/00-especificacion-bdd.md`
 
-**Que hacer:**
+**Qué hacer:**
 
 1. Escribir los escenarios en formato Given/When/Then.
-2. Cubrir minimo: happy path, sad path, y edge cases.
-3. Cada escenario tiene un ID unico (ej: `SC-CART-001`).
+2. Cubrir mínimo: happy path, sad path, y edge cases.
+3. Cada escenario tiene un ID único (ej: `SC-CART-001`).
 
 **Checklist:**
 
 - [ ] Al menos 1 happy path.
-- [ ] Al menos 1 sad path (error de red, datos invalidos).
-- [ ] Al menos 1 edge case (lista vacia, timeout, cancelacion).
-- [ ] Los escenarios estan escritos en lenguaje de negocio, no tecnico.
+- [ ] Al menos 1 sad path (error de red, datos inválidos).
+- [ ] Al menos 1 edge case (lista vacía, timeout, cancelación).
+- [ ] Los escenarios están escritos en lenguaje de negocio, no técnico.
 
-**Ejemplo minimo:**
+**Ejemplo mínimo:**
 
 ```markdown
 ## SC-CART-001: Agregar producto al carrito
@@ -42,39 +42,39 @@ Antes de empezar, asegurate de:
 - Then el carrito muestra 1 item con "Camiseta React" y precio 29.99 EUR
 
 ## SC-CART-002: Agregar producto cuando no hay conexion
-- Given el usuario esta sin conexion
+- Given el usuario está sin conexión
 - When intenta agregar un producto al carrito
-- Then ve un mensaje de error "Sin conexion. Intenta mas tarde."
+- Then ve un mensaje de error "Sin conexión. Intenta más tarde."
 ```
 
 ---
 
 ## Paso 2: Domain (modelos y reglas de negocio)
 
-**Donde:** `Features/NuevaFeature/Domain/`
+**Dónde:** `Features/NuevaFeature/Domain/`
 
-**Que crear:**
+**Qué crear:**
 
 1. **Entidades y Value Objects** — Los modelos puros de negocio.
 2. **Errores de dominio** — Un enum con los errores posibles.
-3. **Puertos (protocolos)** — Los contratos que Application usara.
+3. **Puertos (protocolos)** — Los contratos que Application usará.
 
 **Orden TDD:**
 
 ```
 1. Red:   test_cartItem_calculatesTotal_correctly()
-2. Green: crear CartItem con metodo total
+2. Green: crear CartItem con método total
 3. Red:   test_cart_addItem_incrementsCount()
-4. Green: crear Cart con metodo addItem
+4. Green: crear Cart con método addItem
 ```
 
 **Checklist:**
 
-- [ ] Ningun `import` de frameworks externos (ni SwiftUI, ni Foundation si posible).
+- [ ] Ningún `import` de frameworks externos (ni SwiftUI, ni Foundation si posible).
 - [ ] Todos los tipos son `Sendable`.
 - [ ] Value Objects validan en `init` (ej: `Quantity` no acepta negativos).
-- [ ] Errores son un enum con casos semanticos (no strings).
-- [ ] Protocolos definen el contrato minimo necesario.
+- [ ] Errores son un enum con casos semánticos (no strings).
+- [ ] Protocolos definen el contrato mínimo necesario.
 
 **Ejemplo:**
 
@@ -109,17 +109,17 @@ protocol CartRepository: Sendable {
 
 ## Paso 3: Application (casos de uso)
 
-**Donde:** `Features/NuevaFeature/Application/`
+**Dónde:** `Features/NuevaFeature/Application/`
 
-**Que crear:**
+**Qué crear:**
 
-1. **UseCase** — Orquesta la logica de negocio usando los puertos de Domain.
+1. **UseCase** — Orquesta la lógica de negocio usando los puertos de Domain.
 
 **Orden TDD:**
 
 ```
 1. Red:   test_addToCart_withValidProduct_addsItem()
-2. Green: crear AddToCartUseCase con metodo execute
+2. Green: crear AddToCartUseCase con método execute
 3. Red:   test_addToCart_onConnectivityError_throwsCartError()
 4. Green: manejar error de connectivity
 ```
@@ -127,7 +127,7 @@ protocol CartRepository: Sendable {
 **Checklist:**
 
 - [ ] UseCase depende SOLO de protocolos de Domain (puertos), nunca de clases concretas.
-- [ ] UseCase es un struct inmutable (`Sendable` automatico).
+- [ ] UseCase es un struct inmutable (`Sendable` automático).
 - [ ] UseCase no importa SwiftUI, UIKit, SwiftData, Firebase, etc.
 - [ ] Cada UseCase tiene UNA responsabilidad.
 
@@ -153,13 +153,13 @@ struct AddToCartUseCase: Sendable {
 
 ---
 
-## Paso 4: Infrastructure (implementacion concreta)
+## Paso 4: Infrastructure (implementación concreta)
 
-**Donde:** `Features/NuevaFeature/Infrastructure/`
+**Dónde:** `Features/NuevaFeature/Infrastructure/`
 
-**Que crear:**
+**Qué crear:**
 
-1. **Adapter** — Implementacion concreta del protocolo de Domain.
+1. **Adapter** — Implementación concreta del protocolo de Domain.
 2. **DTOs** — Modelos de transferencia para la API/base de datos.
 3. **Mapper** — Traduce entre DTOs y modelos de Domain.
 
@@ -167,9 +167,9 @@ struct AddToCartUseCase: Sendable {
 
 - [ ] El adapter implementa el protocolo de Domain.
 - [ ] Los DTOs son `Codable` + `Sendable`.
-- [ ] El mapper valida datos (guard let, else throw error semantico).
-- [ ] Los errores tecnicos (HTTP, Firebase, etc.) se traducen a errores de Domain.
-- [ ] Existe al menos un contract test (200 OK, error red, datos invalidos).
+- [ ] El mapper valida datos (guard let, else throw error semántico).
+- [ ] Los errores técnicos (HTTP, Firebase, etc.) se traducen a errores de Domain.
+- [ ] Existe al menos un contract test (200 OK, error red, datos inválidos).
 
 **Ejemplo:**
 
@@ -200,9 +200,9 @@ struct FirestoreCartRepository: CartRepository, Sendable {
 
 ## Paso 5: Interface (ViewModel + SwiftUI)
 
-**Donde:** `Features/NuevaFeature/Interface/`
+**Dónde:** `Features/NuevaFeature/Interface/`
 
-**Que crear:**
+**Qué crear:**
 
 1. **ViewModel** — `@Observable`, `@MainActor`, consume UseCase.
 2. **View** — SwiftUI pura, consume ViewModel.
@@ -210,10 +210,10 @@ struct FirestoreCartRepository: CartRepository, Sendable {
 **Checklist:**
 
 - [ ] ViewModel usa `@Observable` (no `ObservableObject`).
-- [ ] ViewModel esta marcado `@MainActor`.
+- [ ] ViewModel está marcado `@MainActor`.
 - [ ] ViewModel tiene un enum `State` para loading/loaded/error.
-- [ ] View no contiene logica de negocio.
-- [ ] Navegacion se emite como evento (closure), no como NavigationLink directo.
+- [ ] View no contiene lógica de negocio.
+- [ ] Navegación se emite como evento (closure), no como NavigationLink directo.
 - [ ] Tests del ViewModel cubren: estado inicial, happy path, error, retry.
 
 **Ejemplo:**
@@ -255,9 +255,9 @@ final class CartViewModel {
 
 ## Paso 6: Wiring en Composition Root
 
-**Donde:** `App/CompositionRoot.swift`
+**Dónde:** `App/CompositionRoot.swift`
 
-**Que hacer:**
+**Qué hacer:**
 
 1. Crear factory method para la nueva feature.
 2. Conectar con el AppCoordinator (nueva ruta).
@@ -265,21 +265,21 @@ final class CartViewModel {
 **Checklist:**
 
 - [ ] Factory method crea toda la cadena: Repository → UseCase → ViewModel → View.
-- [ ] Si hay cache, el decorador se inserta aqui (no en UseCase).
-- [ ] Si hay logging, el decorador se inserta aqui.
+- [ ] Si hay cache, el decorador se inserta aquí (no en UseCase).
+- [ ] Si hay logging, el decorador se inserta aquí.
 - [ ] El UseCase, ViewModel y View no saben de los decoradores.
 
 ---
 
-## Paso 7: Navegacion
+## Paso 7: Navegación
 
-**Donde:** `App/AppCoordinator.swift` o router de feature.
+**Dónde:** `App/AppCoordinator.swift` o router de feature.
 
-**Que hacer:**
+**Qué hacer:**
 
-1. Anadir nuevo caso a `AppDestination`.
+1. Añadir nuevo caso a `AppDestination`.
 2. Actualizar `DeepLinkParser` si hay deep link.
-3. Actualizar `NavigationPolicy` si requiere autenticacion.
+3. Actualizar `NavigationPolicy` si requiere autenticación.
 
 **Checklist:**
 
@@ -289,12 +289,12 @@ final class CartViewModel {
 
 ---
 
-## Paso 8: Documentacion
+## Paso 8: Documentación
 
-**Que hacer:**
+**Qué hacer:**
 
 1. Crear ADR si la feature cambia arquitectura o introduce dependencia nueva.
-2. Actualizar el README con la nueva leccion.
+2. Actualizar el README con la nueva lección.
 3. Actualizar `build-html.py` con el nuevo archivo en `FILE_ORDER`.
 
 **Checklist:**
@@ -308,12 +308,12 @@ final class CartViewModel {
 
 ## Paso 9: PR y Quality Gates
 
-**Que hacer:**
+**Qué hacer:**
 
-1. Abrir PR con descripcion que responda:
-   - Que comportamiento BDD cubre.
-   - Que tests protegen el cambio.
-   - Que reglas de dependencia toca.
+1. Abrir PR con descripción que responda:
+   - Qué comportamiento BDD cubre.
+   - Qué tests protegen el cambio.
+   - Qué reglas de dependencia toca.
    - Si requiere ADR.
 2. Verificar que los gates pasan.
 
@@ -323,7 +323,7 @@ final class CartViewModel {
 - [ ] Gate 2: build con strict concurrency OK.
 - [ ] Gate 3: unit tests verdes.
 - [ ] Gate 4: integration tests verdes (si toca infra).
-- [ ] Descripcion de PR completa.
+- [ ] Descripción de PR completa.
 
 ---
 
@@ -331,14 +331,14 @@ final class CartViewModel {
 
 ```mermaid
 flowchart TD
-    REQ["Requisito de negocio"] --> BDD["Paso 1: Especificacion BDD"]
+    REQ["Requisito de negocio"] --> BDD["Paso 1: Especificación BDD"]
     BDD --> DOM["Paso 2: Domain<br/>modelos + puertos"]
     DOM --> APP["Paso 3: Application<br/>UseCases"]
     APP --> INF["Paso 4: Infrastructure<br/>adapters + DTOs"]
     INF --> UI["Paso 5: Interface<br/>ViewModel + View"]
-    UI --> WIRE["Paso 6: Composition Root"]
+    UI -.-> WIRE["Paso 6: Composition Root"]
     WIRE --> NAV["Paso 7: Navegacion"]
-    NAV --> DOC["Paso 8: Documentacion"]
+    NAV --> DOC["Paso 8: Documentación"]
     DOC --> PR["Paso 9: PR + Gates"]
 
     style REQ fill:#f8f9fa,stroke:#6c757d
@@ -359,18 +359,22 @@ flowchart TD
 
 | Paso | Tiempo estimado | Notas |
 |---|---|---|
-| BDD | 30-60 min | Requiere conversacion con negocio |
+| BDD | 30-60 min | Requiere conversación con negocio |
 | Domain | 1-2 horas | TDD puro, sin dependencias |
-| Application | 30-60 min | UseCase simple si Domain esta bien |
+| Application | 30-60 min | UseCase simple si Domain está bien |
 | Infrastructure | 1-2 horas | Incluye contract tests |
 | Interface | 1-2 horas | ViewModel + View + tests |
 | Wiring | 15-30 min | Solo Composition Root |
-| Navegacion | 15-30 min | Segun complejidad de rutas |
-| Documentacion | 15-30 min | ADR + README |
-| PR | 15-30 min | Descripcion + review |
+| Navegación | 15-30 min | Según complejidad de rutas |
+| Documentación | 15-30 min | ADR + README |
+| PR | 15-30 min | Descripción + review |
 
 **Total estimado: 5-9 horas** para una feature simple (1 pantalla, 1 UseCase, 1 repository).
 
 ---
 
-**Referencia:** Esta guia aplica el flujo descrito en [Guia de arquitectura](../04-arquitecto/05-guia-arquitectura.md) y usa los quality gates de [Quality Gates](../04-arquitecto/06-quality-gates.md).
+**Referencia:** Esta guía aplica el flujo descrito en [Guia de arquitectura](../04-arquitecto/05-guia-arquitectura.md) y usa los quality gates de [Quality Gates](../04-arquitecto/06-quality-gates.md).
+
+---
+
+**Anterior:** [Atlas visual de arquitectura ←](diagramas/atlas-arquitectura.md) · **Siguiente:** [Git Workflow para el Curso →](git-workflow-curso.md)

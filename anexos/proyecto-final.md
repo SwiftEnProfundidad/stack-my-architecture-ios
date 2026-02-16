@@ -397,3 +397,7 @@ Si tu puntuacion es menor de 35, no te frustres. Vuelve a las lecciones que fall
 **El siguiente paso:** Intenta conectar la app a una API real (puedes usar una API publica de libros como Open Library). Eso te obligara a adaptar el DTO al formato real de la API, que es exactamente lo que haras en tu primer trabajo como desarrollador iOS.
 
 Buena suerte. Ya tienes las herramientas. Ahora, a construir.
+
+---
+
+**Anterior:** [Glosario ←](glosario.md)

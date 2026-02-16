@@ -169,3 +169,7 @@ Tu ejercicio es escribir tu propia "narrativa natural" respondiendo estas pregun
 5. Cierra con métricas o indicadores concretos de éxito
 
 Practica estas narrativas hasta que fluyan naturalmente, sin sonar memorizadas. La autenticidad es más convincente que la perfección.
+
+---
+
+**Anterior:** [Debugging en Xcode: Encuentra y arregla bugs como un prof... ←](10-debugging-xcode.md) · **Siguiente:** [12. Arquitectura Adaptativa: Más Allá del Patrón →](12-arquitectura-adaptativa.md)

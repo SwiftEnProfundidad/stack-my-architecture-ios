@@ -43,3 +43,6 @@ Frase de cierre recomendada:
 
 Se considera paquete defendible si un entrevistador puede seguir problema → decisión → evidencia → operación sin depender de promesas verbales.
 
+---
+
+**Anterior:** [Evidencias obligatorias iOS (cierre defendible) ←](02-evidencias-obligatorias-ios.md) · **Siguiente:** [Calentamiento: Etapa 5 - Maestría →](../../anexos/calentamiento-etapa-5-maestria.md)

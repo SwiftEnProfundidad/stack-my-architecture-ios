@@ -446,4 +446,6 @@ Antes de dar por terminado un test de código async, verifica:
 
 ---
 
+---
+
 **Anterior:** [Structured concurrency ←](03-structured-concurrency.md) · **Siguiente:** [SwiftUI state moderno →](05-swiftui-state-moderno.md)

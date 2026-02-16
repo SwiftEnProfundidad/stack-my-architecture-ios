@@ -398,3 +398,7 @@ graph TD
 ## Conclusion
 
 El dominio cambia (productos → cuentas bancarias), pero la arquitectura no. Value Objects validan en `init`, UseCases orquestan logica de negocio, repositories abstraen persistencia, y los bounded contexts acotan responsabilidades. Si entiendes el curso, puedes modelar un ledger bancario sin cambiar de framework ni de principios.
+
+---
+
+**Anterior:** [ADR-NNN: [Título de la decisión] ←](adrs/TEMPLATE-ADR.md) · **Siguiente:** [Glosario →](glosario.md)

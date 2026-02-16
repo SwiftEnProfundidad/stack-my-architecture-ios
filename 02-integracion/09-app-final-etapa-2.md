@@ -19,9 +19,9 @@ Pero ¿has visto todo funcionando junto? Esta lección es el **cierre visual** d
 ```mermaid
 graph TD
     A[StackMyArchitectureApp] --> B[CompositionRoot]
-    B --> C[AppCoordinator]
-    B --> D[LoginView]
-    B --> E[CatalogView]
+    B -.-> C[AppCoordinator]
+    B -.-> D[LoginView]
+    B -.-> E[CatalogView]
     
     C -->|navega a| F[LoginDestination]
     C -->|navega a| G[CatalogDestination]
@@ -440,4 +440,6 @@ Pero primero, revisa los entregables de la Etapa 2.
 
 ---
 
-**Siguiente paso:** [Entregables Etapa 2](entregables-etapa-2.md)
+---
+
+**Anterior:** [Swift Concurrency Enterprise: Patrones Imprescindibles ←](08-swift-concurrency-enterprise.md) · **Siguiente:** [Entregables — Etapa 2: Integración →](entregables-etapa-2.md)

@@ -178,7 +178,7 @@ Trigger de revisión:
 flowchart TD
     D["Necesitamos integrar Login y Catalog"] --> C1{"Acoplar features directamente?"}
     C1 -->|"Sí"| BAD["Rápido hoy, deuda mañana"]
-    C1 -->|"No"| C2["Contratos + eventos + coordinador"]
+    C1 ..>|"No"| C2["Contratos + eventos + coordinador"]
 
     C2 --> C3{"Modelo de estado UI"}
     C3 -->|"Banderas sueltas"| BAD2["Estados imposibles"]
@@ -258,3 +258,7 @@ Esta ADR se considera implementada cuando:
 - [04-interface-swiftui.md](04-interface-swiftui.md)
 - [../02-navegacion-eventos.md](../02-navegacion-eventos.md)
 - [../03-contratos-features.md](../03-contratos-features.md)
+
+---
+
+**Anterior:** [Feature Catalog: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [Navegación por eventos: el AppCoordinator →](../02-navegacion-eventos.md)

@@ -442,4 +442,6 @@ Antes de mergear cualquier PR:
 
 ---
 
+---
+
 **Anterior:** [Composición avanzada ←](07-composicion-avanzada.md) · **Siguiente:** [Migración a Swift 6 →](09-migracion-swift6.md)

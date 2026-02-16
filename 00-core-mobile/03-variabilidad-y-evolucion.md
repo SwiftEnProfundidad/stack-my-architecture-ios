@@ -1,5 +1,35 @@
 # Variabilidad y evolución sin caos
 
+## Modelo mental
+
+Piensa en tu codebase como una ciudad. Hay zonas residenciales que apenas cambian (Domain, modelos core) y zonas comerciales que se renuevan cada temporada (UI, feature flags, copy). Si construyes la zona comercial con los mismos cimientos que un monumento histórico, desperdicias recursos. Si construyes el monumento con materiales temporales, se derrumba.
+
+```mermaid
+flowchart LR
+    subgraph Estable["Cambio anual"]
+        D["Domain models"]
+        B["Bounded contexts"]
+    end
+    subgraph Medio["Cambio mensual"]
+        C["Contratos API"]
+        P["Políticas cache"]
+    end
+    subgraph Volátil["Cambio semanal"]
+        U["UI/copy"]
+        F["Feature flags"]
+    end
+    Estable -.->|"proteger"| Medio
+    Medio -.->|"adaptar"| Volátil
+```
+
+## Ejemplo en el scaffold
+
+En `ArchitectureKit`, el Domain (`FeatureLoginDomain`, `FeatureCatalogDomain`) es zona estable: los Value Objects `Email`, `Password`, `Product` no cambian con frecuencia. La Infrastructure (`FeatureCatalogData`) es zona media: la política de cache (TTL, network-first) puede ajustarse. La UI (`FeatureCatalogUI`) es zona volátil: el layout de la lista de productos puede cambiar sin tocar Domain. Esta separación se aplica en la Etapa 3 (`03-evolucion/01-caching-offline.md`) cuando se introduce cache sin contaminar el core.
+
+## Cuándo sí / cuándo no
+
+Aplica clasificación de variabilidad cuando el sistema tiene más de una feature o más de un equipo. No la apliques prematuramente en prototipos de una semana donde todo es volátil por definición.
+
 ## Diseñar para cambio
 
 No todo cambia al mismo ritmo. Clasifica explícitamente:
@@ -32,3 +62,6 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 - [ ] Fecha de retiro del legado acordada.
 - [ ] Riesgos de operación revisados con equipo.
 
+---
+
+**Anterior:** [Invariantes y contratos ←](02-invariantes-y-contratos.md) · **Siguiente:** [Calidad PR-ready →](04-calidad-pr-ready.md)

@@ -34,11 +34,20 @@
     var menu = document.getElementById('course-switcher-menu');
     if (!menu) return;
 
-    if (toggle && toggle.parentNode) {
-      toggle.parentNode.removeChild(toggle);
-    }
+    if (toggle) {
+      toggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menu.classList.toggle('open');
+      });
 
-    menu.removeAttribute('hidden');
+      document.addEventListener('click', function () {
+        menu.classList.remove('open');
+      });
+
+      menu.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+    }
   }
 
   setLinks();
