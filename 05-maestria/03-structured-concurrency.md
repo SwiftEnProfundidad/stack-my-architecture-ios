@@ -112,20 +112,18 @@ func loadCatalogScreen() async throws -> (products: [Product], config: CatalogCo
 Sin `async let`, las operaciones serían secuenciales. El diagrama de Gantt lo hace evidente:
 
 ```mermaid
-gantt
-    title Secuencial vs Paralelo (async let)
-    dateFormat X
-    axisFormat %L ms
+flowchart LR
+    subgraph SEQ["Secuencial (700ms)"]
+        S1["repository.loadAll() - 500ms"] --> S2["configService.loadConfig() - 200ms"]
+        S2 --> ST["Total: 700ms"]
+    end
 
-    section Secuencial
-    repository.loadAll()        :s1, 0, 500
-    configService.loadConfig()  :s2, after s1, 200
-    Total: 700ms                :milestone, after s2, 0
+    subgraph PAR["Paralelo (500ms)"]
+        P1["repository.loadAll() - 500ms"] --> PT["Total: 500ms"]
+        P2["configService.loadConfig() - 200ms"] --> PT
+    end
 
-    section Paralelo (async let)
-    repository.loadAll()        :p1, 0, 500
-    configService.loadConfig()  :p2, 0, 200
-    Total: 500ms                :milestone, 500, 0
+    ST -.->|"Ahorro con async let"| PT
 ```
 
 ```swift
