@@ -312,6 +312,10 @@
       restoreScrollForTopic(currentTopic.id);
     }
 
+    if (typeof window.rerenderMermaidSafely === 'function') {
+      window.rerenderMermaidSafely({ scope: target.section, visibleOnly: true });
+    }
+
     startTopicTimer(currentTopic.id);
   }
 

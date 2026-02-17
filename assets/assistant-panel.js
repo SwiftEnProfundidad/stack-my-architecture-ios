@@ -37,7 +37,7 @@
         availableModels: ['gpt-5.3', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-4o-mini', 'gpt-4.1-mini'],
         maxAttachments: IMAGE_MAX_ATTACHMENTS,
         maxImageBytes: IMAGE_MAX_BYTES,
-        allowedImageTypes: ['image/png', 'image/jpeg'],
+        allowedImageTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff', 'image/heic', 'image/heif'],
         visionModels: [VISION_FALLBACK_MODEL]
     };
 
@@ -342,11 +342,61 @@
 
         var textarea = document.createElement('textarea');
         textarea.placeholder = 'Pregunta algo sobre el contenido seleccionado o sobre el tema actual.';
+        textarea.addEventListener('keydown', function (event) {
+            if (event.isComposing) return;
+            if (event.key !== 'Enter') return;
+            if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+            event.preventDefault();
+            submitQuestion(textarea.value);
+        });
+
+        function consumePastedImages(event) {
+            if (!event || state.isLoading) return;
+            var clipboardData = event.clipboardData || window.clipboardData;
+            var images = extractImageFilesFromDataTransfer(clipboardData);
+            if (images.length) {
+                event.preventDefault();
+                handleSelectedFiles(images);
+                setStatus('Imagen pegada desde portapapeles.', 'success');
+                return;
+            }
+
+            if (!dataTransferContainsImage(clipboardData)) return;
+            event.preventDefault();
+            readImagesFromClipboardApi().then(function (fallbackImages) {
+                if (!fallbackImages.length) {
+                    setStatus('No se pudo leer la imagen del portapapeles.', 'warning');
+                    return;
+                }
+                handleSelectedFiles(fallbackImages);
+                setStatus('Imagen pegada desde portapapeles.', 'success');
+            });
+        }
+
+        textarea.addEventListener('paste', function (event) {
+            consumePastedImages(event);
+        });
+
+        textarea.addEventListener('dragover', function (event) {
+            var draggedImages = extractImageFilesFromDataTransfer(event.dataTransfer);
+            if (!draggedImages.length) return;
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        });
+
+        textarea.addEventListener('drop', function (event) {
+            if (state.isLoading) return;
+            var droppedImages = extractImageFilesFromDataTransfer(event.dataTransfer);
+            if (!droppedImages.length) return;
+            event.preventDefault();
+            handleSelectedFiles(droppedImages);
+            setStatus('Imagen adjuntada desde arrastre.', 'success');
+        });
 
         var fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.className = 'assistant-file-input';
-        fileInput.accept = 'image/png,image/jpeg';
+        fileInput.accept = 'image/*';
         fileInput.multiple = true;
         fileInput.addEventListener('change', function () {
             handleSelectedFiles(fileInput.files);
@@ -424,6 +474,15 @@
         refs.attachmentsBox = attachmentsBox;
         refs.attachmentsCounter = attachmentsCounter;
         refs.clearContextBtn = clearContextBtn;
+
+        document.addEventListener('paste', function (event) {
+            if (!state.isOpen) return;
+            var target = event && event.target;
+            var insidePanel = !!(target && target.closest && target.closest('.sma-assistant-panel'));
+            if (!insidePanel) return;
+            if (refs.textarea && target === refs.textarea) return;
+            consumePastedImages(event);
+        });
 
         setOpen(state.isOpen);
         renderMessages();
@@ -685,14 +744,152 @@
     function normalizeImageType(type) {
         var normalized = String(type || '').toLowerCase();
         if (normalized === 'image/jpg') normalized = 'image/jpeg';
+        if (normalized === 'image/x-png') normalized = 'image/png';
+        if (normalized === 'image/x-jpeg') normalized = 'image/jpeg';
         return normalized;
     }
 
-    function compressImage(file) {
-        var inputType = normalizeImageType(file.type);
+    function isImageType(type) {
+        return normalizeImageType(type).indexOf('image/') === 0;
+    }
 
-        if (state.allowedImageTypes.indexOf(inputType) < 0) {
-            return Promise.reject(new Error((file.name || 'archivo') + ': formato no permitido (solo PNG o JPEG).'));
+    function inferImageType(file) {
+        var byType = normalizeImageType(file && file.type);
+        if (isImageType(byType)) return byType;
+
+        var name = String(file && file.name || '').toLowerCase();
+        if (name.endsWith('.png')) return 'image/png';
+        if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+        if (name.endsWith('.webp')) return 'image/webp';
+        if (name.endsWith('.gif')) return 'image/gif';
+        if (name.endsWith('.bmp')) return 'image/bmp';
+        if (name.endsWith('.heic')) return 'image/heic';
+        if (name.endsWith('.heif')) return 'image/heif';
+        if (name.endsWith('.tif') || name.endsWith('.tiff')) return 'image/tiff';
+        return '';
+    }
+
+    function isAllowedImageFile(file) {
+        if (!file) return false;
+        var type = inferImageType(file);
+        if (!type) return false;
+        return state.allowedImageTypes.indexOf(type) >= 0 || isImageType(type);
+    }
+
+    function dataTransferContainsImage(dataTransfer) {
+        if (!dataTransfer) return false;
+
+        if (dataTransfer.items && dataTransfer.items.length) {
+            for (var i = 0; i < dataTransfer.items.length; i += 1) {
+                var item = dataTransfer.items[i];
+                if (!item) continue;
+                if (item.kind === 'file' && isImageType(item.type)) return true;
+            }
+        }
+
+        if (dataTransfer.files && dataTransfer.files.length) {
+            for (var j = 0; j < dataTransfer.files.length; j += 1) {
+                var file = dataTransfer.files[j];
+                if (!file) continue;
+                if (isImageType(file.type) || isAllowedImageFile(file)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    function extractImageFilesFromDataTransfer(dataTransfer) {
+        if (!dataTransfer) return [];
+
+        var files = [];
+        if (dataTransfer.items && dataTransfer.items.length) {
+            for (var i = 0; i < dataTransfer.items.length; i += 1) {
+                var item = dataTransfer.items[i];
+                if (!item || item.kind !== 'file') continue;
+                var fileFromItem = item.getAsFile ? item.getAsFile() : null;
+                if (!fileFromItem || !isAllowedImageFile(fileFromItem)) continue;
+                files.push(fileFromItem);
+            }
+        }
+
+        if (!files.length && dataTransfer.files && dataTransfer.files.length) {
+            for (var j = 0; j < dataTransfer.files.length; j += 1) {
+                var file = dataTransfer.files[j];
+                if (!file || !isAllowedImageFile(file)) continue;
+                files.push(file);
+            }
+        }
+
+        return files.slice(0, state.maxAttachments);
+    }
+
+    function extensionForImageType(type) {
+        var normalized = normalizeImageType(type);
+        if (normalized === 'image/jpeg') return 'jpg';
+        if (normalized === 'image/png') return 'png';
+        if (normalized === 'image/webp') return 'webp';
+        if (normalized === 'image/gif') return 'gif';
+        if (normalized === 'image/bmp') return 'bmp';
+        if (normalized === 'image/heic') return 'heic';
+        if (normalized === 'image/heif') return 'heif';
+        if (normalized === 'image/tiff') return 'tiff';
+        return 'png';
+    }
+
+    function appendClipboardImageTask(tasks, item, rawType) {
+        var normalizedType = normalizeImageType(rawType);
+        if (!isImageType(normalizedType)) return;
+
+        tasks.push(
+            item.getType(rawType)
+                .then(function (blob) {
+                    if (!blob) return null;
+                    var blobType = normalizeImageType(blob.type) || normalizedType;
+                    var fileName = 'captura-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + extensionForImageType(blobType);
+                    return new File([blob], fileName, { type: blobType || 'image/png' });
+                })
+                .catch(function () { return null; })
+        );
+    }
+
+    function readImagesFromClipboardApi() {
+        if (!navigator.clipboard || typeof navigator.clipboard.read !== 'function') {
+            return Promise.resolve([]);
+        }
+
+        return navigator.clipboard.read()
+            .then(function (items) {
+                if (!items || !items.length) return [];
+                var tasks = [];
+
+                for (var i = 0; i < items.length; i += 1) {
+                    var item = items[i];
+                    if (!item || !Array.isArray(item.types)) continue;
+
+                    for (var j = 0; j < item.types.length; j += 1) {
+                        appendClipboardImageTask(tasks, item, item.types[j]);
+                    }
+                }
+
+                if (!tasks.length) return [];
+
+                return Promise.all(tasks).then(function (results) {
+                    return results
+                        .filter(Boolean)
+                        .filter(isAllowedImageFile)
+                        .slice(0, state.maxAttachments);
+                });
+            })
+            .catch(function () {
+                return [];
+            });
+    }
+
+    function compressImage(file) {
+        var inputType = inferImageType(file);
+
+        if (!isImageType(inputType)) {
+            return Promise.reject(new Error((file.name || 'archivo') + ': no es una imagen válida.'));
         }
 
         return readFileAsDataUrl(file)
