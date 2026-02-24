@@ -43,7 +43,7 @@
 
 ## Fase 6 — Mantenimiento de Pipeline
 - ✅ Primera task: validación automática de enlaces/anchors en pipeline de publicación (`.github/workflows/course-qa-audit.yml` + `scripts/run-qa-audit-bundle.sh` + `scripts/audit-cross-links.py`)
-- ⏳ Siguiente task: revisión visual trimestral de Mermaid/assets en el HTML final
+- ✅ Segunda task: revisión visual trimestral de Mermaid/assets en el HTML final (`00-informe/AUDITORIA-REVISION-VISUAL-TRIMESTRAL-2026Q1.md`)
 
 ## Nota operativa de cierre
 - Bundle QA estable y reproducible: `./scripts/run-qa-audit-bundle.sh`.
