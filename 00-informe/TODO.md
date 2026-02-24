@@ -1,6 +1,6 @@
 # Backlog técnico del repositorio
 
-Actualizado: 2026-02-11.
+Actualizado: 2026-02-24.
 
 ## Alcance de este documento
 
@@ -14,5 +14,5 @@ Este archivo es un backlog de **mantenimiento del repositorio del curso**. No de
 
 ## Mantenimiento interno (no curricular)
 
-- [ ] [Media] Añadir validación automática de enlaces/anchors al pipeline de publicación de `dist/`.
+- [x] [Media] Añadir validación automática de enlaces/anchors al pipeline de publicación de `dist/` (workflow `course-qa-audit.yml` ejecutando `run-qa-audit-bundle.sh` con `audit-cross-links.py`).
 - [ ] [Media] Ejecutar revisión visual trimestral de diagramas Mermaid y assets embebidos en el HTML final.
