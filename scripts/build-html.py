@@ -96,7 +96,6 @@ FILE_ORDER = [
     "02-integracion/01-feature-catalog/02-application.md",
     "02-integracion/01-feature-catalog/03-infrastructure.md",
     "02-integracion/01-feature-catalog/04-interface-swiftui.md",
-    "02-integracion/01-feature-catalog/ADR-002-catalog.md",
     "02-integracion/02-navegacion-eventos.md",
     "02-integracion/03-contratos-features.md",
     "02-integracion/04-infra-real-network.md",
@@ -105,6 +104,7 @@ FILE_ORDER = [
     "02-integracion/07-swiftui-enterprise.md",
     "02-integracion/08-swift-concurrency-enterprise.md",
     "02-integracion/09-app-final-etapa-2.md",
+    "02-integracion/01-feature-catalog/ADR-002-catalog.md",
     "02-integracion/entregables-etapa-2.md",
     "anexos/consolidacion-etapa-2-integracion.md",
     "03-evolucion/00-introduccion.md",
@@ -137,12 +137,12 @@ FILE_ORDER = [
     "05-maestria/08-memory-leaks-y-diagnostico.md",
     "05-maestria/09-migracion-swift6.md",
     "05-maestria/10-debugging-xcode.md",
-    "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
-    "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
-    "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
     "05-maestria/11-entrevista-arquitecto.md",
     "05-maestria/12-arquitectura-adaptativa.md",
     "05-maestria/entregables-etapa-5.md",
+    "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
+    "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
+    "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
     "anexos/calentamiento-etapa-5-maestria.md",
     "anexos/quizzes-autoevaluacion.md",
     "anexos/guia-recuperacion-ios.md",
@@ -411,8 +411,18 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
                 in_list = ""
             level = len(header_match.group(1))
             raw_heading = header_match.group(2).strip()
+
+            explicit_anchor = None
+            explicit_anchor_match = re.match(r"^(.*?)\s*\{#([A-Za-z0-9_-]+)\}\s*$", raw_heading)
+            if explicit_anchor_match:
+                raw_heading = explicit_anchor_match.group(1).strip()
+                explicit_anchor = explicit_anchor_match.group(2).strip().lower()
+
             text = inline_format(raw_heading, file_path, file_id, file_id_by_path)
-            anchor = f"{file_id}-{slugify_heading(raw_heading)}"
+            if explicit_anchor:
+                anchor = f"{file_id}-{explicit_anchor}"
+            else:
+                anchor = f"{file_id}-{slugify_heading(raw_heading)}"
             html += f'<h{level} id="{anchor}">{text}</h{level}>\n'
             i += 1
             continue
@@ -566,35 +576,55 @@ def inline_format(text, current_file_path, current_file_id, file_id_by_path):
 
 
 def build_nav(files_content):
-    """Construye la barra de navegacion con anchors."""
+    """Construye la barra de navegacion con anchors y numeracion estable por etapa."""
     nav = '<nav id="sidebar">\n<h2>Indice</h2>\n<ul>\n'
 
-    sections = {
-        "00-informe": "Informe fundacional",
-        "01-fundamentos": "Etapa 1: Junior",
-        "02-integracion": "Etapa 2: Mid",
-        "03-evolucion": "Etapa 3: Senior",
-        "04-arquitecto": "Etapa 4: Arquitecto",
-        "05-maestria": "Etapa 5: Maestria",
-        "anexos": "Anexos",
+    section_meta = {
+        "00-informe": {"title": "Informe fundacional", "lesson_label": "Documento", "numbered": False},
+        "00-core-mobile": {"title": "ETAPA 0: CORE MOBILE", "lesson_label": "Leccion", "numbered": True},
+        "01-fundamentos": {"title": "ETAPA 1: JUNIOR", "lesson_label": "Leccion", "numbered": True},
+        "02-integracion": {"title": "ETAPA 2: MID", "lesson_label": "Leccion", "numbered": True},
+        "03-evolucion": {"title": "ETAPA 3: SENIOR", "lesson_label": "Leccion", "numbered": True},
+        "04-arquitecto": {"title": "ETAPA 4: ARQUITECTO", "lesson_label": "Leccion", "numbered": True},
+        "05-maestria": {"title": "ETAPA 5: MAESTRIA", "lesson_label": "Leccion", "numbered": True},
+        "anexos": {"title": "Anexos", "lesson_label": "Anexo", "numbered": False},
     }
 
-    current_section = ""
+    current_section_key = ""
+    section_lesson_counter = 0
+
     for filepath, content in files_content:
         section_key = filepath.split("/")[0]
-        section_name = sections.get(section_key, section_key)
+        meta = section_meta.get(
+            section_key,
+            {"title": section_key, "lesson_label": "Leccion", "numbered": False},
+        )
 
-        if section_name != current_section:
-            if current_section:
+        if section_key != current_section_key:
+            if current_section_key:
                 nav += "</ul></li>\n"
-            current_section = section_name
-            nav += f'<li class="nav-section"><strong>{section_name}</strong>\n<ul>\n'
+            current_section_key = section_key
+            section_lesson_counter = 0
+            nav += f'<li class="nav-section"><strong>{meta["title"]}</strong>\n<ul>\n'
 
-        # Extract first h1 or filename
         h1_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
-        title = h1_match.group(1) if h1_match else Path(filepath).stem
+        title = h1_match.group(1).strip() if h1_match else Path(filepath).stem.replace("-", " ").strip()
+
+        section_lesson_counter += 1
+        if meta["numbered"]:
+            nav_title = f"{meta['lesson_label']} {section_lesson_counter}: {title}"
+        else:
+            label_prefix = f"{meta['lesson_label']}: "
+            if title.lower().startswith(label_prefix.lower()):
+                nav_title = title
+            else:
+                nav_title = f"{meta['lesson_label']}: {title}"
+
         file_id = file_id_for_path(filepath)
-        nav += f'  <li><a class="doc-nav-link" data-lesson-path="{filepath}" href="#{file_id}">{title}</a></li>\n'
+        nav += (
+            f'  <li><a class="doc-nav-link" data-lesson-path="{filepath}" '
+            f'href="#{file_id}">{nav_title}</a></li>\n'
+        )
 
     nav += "</ul></li>\n</ul>\n</nav>\n"
     return nav
