@@ -1,5 +1,17 @@
 # Calidad PR-ready
 
+## Modelo mental
+
+Una PR es una propuesta de cambio al sistema de producción. Trátala como un contrato: el autor propone, la evidencia respalda, el reviewer valida. Si la evidencia no convence a alguien que no escribió el código, la PR no está lista.
+
+## Ejemplo en el scaffold
+
+En `ArchitectureKit`, cada cambio en Domain o Data se valida con `swift test` (26 tests) y `./scripts/quality-gates.sh` (cobertura Domain ≥ 85%, Data ≥ 75%). Antes de mergear, el autor verifica que `./scripts/check-dependencies.sh` pasa (no hay imports prohibidos entre módulos). Este flujo se practica en la Etapa 4 (`04-arquitecto/06-quality-gates.md`).
+
+## Cuándo sí / cuándo no
+
+Aplica esta disciplina a toda PR que toque código de producción o tests. No la apliques a cambios puramente documentales (typos en README) ni a spikes exploratorios que se descartarán.
+
 ## Production readiness a nivel Pull Request
 
 Una PR está lista cuando su evidencia supera opinión personal. Eso exige build estable, pruebas relevantes, observabilidad mínima y seguridad básica revisada.
@@ -38,3 +50,6 @@ Mitigación en release:
 
 Regla central: evidence over opinion.
 
+---
+
+**Anterior:** [Variabilidad y evolución sin caos ←](03-variabilidad-y-evolucion.md) · **Siguiente:** [Observabilidad y operación →](05-observabilidad-operacion.md)

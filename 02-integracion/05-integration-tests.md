@@ -1,5 +1,10 @@
 # Integration Tests
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Objetivo de aprendizaje
 
 Al final de esta lección vas a dominar cuándo y cómo escribir tests de integración que realmente aporten valor en arquitectura enterprise: sin convertirlos en E2E lentos, sin duplicar unit tests, y con foco en contratos entre capas.
@@ -26,7 +31,7 @@ Piensa cada capa como un aparato eléctrico y su puerto como un enchufe. El unit
 ```mermaid
 flowchart LR
     U["Unit tests\ncomponente aislado"] --> I["Integration tests\nencaje real entre capas"] --> E["E2E/UI\nflujo completo"]
-```
+```text
 
 La estrategia madura no elimina ninguna capa de la pirámide; define para cada una su misión y su coste.
 
@@ -89,7 +94,7 @@ flowchart TD
     REPO --> HTTP["HTTPClientStub frontera"]
     HTTP --> RESP["Data + status o error"]
     RESP --> ASSERT["Asserts sobre resultado de colaboración"]
-```
+```text
 
 Lo que no hacemos:
 
@@ -125,7 +130,7 @@ final class LoadProductsIntegrationTests: XCTestCase {
         XCTAssertEqual(products[0].id, "1")
     }
 }
-```
+```text
 
 **Explicación línea por línea de este integration test:**
 
@@ -197,7 +202,7 @@ final class CatalogIntegrationTests: XCTestCase {
         return LoadProductsUseCase(repository: repository)
     }
 }
-```
+```text
 
 ---
 
@@ -264,7 +269,7 @@ func test_loadProducts_callsRepository() async throws {
     _ = try await sut.execute()
     XCTAssertTrue(repo.loadCalled)
 }
-```
+```text
 
 Este test es válido como unit de Application, pero no es integración. No detecta fallos de JSON, status, mapping ni traducción de errores.
 
@@ -327,4 +332,6 @@ Si aún falla, reducir el caso hasta reproducir en 10 ejecuciones consecutivas l
 
 Un equipo junior suele confiar demasiado en unit tests y un equipo cansado suele abusar de E2E. Un equipo senior domina el punto medio: integration tests que protegen ensamblaje real con coste controlado. Esa es la habilidad que te prepara para enterprise diario.
 
-**Anterior:** [Infraestructura real ←](04-infra-real-network.md) · **Siguiente:** [Entregables Etapa 2 →](entregables-etapa-2.md)
+---
+
+**Anterior:** [Infraestructura real: URLSessionHTTPClient ←](04-infra-real-network.md) · **Siguiente:** [Composition Root: donde se ensambla todo →](06-composition-root.md)

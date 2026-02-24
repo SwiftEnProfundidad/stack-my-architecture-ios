@@ -1,5 +1,12 @@
 # Entregables — Etapa 2: Integración
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Para qué sirve este documento
 
 Este documento define cómo se cierra de verdad la etapa de integración. No es una lista de archivos para "cumplir"; es una guía para comprobar que el alumno ha pasado de construir features aisladas a diseñar un sistema modular que coopera bien.
@@ -166,7 +173,7 @@ Etapa 2 se considera cerrada cuando pasan todos:
 
 ```mermaid
 flowchart LR
-    L["Límites"] --> C["Contratos"]
+    L["Límites"] ..> C["Contratos"]
     C --> I["Infra"]
     I --> T["Tests"]
     T --> L
@@ -225,5 +232,75 @@ Si aparece uno de estos de forma relevante, la etapa debe reabrirse.
 ## Cierre
 
 Etapa 2 no termina cuando “funciona el catálogo”. Termina cuando el sistema demuestra que puede crecer por features sin degradarse. Ese es el primer gran salto de madurez profesional.
+---
 
-**Anterior:** [Integration Tests ←](05-integration-tests.md) · **Siguiente:** [Etapa 3: Evolución →](../03-evolucion/00-introduccion.md)
+## Si no cumples todos los entregables
+
+La integración es compleja. Muchos developers se atascan aquí. Es normal.
+
+### Paso 1: Diagnóstico común
+
+| Síntoma | Probable causa | Solución rápida |
+|---------|----------------|-----------------|
+| Login no navega a Catalog | Evento no emitido o coordinator no conectado | Revisa [Navegación por eventos](02-navegacion-eventos.md) |
+| Tests de integración lentos | Están tocando red real | Usa `HTTPClientStub` como en la lección |
+| "Cannot find type" entre features | Import directo de otra feature | Usa contratos en `AppContracts`, no importes la feature |
+| Composition Root enorme | Todas las dependencias en un solo método | Divide en `makeLoginDependencies()`, `makeCatalogDependencies()` |
+
+### Paso 2: Plan de recuperación
+
+Orden de prioridad para completar:
+1. **Contratos** (`NavigationEvent`, `AppCoordinator`) - Sin esto no hay integración
+2. **Feature Catalog Domain** - Los modelos básicos
+3. **Navegación funcional** - Login → Catalog debe funcionar
+4. **Tests de integración** - Al menos 1 que valide el flujo completo
+5. **Infra real** - Opcional para cerrar la etapa; puedes usar stubs
+
+### Paso 3: Recursos de ayuda
+
+- **Errores de compilación**: [Guía de Recuperación - Etapa 2](../anexos/guia-recuperacion-ios.md#etapa-2)
+- **Navegación no funciona**: Revisa que el `coordinator` se pase por `environment` o inyección
+- **Tests fallan**: Asegúrate de que los stubs devuelvan `Sendable` types
+
+### Paso 4: Checkpoint alternativo
+
+Si no puedes completar todo, al menos asegúrate de:
+- [ ] Entender qué es un `NavigationEvent` y por qué es mejor que `NavigationLink` directo
+- [ ] Haber escrito 1 test que verifique que Login emite un evento
+- [ ] Saber explicar por qué Domain no importa Infrastructure
+
+Con eso, puedes pasar a Etapa 3 y volver a completar E2 más adelante.
+
+---
+
+## Lo que ya sabes hacer
+
+Aunque no cierres todos los entregables:
+- ✅ Construir una feature completa por capas (Login)
+- ✅ Escribir tests unitarios con TDD
+- ✅ Separar Domain de Infrastructure
+- ✅ Usar Value Objects y casos de uso
+
+**Esto ya es nivel junior-medio.** Muchos developers no dominan esto.
+
+---
+
+## Siguiente etapa
+
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `02-integracion/entregables-etapa-2.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+**Anterior:** [App Final Etapa 2: Login + Catalog Funcionando Juntos ←](09-app-final-etapa-2.md) · **Siguiente:** [Consolidación: Etapa 2 - Integración →](../anexos/consolidacion-etapa-2-integracion.md)

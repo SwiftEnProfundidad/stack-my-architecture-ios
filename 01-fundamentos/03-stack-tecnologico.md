@@ -16,7 +16,7 @@ SwiftUI es el framework declarativo de Apple para construir interfaces de usuari
 Text("Hola mundo")
     .font(.title)
     .foregroundStyle(.blue)
-```
+```text
 
 Y SwiftUI se encarga de crear los elementos nativos necesarios, posicionarlos, y actualizarlos cuando cambia el estado.
 
@@ -61,7 +61,7 @@ func execute(email: String, password: String) async throws -> Session {
     let credentials = try Credentials(email: email, password: password)
     return try await authGateway.authenticate(credentials: credentials)
 }
-```
+```text
 
 Se lee de arriba a abajo: construyo las credenciales, luego espero (`await`) la respuesta del servidor. Si algo falla, lanzo un error (`throws`). Sencillo y legible.
 
@@ -73,7 +73,7 @@ Button("Login") {
         await viewModel.submit()
     }
 }
-```
+```swift
 
 **`actor`** es un tipo de referencia que protege su estado mutable de accesos concurrentes. Solo un hilo puede acceder al estado del actor a la vez. Es la alternativa moderna a los locks y semáforos. En este curso, los usaremos cuando un componente necesite estado mutable compartido entre varios llamantes.
 
@@ -117,7 +117,7 @@ graph LR
 
     style LayerFirst fill:#f8d7da,stroke:#dc3545
     style FeatureFirst fill:#d4edda,stroke:#28a745
-```
+```text
 
 En la organización por capas, trabajar en Login te obliga a abrir 4 carpetas diferentes. En la organización por features, todo lo de Login está junto. **Si quieres borrar una feature, borras una carpeta. Si quieres mover una feature a otro módulo, mueves una carpeta.** Eso no es posible con la organización por capas.
 
@@ -133,7 +133,7 @@ En este curso, el código se organiza por **features**, no por capas. Cada featu
 
 La estructura en el proyecto Xcode se ve así:
 
-```
+```text
 Sources/
 ├── App/
 │   ├── StackMyArchitectureApp.swift
@@ -168,7 +168,7 @@ Sources/
 │       └── Interface/
 └── SharedKernel/
     └── (solo tipos verdaderamente compartidos)
-```
+```text
 
 Fíjate en que `SharedKernel/` está vacío o casi vacío. La regla es que solo vive ahí lo que dos o más features necesitan genuinamente compartir. Si solo lo usa una feature, va dentro de esa feature, aunque parezca "genérico". Esto evita que SharedKernel se convierta en un cajón de sastre donde todo termina acoplado a todo.
 
@@ -212,7 +212,7 @@ Cada feature en nuestro proyecto tiene exactamente cuatro capas:
 
 Las dependencias **siempre** apuntan hacia dentro, hacia el Domain. Nunca al revés.
 
-```
+```text
 Interface ──> Application ──> Domain <── Infrastructure
 ```
 
@@ -308,4 +308,23 @@ Cada pieza tiene su razón de ser. Si quitas una, las demás se debilitan. Por e
 
 ---
 
-**Anterior:** [Metodología TDD: práctica Red-Green-Refactor ←](02-metodologia-tdd-practica.md) · **Siguiente:** [Estructura Feature-First →](04-estructura-feature-first.md)
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/03-stack-tecnologico.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
+
+**Anterior:** [Metodología TDD: práctica Red-Green-Refactor ←](02-metodologia-tdd-practica.md) · **Siguiente:** [Estructura Feature-First: paso a paso en Xcode →](04-estructura-feature-first.md)

@@ -60,13 +60,13 @@ flowchart TD
     LOGIN --> LDOM["Domain"]
     LOGIN --> LAPP["Application"]
     LOGIN --> LINF["Infrastructure"]
-    LOGIN --> LUI["Interface"]
+    LOGIN ..> LUI["Interface"]
 
     CATALOG --> CDOM["Domain"]
     CATALOG --> CAPP["Application"]
     CATALOG --> CINF["Infrastructure"]
-    CATALOG --> CUI["Interface"]
-```
+    CATALOG ..> CUI["Interface"]
+```text
 
 Ownership sugerido por contexto:
 
@@ -106,10 +106,10 @@ Regla canónica Clean por feature:
 
 ```mermaid
 graph LR
-    UI["Interface"] --> APP["Application"]
+    UI["Interface"] ..> APP["Application"]
     APP --> DOM["Domain"]
     INF["Infrastructure"] --> DOM
-```
+```text
 
 Regla cross-feature:
 
@@ -123,13 +123,13 @@ Regla cross-feature:
 ```mermaid
 flowchart TD
     RQ["Requisito"] --> BDD["Especificacion BDD"]
-    BDD --> CT["Contratos Domain/Application"]
+    BDD ..> CT["Contratos Domain/Application"]
     CT --> TDD["TDD core"]
     TDD --> INFRA["Infra + contract tests"]
-    INFRA --> UI["Interface + estado"]
+    INFRA ..> UI["Interface + estado"]
     UI --> ADR["ADR si afecta arquitectura"]
     ADR --> PR["PR + quality gates"]
-```
+```text
 
 Esta secuencia evita construir UI sobre contratos inestables.
 
@@ -159,7 +159,7 @@ No hace falta ADR para micro-cambios locales reversibles.
 - Consecuencias:
 - Trigger de revision:
 - Fecha:
-```
+```text
 
 La parte más olvidada suele ser `Trigger de revision`. Sin trigger, las decisiones se fosilizan.
 
@@ -305,9 +305,6 @@ Trigger para reforzar B con automatización:
 ## Cierre
 
 La arquitectura no se gobierna solo con código. Se gobierna con código + decisiones + lenguaje compartido. Esta guía es el pegamento que convierte un conjunto de features en una plataforma mantenible por equipos reales.
-
-**Anterior:** [Versionado y SPM ←](04-versionado-spm.md) · **Siguiente:** [Quality Gates →](06-quality-gates.md)
-
 ---
 
 ## Cadencia recomendada de mantenimiento de guía
@@ -372,3 +369,30 @@ La guía está sana cuando:
 - los ADRs recientes reflejan cambios reales del repositorio.
 
 Si alguna señal falla, la guía necesita mantenimiento inmediato.
+
+---
+
+## Ejercicio guiado: auditar coherencia guía ↔ código
+
+**Objetivo:** Verificar que la guía de arquitectura del repositorio refleja fielmente el estado actual del scaffold.
+
+**Instrucciones:**
+
+1. Lee la sección de "reglas de dependencia" de esta guía y compárala con `Package.swift`.
+2. Verifica que cada módulo listado en la guía existe como target en `Package.swift`.
+3. Verifica que las direcciones de dependencia descritas coinciden con las declaradas en `dependencies:` de cada target.
+4. Si encuentras una discrepancia (módulo renombrado, dependencia añadida no documentada), documéntala como hallazgo.
+
+**Criterios de éxito:**
+
+- Todos los targets de `Package.swift` aparecen en la guía (o se justifica su omisión).
+- Las direcciones de dependencia de la guía coinciden con el código.
+- Si hay discrepancias, se documentan con archivo y línea exactos.
+
+**Solución razonada:**
+
+Este ejercicio no tiene código nuevo; es una auditoría. La habilidad que entrena es la de mantener documentación viva: si la guía dice "FeatureLoginDomain no depende de InfraHTTP" pero `Package.swift` dice lo contrario, la guía miente y pierde credibilidad. El arquitecto responsable detecta estas divergencias antes de que el equipo las descubra por un bug.
+
+---
+
+**Anterior:** [Versionado y SPM ←](04-versionado-spm.md) · **Siguiente:** [Quality Gates →](06-quality-gates.md)

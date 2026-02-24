@@ -1,18 +1,20 @@
 # SwiftData como ProductStore
 
+> **Nota de nomenclatura:** Esta lección usa nombres genéricos (`ProductStore`, `SwiftDataProductStore`, `ProductEntity`) para explicar el patrón. En el scaffold real, los equivalentes son `CatalogCacheStore`, `SwiftDataCatalogCacheStore` y `CatalogProductEntity`.
+
 ## Objetivo de aprendizaje
 
-Al terminar esta leccion vas a saber implementar persistencia local con SwiftData para el cache del Catalog, sin contaminar Domain ni Application, y con tests deterministas que no dependen de disco real.
+Al terminar esta lección vas a saber implementar persistencia local con SwiftData para el cache del Catalog, sin contaminar Domain ni Application, y con tests deterministas que no dependen de disco real.
 
-En palabras simples: SwiftData es la caja donde guardas los productos para cuando no haya internet. Esta leccion te enseña a construir esa caja bien.
+En palabras simples: SwiftData es la caja donde guardas los productos para cuando no haya internet. Esta lección te enseña a construir esa caja bien.
 
 ---
 
-## Definicion simple
+## Definición simple
 
-SwiftData es el framework de Apple (iOS 17+) para persistencia local. Reemplaza a Core Data con una API mas moderna basada en macros de Swift. En nuestro curso, lo usamos para implementar el protocolo `ProductStore` que definimos en la leccion de caching.
+SwiftData es el framework de Apple (iOS 17+) para persistencia local. Reemplaza a Core Data con una API más moderna basada en macros de Swift. En nuestro curso, lo usamos para implementar el protocolo `ProductStore` que definimos en la lección de caching.
 
-**Donde vive SwiftData en la arquitectura:**
+**Dónde vive SwiftData en la arquitectura:**
 
 ```mermaid
 graph LR
@@ -46,9 +48,9 @@ graph LR
     style APP fill:#cce5ff,stroke:#007bff
     style INFRA fill:#fff3cd,stroke:#ffc107
     style FW fill:#f8d7da,stroke:#dc3545
-```
+```text
 
-**Regla critica:** SwiftData solo aparece en Infrastructure. Domain y Application no importan SwiftData. Si ves `import SwiftData` en Domain, hay un error de arquitectura.
+**Regla crítica:** SwiftData solo aparece en Infrastructure. Domain y Application no importan SwiftData. Si ves `import SwiftData` en Domain, hay un error de arquitectura.
 
 ---
 
@@ -62,20 +64,20 @@ Piensa en el `ProductStore` como una caja en tu casa:
 
 ---
 
-## Cuando SI y cuando NO usar SwiftData
+## Cuándo SÍ y cuándo NO usar SwiftData
 
-### Cuando SI
+### Cuándo SÍ
 
 - Datos estructurados que necesitas persistir entre sesiones de la app.
-- iOS 17+ como target minimo (nuestro caso).
+- iOS 17+ como target mínimo (nuestro caso).
 - Equipo que quiere API moderna sin la complejidad de Core Data.
 
-### Cuando NO
+### Cuándo NO
 
 - Datos simples de key-value (usa `UserDefaults` o `@AppStorage`).
-- Archivos grandes (imagenes, videos) — usa `FileManager`.
+- Archivos grandes (imágenes, videos) — usa `FileManager`.
 - Si necesitas soporte para iOS 16 o inferior — usa Core Data.
-- Si necesitas migraciones muy complejas con transformaciones de datos — Core Data da mas control.
+- Si necesitas migraciones muy complejas con transformaciones de datos — Core Data da más control.
 
 ---
 
@@ -114,12 +116,12 @@ final class ProductEntity {
         self.cachedAt = cachedAt
     }
 }
-```
+```text
 
-**Linea por linea:**
+**Línea por línea:**
 
 - `@Model` — Macro de SwiftData que convierte la clase en un modelo persistible. Equivale a `NSManagedObject` de Core Data pero sin el boilerplate.
-- `@Attribute(.unique) var productId` — El id es unico. Si guardas un producto con el mismo id, SwiftData actualiza el existente en vez de crear un duplicado.
+- `@Attribute(.unique) var productId` — El id es único. Si guardas un producto con el mismo id, SwiftData actualiza el existente en vez de crear un duplicado.
 - `var priceAmount: Decimal` / `var priceCurrency: String` — No usamos `Price` de Domain directamente. SwiftData necesita tipos primitivos. El mapper convierte entre `ProductEntity` y `Product`.
 - `var imageURLString: String` — Guardamos la URL como String porque SwiftData no persiste `URL` directamente.
 - `var cachedAt: Date` — La fecha en que se guardo. Esto es clave para el TTL.
@@ -164,17 +166,17 @@ struct ProductEntityMapper {
         )
     }
 }
-```
+```text
 
-**Linea por linea:**
+**Línea por línea:**
 
 - `toDomain` — Convierte una entidad de SwiftData a un `Product` de Domain. Valida que la URL sea correcta (igual que el `ProductMapper` de Infrastructure remota).
 - `toEntity` — Convierte un `Product` de Domain a una entidad de SwiftData. Descompone `Price` en sus campos primitivos y `URL` en String.
-- `cachedAt` — El timestamp se pasa como parametro porque lo decide el `CachedProductRepository`, no el mapper.
+- `cachedAt` — El timestamp se pasa como parámetro porque lo decide el `CachedProductRepository`, no el mapper.
 
 ---
 
-## La implementacion: SwiftDataProductStore
+## La implementación: SwiftDataProductStore
 
 ```swift
 // StackMyArchitecture/Features/Catalog/Infrastructure/Store/SwiftDataProductStore.swift
@@ -221,16 +223,16 @@ final class SwiftDataProductStore: ProductStore, @unchecked Sendable {
         try context.save()
     }
 }
-```
+```text
 
-**Linea por linea:**
+**Línea por línea:**
 
 - `@unchecked Sendable` — `ModelContainer` es thread-safe internamente, pero el compilador no lo sabe. Marcamos `@unchecked Sendable` con esta justificacion documentada.
-- `ModelContext(container)` — Creamos un contexto nuevo para cada operacion. Esto es seguro porque `ModelContext` es ligero y `ModelContainer` maneja la concurrencia internamente.
+- `ModelContext(container)` — Creamos un contexto nuevo para cada operación. Esto es seguro porque `ModelContext` es ligero y `ModelContainer` maneja la concurrencia internamente.
 - `FetchDescriptor<ProductEntity>` — Le dice a SwiftData que queremos todos los `ProductEntity`, ordenados por id.
 - `guard !entities.isEmpty else { return nil }` — Si no hay nada guardado, devolvemos `nil`. El `CachedProductRepository` interpreta `nil` como "no hay cache".
-- `entities.map(\.cachedAt).min()` — Usamos el timestamp mas antiguo como referencia. Si un producto se guardo hace 5 minutos y otro hace 3, usamos 5 (el mas conservador para el TTL).
-- `try context.delete(model: ProductEntity.self)` — Estrategia "replace all": borramos todo y guardamos lo nuevo. Es simple y correcto para un catalogo completo. Si tuvieramos paginacion, usariamos una estrategia de merge.
+- `entities.map(\.cachedAt).min()` — Usamos el timestamp más antiguo como referencia. Si un producto se guardo hace 5 minutos y otro hace 3, usamos 5 (el más conservador para el TTL).
+- `try context.delete(model: ProductEntity.self)` — Estrategia "replace all": borramos todo y guardamos lo nuevo. Es simple y correcto para un catálogo completo. Si tuvieramos paginacion, usariamos una estrategia de merge.
 - `context.insert(entity)` + `context.save()` — Insertamos cada entidad y guardamos los cambios en disco.
 
 ---
@@ -278,9 +280,9 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```
+```text
 
-**Punto critico:** Comparado con el Composition Root de Etapa 2, lo unico que cambia es el paso 4: insertamos `CachedProductRepository` como decorador entre el remoto y el UseCase. **El UseCase, el ViewModel y la View no cambian.** Eso demuestra que la arquitectura por capas funciona: puedes añadir cache sin tocar Domain, Application ni Interface.
+**Punto crítico:** Comparado con el Composition Root de Etapa 2, lo único que cambia es el paso 4: insertamos `CachedProductRepository` como decorador entre el remoto y el UseCase. **El UseCase, el ViewModel y la View no cambian.** Eso demuestra que la arquitectura por capas funciona: puedes añadir cache sin tocar Domain, Application ni Interface.
 
 ---
 
@@ -289,11 +291,11 @@ extension CompositionRoot {
 | Aspecto | SwiftData | Core Data |
 |---|---|---|
 | API | Macros Swift modernas (`@Model`) | XML model + `NSManagedObject` subclasses |
-| Configuracion | `ModelContainer` en 1 linea | `NSPersistentContainer` + `.xcdatamodeld` |
+| Configuración | `ModelContainer` en 1 linea | `NSPersistentContainer` + `.xcdatamodeld` |
 | Migraciones | Automaticas para cambios simples | Manuales con `NSMigrationManager` para cambios complejos |
 | Control fino | Limitado (Apple decide mucho) | Total (predicados, fetch limits, batch operations) |
 | Performance con datasets grandes | Buena para uso normal | Mejor para millones de registros |
-| iOS minimo | 17+ | 11+ |
+| iOS mínimo | 17+ | 11+ |
 | Curva de aprendizaje | Baja | Media-alta |
 
 **Cuando elegir Core Data sobre SwiftData:**
@@ -310,7 +312,7 @@ extension CompositionRoot {
 - Quieres simplicidad y rapidez de desarrollo.
 - Las migraciones automaticas cubren tus necesidades.
 
-En este curso elegimos SwiftData porque nuestro target es iOS 17+ y el catalogo de productos no requiere las capacidades avanzadas de Core Data.
+En este curso elegimos SwiftData porque nuestro target es iOS 17+ y el catálogo de productos no requiere las capacidades avanzadas de Core Data.
 
 ---
 
@@ -392,33 +394,33 @@ final class SwiftDataProductStoreTests: XCTestCase {
         XCTAssertEqual(loaded?.timestamp, timestamp)
     }
 }
-```
+```text
 
 **Explicacion de cada test:**
 
 - **`test_load_onEmptyStore_returnsNil`** — Verifica que un store vacio devuelve `nil`, no un array vacio ni un crash. El `CachedProductRepository` interpreta `nil` como "no hay cache disponible".
 
-- **`test_saveAndLoad_roundTripsProducts`** — El test mas importante: guarda 2 productos, los carga, y verifica que son identicos (id, nombre, precio con precision Decimal, URL). Si el mapper tiene un bug (por ejemplo, pierde precision en el precio), este test falla.
+- **`test_saveAndLoad_roundTripsProducts`** — El test más importante: guarda 2 productos, los carga, y verifica que son identicos (id, nombre, precio con precisión Decimal, URL). Si el mapper tiene un bug (por ejemplo, pierde precisión en el precio), este test falla.
 
 - **`test_save_replacesExistingProducts`** — Verifica la estrategia "replace all": al guardar productos nuevos, los antiguos desaparecen. Si el store hiciera append en vez de replace, este test fallaria mostrando 2 productos en vez de 1.
 
-- **`test_load_preservesTimestamp`** — Verifica que el timestamp se guarda y se recupera correctamente. El TTL depende de este timestamp, asi que si se corrompe, todo el sistema de cache falla.
+- **`test_load_preservesTimestamp`** — Verifica que el timestamp se guarda y se recupera correctamente. El TTL depende de este timestamp, así que si se corrompe, todo el sistema de cache falla.
 
-**`ModelConfiguration(isStoredInMemoryOnly: true)`** — Clave para tests: el container vive solo en RAM. No toca disco, no deja basura entre tests, y es rapido. Cada test crea su propio container aislado.
+**`ModelConfiguration(isStoredInMemoryOnly: true)`** — Clave para tests: el container vive solo en RAM. No toca disco, no deja basura entre tests, y es rápido. Cada test crea su propio container aislado.
 
 ---
 
-## ADR corto de la leccion
+## ADR corto de la lección
 
 ```markdown
-## ADR-003B: SwiftData como implementacion de ProductStore
+## ADR-003B: SwiftData como implementación de ProductStore
 - Estado: Aprobado
 - Contexto: necesidad de persistencia local para cache de Catalog en iOS 17+
-- Decision: usar SwiftData con ModelContainer in-memory para tests y on-disk para produccion
+- Decisión: usar SwiftData con ModelContainer in-memory para tests y on-disk para producción
 - Alternativa rechazada: Core Data (mayor complejidad sin beneficio para nuestro volumen de datos)
 - Consecuencias: API simple, migraciones automaticas, menor boilerplate; si necesitamos soporte iOS < 17 o migraciones complejas, reevaluamos
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 
@@ -435,6 +437,52 @@ final class SwiftDataProductStoreTests: XCTestCase {
 
 ## Cierre
 
-SwiftData es una herramienta, no una arquitectura. Lo que importa no es que uses SwiftData o Core Data, sino que la persistencia viva detras de un protocolo (`ProductStore`) que el resto del sistema no necesita conocer. Si mañana Apple lanza "SwiftData 2" o decides migrar a SQLite directo, solo cambias un archivo en Infrastructure. El test de cache que escribimos antes sigue pasando porque no sabe que SwiftData existe.
+SwiftData es una herramienta, no una arquitectura. Lo que importa no es que uses SwiftData o Core Data, sino que la persistencia viva detrás de un protocolo (`ProductStore`) que el resto del sistema no necesita conocer. Si mañana Apple lanza "SwiftData 2" o decides migrar a SQLite directo, solo cambias un archivo en Infrastructure. El test de cache que escribimos antes sigue pasando porque no sabe que SwiftData existe.
 
-**Anterior:** [Trade-offs y riesgos ←](05-trade-offs.md) · **Siguiente:** [Entregables Etapa 3 →](entregables-etapa-3.md)
+---
+
+## Ejercicio guiado: round-trip test de SwiftData store
+
+**Objetivo:** Verificar que `SwiftDataCatalogCacheStore` persiste y recupera productos correctamente, incluyendo campos `Decimal` y timestamp.
+
+**Instrucciones:**
+
+1. Abre `Tests/FeatureCatalogPersistenceSwiftDataTests/`.
+2. Escribe (o revisa) un test que haga round-trip completo:
+   - Crea productos con precio `Decimal(19.99)` y nombre con caracteres especiales (ej. `"Café ☕"`).
+   - Guarda con `save(products, timestamp: now)`.
+   - Recupera con `load()`.
+   - Verifica que nombre, precio y timestamp coinciden exactamente.
+3. Escribe un segundo test que verifique `clear()`:
+   - Guarda productos, llama `clear()`, verifica que `load()` devuelve `nil`.
+
+**Criterios de éxito:**
+
+- Ambos tests pasan con `swift test --filter SwiftDataCatalog`.
+- Los tests usan `isStoredInMemoryOnly: true` para no contaminar disco.
+- El precio `Decimal` se preserva sin pérdida de precisión (no `Double`).
+
+**Solución razonada:**
+
+```swift
+func test_roundTrip_preservesDecimalAndSpecialChars() async throws {
+    let store = SwiftDataCatalogCacheStore(inMemory: true)
+    let products = [Product(name: "Café ☕", price: Decimal(19.99))]
+    let now = Date()
+
+    try await store.save(products, timestamp: now)
+    let result = try await store.load()
+
+    XCTAssertNotNil(result)
+    XCTAssertEqual(result?.products.first?.name, "Café ☕")
+    XCTAssertEqual(result?.products.first?.price, Decimal(19.99))
+    XCTAssertEqual(result?.timestamp.timeIntervalSince1970,
+                   now.timeIntervalSince1970, accuracy: 1.0)
+}
+```
+
+El test verifica que SwiftData no corrompe `Decimal` al persistir (un error común si se usa `Double` internamente). Si el mapper `ProductEntity → Product` pierde precisión, este test lo detecta.
+
+---
+
+**Anterior:** [Trade-offs y riesgos ←](05-trade-offs.md) · **Siguiente:** [Backend Firebase: integración enterprise →](07-backend-firebase.md)

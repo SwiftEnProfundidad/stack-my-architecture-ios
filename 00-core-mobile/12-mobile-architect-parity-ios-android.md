@@ -72,3 +72,7 @@ Mi ejecución más profunda está en iOS, donde resuelvo flujos complejos y deci
 La señal profesional de este perfil es clara: profundidad de ejecución en iOS con paridad arquitectónica en Android. Esta combinación no diluye expertise ni exagera alcance; refuerza responsabilidad real sobre coherencia, operabilidad y evolución del sistema móvil.
 
 Bajo este marco, el valor del Mobile Architect no se mide por cantidad de código en dos plataformas, sino por calidad de decisiones, disciplina de evidencia y capacidad de sostener resultados técnicos bajo escrutinio.
+
+---
+
+**Anterior:** [Crosswalk iOS ↔ Android ←](11-crosswalk-ios-android.md) · **Siguiente:** [Introducción al curso →](../01-fundamentos/00-introduccion.md)

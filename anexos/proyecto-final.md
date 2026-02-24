@@ -86,7 +86,7 @@ Estos son los escenarios BDD que tu app debe cumplir:
 
 ### Estructura de carpetas (Feature-First)
 
-```
+```text
 BookShelf/
 ├── App/
 │   ├── BookShelfApp.swift
@@ -137,13 +137,13 @@ BookShelfTests/
 └── App/
     └── Navigation/
         └── AppCoordinatorTests.swift
-```
+```swift
 
 ### Modelo de dominio
 
 Tu struct `Book` debe tener:
 
-```
+```text
 Book
 ├── id: String
 ├── title: String
@@ -151,7 +151,7 @@ Book
 ├── price: Price        (reutiliza el Price del curso o crea uno nuevo)
 ├── coverURL: URL
 └── description: String
-```
+```swift
 
 **Pregunta para ti:** Que protocolos necesita conformar `Book`? Piensa en: tests (necesitas `==`), navegacion (necesitas NavigationPath), concurrencia (es async). Escribe los protocolos ANTES de mirar la respuesta.
 
@@ -173,7 +173,7 @@ enum BooksError: Error, Equatable, Sendable {
     case connectivity
     case invalidData
 }
-```
+```text
 
 **Pregunta para ti:** Por que `Error`, `Equatable` y `Sendable`? Escribe tu respuesta antes de mirar.
 
@@ -397,3 +397,7 @@ Si tu puntuacion es menor de 35, no te frustres. Vuelve a las lecciones que fall
 **El siguiente paso:** Intenta conectar la app a una API real (puedes usar una API publica de libros como Open Library). Eso te obligara a adaptar el DTO al formato real de la API, que es exactamente lo que haras en tu primer trabajo como desarrollador iOS.
 
 Buena suerte. Ya tienes las herramientas. Ahora, a construir.
+
+---
+
+**Anterior:** [Glosario ←](glosario.md)

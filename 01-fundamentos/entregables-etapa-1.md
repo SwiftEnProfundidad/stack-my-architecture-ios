@@ -42,7 +42,7 @@
 
 ## Diagrama de dependencias esperado
 
-```
+```text
 LoginView
   └──> LoginViewModel (@Observable, @MainActor)
          └──> LoginUseCase (struct, Sendable)
@@ -55,5 +55,47 @@ LoginView
 ```
 
 ---
+---
 
-**Siguiente etapa:** [Etapa 2 — Integración y disciplina →](../02-integracion/00-introduccion.md)
+## Si no cumples todos los entregables
+
+No pasa nada. Esto es normal. Aquí tienes un plan de recuperación:
+
+### Paso 1: Identifica qué te falta
+Revisa la checklist de arriba y marca en rojo lo que no tienes.
+
+### Paso 2: Prioriza
+No intentes hacer todo a la vez. Orden de prioridad:
+1. **Value Objects** (`Email`, `Password`) - Son la base de todo
+2. **LoginUseCase con TDD** - El núcleo de la lógica
+3. **LoginViewModel** - La conexión con la UI
+4. **LoginView** - Lo que el usuario ve
+5. **Tests** - La seguridad de que funciona
+
+### Paso 3: Recursos de ayuda
+- **Errores de compilación**: Revisa [Guía de Recuperación - Etapa 1](../anexos/guia-recuperacion-ios.md#etapa-1)
+- **No entiendes un concepto**: Vuelve a la lección correspondiente, no sigas adelante
+- **Tests que no pasan**: Lee el error cuidadosamente; los tests son tu mejor debugger
+
+### Paso 4: Pide ayuda
+Si después de 2 intentos sigues atascado:
+- Describe qué error ves (copia el mensaje exacto)
+- Explica qué has intentado
+- Pregunta en el foro/Discord del curso
+
+---
+
+## Lo que ya sabes hacer (celebración)
+
+Aunque no cumplas todos los entregables, seguro que has aprendido algo:
+
+- ✅ Escribir código Swift básico
+- ✅ Crear un proyecto Xcode
+- ✅ Estructurar carpetas Feature-First
+- ✅ Algún concepto de Value Objects o TDD
+
+**Esto ya es más de lo que sabías antes de empezar.** Cada línea de código cuenta.
+
+---
+
+**Anterior:** [Conectando la App: Tu Primera App Funcional ←](06-conectando-la-app.md) · **Siguiente:** [Etapa 2: Integración — Dos features que trabajan juntas s... →](../02-integracion/00-introduccion.md)

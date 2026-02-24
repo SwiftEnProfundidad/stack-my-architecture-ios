@@ -23,45 +23,45 @@ La diferencia entre esos dos escenarios no es talento ni años de experiencia. E
 Antes de empezar, mira dónde estás y a dónde vas. Este diagrama muestra el camino completo del curso. Cada etapa construye sobre la anterior, sin saltos:
 
 ```mermaid
-graph LR
+graph TD
     subgraph E1["Etapa 1: Junior"]
-        direction TB
+        direction LR
         E1A["Principios de ingeniería"]
-        E1B["BDD + TDD"]
-        E1C["Clean Architecture"]
+        E1B["BDD (escenarios)"]
+        E1C["TDD (Red-Green-Refactor)"]
         E1D["Feature Login completa"]
     end
 
     subgraph E2["Etapa 2: Mid"]
-        direction TB
-        E2A["Segunda feature: Catálogo"]
-        E2B["Integración entre features"]
-        E2C["Navegación desacoplada"]
-        E2D["Composition Root"]
+        direction LR
+        E2A["Feature Catalog + contratos"]
+        E2B["Navegación desacoplada"]
+        E2C["Infra real + integration tests"]
+        E2D["Swift Concurrency aplicada"]
     end
 
     subgraph E3["Etapa 3: Senior"]
-        direction TB
-        E3A["Cache y offline"]
-        E3B["Decorator pattern"]
+        direction LR
+        E3A["Cache/offline + consistencia"]
+        E3B["SwiftData como adaptador"]
         E3C["Observabilidad"]
-        E3D["Quality gates"]
+        E3D["Tests avanzados + trade-offs"]
     end
 
     subgraph E4["Etapa 4: Arquitecto"]
-        direction TB
+        direction LR
         E4A["Bounded contexts"]
-        E4B["Gobernanza técnica"]
-        E4C["ADRs de sistema"]
-        E4D["Multi-módulo"]
+        E4B["Deep links como plataforma"]
+        E4C["Reglas de dependencia + quality gates"]
+        E4D["SPM + ADRs de gobernanza"]
     end
 
     subgraph E5["Etapa 5: Maestria"]
-        direction TB
-        E5A["Swift Concurrency"]
-        E5B["SwiftUI performance"]
-        E5C["Composición avanzada"]
-        E5D["Migración Swift 6"]
+        direction LR
+        E5A["Isolation domains + actors"]
+        E5B["Testing concurrente"]
+        E5C["SwiftUI estado/performance"]
+        E5D["Composición, diagnóstico y evolución"]
     end
 
     E1 --> E2 --> E3 --> E4 --> E5
@@ -71,7 +71,7 @@ graph LR
     style E3 fill:#fff3cd,stroke:#ffc107
     style E4 fill:#ffe0cc,stroke:#fd7e14
     style E5 fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 **Estás aquí: Etapa 1.** Todo lo que aprendas aquí es la base de todo lo demás. Si interiorizas bien los fundamentos, las etapas posteriores encajarán naturalmente. Si los saltas o los lees por encima, cada etapa siguiente será más confusa.
 
@@ -154,7 +154,7 @@ graph TD
     style INFRASTRUCTURE fill:#fff3cd,stroke:#ffc107
     style INTERFACE fill:#ffe0cc,stroke:#fd7e14
     style ADR fill:#f8f9fa,stroke:#6c757d
-```
+```text
 
 Cada caja del diagrama es algo que vas a construir con tus manos. Cuando termines, entenderás no solo qué hace cada pieza, sino **por qué existe** y **qué pasaría si no existiera**. Eso es lo que separa a alguien que copia un tutorial de alguien que entiende la arquitectura.
 
@@ -227,24 +227,26 @@ graph LR
     A["Rectangulo: una ACCION o COMPONENTE<br/>Ejemplo: LoginUseCase, CatalogView"]
     B{"Rombo: una DECISION<br/>Ejemplo: Es valido el email?"}
     C(("Circulo: un punto de INICIO o FIN"))
-```
+```text
 
-- **Rectangulo** (las cajas con esquinas rectas `["texto"]`): representan **componentes**, **acciones** o **datos**. Es lo mas comun. Cuando ves una caja rectangular que dice "LoginUseCase", significa que hay un componente llamado LoginUseCase que hace algo.
-- **Rombo** (las cajas con forma de diamante `{"texto"}`): representan **decisiones** o **preguntas**. Siempre tienen dos o mas flechas saliendo de ellas, una por cada respuesta posible. Por ejemplo: "Usuario autenticado?" con flechas "SI" y "NO".
-- **Circulo** (las formas redondas `(("texto"))` o `(( ))`): representan **puntos de inicio o fin** de un flujo. Es como decir "aqui empieza" o "aqui termina".
+- **Rectángulo**: representa **componentes**, **acciones** o **datos**. Es la forma más común. Cuando ves una caja rectangular que dice “LoginUseCase”, significa que hay un componente con esa responsabilidad.
+- **Rombo**: representa **decisiones** o **preguntas**. Siempre tiene dos o más flechas saliendo, una por cada resultado posible. Por ejemplo: “¿Usuario autenticado?” con salida “sí” y salida “no”.
+- **Círculo**: representa **inicio** o **fin** de flujo. Es la forma de marcar “aquí empieza” o “aquí termina”.
 
 ### Las flechas: qué significa cada conexión
 
-```mermaid
-graph LR
-    A["Componente A"] --> B["Componente B"]
-    C["Componente C"] -.-> D["Componente D"]
-    E["Componente E"] -->|"con mensaje"| F["Componente F"]
-```
+![Leyenda de flechas para diagramas (genérica)](../assets/leyenda-flechas-generica.svg)
 
-- **Flecha solida** (`-->`): significa que A **depende de** B, o que A **llama a** B, o que A **se conecta con** B. Es una relacion directa y real que existe en el codigo.
-- **Flecha punteada** (`-.->`): significa una relacion **indirecta**, **prohibida**, o **futura**. Cuando ves una flecha punteada que dice "PROHIBIDO", quiere decir que esa conexion NO debe existir en el codigo. Cuando dice "futuro", significa que todavia no existe pero existira mas adelante.
-- **Flecha con texto** (`-->|"texto"|`): la etiqueta en la flecha te dice **que tipo de relacion** es. Por ejemplo, `-->|"protocolo"|` significa que la conexion es a traves de un protocolo. `-->|"SI"|` y `-->|"NO"|` te dicen que camino se sigue segun la respuesta a una decision.
+Aquí fijamos una convención única para todo el curso. No es decoración: sirve para que, cuando veas un diagrama en cualquier etapa, entiendas rápidamente si una relación es de uso en runtime, de ensamblado o de contrato.
+
+- **Línea continua + punta cerrada** (notación Mermaid: flecha continua): **dependencia directa en runtime**. A invoca o usa B en el flujo principal.
+- **Línea discontinua + punta cerrada** (notación Mermaid: flecha discontinua): **wiring/configuración**. Se usa para composición, inicialización o conexión de piezas, no para lógica de dominio.
+- **Línea discontinua + punta abierta** (referencia visual de la imagen): **contrato/abstracción**. Implementa o depende de interfaz/protocolo.
+- **Línea continua + punta abierta** (referencia visual de la imagen): **salida/evento**. Propagación o notificación desacoplada (callbacks, streams, delegación, bus de eventos).
+
+Cuando el diagrama se escriba en Mermaid, la convención se mantiene con **línea + etiqueta textual** para no perder semántica (por ejemplo “contrato/protocolo” o “evento”), aunque la punta visual no siempre tenga toda la granularidad de una lámina estática.
+
+Regla práctica: antes de dibujar, decide si la flecha representa **uso directo**, **wiring**, **contrato** o **evento**. Si no puedes decirlo en una frase, el diagrama está mezclando conceptos.
 
 ### Las cajas grandes (subgraphs): agrupaciones
 
@@ -254,7 +256,7 @@ graph TD
         A["Elemento 1"]
         B["Elemento 2"]
     end
-```
+```text
 
 Los **subgraphs** (cajas grandes que contienen otras cajas) representan **agrupaciones logicas**. Todo lo que esta dentro de una caja grande pertenece al mismo concepto. Por ejemplo:
 
@@ -266,12 +268,12 @@ Los **subgraphs** (cajas grandes que contienen otras cajas) representan **agrupa
 
 En los diagramas de este curso usamos colores de forma consistente:
 
-- **Verde** (`fill:#d4edda`): algo **positivo**, **correcto**, o la capa **Domain** (la mas interna y pura).
-- **Azul** (`fill:#cce5ff`): la capa **Application**, o algo **intermedio/neutro**.
-- **Amarillo** (`fill:#fff3cd`): la capa **Infrastructure**, o algo que requiere **atencion/precaucion**.
-- **Naranja** (`fill:#ffe0cc`): la capa **Interface**, o algo que esta en la **periferia**.
-- **Rojo** (`fill:#f8d7da`): algo **negativo**, **incorrecto**, o un **error**.
-- **Gris** (`fill:#f8f9fa`): algo **neutro**, de **referencia**, o **documentacion**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#d4edda;border:1px solid #2d5a3a;vertical-align:middle;margin-right:6px;"></span> **Verde**: algo **positivo**, **correcto**, o la capa **Domain** (la mas interna y pura).
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#cce5ff;border:1px solid #2f5f8a;vertical-align:middle;margin-right:6px;"></span> **Azul**: la capa **Application**, o algo **intermedio/neutro**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fff3cd;border:1px solid #8a6b1f;vertical-align:middle;margin-right:6px;"></span> **Amarillo**: la capa **Infrastructure**, o algo que requiere **atencion/precaucion**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ffe0cc;border:1px solid #8b5e3c;vertical-align:middle;margin-right:6px;"></span> **Naranja**: la capa **Interface**, o algo que esta en la **periferia**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f8d7da;border:1px solid #8a434a;vertical-align:middle;margin-right:6px;"></span> **Rojo**: algo **negativo**, **incorrecto**, o un **error**.
+- <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f8f9fa;border:1px solid #6e7378;vertical-align:middle;margin-right:6px;"></span> **Gris**: algo **neutro**, de **referencia**, o **documentacion**.
 
 ### Los diagramas de secuencia: quién habla con quién
 
@@ -284,7 +286,7 @@ sequenceDiagram
 
     A->>B: llama a metodo
     B-->>A: devuelve resultado
-```
+```text
 
 Leelos de **arriba hacia abajo**: el tiempo avanza hacia abajo. Cada linea horizontal es un **mensaje** (una llamada a un metodo o una respuesta). Las flechas solidas (`->>`) son llamadas. Las flechas punteadas (`-->>`) son respuestas. Los recuadros grises (`Note over`) son comentarios que explican lo que esta pasando en ese momento.
 
@@ -318,10 +320,17 @@ flowchart TD
 
 ## Cómo avanzar por el curso
 
-El curso está dividido en cuatro etapas que progresan en complejidad. La Etapa 1 (Junior) establece los fundamentos. La Etapa 2 (Mid) añade una segunda feature y la integración entre ambas. La Etapa 3 (Senior) introduce problemas reales de producción como caching, offline y observabilidad. La Etapa 4 (Arquitecto) escala el sistema a nivel de plataforma con gobernanza y quality gates.
+El curso está dividido en cinco etapas que progresan en complejidad sin saltos. La Etapa 1 (Junior) fija fundamentos. La Etapa 2 (Mid) integra features y trae concurrencia a tiempo para soportar red real. La Etapa 3 (Senior) trabaja resiliencia (cache, consistencia y observabilidad). La Etapa 4 (Arquitecto) establece gobernanza de plataforma (contextos, reglas, quality gates, deep links). La Etapa 5 (Maestría) consolida concurrencia avanzada, performance de UI y composición de largo plazo.
 
-**Sigue el orden.** Cada etapa construye sobre la anterior. Si saltas a la Etapa 3 sin haber interiorizado la 1 y la 2, vas a sentir que todo es abstracto y desconectado. Si sigues el orden, cada concepto nuevo encaja naturalmente con lo que ya sabes.
+**Sigue el orden.** Cada etapa construye sobre la anterior. Si saltas directamente a Senior o Arquitecto sin dominar Junior y Mid, lo que verás será una lista de técnicas sueltas. En cambio, si sigues la secuencia, cada técnica aparece justo cuando la necesitas para resolver un problema real.
 
-**No leas por encima.** Lee cada lección completa, escribe el código en Xcode (no solo lo leas), ejecuta los tests, y asegúrate de que entiendes por qué cada pieza está donde está. Si algo no te queda claro, vuelve a leerlo. El curso está escrito para que no necesites buscar en otro sitio.
+**No leas por encima.** Lee cada lección completa, escribe el código en Xcode (no solo lo mires), ejecuta tests, y verbaliza con tus palabras por qué cada decisión está tomada así. Si algo no te queda claro, detente ahí: el progreso rápido con ambigüedad termina saliendo caro en las etapas siguientes.
 
-**Siguiente lección:** [Principios de ingeniería →](01-principios-ingenieria.md)
+---
+
+## Entregables de cierre de etapa
+
+- Revisa y completa los entregables oficiales aqui: [entregables-etapa-1.md](../01-fundamentos/entregables-etapa-1.md).
+
+
+**Anterior:** [1) Purpose of This Document ←](../00-core-mobile/12-mobile-architect-parity-ios-android.md) · **Siguiente:** [Setup: Preparación del entorno →](00-setup.md)

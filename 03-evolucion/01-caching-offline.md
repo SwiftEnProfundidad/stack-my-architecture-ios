@@ -1,5 +1,7 @@
 # Caching y offline
 
+> **Nota de nomenclatura:** Esta lección usa nombres genéricos (`ProductRepository`, `ProductStore`, `CachedProductRepository`) para explicar el patrón. En el scaffold real (`apps/ios/ArchitectureKit`), los equivalentes son `CatalogRepository`, `CatalogCacheStore` y `CachedCatalogRepository`. El patrón es idéntico; los nombres reflejan que el dominio concreto es Catalog.
+
 ## Qué problema resolvemos realmente
 
 Si una app móvil solo funciona con red perfecta, no está lista para producción. El usuario entra al metro, cambia de zona de cobertura, recibe latencia alta o pierde conexión por segundos. En esos momentos, el sistema no debe derrumbarse en "error y reintentar" si tiene datos recientes que todavía aportan valor.
@@ -40,7 +42,7 @@ flowchart TD
     R -->|"No"| CACHE{"Cache válido?"}
     CACHE -->|"Sí"| SHOW_CACHE["Mostrar cache"]
     CACHE -->|"No"| SHOW_ERR["Mostrar error"]
-```
+```text
 
 ---
 
@@ -139,7 +141,7 @@ final class CachedProductRepository: ProductRepository, @unchecked Sendable {
         now().timeIntervalSince(timestamp) < maxAge
     }
 }
-```
+```text
 
 Este código demuestra el patrón central:
 - primero remoto,
@@ -156,7 +158,7 @@ flowchart LR
     CACHED --> STORE["FileProductStore"]
     REMOTE --> HTTP["HTTPClient chain"]
     HTTP --> NET["API"]
-```
+```text
 
 Punto crítico de diseño:
 - el UseCase no cambia al introducir cache.
@@ -199,7 +201,7 @@ struct CachedProducts: Sendable {
     let products: [Product]
     let timestamp: Date
 }
-```
+```text
 
 **Linea por linea:**
 
@@ -227,7 +229,7 @@ private func makeSUT(
         now: now
     )
 }
-```
+```text
 
 **Por que tantos parametros con valores por defecto:** Cada test solo configura lo que le importa. Si un test verifica el TTL, pasa `maxAge` y `now`. Si verifica el happy path, solo pasa `remoteResult`. Los valores por defecto cubren el caso mas comun (exito, sin cache, 5 minutos de TTL, reloj real).
 
@@ -258,7 +260,7 @@ func test_loadAll_onRemoteSuccess_returnsFreshAndSavesToStore() async throws {
     XCTAssertEqual(store.savedProducts, products)
     XCTAssertEqual(store.savedTimestamp, fixedDate)
 }
-```
+```text
 
 **Que verifica:** Cuando el remoto responde con exito, el `CachedProductRepository` hace dos cosas: (1) devuelve los productos frescos, y (2) los guarda en el store para uso futuro. Si alguien borrara la linea `try? await store.save(...)`, el segundo assert fallaria.
 
@@ -283,7 +285,7 @@ func test_loadAll_onRemoteFailureWithValidCache_returnsCached() async throws {
 
     XCTAssertEqual(result, cachedProducts)
 }
-```
+```text
 
 **Que verifica:** Si el remoto falla pero hay cache guardado hace menos de 300 segundos (el TTL), devuelve el cache. El usuario ve productos "un poco viejos" en vez de una pantalla de error. Esto es el **fallback**.
 
@@ -313,7 +315,7 @@ func test_loadAll_onRemoteFailureWithExpiredCache_throwsError() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```
+```text
 
 **Que verifica:** Si el remoto falla Y el cache ha expirado (401 > 300), **no** devuelve datos viejos. Propaga el error. Esto protege al usuario de ver datos que ya no son confiables.
 
@@ -337,7 +339,7 @@ func test_loadAll_onRemoteFailureWithNoCache_throwsError() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```
+```text
 
 **Que verifica:** Si no hay cache guardado (primera vez que se abre la app, o se borro el cache), y el remoto falla, se propaga el error. No hay magia: si no tienes datos ni remotos ni locales, no puedes mostrar nada.
 
@@ -359,7 +361,7 @@ func test_loadAll_cacheExactlyAtTTL_isStillValid() async throws {
     let result = try await sut.loadAll()
     XCTAssertEqual(result, cachedProducts)
 }
-```
+```text
 
 **Que verifica:** Un edge case critico: el cache tiene exactamente la edad del TTL (300s). La decision de diseño es que `< maxAge` es valido, asi que exactamente 300 esta **en el limite**. Si la condicion fuera `<=`, este test pasaria. Si fuera `<`, fallaria. El test documenta explicitamente que decision tomamos.
 
@@ -457,9 +459,6 @@ Corrección:
 ## Siguiente paso
 
 Con cache funcional, toca resolver una pregunta crítica: **cuánta desactualización es aceptable y cuándo invalidar datos**.
-
-**Siguiente:** [Consistencia e invalidación →](02-consistencia.md)
-
 ---
 
 ## Máquina de estados de UI para cache/offline
@@ -475,7 +474,7 @@ stateDiagram-v2
     LoadedFresh --> Loading: refresh manual
     LoadedCached --> Loading: refresh manual
     Error --> Loading: retry
-```
+```text
 
 Esta máquina evita frases ambiguas como “está cargando pero también mostrando error”.
 
@@ -503,7 +502,7 @@ struct CatalogComposer {
         return LoadProductsUseCase(repository: cached)
     }
 }
-```
+```text
 
 Con este patrón puedes reemplazar estrategia de cache sin tocar Domain/Application.
 
@@ -561,3 +560,73 @@ Con esta visión, eliges políticas de cache por impacto total, no por preferenc
 ## Criterio de UX mínimo
 
 Si se sirve cache, la interfaz nunca debe dar impresión de “dato en tiempo real” sin indicador o semántica de frescura adecuada.
+
+---
+
+## Ejercicio guiado: verificar política network-first con TTL
+
+**Objetivo:** Confirmar que `CachedProductRepository` sirve datos de cache cuando la red falla y que respeta el TTL configurado.
+
+**Instrucciones:**
+
+1. Abre `Tests/FeatureCatalogDataIntegrationTests/` en el scaffold.
+2. Localiza los tests de `CachedProductRepository` (o créalos si no existen).
+3. Escribe un test que simule este escenario:
+   - El repositorio remoto devuelve `[Product(name: "Widget", price: 9.99)]`.
+   - Se llama `loadProducts()` → debe devolver los productos remotos y guardarlos en cache.
+   - Se configura el repositorio remoto para lanzar error de conectividad.
+   - Se llama `loadProducts()` de nuevo → debe devolver los productos cacheados.
+4. Escribe un segundo test que verifique TTL:
+   - Guarda productos con timestamp de hace 10 minutos.
+   - Configura TTL a 5 minutos.
+   - Llama `loadProducts()` con red disponible → debe ir a red (cache expirado), no servir cache.
+
+**Criterios de éxito:**
+
+- Ambos tests pasan con `swift test --filter CachedProductRepository`.
+- El `CachedProductRepository` no importa SwiftData ni ningún detalle de persistencia concreto.
+- El test usa stubs/fakes para red y store, no implementaciones reales.
+
+**Solución razonada:**
+
+```swift
+// Test 1: fallback a cache cuando la red falla
+func test_loadProducts_returnsCache_whenRemoteFails() async throws {
+    let remoteProducts = [Product(name: "Widget", price: Decimal(9.99))]
+    let stubRemote = StubProductRemote(result: .success(remoteProducts))
+    let memoryStore = InMemoryProductStore()
+    let sut = CachedProductRepository(remote: stubRemote, store: memoryStore, ttlSeconds: 300)
+
+    // Primera carga: red OK → guarda en cache
+    let first = try await sut.loadProducts()
+    XCTAssertEqual(first, remoteProducts)
+
+    // Red falla
+    stubRemote.result = .failure(NSError(domain: "net", code: -1))
+
+    // Segunda carga: cache sirve
+    let second = try await sut.loadProducts()
+    XCTAssertEqual(second, remoteProducts)
+}
+
+// Test 2: cache expirado fuerza recarga remota
+func test_loadProducts_ignoresExpiredCache() async throws {
+    let staleProducts = [Product(name: "Old", price: Decimal(1.00))]
+    let freshProducts = [Product(name: "New", price: Decimal(2.00))]
+    let memoryStore = InMemoryProductStore()
+    // Simular cache guardado hace 10 min
+    try await memoryStore.save(staleProducts, timestamp: Date().addingTimeInterval(-600))
+
+    let stubRemote = StubProductRemote(result: .success(freshProducts))
+    let sut = CachedProductRepository(remote: stubRemote, store: memoryStore, ttlSeconds: 300)
+
+    let result = try await sut.loadProducts()
+    XCTAssertEqual(result, freshProducts, "Cache expirado: debe ir a red")
+}
+```
+
+La clave es que `CachedProductRepository` depende de protocolos (`ProductRemote`, `ProductStore`), no de implementaciones concretas. Esto permite testear la política de cache sin red real ni SwiftData.
+
+---
+
+**Anterior:** [Etapa 3: Evolución — Resiliencia y calidad de producción ←](00-introduccion.md) · **Siguiente:** [Consistencia e invalidación →](02-consistencia.md)

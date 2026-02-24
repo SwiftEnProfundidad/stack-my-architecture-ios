@@ -10,7 +10,7 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
-- [Roadmap V2 (práctico)](plans/roadmap-v2.md)
+- [Roadmap V2 (práctico)](docs/management/roadmap-v2.md)
 - [Scaffold ejecutable iOS (SPM)](apps/ios/ArchitectureKit/README.md)
 - [Host App UI smoke (XCUITest)](apps/ios/ArchitectureHostApp/README.md)
 - [ADRs del scaffold](docs/adr)
@@ -43,7 +43,7 @@ La split view de asistente funciona **solo** contra proxy local para no exponer 
    - `node assistant-bridge/server.js`
 4. Abre el curso por localhost como siempre.
 
-El panel usa por defecto `http://localhost:8787` y consulta métricas en [`/metrics`](assistant-bridge/server.js:77).
+El panel usa por defecto `http://localhost:8787` y consulta métricas en [`/metrics`](assistant-bridge/server.js).
 
 #### Adjuntos de imágenes
 
@@ -82,12 +82,26 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 ### Informe fundacional
 
 - [Informe completo del curso](00-informe/INFORME-CURSO.md)
+- [Decisiones tomadas](00-informe/DECISIONES-TOMADAS.md)
+- [Backlog técnico del repo (mantenimiento interno)](00-informe/TODO.md)
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
+- [Core Mobile: Marco de decisiones](00-core-mobile/01-marco-de-decisiones.md)
+- [Core Mobile: Invariantes y contratos](00-core-mobile/02-invariantes-y-contratos.md)
+- [Core Mobile: Variabilidad y evolución](00-core-mobile/03-variabilidad-y-evolucion.md)
+- [Core Mobile: Calidad PR-ready](00-core-mobile/04-calidad-pr-ready.md)
+- [Core Mobile: Observabilidad y operación](00-core-mobile/05-observabilidad-operacion.md)
+- [Core Mobile: Release, rollback y flags](00-core-mobile/06-release-rollback-flags.md)
+- [Core Mobile: APIs, contratos y versionado](00-core-mobile/07-apis-contratos-versionado.md)
+- [Core Mobile: Seguridad y privacidad](00-core-mobile/08-seguridad-privacidad-threat-modeling.md)
+- [Core Mobile: Dependency governance](00-core-mobile/09-dependency-governance-supply-chain.md)
+- [Core Mobile: Plantillas](00-core-mobile/10-plantillas.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
+- [Core Mobile: Mobile Architect parity](00-core-mobile/12-mobile-architect-parity-ios-android.md)
 
 ### Etapa 1 — Junior: Fundamentos operables
 
 - [Introducción y objetivos](01-fundamentos/00-introduccion.md)
+- [Setup de entorno](01-fundamentos/00-setup.md)
 - [Principios de ingeniería](01-fundamentos/01-principios-ingenieria.md)
 - [Metodología BDD: especificación y descubrimiento](01-fundamentos/02-metodologia-bdd-tdd.md)
 - [Metodología TDD: práctica Red-Green-Refactor](01-fundamentos/02-metodologia-tdd-practica.md)
@@ -118,6 +132,9 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Infraestructura real: Network](02-integracion/04-infra-real-network.md)
 - [Integration tests](02-integracion/05-integration-tests.md)
 - [Composition Root](02-integracion/06-composition-root.md)
+- [SwiftUI enterprise](02-integracion/07-swiftui-enterprise.md)
+- [Swift Concurrency enterprise](02-integracion/08-swift-concurrency-enterprise.md)
+- [App final Etapa 2](02-integracion/09-app-final-etapa-2.md)
 - [Entregables Etapa 2](02-integracion/entregables-etapa-2.md)
 
 ### Etapa 3 — Senior: Evolución y resiliencia
@@ -155,9 +172,13 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Composición avanzada](05-maestria/07-composicion-avanzada.md)
 - [Memory leaks y diagnóstico](05-maestria/08-memory-leaks-y-diagnostico.md)
 - [Migración a Swift 6](05-maestria/09-migracion-swift6.md)
+- [Debugging en Xcode](05-maestria/10-debugging-xcode.md)
+- [Entrevista de arquitecto](05-maestria/11-entrevista-arquitecto.md)
+- [Arquitectura adaptativa](05-maestria/12-arquitectura-adaptativa.md)
 - [Entregables Etapa 5](05-maestria/entregables-etapa-5.md)
 - [Rúbrica final iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
 - [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Checklist final de entrega](05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md)
 
 ### Anexos
 
@@ -221,3 +242,22 @@ La meta no es “mencionar skills”, sino usarlas para tomar mejores decisiones
 - No es escribir producción y agregar tests al final.
 - No es usar `@MainActor` para silenciar warnings sin justificar límites.
 - No es adoptar modas; es construir un sistema coherente guiado por requisitos, tests y límites.
+
+## QA Pedagogico (auditoria automatizada)
+
+Para ejecutar la auditoria completa del curso y generar informes consolidados:
+
+```bash
+./scripts/run-qa-audit-bundle.sh
+```
+
+Artefactos principales en `00-informe/`:
+
+- `AUDITORIA-QA-INTEGRAL.md` y `AUDITORIA-QA-INTEGRAL.json`
+- `AUDITORIA-GUARDRAILS.md` y `AUDITORIA-GUARDRAILS.json`
+- `AUDITORIA-GUARDRAILS-BASELINE.json` (baseline de no regresion)
+
+Guardrails actuales:
+
+- Bloque tecnico base sin P1: snippets, enlaces, cierre y plantilla
+- Bloque pedagogico semantico sin regresion contra baseline: continuidad, saltos, mermaid y trazabilidad

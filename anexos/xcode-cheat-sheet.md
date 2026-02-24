@@ -108,10 +108,10 @@
 
 ### Selección múltiple (column mode)
 
-```
+```text
 Alt/Option + arrastrar selección
 → Selecciona en modo columna para editar múltiples líneas a la vez
-```
+```text
 
 **Ejemplo:** Quieres añadir `private` a 5 variables:
 ```swift
@@ -127,7 +127,7 @@ var age: Int
 private var name: String
 private var email: String
 private var age: Int
-```
+```text
 
 ### Búsqueda global vs local
 
@@ -148,19 +148,19 @@ private var age: Int
 
 ### Text Editing
 
-```
+```text
 Preferences → Text Editing → Editing
 ✅ Enable type-over completions
 ✅ Suggest completions while typing
 ✅ Use escape key to show completions
 ✅ Automatically trim trailing whitespace
 ✅ Including whitespace-only lines
-```
+```text
 
 ### Key Bindings personalizados (opcional)
 
 Si quieres añadir atajos custom:
-```
+```text
 Preferences → Key Bindings
 Busca el comando → Doble click en atajo → Pulsar combinación deseada
 ```
@@ -207,4 +207,4 @@ Busca el comando → Doble click en atajo → Pulsar combinación deseada
 
 ---
 
-**Siguiente anexo:** [Tips del Simulador](simulator-tips.md)
+**Anterior:** [Git Workflow para el Curso ←](git-workflow-curso.md) · **Siguiente:** [Cómo Leer Documentación de Apple Efectivamente →](como-leer-documentacion.md)

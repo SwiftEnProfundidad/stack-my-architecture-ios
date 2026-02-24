@@ -1,5 +1,10 @@
 # Infraestructura real: URLSessionHTTPClient
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a poder conectar la arquitectura del curso con red real manteniendo intactos los límites de Clean Architecture: infraestructura concreta fuera del core, errores traducidos de forma semántica y pruebas estables.
@@ -31,7 +36,7 @@ flowchart LR
     AUTH --> LOG["Logging decorator"]
     LOG --> BASE["URLSessionHTTPClient"]
     BASE --> API["Remote API"]
-```
+```text
 
 Esto permite escalar capacidades sin reescribir repositorios.
 
@@ -45,7 +50,7 @@ import Foundation
 protocol HTTPClient: Sendable {
     func execute(_ request: URLRequest) async throws -> (Data, HTTPURLResponse)
 }
-```
+```text
 
 Por qué este contrato es bueno:
 
@@ -78,7 +83,7 @@ struct URLSessionHTTPClient: HTTPClient, Sendable {
         return (data, httpResponse)
     }
 }
-```
+```text
 
 Decisiones:
 
@@ -115,7 +120,7 @@ struct AuthenticatedHTTPClient: HTTPClient, Sendable {
         return try await wrapped.execute(authenticatedRequest)
     }
 }
-```
+```text
 
 Ventaja:
 
@@ -133,7 +138,7 @@ flowchart TD
     TECH["URLError / status / decode"] --> MAP["Repository error mapping"]
     MAP --> SEM["CatalogError"]
     SEM --> APP["UseCase + ViewModel"]
-```
+```text
 
 Ejemplo de criterio de etapa:
 
@@ -162,7 +167,7 @@ struct CatalogComposer {
         return RemoteProductRepository(httpClient: authClient, baseURL: baseURL)
     }
 }
-```
+```text
 
 Principio importante del curso:
 
@@ -252,7 +257,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.execute(URLRequest(url: URL(string: "https://example.com")!)))
     }
 }
-```
+```swift
 
 ---
 
@@ -400,9 +405,6 @@ Trigger para revisar B:
 ## Cierre
 
 Con esta pieza, el curso pasa de “arquitectura bien dibujada” a “arquitectura conectada al mundo real”. La clave no es usar `URLSession`; la clave es usarla sin romper los límites que hacen que el sistema siga siendo evolutivo.
-
-**Siguiente:** [Integration tests →](05-integration-tests.md)
-
 ---
 
 ## Ejercicio guiado para consolidar la skill
@@ -451,3 +453,7 @@ Una buena infraestructura no se mide por “cuánto framework usa”, sino por c
 ## Nota final de práctica
 
 Si un cambio de proveedor HTTP obliga a tocar UseCases o Domain, no cambiaste infraestructura: rompiste la arquitectura. Ese test mental te protege en cada refactor.
+
+---
+
+**Anterior:** [Contratos entre features ←](03-contratos-features.md) · **Siguiente:** [Integration Tests →](05-integration-tests.md)

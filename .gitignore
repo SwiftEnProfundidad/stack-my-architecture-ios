@@ -1,5 +1,6 @@
 # Generated artifacts
 dist/
+.tmp/
 
 # macOS
 .DS_Store

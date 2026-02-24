@@ -1,8 +1,8 @@
-# Backend Firebase: integracion enterprise
+# Backend Firebase: integración enterprise
 
 ## Objetivo de aprendizaje
 
-Al terminar esta leccion vas a saber integrar Firebase (Auth + Firestore) en una arquitectura Clean sin contaminar Domain ni Application. Sabras encapsular los SDKs de Firebase detras de protocolos, testear la integracion con emuladores, y gestionar entornos (dev/prod) de forma segura.
+Al terminar esta lección vas a saber integrar Firebase (Auth + Firestore) en una arquitectura Clean sin contaminar Domain ni Application. Sabras encapsular los SDKs de Firebase detrás de protocolos, testear la integración con emuladores, y gestionar entornos (dev/prod) de forma segura.
 
 En palabras simples: Firebase es un proveedor de servicios. Tu arquitectura no debe depender de el. Si mañana cambias a Supabase o a un backend propio, solo cambias un modulo.
 
@@ -10,16 +10,16 @@ En palabras simples: Firebase es un proveedor de servicios. Tu arquitectura no d
 
 ## Definicion simple
 
-Firebase es una plataforma de Google que ofrece autenticacion, base de datos en tiempo real (Firestore), storage, y mas. En este curso usamos dos servicios:
+Firebase es una plataforma de Google que ofrece autenticacion, base de datos en tiempo real (Firestore), storage, y más. En este curso usamos dos servicios:
 
 - **Firebase Auth** — para autenticar usuarios (email/password).
-- **Cloud Firestore** — para almacenar y consultar datos (productos del catalogo).
+- **Cloud Firestore** — para almacenar y consultar datos (productos del catálogo).
 
 Ambos tienen SDKs para iOS que se integran via Swift Package Manager.
 
 ---
 
-## Modelo mental: Firebase como proveedor detras de un mostrador
+## Modelo mental: Firebase como proveedor detrás de un mostrador
 
 Imagina que Domain es tu empresa. Application es tu equipo interno. Infrastructure es el mostrador que da a la calle. Firebase es un proveedor que viene a entregar paquetes al mostrador.
 
@@ -53,7 +53,7 @@ graph LR
     style CORE fill:#d4edda,stroke:#28a745
     style INFRA fill:#fff3cd,stroke:#ffc107
     style SDK fill:#fce4ec,stroke:#e91e63
-```
+```text
 
 ---
 
@@ -61,7 +61,7 @@ graph LR
 
 ### Cuando SI
 
-- Prototipo rapido o MVP donde necesitas backend sin escribir servidor.
+- Prototipo rápido o MVP donde necesitas backend sin escribir servidor.
 - Proyecto con presupuesto limitado (plan gratuito generoso: Spark plan).
 - Auth simple (email/password, Google, Apple Sign-In).
 - Datos relativamente simples (documentos JSON).
@@ -104,7 +104,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 **`FirebaseApp.configure()`** — Se llama UNA sola vez, al iniciar la app. Lee el `GoogleService-Info.plist` y configura los servicios. Esta es la UNICA linea de Firebase que vive fuera de Infrastructure.
 
@@ -154,7 +154,7 @@ struct FirebaseAuthGateway: AuthGateway, Sendable {
         }
     }
 }
-```
+```swift
 
 **Linea por linea:**
 
@@ -205,12 +205,12 @@ struct FirestoreProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```
+```text
 
 **Linea por linea:**
 
 - `Firestore.firestore()` — Obtiene la instancia de Firestore (configurada por `FirebaseApp.configure()`).
-- `db.collection("products").getDocuments()` — Lee TODOS los documentos de la coleccion "products". En un catalogo real con miles de productos, usarias paginacion (`.limit(to: 20).start(afterDocument: lastDoc)`).
+- `db.collection("products").getDocuments()` — Lee TODOS los documentos de la coleccion "products". En un catálogo real con miles de productos, usarias paginacion (`.limit(to: 20).start(afterDocument: lastDoc)`).
 - Error de red → `CatalogError.connectivity` — Misma traduccion que haciamos con URLSession.
 - Error de mapeo → `CatalogError.invalidData` — Si un documento tiene formato inesperado.
 - `mapper.toDomain(doc.data(), id:)` — Convierte el diccionario de Firestore a `Product` de Domain.
@@ -243,11 +243,11 @@ struct FirestoreProductMapper {
         )
     }
 }
-```
+```text
 
 **Por que `[String: Any]`:** Firestore devuelve documentos como diccionarios sin tipo. El mapper extrae cada campo con `as?` y lanza error si falta o tiene tipo incorrecto. Es similar al `ProductDTO` de la infra HTTP, pero sin `Decodable` porque Firestore no usa `JSONDecoder`.
 
-**`priceNumber.decimalValue`** — Firestore almacena numeros como `NSNumber`. Convertimos a `Decimal` para mantener la precision que definimos en Domain.
+**`priceNumber.decimalValue`** — Firestore almacena numeros como `NSNumber`. Convertimos a `Decimal` para mantener la precisión que definimos en Domain.
 
 ---
 
@@ -255,7 +255,7 @@ struct FirestoreProductMapper {
 
 Las Security Rules de Firestore definen quien puede leer y escribir cada coleccion. Son criticas para seguridad.
 
-```
+```text
 // firestore.rules
 
 rules_version = '2';
@@ -280,7 +280,7 @@ service cloud.firestore {
     }
   }
 }
-```
+```text
 
 **Linea por linea:**
 
@@ -295,10 +295,10 @@ service cloud.firestore {
 
 Firebase ofrece emuladores locales que replican Auth y Firestore sin conectarse a la nube. Son esenciales para:
 
-- Tests de integracion sin coste ni latencia de red.
-- Desarrollo local sin afectar datos de produccion.
+- Tests de integración sin coste ni latencia de red.
+- Desarrollo local sin afectar datos de producción.
 
-### Configuracion
+### Configuración
 
 ```bash
 # Instalar Firebase CLI (una sola vez)
@@ -310,7 +310,7 @@ firebase init emulators
 
 # Iniciar emuladores
 firebase emulators:start
-```
+```text
 
 ### Conectar la app a emuladores (solo en desarrollo)
 
@@ -334,9 +334,9 @@ struct FirebaseConfig {
         #endif
     }
 }
-```
+```text
 
-**`#if DEBUG`** — Solo activa emuladores en builds de debug. En produccion, Firebase conecta con la nube automaticamente. Esto previene que un build de release accidentalmente use emuladores.
+**`#if DEBUG`** — Solo activa emuladores en builds de debug. En producción, Firebase conecta con la nube automaticamente. Esto previene que un build de release accidentalmente use emuladores.
 
 ---
 
@@ -371,11 +371,11 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```
+```text
 
-**Comparacion con Etapa 2:** Lo unico que cambia es la linea de creacion del gateway/repository:
+**Comparacion con Etapa 2:** Lo único que cambia es la linea de creación del gateway/repository:
 
-| Etapa 2 (HTTP generico) | Etapa 3 (Firebase) |
+| Etapa 2 (HTTP genérico) | Etapa 3 (Firebase) |
 |---|---|
 | `RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)` | `FirebaseAuthGateway()` |
 | `RemoteProductRepository(httpClient: httpClient, baseURL: baseURL)` | `FirestoreProductRepository()` |
@@ -388,14 +388,14 @@ extension CompositionRoot {
 
 Estructura de la coleccion `products`:
 
-```
+```text
 products/
   {productId}/
     name: "Camiseta React"       (string)
     price: 29.99                  (number)
     currency: "EUR"               (string)
     image_url: "https://..."      (string)
-```
+```text
 
 **Reglas de modelado para Firestore:**
 
@@ -407,23 +407,23 @@ products/
 
 ## Entornos: dev vs prod
 
-Nunca uses la misma base de datos para desarrollo y produccion.
+Nunca uses la misma base de datos para desarrollo y producción.
 
 ### Estrategia con dos proyectos Firebase
 
 1. **`stack-my-arch-dev`** — Proyecto Firebase para desarrollo. Datos de prueba. Emuladores locales.
-2. **`stack-my-arch-prod`** — Proyecto Firebase para produccion. Datos reales. Security Rules estrictas.
+2. **`stack-my-arch-prod`** — Proyecto Firebase para producción. Datos reales. Security Rules estrictas.
 
 ### Cambio de entorno
 
 Cada proyecto tiene su propio `GoogleService-Info.plist`. Puedes usar build configurations de Xcode o un script de build para copiar el plist correcto segun el scheme.
 
-```
+```text
 StackMyArchitecture/
   Config/
     Dev/GoogleService-Info.plist
     Prod/GoogleService-Info.plist
-```
+```text
 
 En el Build Phase, un script copia el plist correcto:
 
@@ -433,11 +433,11 @@ if [ "${CONFIGURATION}" == "Debug" ]; then
 else
     cp "${PROJECT_DIR}/Config/Prod/GoogleService-Info.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/"
 fi
-```
+```text
 
 ---
 
-## Tests de integracion con Firebase
+## Tests de integración con Firebase
 
 ### Con emuladores (recomendado)
 
@@ -469,9 +469,9 @@ final class FirebaseAuthGatewayIntegrationTests: XCTestCase {
         XCTAssertFalse(session.userId.isEmpty)
     }
 }
-```
+```text
 
-**Nota:** Estos tests requieren que los emuladores de Firebase esten corriendo (`firebase emulators:start`). Son mas lentos que los unit tests con stubs, pero verifican la integracion real con el SDK.
+**Nota:** Estos tests requieren que los emuladores de Firebase esten corriendo (`firebase emulators:start`). Son más lentos que los unit tests con stubs, pero verifican la integración real con el SDK.
 
 ### Sin emuladores (unit tests con stubs)
 
@@ -488,9 +488,9 @@ Para los tests del UseCase y del ViewModel, seguimos usando stubs como siempre. 
 | Firestore writes | 20K/dia |
 | Firestore storage | 1 GB |
 
-**Para un curso y desarrollo:** Mas que suficiente. Si llegas a estos limites en produccion, migras al plan Blaze (pay-as-you-go).
+**Para un curso y desarrollo:** Más que suficiente. Si llegas a estos limites en producción, migras al plan Blaze (pay-as-you-go).
 
-**Verificar limites actualizados:** Los limites pueden cambiar. Consulta siempre la [pagina oficial de precios](https://firebase.google.com/pricing) (N/D: no puedo verificar la URL exacta en este momento, confirma en la documentacion oficial de Firebase).
+**Verificar limites actualizados:** Los limites pueden cambiar. Consulta siempre la [página oficial de precios](https://firebase.google.com/pricing) (N/D: no puedo verificar la URL exacta en este momento, confirma en la documentacion oficial de Firebase).
 
 ---
 
@@ -502,15 +502,15 @@ Mensaje: `Default FirebaseApp is not configured. Make sure you call FirebaseApp.
 
 Causa: Olvidaste llamar a `FirebaseApp.configure()` antes de usar cualquier servicio.
 
-Solucion: Llamar en el `init()` de `@main App`.
+Solución: Llamar en el `init()` de `@main App`.
 
 ### Error 2: Permission denied en Firestore
 
 Mensaje: `Missing or insufficient permissions`
 
-Causa: Las Security Rules no permiten la operacion. O el usuario no esta autenticado.
+Causa: Las Security Rules no permiten la operación. O el usuario no esta autenticado.
 
-Solucion: Verificar que el usuario esta logueado (`Auth.auth().currentUser != nil`) y que las rules permiten la operacion.
+Solución: Verificar que el usuario esta logueado (`Auth.auth().currentUser != nil`) y que las rules permiten la operación.
 
 ### Error 3: Datos nil en Firestore
 
@@ -518,11 +518,11 @@ Mensaje: El mapper lanza `CatalogError.invalidData` inesperadamente.
 
 Causa: Un campo del documento tiene nombre diferente al esperado, o tipo diferente.
 
-Solucion: Verificar en Firebase Console que los documentos tienen la estructura esperada. Usar el mapper con validacion explicita (`guard let ... else throw`).
+Solución: Verificar en Firebase Console que los documentos tienen la estructura esperada. Usar el mapper con validación explicita (`guard let ... else throw`).
 
 ---
 
-## ADR corto de la leccion
+## ADR corto de la lección
 
 ```markdown
 ## ADR-004: Firebase como backend principal encapsulado en Infrastructure
@@ -532,7 +532,7 @@ Solucion: Verificar en Firebase Console que los documentos tienen la estructura 
 - Alternativa: Supabase (Postgres + RLS), documentada en apendice
 - Consecuencias: setup rapido, plan gratuito generoso, vendor lock-in mitigado por encapsulacion; si migramos, solo cambian archivos de Infrastructure
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 
@@ -542,14 +542,53 @@ Solucion: Verificar en Firebase Console que los documentos tienen la estructura 
 - [ ] Domain y Application no saben que Firebase existe.
 - [ ] Security Rules siguen principio de minimo privilegio.
 - [ ] Entornos dev/prod separados con plists distintos.
-- [ ] Emuladores configurados para tests de integracion.
+- [ ] Emuladores configurados para tests de integración.
 - [ ] Errores de Firebase se traducen a errores de Domain.
-- [ ] Composition Root puede cambiar de Firebase a HTTP generico cambiando una linea.
+- [ ] Composition Root puede cambiar de Firebase a HTTP genérico cambiando una linea.
 
 ---
 
 ## Cierre
 
-Firebase es una herramienta poderosa para arrancar rapido. Pero su valor real en un proyecto enterprise no es la facilidad de setup, sino lo facil que es reemplazarlo gracias a la encapsulacion. Si un dia tu empresa decide migrar a un backend propio, tu Domain, Application e Interface ni se enteran. Solo cambias los archivos de Infrastructure y el Composition Root. Esa es la garantia que te da una arquitectura bien diseñada.
+Firebase es una herramienta poderosa para arrancar rápido. Pero su valor real en un proyecto enterprise no es la facilidad de setup, sino lo fácil que es reemplazarlo gracias a la encapsulacion. Si un dia tu empresa decide migrar a un backend propio, tu Domain, Application e Interface ni se enteran. Solo cambias los archivos de Infrastructure y el Composition Root. Esa es la garantia que te da una arquitectura bien diseñada.
 
-**Anterior:** [SwiftData como ProductStore ←](06-swiftdata-store.md) · **Siguiente:** [Entregables Etapa 3 →](entregables-etapa-3.md)
+---
+
+## Ejercicio guiado: verificar encapsulación de Firebase
+
+**Objetivo:** Confirmar que Firebase está correctamente encapsulado y que el Composition Root puede cambiar de backend sin tocar Domain ni Application.
+
+**Instrucciones:**
+
+1. Ejecuta `./scripts/check-dependencies.sh` desde `apps/ios/ArchitectureKit/`.
+2. Verifica que ningún target de Domain ni Application importa `Firebase*`.
+3. En `AppComposition`, localiza dónde se inyecta el repositorio de productos.
+4. Escribe un test conceptual: crea un `StubProductRepository` que devuelva datos hardcodeados y verifica que `AppComposition` puede usarlo en lugar del repositorio real de Firebase.
+
+**Criterios de éxito:**
+
+- `check-dependencies.sh` pasa sin errores.
+- `grep -r "import Firebase" Sources/FeatureCatalogDomain Sources/FeatureLoginDomain` devuelve 0 resultados.
+- El test de composición demuestra que el wiring es intercambiable.
+
+**Solución razonada:**
+
+```swift
+// En AppCompositionTests
+func test_composition_worksWithStubRepository() async throws {
+    let stub = StubProductRepository(result: .success([
+        Product(name: "Test", price: Decimal(1.00))
+    ]))
+    // Si AppComposition acepta un ProductRepository genérico,
+    // este test compila y pasa sin Firebase en el grafo de dependencias.
+    let viewModel = CatalogViewModel(repository: stub)
+    await viewModel.load()
+    XCTAssertEqual(viewModel.products.count, 1)
+}
+```
+
+La clave no es testear Firebase en sí, sino verificar que la arquitectura permite sustituirlo. Si este test compila y pasa, Firebase está correctamente encapsulado detrás de un protocolo.
+
+---
+
+**Anterior:** [SwiftData como ProductStore ←](06-swiftdata-store.md) · **Siguiente:** [Entregables — Etapa 3: Evolución →](entregables-etapa-3.md)

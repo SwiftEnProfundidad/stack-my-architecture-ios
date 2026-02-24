@@ -1,5 +1,12 @@
 # Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patrones de composición
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Por qué existe esta etapa y por qué no es opcional
 
 Hasta aquí el curso ya te llevó a construir arquitectura modular, contratos entre features, navegación desacoplada, observabilidad y quality gates. Eso te pone por encima del promedio. Pero en un entorno enterprise real todavía falta una capa crítica: **dominar los mecanismos que sostienen el sistema cuando todo se complica al mismo tiempo**.
@@ -62,7 +69,7 @@ flowchart LR
     M --> S["Senior\nEvoluciona"]
     S --> A["Arquitecto\nGobierna"]
     A --> X["Maestría\nOpera bajo presión real"]
-```
+```text
 
 ---
 
@@ -131,7 +138,7 @@ flowchart TD
     C --> E["Evidencia verificable"]
     E --> R["Ritual diario enterprise"]
     R --> L
-```
+```text
 
 Este ciclo se repite hasta que el comportamiento técnico correcto deja de ser esfuerzo consciente y se vuelve segunda naturaleza.
 
@@ -179,7 +186,7 @@ graph TD
     style COMPOSITION fill:#fff3cd,stroke:#ffc107
     style DIAGNOSTICS fill:#f8d7da,stroke:#dc3545
     style MIGRATION fill:#e2d5f1,stroke:#6f42c1
-```
+```text
 
 ### Qué problema enterprise resuelve cada bloque
 
@@ -211,7 +218,7 @@ graph LR
 
     style Problems fill:#f8d7da,stroke:#dc3545
     style Solutions fill:#d4edda,stroke:#28a745
-```
+```text
 
 ```text
 05-maestria/
@@ -305,4 +312,8 @@ Eso es exactamente lo que diferencia a alguien que "sabe conceptos" de alguien q
 
 Ahora sí: pasa a `01-isolation-domains.md` y estúdialo con el contrato anterior en mano. No lo leas como capítulo aislado; léelo como la primera pieza del sistema operativo mental que necesitas para trabajar a nivel arquitecto.
 
-**Siguiente:** [Isolation domains y Sendable →](01-isolation-domains.md)
+> **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](10-rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
+
+---
+
+**Anterior:** [Consolidación: Etapa 4 - Arquitecto ←](../anexos/consolidacion-etapa-4-arquitecto.md) · **Siguiente:** [Isolation domains y Sendable →](01-isolation-domains.md)

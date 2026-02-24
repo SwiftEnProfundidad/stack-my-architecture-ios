@@ -50,7 +50,7 @@ graph TD
     style Composed fill:#cce5ff,stroke:#007bff
     style Errors fill:#f8d7da,stroke:#dc3545
     style Events fill:#fff3cd,stroke:#ffc107
-```
+```text
 
 Cada tipo en este diagrama es algo que vas a construir con TDD. Los Value Objects (verde) son lo primero, porque todo lo demás depende de ellos.
 
@@ -74,7 +74,7 @@ graph LR
 
     style Raw fill:#f8d7da,stroke:#dc3545
     style VO fill:#d4edda,stroke:#28a745
-```
+```text
 
 ---
 
@@ -118,7 +118,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email.value, "user@example.com")
     }
 }
-```
+```swift
 
 **Explicación línea por línea para que no quede ninguna duda:**
 
@@ -148,7 +148,7 @@ struct Email: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```
+```swift
 
 **Explicación línea por línea:**
 
@@ -178,7 +178,7 @@ func test_init_with_string_without_at_sign_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```
+```swift
 
 **Explicación línea por línea:**
 
@@ -209,7 +209,7 @@ struct Email: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```
+```swift
 
 **Explicación de las líneas nuevas:**
 
@@ -237,7 +237,7 @@ func test_init_with_email_without_domain_dot_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```
+```text
 
 Ejecutamos. Falla porque "user@domain" contiene arroba y pasa nuestra validación actual.
 
@@ -256,7 +256,7 @@ private static func isValid(_ value: String) -> Bool {
     guard parts.count == 2 else { return false }
     return parts[1].contains(".")
 }
-```
+```text
 
 Ejecutamos. Los tres tests pasan.
 
@@ -270,7 +270,7 @@ func test_init_with_empty_string_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```
+```text
 
 Ejecutamos. Pasa sin cambiar nada porque un string vacío no contiene "@". El test tiene valor documental: deja explícito que un email vacío es inválido.
 
@@ -286,7 +286,7 @@ func test_init_trims_whitespace_from_valid_email() throws {
     
     XCTAssertEqual(email.value, "user@example.com")
 }
-```
+```text
 
 Ejecutamos. Falla porque nuestro `init` guarda el valor tal cual, con espacios.
 
@@ -300,7 +300,7 @@ init(_ rawValue: String) throws {
     }
     self.value = trimmed
 }
-```
+```text
 
 Ejecutamos. Todos los tests pasan.
 
@@ -336,7 +336,7 @@ struct Email: Equatable, Sendable {
         return parts[1].contains(".")
     }
 }
-```
+```text
 
 Y el archivo de tests completo es:
 
@@ -378,7 +378,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email.value, "user@example.com")
     }
 }
-```
+```text
 
 Fíjate en lo que ha pasado: 5 tests, 5 iteraciones de TDD, y el resultado es un tipo de dominio completo, verificado, y con una cobertura que cubre todos los escenarios BDD que definimos. Y el código de producción tiene exactamente lo que necesitamos, nada más. No hay "código por si acaso". Todo lo que hay, lo pidió un test.
 
@@ -406,7 +406,7 @@ final class PasswordTests: XCTestCase {
         XCTAssertEqual(password.value, "securePass123")
     }
 }
-```
+```text
 
 No compila porque `Password` no existe.
 
@@ -422,7 +422,7 @@ struct Password: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```
+```text
 
 Pasa.
 
@@ -436,7 +436,7 @@ func test_init_with_empty_string_throws_empty() {
         XCTAssertEqual(error as? Password.ValidationError, .empty)
     }
 }
-```
+```text
 
 Falla.
 
@@ -457,7 +457,7 @@ struct Password: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```
+```text
 
 Ambos tests pasan. El `Password` está completo.
 
@@ -474,7 +474,7 @@ struct Credentials: Equatable, Sendable {
     let email: Email
     let password: Password
 }
-```
+```swift
 
 No escribimos tests para `Credentials` porque no tiene comportamiento propio. Es un tipo de datos puro, sin lógica. Testear que un struct guarda los valores que le pasas no aporta valor. Los tests de `Email` y `Password` ya cubren la validación de sus componentes.
 
@@ -491,7 +491,7 @@ enum AuthError: Error, Equatable, Sendable {
     case invalidCredentials
     case connectivity
 }
-```
+```text
 
 Estos errores son diferentes de los errores de validación de los Value Objects (`Email.ValidationError.invalidFormat`, `Password.ValidationError.empty`). Los errores de los Value Objects son errores de **formato**: los datos del usuario no pasan la validación local. `AuthError` son errores de **autenticación**: los datos pasaron la validación local pero algo falló en la comunicación con el servidor.
 
@@ -510,7 +510,7 @@ enum LoginEvent: Equatable, Sendable {
     case succeeded(email: String)
     case failed(AuthError)
 }
-```
+```text
 
 ¿Para qué sirven los eventos? Para desacoplar la feature de lo que ocurre después. Cuando el login es exitoso, la feature emite `LoginEvent.succeeded(email: "user@example.com")`. Pero la feature **no sabe** qué pasa después. No sabe que el coordinador va a navegar a la pantalla de Home. No sabe que quizá se va a guardar la sesión en el keychain. Esas son decisiones de otros componentes que escuchan el evento y actúan en consecuencia.
 
@@ -577,4 +577,20 @@ En la siguiente lección vamos a subir una capa: la Application. Allí construir
 
 ---
 
-**Anterior:** [Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Application →](02-application.md)
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/01-domain.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+**Anterior:** [Feature Login: Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Feature Login: Capa Application →](02-application.md)

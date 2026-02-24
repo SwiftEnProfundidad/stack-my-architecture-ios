@@ -73,7 +73,7 @@ graph LR
 
     Mono -->|"Dolor medible"| Local
     Local -->|"Consumidores independientes"| Remote
-```
+```text
 
 ---
 
@@ -113,7 +113,7 @@ StackMyArchitecture/
     Catalog/
   SharedKernel/
   Tests/
-```
+```text
 
 ### Siguiente paso (cuando duela): Nivel 2
 
@@ -127,7 +127,7 @@ StackMyArchitecture/
       Package.swift
     CatalogFeature/
       Package.swift
-```
+```text
 
 ---
 
@@ -161,7 +161,7 @@ let package = Package(
         )
     ]
 )
-```
+```text
 
 Punto clave:
 
@@ -185,7 +185,7 @@ public struct Session: Sendable, Equatable, Hashable {
         self.email = email
     }
 }
-```
+```text
 
 Si marcas todo `public`, conviertes detalles internos en contrato difícil de cambiar.
 
@@ -227,7 +227,7 @@ flowchart LR
     V1["1.0.0"] --> V2["1.0.1 PATCH"]
     V2 --> V3["1.1.0 MINOR"]
     V3 --> V4["2.0.0 MAJOR"]
-```
+```text
 
 Si no hay disciplina de semver, consumidores pierden confianza y empiezan a pinnear versiones antiguas.
 
@@ -249,7 +249,7 @@ Ejemplo:
 public var token: String { accessToken }
 
 public let accessToken: String
-```
+```text
 
 ---
 
@@ -385,7 +385,7 @@ Trigger para B -> C:
 - Decisión: mantener Nivel 1 inicialmente; migrar a paquetes locales (Nivel 2) ante dolor medible; evaluar Nivel 3 solo con consumidores independientes reales
 - Consecuencias: menor complejidad inicial, migración guiada por señales objetivas
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 
@@ -402,9 +402,6 @@ Trigger para B -> C:
 ## Cierre
 
 SPM no es el objetivo, es el medio. El objetivo es reducir coste de coordinación y cambio mientras la organización crece. Cuando entiendes eso, dejas de modularizar por estética y empiezas a modularizar por economía de ingeniería.
-
-**Anterior:** [Navegación y deep links ←](03-navegacion-deeplinks.md) · **Siguiente:** [Guía de arquitectura →](05-guia-arquitectura.md)
-
 ---
 
 ## Estrategia de migración segura a paquetes locales (playbook)
@@ -459,3 +456,46 @@ Sin rollback documentado, un fallo de versión se convierte en crisis de coordin
 ## Principio de versionado responsable
 
 Versionar no es publicar rápido; es publicar cambios que otro equipo puede adoptar con confianza y previsibilidad.
+
+---
+
+## Ejercicio guiado: analizar el grafo de dependencias SPM
+
+**Objetivo:** Visualizar y verificar el grafo de dependencias del scaffold para detectar posibles ciclos o acoplamientos innecesarios.
+
+**Instrucciones:**
+
+1. Ejecuta `swift package show-dependencies --format json` desde `apps/ios/ArchitectureKit/`.
+2. Identifica cuántos targets dependen de `CoreDomain` (debería ser la raíz compartida).
+3. Verifica que ningún target de Domain depende de targets de Data o UI.
+4. Dibuja el grafo simplificado en Mermaid y compáralo con el `Package.swift`.
+
+**Criterios de éxito:**
+
+- El grafo no tiene ciclos (SPM no compilaría si los hubiera, pero verifica visualmente).
+- `CoreDomain` es la única dependencia compartida entre features de Domain.
+- `AppComposition` es el único target que depende de todos los demás (es el "techo" del grafo).
+
+**Solución razonada:**
+
+```mermaid
+graph BT
+    CoreDomain --> FeatureLoginDomain
+    CoreDomain --> FeatureCatalogDomain
+    FeatureLoginDomain --> FeatureLoginData
+    FeatureLoginDomain --> FeatureLoginUI
+    FeatureCatalogDomain --> FeatureCatalogData
+    FeatureCatalogDomain --> FeatureCatalogUI
+    FeatureCatalogData --> FeatureCatalogPersistenceSwiftData
+    FeatureLoginData --> AppComposition
+    FeatureLoginUI --> AppComposition
+    FeatureCatalogData --> AppComposition
+    FeatureCatalogUI --> AppComposition
+    FeatureCatalogPersistenceSwiftData --> AppComposition
+```
+
+El grafo muestra que las dependencias fluyen de Domain hacia afuera (Data, UI) y convergen en `AppComposition`. Ninguna flecha va de Data/UI hacia Domain de otra feature. Esta estructura es la que `check-dependencies.sh` protege automáticamente.
+
+---
+
+**Anterior:** [Navegación y deep links como plataforma ←](03-navegacion-deeplinks.md) · **Siguiente:** [Guía de arquitectura del repositorio →](05-guia-arquitectura.md)

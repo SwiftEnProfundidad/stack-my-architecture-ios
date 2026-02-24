@@ -263,3 +263,7 @@ Este documento organiza preguntas por nivel (Junior → Mid → Senior → Archi
 ---
 
 **Consejo final:** Las mejores respuestas combinan principios sólidos, experiencia real, y humildad para reconocer que siempre hay trade-offs.
+
+---
+
+**Anterior:** [Anexo: Guía CQS y CQRS ←](guia-cqs-cqrs.md) · **Siguiente:** [Hallazgos y correcciones pedagógicas →](hallazgos-y-correcciones.md)

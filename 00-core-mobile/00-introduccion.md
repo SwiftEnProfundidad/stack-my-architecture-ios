@@ -34,3 +34,20 @@ Lo que no se puede observar ni recuperar en incidente no está listo para produc
 
 La arquitectura no es foto estática. Debe soportar cambios incrementales sin caos ni reescrituras de alto riesgo.
 
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+**Siguiente:** [Marco de decisiones arquitectónicas →](01-marco-de-decisiones.md)

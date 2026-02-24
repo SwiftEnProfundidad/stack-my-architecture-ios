@@ -34,7 +34,7 @@ flowchart LR
     DOC --> CHECK["Script/Lint/Build rule"]
     CHECK --> CI["Pipeline PR"]
     CI --> FEEDBACK["Fallo temprano"]
-```
+```text
 
 Sin barandilla, dependes de que nadie se equivoque. Eso no escala.
 
@@ -70,7 +70,7 @@ Sin barandilla, dependes de que nadie se equivoque. Eso no escala.
 ```mermaid
 graph TD
     subgraph FeatureX["Feature X"]
-        UI["Interface"] --> APP["Application"]
+        UI["Interface"] ..> APP["Application"]
         APP --> DOM["Domain"]
         INF["Infrastructure"] --> DOM
         INF --> APP
@@ -82,7 +82,7 @@ graph TD
     INF --> SK
 
     FX["Feature X"] -. "NO" .-> FY["Feature Y"]
-```
+```text
 
 ---
 
@@ -131,7 +131,7 @@ if [ "$violations" -gt 0 ]; then
 fi
 
 echo "Domain imports OK"
-```
+```text
 
 ### `check-feature-cross-imports.sh`
 
@@ -163,7 +163,7 @@ if [ "$violations" -gt 0 ]; then
 fi
 
 echo "Feature cross-imports OK"
-```
+```text
 
 ---
 
@@ -178,7 +178,7 @@ flowchart TD
     CHECK4 --> MERGE{"Todo OK?"}
     MERGE -->|"Si"| DONE["Merge"]
     MERGE -->|"No"| FIX["Corregir"]
-```
+```text
 
 Orden recomendado:
 
@@ -361,9 +361,6 @@ Trigger para B -> C:
 ## Cierre
 
 La arquitectura no se mantiene por buena voluntad. Se mantiene porque el sistema de trabajo hace difícil romperla y fácil corregirla. Ese cambio de mentalidad es exactamente lo que distingue una organización que escala de una que se degrada.
-
-**Anterior:** [Bounded Contexts ←](01-bounded-contexts.md) · **Siguiente:** [Navegación y deep links →](03-navegacion-deeplinks.md)
-
 ---
 
 ## Plan de adopción por fases (recomendado)
@@ -430,3 +427,30 @@ Lo que se mide de forma visible se mejora de forma consistente.
 ## Regla de oro final
 
 Si una regla no puede explicarse en una frase clara y verificarse automáticamente, aún no está lista para ser quality gate bloqueante.
+
+---
+
+## Ejercicio guiado: añadir una regla de dependencia y verificarla
+
+**Objetivo:** Experimentar el ciclo de añadir un import prohibido, ver cómo el gate lo detecta y corregirlo.
+
+**Instrucciones:**
+
+1. Abre `apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/` y añade temporalmente `import InfraHTTP` en cualquier archivo.
+2. Ejecuta `./scripts/check-dependencies.sh`.
+3. Observa el error: el script debe reportar un import prohibido.
+4. Elimina el import y vuelve a ejecutar el script para confirmar que pasa.
+
+**Criterios de éxito:**
+
+- El script detecta el import prohibido y falla con mensaje claro.
+- Tras eliminar el import, el script pasa sin errores.
+- Entiendes que la regla "Domain no importa Infrastructure" se verifica automáticamente, no por revisión manual.
+
+**Solución razonada:**
+
+El script `check-dependencies.sh` recorre los archivos `.swift` de cada target y verifica que no contengan imports de módulos prohibidos según la dirección de dependencia definida en `Package.swift`. Cuando encuentras un import prohibido, el script reporta archivo y línea. La corrección es siempre eliminar el import y mover la dependencia a la capa correcta (Infrastructure o Composition Root). Este ejercicio demuestra que las reglas de arquitectura son ejecutables, no opiniones.
+
+---
+
+**Anterior:** [Bounded Contexts ←](01-bounded-contexts.md) · **Siguiente:** [Navegación y deep links como plataforma →](03-navegacion-deeplinks.md)

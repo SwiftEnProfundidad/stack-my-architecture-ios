@@ -1,5 +1,12 @@
 # Etapa 4: Arquitecto — Plataforma y gobernanza
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Objetivo de la etapa
 
 Al terminar esta etapa, el alumno deja de pensar solo en “cómo implementar una feature” y pasa a pensar en “cómo escalar un sistema y un equipo sin perder control”.
@@ -24,7 +31,7 @@ flowchart LR
     E1["Etapa 1\nFeature correcta"] --> E2["Etapa 2\nIntegracion entre features"]
     E2 --> E3["Etapa 3\nResiliencia operativa"]
     E3 --> E4["Etapa 4\nPlataforma y gobernanza"]
-```
+```text
 
 Pregunta de etapa 3:
 
@@ -65,7 +72,7 @@ flowchart TD
     NAV --> PKG["Versionado y paquetizacion"]
     PKG --> GUIDE["Guia arquitectura viva"]
     GUIDE --> GATES["Quality gates CI"]
-```
+```text
 
 ---
 
@@ -229,9 +236,6 @@ Gobernanza sin política de concurrencia deja un hueco crítico en arquitectura 
 ## Cierre
 
 Esta etapa es el puente entre “programar bien” y “construir un sistema que escala con gente real trabajando dentro”. Si la haces bien, los siguientes cambios del proyecto serán más seguros, más rápidos y menos dramáticos.
-
-**Siguiente:** [Bounded contexts →](01-bounded-contexts.md)
-
 ---
 
 ## Señales de madurez: de senior a arquitecto
@@ -298,7 +302,7 @@ Este ciclo evita dos extremos:
 ```mermaid
 flowchart TD
     PAIN["Dolor real de coordinacion"] --> ANALYZE{"Repetitivo y costoso?"}
-    ANALYZE -->|"No"| LOCAL["Resolver localmente"]
+    ANALYZE -.->|"No"| LOCAL["Resolver localmente"]
     ANALYZE -->|"Si"| RULE["Definir regla de plataforma"]
     RULE --> PILOT["Pilotar en 1-2 features"]
     PILOT --> VALUE{"Reduce incidentes/friccion?"}
@@ -388,3 +392,7 @@ Si no cumple estos criterios, probablemente aún debe quedarse como convención 
 ## Puente hacia Etapa 5 (maestría)
 
 Al cerrar Arquitecto, el siguiente salto es optimización fina de concurrencia, rendimiento y operaciones avanzadas. El objetivo de esta etapa no es competir con Etapa 5, sino dejar una plataforma lo bastante sólida para que esas optimizaciones sean seguras y acumulativas.
+
+---
+
+**Anterior:** [Calentamiento: Etapa 3 - Evolución ←](../anexos/calentamiento-etapa-3-evolucion.md) · **Siguiente:** [Bounded Contexts →](01-bounded-contexts.md)

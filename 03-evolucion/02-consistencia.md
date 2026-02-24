@@ -1,5 +1,7 @@
 # Consistencia e invalidación
 
+> **Nota de nomenclatura:** Esta lección usa nombres genéricos (`ProductRepository`, `ProductStore`) para explicar el patrón. En el scaffold real, los equivalentes son `CatalogRepository` y `CatalogCacheStore`.
+
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a poder diseñar una política de consistencia para `Catalog` que sea explícita, testeable y operable: sabrás definir qué significa “dato aceptablemente fresco”, cuándo invalidarlo y cómo comunicar ese estado a UI sin engañar al usuario.
@@ -37,7 +39,7 @@ flowchart TD
     NET -->|"No"| POLICY{"Politica negocio"}
     POLICY -->|"Permite stale"| SHOW["Mostrar con aviso"]
     POLICY -->|"No permite"| FAIL["Error + retry"]
-```
+```text
 
 ---
 
@@ -138,7 +140,7 @@ enum Freshness: Sendable, Equatable {
     case fresh
     case stale(age: TimeInterval)
 }
-```
+```text
 
 La política devuelve estado semántico, no solo booleano. Esto mejora decisiones en Application/UI.
 
@@ -194,7 +196,7 @@ struct CachedProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```
+```text
 
 Aquí se ve un principio clave:
 
@@ -216,7 +218,7 @@ enum CatalogScreenState: Sendable, Equatable {
     case loaded(products: [Product], freshness: Freshness)
     case error(CatalogError)
 }
-```
+```text
 
 No siempre necesitas mostrar “actualizado hace X minutos”, pero el estado debe poder representarlo para casos de producto exigentes.
 
@@ -311,7 +313,7 @@ final class CachedProductRepositoryConsistencyTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.loadAll())
     }
 }
-```
+```text
 
 ---
 
@@ -339,7 +341,7 @@ actor InMemoryProductStore: ProductStore {
         cached
     }
 }
-```
+```text
 
 No metas `@MainActor` en almacenamiento por “silenciar warnings”. Aisla donde corresponde.
 
@@ -395,7 +397,7 @@ Corrección:
 - Decisión: aplicar network-first con fallback a cache solo cuando politica de frescura lo permita
 - Consecuencias: mejor resiliencia sin ocultar stale data expirada
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 
@@ -422,9 +424,6 @@ Corrección:
 ## Cierre
 
 Sin política de consistencia, cache es una lotería. Con política explícita y tests sólidos, cache se convierte en una ventaja competitiva: app rápida y resiliente sin sacrificar honestidad de datos.
-
-**Siguiente:** [Observabilidad →](03-observabilidad.md)
-
 ---
 
 ## Matriz rápida para elegir TTL
@@ -436,3 +435,46 @@ Sin política de consistencia, cache es una lotería. Con política explícita y
 | Contenido editorial | Baja | Alta | 15-30 min |
 
 La tabla no sustituye métricas reales, pero ayuda a arrancar con criterio explícito.
+
+---
+
+## Ejercicio guiado: invalidación de cache por evento de dominio
+
+**Objetivo:** Implementar y testear la invalidación de cache cuando un evento de dominio indica que los datos han cambiado.
+
+**Instrucciones:**
+
+1. En `FeatureCatalogData`, localiza (o crea) un protocolo `CacheInvalidator` con un método `invalidate() async`.
+2. Implementa un `TTLCacheInvalidator` que borre el cache local cuando se invoca.
+3. Escribe un test que simule este flujo:
+   - Se cargan productos y se guardan en cache.
+   - Se dispara un evento de invalidación (simulando que el backend notificó cambio).
+   - La siguiente carga debe ir a red, no a cache.
+
+**Criterios de éxito:**
+
+- El test pasa con `swift test --filter CacheInvalidat`.
+- El invalidador no conoce SwiftData ni detalles de persistencia.
+- La invalidación es explícita (no depende de timing ni de TTL expirado).
+
+**Solución razonada:**
+
+```swift
+func test_invalidate_forcesNextLoadFromRemote() async throws {
+    let products = [Product(name: "Widget", price: Decimal(9.99))]
+    let store = InMemoryProductStore()
+    try await store.save(products, timestamp: Date())
+
+    let invalidator = TTLCacheInvalidator(store: store)
+    await invalidator.invalidate()
+
+    let cached = try await store.load()
+    XCTAssertNil(cached, "Tras invalidar, el store debe estar vacío")
+}
+```
+
+La razón de separar invalidación en su propio protocolo es que permite componer distintas estrategias (por TTL, por evento, por push notification) sin modificar el repositorio de cache.
+
+---
+
+**Anterior:** [Caching y offline ←](01-caching-offline.md) · **Siguiente:** [Observabilidad →](03-observabilidad.md)

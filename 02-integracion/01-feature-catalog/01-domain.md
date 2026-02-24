@@ -1,5 +1,12 @@
 # Feature Catalog: Capa Domain
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a poder modelar un dominio de `Catalog` que no sea una colección pasiva de structs, sino un núcleo semántico estable: tipos con significado de negocio, invariantes explícitas y errores útiles para Application/UI.
@@ -41,8 +48,8 @@ flowchart LR
     EXT["Mundo externo\nHTTP/JSON"] --> INFRA["Infrastructure\ntraduce formato"]
     INFRA --> DOMAIN["Domain\nsemantica de negocio"]
     DOMAIN --> APP["Application\norquesta casos"]
-    APP --> UI["Interface\npresenta estados"]
-```
+    APP ..> UI["Interface\npresenta estados"]
+```text
 
 Si Domain acepta cualquier cosa sin criterio, todo lo demás hereda ruido.
 
@@ -74,7 +81,7 @@ struct Product: Equatable, Sendable {
     let price: Price
     let imageURL: URL
 }
-```
+```text
 
 ### `Price`
 
@@ -85,7 +92,7 @@ struct Price: Equatable, Sendable {
     let amount: Decimal
     let currency: String
 }
-```
+```text
 
 ### `CatalogError`
 
@@ -94,7 +101,7 @@ enum CatalogError: Error, Equatable, Sendable {
     case connectivity
     case invalidData
 }
-```
+```text
 
 Decisiones clave:
 
@@ -197,7 +204,7 @@ final class ProductDomainTests: XCTestCase {
         XCTAssertNotEqual(CatalogError.connectivity, .invalidData)
     }
 }
-```
+```swift
 
 **Explicación de cada test:**
 
@@ -336,9 +343,6 @@ Trigger para A -> B:
 ## Cierre
 
 Cuando tu Domain está bien definido, el resto de capas dejan de discutir “qué significan los datos” y se concentran en su trabajo. Ese orden semántico es uno de los multiplicadores más fuertes de productividad en sistemas enterprise.
-
-**Anterior:** [Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Application →](02-application.md)
-
 ---
 
 ## Ejercicio de consolidación de dominio
@@ -357,3 +361,7 @@ Este ejercicio entrena evolución de dominio con impacto controlado por tests.
 ## Señal de dominio saludable
 
 Si puedes cambiar proveedor de datos o presentación sin renombrar conceptos de negocio (`Product`, `Price`, `CatalogError`), el dominio está bien aislado.
+
+---
+
+**Anterior:** [Feature Catalog: Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Feature Catalog: Capa Application →](02-application.md)

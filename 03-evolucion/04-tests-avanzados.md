@@ -1,5 +1,12 @@
 # Tests avanzados
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Objetivo de aprendizaje
 
 Al finalizar esta lección vas a poder diseñar y escribir pruebas avanzadas para escenarios donde la mayoría de equipos rompe producción: cancelación, concurrencia, timing y backpressure. El foco es que las pruebas sean deterministas, rápidas y útiles para guiar decisiones de arquitectura.
@@ -32,7 +39,7 @@ flowchart LR
     RISK --> TEST["Test determinista"]
     TEST --> FEED["Feedback de diseño"]
     FEED --> HARDEN["Arquitectura mas robusta"]
-```
+```text
 
 Sin este túnel, validas estética de código, no robustez real.
 
@@ -88,7 +95,7 @@ final class CancellationTests: XCTestCase {
         }
     }
 }
-```
+```text
 
 ### Error típico
 
@@ -115,7 +122,7 @@ struct FixedClock: Clock {
     let value: Date
     func now() -> Date { value }
 }
-```
+```text
 
 ### Test determinista
 
@@ -129,7 +136,7 @@ func test_policy_marksStale_afterMaxAge() {
         return XCTFail("Expected stale")
     }
 }
-```
+```text
 
 Si usas `sleep(300)` en tests, estás construyendo deuda de CI.
 
@@ -150,7 +157,7 @@ final class UnsafeSpy: ProductRepository, @unchecked Sendable {
         return []
     }
 }
-```
+```text
 
 Si hay llamadas concurrentes, este spy introduce carreras.
 
@@ -169,7 +176,7 @@ actor SafeProductRepositorySpy: ProductRepository {
         callCount
     }
 }
-```
+```text
 
 Regla de curso:
 
@@ -204,7 +211,7 @@ flowchart TD
     C --> R["Estado estable"]
     S --> R
     D --> R
-```
+```text
 
 ### Test de última petición gana
 
@@ -222,7 +229,7 @@ func test_viewModel_lastRequestWins_underRapidRefresh() async {
     let state = await sut.state
     XCTAssertEqual(state.products.first?.id, "2")
 }
-```
+```text
 
 Este test protege contra resultados fuera de orden.
 
@@ -262,7 +269,7 @@ flowchart LR
     G --> FIX2["SUT aislado por test"]
     N --> FIX3["Dobles de frontera"]
     O --> FIX4["Controladores de completion"]
-```
+```text
 
 ---
 
@@ -331,7 +338,7 @@ final class CatalogAdvancedTestPlan {
         "Last request wins under rapid refresh"
     ]
 }
-```
+```text
 
 La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 
@@ -346,7 +353,7 @@ La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 - Decisión: introducir clocks inyectados, dobles seguros y casos avanzados en rutas criticas
 - Consecuencias: mayor confianza en evoluciones con coste moderado de diseño de tests
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 
@@ -375,9 +382,6 @@ La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 ## Cierre
 
 Las pruebas avanzadas son el puente entre “funciona hoy” y “seguirá funcionando cuando el sistema evolucione”. Cuando las dominas, puedes refactorizar con seguridad real, que es la moneda principal de la arquitectura enterprise.
-
-**Siguiente:** [Trade-offs y riesgos →](05-trade-offs.md)
-
 ---
 
 ## Laboratorio guiado de 45 minutos
@@ -423,3 +427,55 @@ Esta rúbrica evita la falsa métrica de “cantidad de tests” y prioriza valo
 - conviertes bugs de timing en casos reproducibles y protegidos.
 
 Cuando puedes hacer esto de forma sistemática, tus refactors dejan de ser apuestas.
+
+---
+
+## Ejercicio guiado: test de cancelación en caso de uso
+
+**Objetivo:** Verificar que un caso de uso respeta la cancelación de `Task` y no produce efectos secundarios tras ser cancelado.
+
+**Instrucciones:**
+
+1. En `Tests/FeatureCatalogDataIntegrationTests/`, crea un test para `LoadProductsUseCase` (o equivalente).
+2. Configura un stub remoto que introduzca un `Task.sleep` de 2 segundos antes de responder.
+3. Lanza el caso de uso dentro de un `Task`, y cancélalo tras 100ms.
+4. Verifica que el resultado es `CancellationError` (o que el caso de uso no completa con datos).
+5. Verifica que el store de cache NO se actualizó (la cancelación interrumpió antes de guardar).
+
+**Criterios de éxito:**
+
+- El test pasa de forma determinista (no flaky).
+- El caso de uso usa `try Task.checkCancellation()` o `withTaskCancellationHandler` internamente.
+- No se usa `Task.sleep` en el test para esperar resultados (usa `Task.value` con expectativa de error).
+
+**Solución razonada:**
+
+```swift
+func test_loadProducts_respectsCancellation() async throws {
+    let slowRemote = SlowStubRemote(delay: .seconds(2), result: .success([Product(name: "A", price: 1)]))
+    let store = InMemoryProductStore()
+    let sut = CachedProductRepository(remote: slowRemote, store: store, ttlSeconds: 300)
+
+    let task = Task { try await sut.loadProducts() }
+
+    // Cancelar rápido
+    try await Task.sleep(for: .milliseconds(100))
+    task.cancel()
+
+    do {
+        _ = try await task.value
+        XCTFail("Debería haber lanzado CancellationError")
+    } catch is CancellationError {
+        // Esperado
+    }
+
+    let cached = try await store.load()
+    XCTAssertNil(cached, "Cache no debe actualizarse tras cancelación")
+}
+```
+
+La cancelación es un caso funcional, no una excepción ignorable. Si el caso de uso no la respeta, el usuario puede ver datos de una operación que ya descartó.
+
+---
+
+**Anterior:** [Observabilidad ←](03-observabilidad.md) · **Siguiente:** [Trade-offs y riesgos →](05-trade-offs.md)

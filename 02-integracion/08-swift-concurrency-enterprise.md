@@ -1,8 +1,32 @@
 # Swift Concurrency Enterprise: Patrones Imprescindibles
 
-## Por que esta leccion
 
-En las lecciones anteriores usamos `async/await`, `Sendable` y `@MainActor` sin profundizar en como funciona la concurrencia por debajo. Un junior que entre en enterprise va a encontrar `Task`, `TaskGroup`, `async let`, `actor`, cancelacion, `AsyncSequence`, y errores de Swift 6 como "Sending value of non-Sendable type risks causing data races". Esta leccion te prepara para todo eso.
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
+## Mapa de lectura (~35 min)
+
+| # | Sección | Línea | Tiempo |
+|---|---------|-------|--------|
+| 1 | async/await — La base de todo | ~9 | 3 min |
+| 2 | Task — Unidad de trabajo concurrente | ~68 | 3 min |
+| 3 | async let — Paralelo (número fijo) | ~148 | 3 min |
+| 4 | TaskGroup — Paralelo (número dinámico) | ~210 | 3 min |
+| 5 | Actor — Proteger estado compartido | ~260 | 3 min |
+| 6 | Sendable — Seguridad al cruzar fronteras | ~340 | 3 min |
+| 7 | Cancelación cooperativa | ~397 | 2 min |
+| 8 | AsyncSequence y AsyncStream | ~441 | 3 min |
+| 9 | Patrones enterprise comunes | ~500 | 3 min |
+| 10 | Swift 6 — Lo que cambia | ~585 | 3 min |
+| 11 | Anti-patrones — Lo que NUNCA hacer | ~666 | 3 min |
+| — | Ejercicio guiado: cancelación segura | ~812 | 3 min |
+
+---
+
+## Por que esta lección
+
+En las lecciones anteriores usamos `async/await`, `Sendable` y `@MainActor` sin profundizar en como funciona la concurrencia por debajo. Un junior que entre en enterprise va a encontrar `Task`, `TaskGroup`, `async let`, `actor`, cancelación, `AsyncSequence`, y errores de Swift 6 como "Sending value of non-Sendable type risks causing data races". Esta lección te prepara para todo eso.
 
 ---
 
@@ -10,7 +34,7 @@ En las lecciones anteriores usamos `async/await`, `Sendable` y `@MainActor` sin 
 
 ### Que es
 
-`async/await` permite escribir codigo asincrono (que tarda en completarse, como una peticion de red) como si fuera sincrono (lineal, de arriba a abajo). Sin `async/await`, usariamos closures anidados (callback hell).
+`async/await` permite escribir código asincrono (que tarda en completarse, como una peticion de red) como si fuera sincrono (lineal, de arriba a abajo). Sin `async/await`, usariamos closures anidados (callback hell).
 
 ### Comparacion visual
 
@@ -32,15 +56,15 @@ func loadProducts() async throws -> [Product] {
     let (data, _) = try await httpClient.execute(request)
     return try JSONDecoder().decode([Product].self, from: data)
 }
-```
+```text
 
 **Explicacion:**
 
-`async` — Marca una funcion como asincrona. Dice: "esta funcion puede pausarse mientras espera algo". No significa que se ejecute en otro hilo — significa que **puede suspenderse**.
+`async` — Marca una función como asincrona. Dice: "esta función puede pausarse mientras espera algo". No significa que se ejecute en otro hilo — significa que **puede suspenderse**.
 
-`await` — Marca un **punto de suspension**. Cuando Swift llega a un `await`, la funcion se pausa. El hilo queda libre para hacer otras cosas. Cuando la operacion termina, la funcion se reanuda donde se quedo.
+`await` — Marca un **punto de suspension**. Cuando Swift llega a un `await`, la función se pausa. El hilo queda libre para hacer otras cosas. Cuando la operación termina, la función se reanuda donde se quedo.
 
-`throws` — La funcion puede fallar. `try` acompana a `await` porque la llamada puede tanto suspenderse como fallar.
+`throws` — La función puede fallar. `try` acompana a `await` porque la llamada puede tanto suspenderse como fallar.
 
 ### El punto de suspension explicado
 
@@ -59,7 +83,7 @@ sequenceDiagram
     Note over VM: REANUDADO<br/>Continua donde se pausó
     VM->>VM: state = .loaded(products)
     VM-->>V: SwiftUI detecta cambio → redibuja
-```
+```text
 
 **Clave:** Mientras `ViewModel.load()` espera la respuesta de red, el hilo **no esta bloqueado**. Puede ejecutar otras tareas. Esto es radicalmente diferente a `DispatchQueue.sync` que bloquea el hilo hasta que termina.
 
@@ -69,9 +93,9 @@ sequenceDiagram
 
 ### Que es
 
-Un `Task` es un **contexto de ejecucion asincrono**. Piensalo como un trabajador que puedes contratar para hacer un trabajo en paralelo.
+Un `Task` es un **contexto de ejecución asincrono**. Piensalo como un trabajador que puedes contratar para hacer un trabajo en paralelo.
 
-### Task no estructurado (lanzar desde codigo sincrono)
+### Task no estructurado (lanzar desde código sincrono)
 
 ```swift
 // En un Button action (contexto sincrono):
@@ -80,9 +104,9 @@ Button("Cargar") {
         await viewModel.load()
     }
 }
-```
+```text
 
-`Task { ... }` — Crea un nuevo contexto async desde codigo sincrono. Lo necesitas porque el action de un `Button` no es `async`. El `Task` "envuelve" el codigo async para que pueda ejecutarse.
+`Task { ... }` — Crea un nuevo contexto async desde código sincrono. Lo necesitas porque el action de un `Button` no es `async`. El `Task` "envuelve" el código async para que pueda ejecutarse.
 
 **Peligro:** Si la vista desaparece, este `Task` sigue ejecutandose. Por eso en SwiftUI preferimos `.task { }` (que se cancela automaticamente).
 
@@ -104,9 +128,9 @@ Button("Cargar") {
 Task {
     await viewModel.load()
 }
-```
+```text
 
-### Cancelacion manual de Task
+### Cancelación manual de Task
 
 Si usas `Task { }` no estructurado, puedes cancelarlo manualmente:
 
@@ -133,19 +157,19 @@ final class SearchViewModel {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
-`searchTask?.cancel()` — Cancela la busqueda anterior si aun esta en progreso. Si el usuario escribe rapido "i", "ip", "iph", "ipho", "iphon", "iphone", cancelamos las busquedas intermedias y solo ejecutamos la ultima.
+`searchTask?.cancel()` — Cancela la busqueda anterior si aun esta en progreso. Si el usuario escribe rápido "i", "ip", "iph", "ipho", "iphon", "iphone", cancelamos las busquedas intermedias y solo ejecutamos la ultima.
 
 `Task.sleep(for: .milliseconds(300))` — Pausa el Task 300ms (debounce). Si el usuario sigue escribiendo, el Task se cancela antes de que pase ese tiempo.
 
-`Task.isCancelled` — Propiedad booleana que indica si el Task fue cancelado. La cancelacion en Swift es **cooperativa**: el sistema NO mata el Task — solo lo marca como cancelado. Tu codigo debe verificar periodicamente `Task.isCancelled` y salir limpiamente.
+`Task.isCancelled` — Propiedad booleana que indica si el Task fue cancelado. La cancelación en Swift es **cooperativa**: el sistema NO mata el Task — solo lo marca como cancelado. Tu código debe verificar periodicamente `Task.isCancelled` y salir limpiamente.
 
 ---
 
-## 3. async let — Operaciones en paralelo (numero fijo)
+## 3. async let — Operaciones en paralelo (número fijo)
 
 ### Que es
 
@@ -174,13 +198,13 @@ func loadProfile() async throws -> ProfileData {
     )
     // Total: ~2 segundos (el mas lento)
 }
-```
+```text
 
 **Explicacion:**
 
 `async let user = fetchUser()` — Lanza `fetchUser()` inmediatamente en background, pero NO espera el resultado. Es como pedir tres pizzas a la vez en vez de pedir una, esperar, pedir otra, esperar, pedir otra.
 
-`try await ProfileData(user: user, posts: posts, photos: photos)` — Aqui es donde esperas los tres resultados. Si alguno falla, los demas se **cancelan automaticamente** (structured concurrency).
+`try await ProfileData(user: user, posts: posts, photos: photos)` — Aquí es donde esperas los tres resultados. Si alguno falla, los demas se **cancelan automaticamente** (structured concurrency).
 
 ```mermaid
 gantt
@@ -197,7 +221,7 @@ gantt
     fetchUser     :0, 2
     fetchPosts    :0, 1
     fetchPhotos   :0, 1
-```
+```text
 
 ### Cuando usar async let
 
@@ -207,13 +231,13 @@ gantt
 
 ---
 
-## 4. TaskGroup — Operaciones en paralelo (numero dinamico)
+## 4. TaskGroup — Operaciones en paralelo (número dinámico)
 
 ### Que es
 
-Cuando el numero de operaciones no se conoce en compilacion (ej: descargar N imagenes), usas `TaskGroup`.
+Cuando el número de operaciones no se conoce en compilacion (ej: descargar N imágenes), usas `TaskGroup`.
 
-### Ejemplo: descargar imagenes de productos
+### Ejemplo: descargar imágenes de productos
 
 ```swift
 func loadProductImages(urls: [URL]) async -> [URL: Data] {
@@ -236,11 +260,11 @@ func loadProductImages(urls: [URL]) async -> [URL: Data] {
         return results
     }
 }
-```
+```text
 
 **Explicacion:**
 
-`withTaskGroup(of: (URL, Data?).self)` — Crea un grupo de tareas. El parametro `of:` dice que tipo devuelve cada tarea hija.
+`withTaskGroup(of: (URL, Data?).self)` — Crea un grupo de tareas. El parámetro `of:` dice que tipo devuelve cada tarea hija.
 
 `group.addTask { ... }` — Anade una tarea al grupo. Cada tarea se ejecuta en paralelo. Si tienes 50 URLs, se lanzan 50 descargas en paralelo (el sistema gestiona cuantas se ejecutan realmente a la vez).
 
@@ -250,10 +274,10 @@ func loadProductImages(urls: [URL]) async -> [URL: Data] {
 
 | `async let` | `TaskGroup` |
 |---|---|
-| Numero fijo de operaciones | Numero dinamico (array) |
+| Número fijo de operaciones | Número dinámico (array) |
 | Conocido en compilacion | Conocido en runtime |
-| Mas simple de escribir | Mas flexible |
-| Ej: fetchUser + fetchPosts | Ej: descargar N imagenes |
+| Más simple de escribir | Más flexible |
+| Ej: fetchUser + fetchPosts | Ej: descargar N imágenes |
 
 ---
 
@@ -261,7 +285,7 @@ func loadProductImages(urls: [URL]) async -> [URL: Data] {
 
 ### Que es
 
-Un `actor` es como una `class` con un **candado automatico**. Solo una operacion puede ejecutarse dentro del actor a la vez. Esto previene **data races** (dos hilos accediendo al mismo dato simultaneamente).
+Un `actor` es como una `class` con un **candado automático**. Solo una operación puede ejecutarse dentro del actor a la vez. Esto previene **data races** (dos hilos accediendo al mismo dato simultaneamente).
 
 ### El problema sin actor
 
@@ -278,9 +302,9 @@ class ImageCache {
         cache[url] = data  // Hilo 2 escribe AL MISMO TIEMPO → CRASH
     }
 }
-```
+```text
 
-### La solucion con actor
+### La solución con actor
 
 ```swift
 actor ImageCache {
@@ -298,7 +322,7 @@ actor ImageCache {
 // Uso: requiere await porque el actor puede estar ocupado
 let data = await imageCache.get(url)
 await imageCache.set(url, data: imageData)
-```
+```swift
 
 **Explicacion:**
 
@@ -313,11 +337,11 @@ await imageCache.set(url, data: imageData)
 ```swift
 @Observable @MainActor
 final class CatalogViewModel { ... }
-```
+```text
 
 **Por que:** Las propiedades del ViewModel son leidas por SwiftUI para renderizar. SwiftUI solo renderiza en el hilo principal. Si cambiaras `state` desde un hilo de background, la app crashearia. `@MainActor` previene eso.
 
-**Regla del skill:** No uses `@MainActor` como solucion generica para todo. Solo para codigo que genuinamente necesita el hilo principal (UI, ViewModels). Infraestructura y Domain NO necesitan `@MainActor`.
+**Regla del skill:** No uses `@MainActor` como solución generica para todo. Solo para código que genuinamente necesita el hilo principal (UI, ViewModels). Infraestructura y Domain NO necesitan `@MainActor`.
 
 ### Cuando usar cada herramienta
 
@@ -333,7 +357,7 @@ flowchart TD
     style SENDABLE fill:#d4edda,stroke:#28a745
     style MAINACTOR fill:#cce5ff,stroke:#007bff
     style ACTOR fill:#fff3cd,stroke:#ffc107
-```
+```text
 
 ---
 
@@ -341,17 +365,17 @@ flowchart TD
 
 ### Que es
 
-`Sendable` es un protocolo que dice: "este tipo es seguro para enviarse entre hilos". Ya lo usamos en todos los modelos de dominio. Aqui profundizamos en POR QUE y CUANDO.
+`Sendable` es un protocolo que dice: "este tipo es seguro para enviarse entre hilos". Ya lo usamos en todos los modelos de dominio. Aquí profundizamos en POR QUE y CUANDO.
 
 ### Que tipos son Sendable automaticamente
 
 | Tipo | Sendable? | Por que |
 |---|---|---|
-| `struct` con todas las propiedades `Sendable` | Si (automatico) | Los structs se copian, no se comparten |
-| `enum` con valores asociados `Sendable` | Si (automatico) | Los enums se copian |
+| `struct` con todas las propiedades `Sendable` | Si (automático) | Los structs se copian, no se comparten |
+| `enum` con valores asociados `Sendable` | Si (automático) | Los enums se copian |
 | `actor` | Si (siempre) | Los actors serializan acceso |
 | `class` normal | **No** | Las clases se comparten por referencia → data race |
-| `final class` con propiedades `let` `Sendable` | Si (automatico) | Inmutable → seguro |
+| `final class` con propiedades `let` `Sendable` | Si (automático) | Inmutable → seguro |
 | `@Sendable` closure | Si (marcado) | El closure no captura estado mutable |
 
 ### Donde se necesita Sendable
@@ -371,7 +395,7 @@ Task {
 group.addTask {
     return processedItem  // processedItem debe ser Sendable
 }
-```
+```text
 
 ### @unchecked Sendable — Deuda tecnica
 
@@ -383,24 +407,24 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
     var result: Result<(Data, HTTPURLResponse), Error>
     // ...
 }
-```
+```text
 
 `@unchecked Sendable` — Le dices al compilador: "confio en que esto es thread-safe". Pero si te equivocas, habra data races que el compilador no detectara.
 
 **Reglas del skill:**
-1. **Nunca** en codigo de produccion sin justificacion documentada.
+1. **Nunca** en código de producción sin justificacion documentada.
 2. Si lo usas, crea un ticket/tarea para eliminarlo en el futuro.
 3. En tests es aceptable porque los tests son single-threaded en la practica.
 
 ---
 
-## 7. Cancelacion cooperativa — Ser buen ciudadano
+## 7. Cancelación cooperativa — Ser buen ciudadano
 
 ### Que es
 
-Cuando un Task se cancela (porque la vista desaparecio, el usuario navego atras, o se lanzo una busqueda nueva), Swift NO lo mata inmediatamente. Lo **marca** como cancelado. Tu codigo debe verificarlo y salir limpiamente.
+Cuando un Task se cancela (porque la vista desaparecio, el usuario navego atras, o se lanzo una busqueda nueva), Swift NO lo mata inmediatamente. Lo **marca** como cancelado. Tu código debe verificarlo y salir limpiamente.
 
-### Como verificar cancelacion
+### Como verificar cancelación
 
 ```swift
 func processLargeDataset(_ items: [Item]) async throws -> [ProcessedItem] {
@@ -416,11 +440,11 @@ func processLargeDataset(_ items: [Item]) async throws -> [ProcessedItem] {
 
     return results
 }
-```
+```text
 
 **Explicacion:**
 
-`Task.checkCancellation()` — Si el Task fue cancelado, lanza `CancellationError`. El `try` la propaga hacia arriba y la funcion termina limpiamente.
+`Task.checkCancellation()` — Si el Task fue cancelado, lanza `CancellationError`. El `try` la propaga hacia arriba y la función termina limpiamente.
 
 Alternativa manual:
 
@@ -428,13 +452,13 @@ Alternativa manual:
 guard !Task.isCancelled else {
     return results  // Devolver lo que tengamos hasta ahora
 }
-```
+```text
 
 ### Por que es importante
 
-Sin verificacion de cancelacion, un Task cancelado sigue ejecutandose hasta el final, desperdiciando CPU, memoria, y bateria. En enterprise, esto es inaceptable: si el usuario navega atras, las operaciones de la pantalla anterior deben detenerse.
+Sin verificacion de cancelación, un Task cancelado sigue ejecutandose hasta el final, desperdiciando CPU, memoria, y bateria. En enterprise, esto es inaceptable: si el usuario navega atras, las operaciones de la pantalla anterior deben detenerse.
 
-`.task` de SwiftUI ya maneja esto por ti — cuando la vista desaparece, cancela el Task. Pero tu codigo **dentro** del Task debe ser cooperativo y verificar `Task.isCancelled` en bucles largos.
+`.task` de SwiftUI ya maneja esto por ti — cuando la vista desaparece, cancela el Task. Pero tu código **dentro** del Task debe ser cooperativo y verificar `Task.isCancelled` en bucles largos.
 
 ---
 
@@ -452,7 +476,7 @@ let url = URL(fileURLWithPath: "/path/to/large-file.txt")
 for try await line in url.lines {
     process(line)
 }
-```
+```text
 
 `for try await line in url.lines` — Igual que `for line in array`, pero cada linea llega de forma asincrona. El bucle se pausa esperando la siguiente linea, sin bloquear el hilo.
 
@@ -479,17 +503,17 @@ func observeLocationUpdates() -> AsyncStream<CLLocation> {
 for await location in observeLocationUpdates() {
     updateMap(with: location)
 }
-```
+```text
 
 **Explicacion:**
 
 `AsyncStream { continuation in ... }` — Crea un stream asincrono. La `continuation` es el control remoto: llamas a `.yield(valor)` para emitir valores y `.finish()` para terminar el stream.
 
-`continuation.onTermination` — Se ejecuta cuando el consumidor deja de escuchar (cancelacion, scope terminado). Aqui limpias recursos.
+`continuation.onTermination` — Se ejecuta cuando el consumidor deja de escuchar (cancelación, scope terminado). Aquí limpias recursos.
 
 ### Cuando usar AsyncSequence
 
-| Patron | Herramienta |
+| Patrón | Herramienta |
 |---|---|
 | Una peticion, una respuesta | `async/await` |
 | N peticiones en paralelo | `async let` / `TaskGroup` |
@@ -499,7 +523,7 @@ for await location in observeLocationUpdates() {
 
 ## 9. Patrones enterprise comunes
 
-### Patron: Red + UI update
+### Patrón: Red + UI update
 
 ```swift
 @Observable @MainActor
@@ -520,11 +544,11 @@ final class ProductListViewModel {
         }
     }
 }
-```
+```text
 
-`defer { isLoading = false }` — Se ejecuta **siempre** al salir de la funcion, sea por exito o por error. Garantiza que `isLoading` se pone en `false` sin importar que pase. Es como un "al salir, apaga la luz".
+`defer { isLoading = false }` — Se ejecuta **siempre** al salir de la función, sea por exito o por error. Garantiza que `isLoading` se pone en `false` sin importar que pase. Es como un "al salir, apaga la luz".
 
-### Patron: Retry con backoff exponencial
+### Patrón: Retry con backoff exponencial
 
 ```swift
 func withRetry<T>(
@@ -547,9 +571,9 @@ func withRetry<T>(
 let products = try await withRetry {
     try await repository.loadAll()
 }
-```
+```text
 
-### Patron: Timeout
+### Patrón: Timeout
 
 ```swift
 func withTimeout<T>(
@@ -576,9 +600,9 @@ func withTimeout<T>(
 let products = try await withTimeout(seconds: 10) {
     try await repository.loadAll()
 }
-```
+```text
 
-**Explicacion:** Lanza dos tareas en paralelo: la operacion real y un timer. Si el timer termina primero (timeout), cancela la operacion. Si la operacion termina primero, cancela el timer.
+**Explicacion:** Lanza dos tareas en paralelo: la operación real y un timer. Si el timer termina primero (timeout), cancela la operación. Si la operación termina primero, cancela el timer.
 
 ---
 
@@ -586,9 +610,9 @@ let products = try await withTimeout(seconds: 10) {
 
 ### Strict concurrency por defecto
 
-En Swift 6, el compilador **rechaza** codigo que podria tener data races. Lo que antes eran warnings se convierten en errores.
+En Swift 6, el compilador **rechaza** código que podria tener data races. Lo que antes eran warnings se convierten en errores.
 
-### Errores mas comunes en Swift 6
+### Errores más comunes en Swift 6
 
 **Error 1: "Sending value of non-Sendable type"**
 ```swift
@@ -610,7 +634,7 @@ final class MyService: Sendable {
 struct MyService: Sendable {
     func doWork() { }
 }
-```
+```text
 
 **Error 2: "Main actor-isolated property cannot be accessed from nonisolated context"**
 ```swift
@@ -628,7 +652,7 @@ func process(vm: ViewModel) {
 func process(vm: ViewModel) async {
     print(await vm.name)  // OK: await cruza la frontera
 }
-```
+```text
 
 **Error 3: "Capture of non-Sendable in @Sendable closure"**
 ```swift
@@ -651,7 +675,7 @@ let processor = DataProcessor()
 Task {
     await processor.add("nuevo")  // OK: serializado por el actor
 }
-```
+```text
 
 ### Como prepararte
 
@@ -688,11 +712,11 @@ func loadData() async throws -> Data {
     let (data, _) = try await session.data(from: url)
     return data
 }
-```
+```text
 
-`DispatchSemaphore`, `NSLock`, y `pthread_mutex` **nunca** deben usarse en contextos async. Bloquean el hilo del executor, y como el executor tiene un numero limitado de hilos, puedes causar un deadlock donde todas las tareas estan esperando un hilo que esta bloqueado.
+`DispatchSemaphore`, `NSLock`, y `pthread_mutex` **nunca** deben usarse en contextos async. Bloquean el hilo del executor, y como el executor tiene un número limitado de hilos, puedes causar un deadlock donde todas las tareas estan esperando un hilo que esta bloqueado.
 
-### Nunca usar Task.detached sin razon
+### Nunca usar Task.detached sin razón
 
 ```swift
 // MAL: pierde herencia de contexto (prioridad, actor)
@@ -704,11 +728,11 @@ Task.detached {
 Task {
     await viewModel.load()  // Hereda @MainActor si el padre es @MainActor
 }
-```
+```swift
 
 `Task.detached` NO hereda el contexto del padre (prioridad, actor isolation). Solo usalo si necesitas **explicitamente** ejecutar fuera del contexto actual (raro).
 
-### Nunca ignorar la cancelacion
+### Nunca ignorar la cancelación
 
 ```swift
 // MAL: ignora cancelacion, desperdicia recursos
@@ -729,7 +753,7 @@ func processItems(_ items: [Item]) async throws -> [Result] {
     }
     return results
 }
-```
+```text
 
 ---
 
@@ -763,13 +787,13 @@ flowchart LR
         C1["Cancelacion<br/>Task.isCancelled"]
         C2["Retry + Timeout<br/>Patrones enterprise"]
     end
-```
+```text
 
 ### Checklist de concurrencia para un junior
 
-**Basico (usa a diario):**
+**Básico (usa a diario):**
 - [ ] `async/await` para operaciones asincronas
-- [ ] `.task { }` en SwiftUI para carga automatica con cancelacion
+- [ ] `.task { }` en SwiftUI para carga automatica con cancelación
 - [ ] `Task { }` solo cuando no puedas usar `.task`
 - [ ] `try/catch` para manejar errores async
 
@@ -778,13 +802,13 @@ flowchart LR
 - [ ] `TaskGroup` para N operaciones dinamicas
 - [ ] Entender que `async let` cancela hermanos si uno falla
 
-**Proteccion (usa siempre):**
+**Protección (usa siempre):**
 - [ ] `Sendable` en todos los tipos que cruzan fronteras async
-- [ ] `@MainActor` en ViewModels y codigo de UI
+- [ ] `@MainActor` en ViewModels y código de UI
 - [ ] `actor` para caches, stores, y estado mutable compartido
-- [ ] Evitar `@unchecked Sendable` en produccion
+- [ ] Evitar `@unchecked Sendable` en producción
 
-**Cancelacion (obligatorio en enterprise):**
+**Cancelación (obligatorio en enterprise):**
 - [ ] `Task.checkCancellation()` en bucles largos
 - [ ] `Task.isCancelled` para limpiar recursos
 - [ ] `defer { }` para garantizar limpieza
@@ -801,8 +825,85 @@ flowchart LR
 
 **Anti-patrones (NUNCA hacer):**
 - [ ] No usar `DispatchSemaphore` en contextos async
-- [ ] No usar `Task.detached` sin razon documentada
-- [ ] No ignorar cancelacion en bucles largos
+- [ ] No usar `Task.detached` sin razón documentada
+- [ ] No ignorar cancelación en bucles largos
 - [ ] No bloquear hilos con `wait()` o `sleep()` (usar `Task.sleep`)
 
 Si dominas estos puntos, puedes manejar cualquier escenario de concurrencia en enterprise iOS.
+
+---
+
+## Ejercicio guiado: cancelación segura en CatalogViewModel
+
+**Objetivo:** Verificar que el ViewModel de Catalog cancela correctamente la carga anterior cuando el usuario dispara una nueva carga.
+
+**Instrucciones:**
+
+1. Abre `apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/` y localiza el ViewModel de Catalog.
+2. Verifica (o implementa) que al llamar `load()` por segunda vez, la primera `Task` se cancela.
+3. Escribe un test que simule:
+   - Primera llamada a `load()` con un repositorio lento (2 segundos).
+   - Segunda llamada a `load()` inmediatamente despues.
+   - Verifica que solo la segunda carga produce resultado en `products`.
+
+**Criterios de exito:**
+
+- El test pasa de forma determinista.
+- El ViewModel almacena la `Task` activa y la cancela antes de crear una nueva.
+- No hay data races (el ViewModel usa `@MainActor` o aislamiento equivalente).
+
+**Solución razonada:**
+
+```swift
+// En el ViewModel
+@MainActor
+final class CatalogViewModel: ObservableObject {
+    @Published var products: [Product] = []
+    private var loadTask: Task<Void, Never>?
+
+    func load() {
+        loadTask?.cancel()  // Cancelar carga anterior
+        loadTask = Task {
+            do {
+                let result = try await repository.loadProducts()
+                if !Task.isCancelled {
+                    products = result
+                }
+            } catch {
+                // Manejar error (no actualizar si cancelado)
+            }
+        }
+    }
+}
+
+// Test
+func test_load_cancels_previous_load() async {
+    let slowRepo = SlowStubRepository(delay: .seconds(2), result: [Product(name: "Old", price: 1)])
+    let fastRepo = StubRepository(result: [Product(name: "New", price: 2)])
+
+    let sut = CatalogViewModel(repository: slowRepo)
+    sut.load()  // Primera carga (lenta)
+
+    // Cambiar a repo rapido y cargar de nuevo
+    sut.repository = fastRepo
+    sut.load()  // Segunda carga (cancela la primera)
+
+    // Esperar a que la segunda complete
+    try? await Task.sleep(for: .milliseconds(200))
+    XCTAssertEqual(sut.products.first?.name, "New")
+}
+```
+
+La cancelación no es un detalle de implementación: es un requisito de UX. Sin ella, el usuario puede ver datos de una carga que ya no es relevante (por ejemplo, resultados de una busqueda anterior).
+
+---
+
+## Cierre
+
+Swift Concurrency no es una feature opcional que se anade al final. Es el sistema de tipos que garantiza que tu app no tiene data races. En esta lección has visto los patrones fundamentales: `async/await` para flujos lineales, `Task` para trabajo concurrente con cancelación, `@MainActor` para proteger UI, y `Sendable` para fronteras de concurrencia.
+
+La Etapa 5 (Maestria) profundiza en estos conceptos con isolation domains, actors como componentes arquitectonicos y testing concurrente avanzado. Lo que has aprendido aquí es la base operativa; lo que viene es el criterio de diseño.
+
+---
+
+**Anterior:** [SwiftUI Enterprise: Patrones Imprescindibles ←](07-swiftui-enterprise.md) · **Siguiente:** [App Final Etapa 2: Login + Catalog Funcionando Juntos →](09-app-final-etapa-2.md)

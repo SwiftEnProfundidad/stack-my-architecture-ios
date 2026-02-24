@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1400" viewBox="0 0 1900 1400" role="img" aria-label="Leyenda de flechas para diagramas">
+  <defs>
+    <style>
+      .title { fill: #e8edf6; font: 800 70px 'Inter', 'Segoe UI', sans-serif; }
+      .subtitle { fill: #9fa9bc; font: 400 40px 'Inter', 'Segoe UI', sans-serif; }
+      .section { font: 800 58px 'Inter', 'Segoe UI', sans-serif; }
+      .body { fill: #d8dee9; font: 400 44px 'Inter', 'Segoe UI', sans-serif; }
+      .hint { fill: #9fa9bc; font: 400 36px 'Inter', 'Segoe UI', sans-serif; }
+      .footer { fill: #7e899f; font: 400 34px 'Inter', 'Segoe UI', sans-serif; }
+    </style>
+
+    <marker id="closed-pink" markerWidth="14" markerHeight="12" refX="12" refY="6" orient="auto">
+      <polygon points="0,0 12,6 0,12" fill="#ff5ecf" />
+    </marker>
+    <marker id="closed-white" markerWidth="14" markerHeight="12" refX="12" refY="6" orient="auto">
+      <polygon points="0,0 12,6 0,12" fill="#f4f7fc" />
+    </marker>
+    <marker id="open-blue" markerWidth="15" markerHeight="12" refX="13" refY="6" orient="auto">
+      <polyline points="0,0 13,6 0,12" fill="none" stroke="#49a4ff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+    </marker>
+    <marker id="open-green" markerWidth="15" markerHeight="12" refX="13" refY="6" orient="auto">
+      <polyline points="0,0 13,6 0,12" fill="none" stroke="#5df0b2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+    </marker>
+  </defs>
+
+  <rect x="24" y="24" width="1852" height="1352" rx="28" fill="#050b18" stroke="#4f5964" stroke-width="3" />
+
+  <text x="950" y="130" class="title" text-anchor="middle">Leyenda de flechas para diagramas</text>
+  <text x="950" y="205" class="title" text-anchor="middle">(genérica)</text>
+  <text x="950" y="270" class="subtitle" text-anchor="middle">4 combinaciones (línea + punta) y un uso recomendado para mantener tus diagramas consistentes</text>
+
+  <line x1="120" y1="370" x2="450" y2="370" stroke="#ff5ecf" stroke-width="10" marker-end="url(#closed-pink)" />
+  <text x="560" y="360" class="section" fill="#ff5ecf">Línea continua + punta cerrada</text>
+  <text x="560" y="426" class="body">• Dependencia directa en runtime (A usa / invoca a B).</text>
+  <text x="560" y="480" class="body">• Normalmente implica referencia fuerte o composición.</text>
+  <text x="560" y="536" class="hint">Úsala cuando la relación es parte del flujo principal de ejecución.</text>
+
+  <line x1="120" y1="620" x2="450" y2="620" stroke="#f4f7fc" stroke-width="10" stroke-dasharray="30 18" marker-end="url(#closed-white)" />
+  <text x="560" y="610" class="section" fill="#f4f7fc">Línea discontinua + punta cerrada</text>
+  <text x="560" y="676" class="body">• Creación / configuración (wiring): un ensamblador conecta piezas.</text>
+  <text x="560" y="730" class="body">• Relación de infraestructura, no de comportamiento del dominio.</text>
+  <text x="560" y="786" class="hint">Úsala para indicar “esto se construye aquí y se inyecta allá”.</text>
+
+  <line x1="120" y1="870" x2="450" y2="870" stroke="#49a4ff" stroke-width="10" stroke-dasharray="30 18" marker-end="url(#open-blue)" />
+  <text x="560" y="860" class="section" fill="#49a4ff">Línea discontinua + punta abierta</text>
+  <text x="560" y="926" class="body">• Contrato / abstracción (relación de tipo).</text>
+  <text x="560" y="980" class="body">• Implementa o depende de una interfaz/protocolo.</text>
+  <text x="560" y="1036" class="hint">Úsala para resaltar inversión de dependencias y sustituibilidad.</text>
+
+  <line x1="120" y1="1120" x2="450" y2="1120" stroke="#5df0b2" stroke-width="10" marker-end="url(#open-green)" />
+  <text x="560" y="1110" class="section" fill="#5df0b2">Línea continua + punta abierta</text>
+  <text x="560" y="1176" class="body">• Salida / propagación (A emite datos/eventos hacia B).</text>
+  <text x="560" y="1230" class="body">• Útil para callbacks, delegación, observers, streams, etc.</text>
+  <text x="560" y="1286" class="hint">Úsala cuando quieres diferenciar “entrada/uso” vs “salida/notificación”.</text>
+
+  <text x="950" y="1342" class="footer" text-anchor="middle">Regla práctica: decide una convención (como esta) y úsala de forma consistente en todo el diagrama.</text>
+</svg>

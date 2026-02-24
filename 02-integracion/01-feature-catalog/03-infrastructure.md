@@ -1,5 +1,10 @@
 # Feature Catalog: Capa Infrastructure
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a poder construir una infraestructura de `Catalog` que conecte con red real sin contaminar el core de negocio, con contratos claros, traducción de errores consistente y pruebas de contrato estables.
@@ -60,7 +65,7 @@ flowchart LR
     RES --> ERRTECH["Transport/Decode Errors"]
     ERRTECH --> ERRT["Error Translator"]
     ERRT --> DOMERR["CatalogError"]
-```
+```text
 
 Si falla el mapping y dejas pasar basura, rompes el dominio.
 
@@ -99,7 +104,7 @@ import Foundation
 protocol ProductRepository: Sendable {
     func loadAll() async throws -> [Product]
 }
-```
+```text
 
 Infrastructure debe cumplir este contrato exacto, sin extenderlo con detalles de red.
 
@@ -127,7 +132,7 @@ struct ProductDTO: Decodable, Sendable {
         case imageURL = "image_url"
     }
 }
-```
+```text
 
 Este ejemplo usa `Decimal` y `URL` ya decodificados para fallar pronto cuando el payload venga mal.
 
@@ -168,7 +173,7 @@ struct ProductMapper {
         )
     }
 }
-```
+```text
 
 Diferencia clave:
 
@@ -240,7 +245,7 @@ struct RemoteProductRepository: ProductRepository, Sendable {
         return request
     }
 }
-```
+```text
 
 ### Por qué así
 
@@ -266,7 +271,7 @@ struct CatalogFeatureFactory {
         return LoadProductsUseCase(repository: repository)
     }
 }
-```
+```text
 
 Esto mantiene la regla de curso: composición fuera del core.
 
@@ -344,7 +349,7 @@ final class RemoteProductRepositoryTests: XCTestCase {
         try! JSONSerialization.data(withJSONObject: rows)
     }
 }
-```
+```text
 
 **Explicación de cada test de contrato:**
 
@@ -404,7 +409,7 @@ struct BadRemoteRepository: ProductRepository {
         }
     }
 }
-```
+```text
 
 Qué está mal:
 
@@ -461,4 +466,6 @@ Cómo depurarlo:
 
 Si Application es el director de orquesta, Infrastructure es el técnico de sonido: nadie le aplaude cuando todo va bien, pero si falla, el concierto se cae. Esta capa bien diseñada te da algo muy enterprise: cambiar proveedores externos sin romper reglas de negocio.
 
-**Anterior:** [Application ←](02-application.md) · **Siguiente:** [Interface SwiftUI →](04-interface-swiftui.md)
+---
+
+**Anterior:** [Feature Catalog: Capa Application ←](02-application.md) · **Siguiente:** [Feature Catalog: Capa Interface (SwiftUI) →](04-interface-swiftui.md)

@@ -1,26 +1,52 @@
 # SwiftUI Enterprise: Patrones Imprescindibles
 
-## Por que esta leccion
+## Mapa de lectura (~50 min)
 
-En las lecciones anteriores construimos dos pantallas (Login y Catalog) usando SwiftUI. Pero una app profesional necesita mucho mas: modales, alertas, pull-to-refresh, busqueda, tabs, barras de herramientas, persistencia de preferencias... En esta leccion vamos a enriquecer nuestra app con los patrones SwiftUI que encontraras en **cualquier** app enterprise.
+| # | Sección | Línea | Tiempo |
+|---|---------|-------|--------|
+| 1 | TabView — Navegación por pestañas | ~15 | 3 min |
+| 2 | @Environment — Valores del sistema | ~90 | 3 min |
+| 3 | .sheet y .fullScreenCover — Modales | ~157 | 3 min |
+| 4 | .alert y .confirmationDialog | ~247 | 3 min |
+| 5 | .refreshable — Pull to refresh | ~314 | 2 min |
+| 6 | .searchable — Búsqueda en listas | ~350 | 3 min |
+| 7 | .toolbar — Barra de herramientas | ~417 | 2 min |
+| 8 | @Binding — Conexión bidireccional | ~458 | 3 min |
+| 9 | Form y Section — Ajustes | ~508 | 3 min |
+| 10 | NavigationLink vs navigationDestination | ~584 | 2 min |
+| 11 | ViewModifier personalizados | ~615 | 2 min |
+| 12 | @Bindable — Compañero de @Observable | ~696 | 3 min |
+| 13 | Performance — Listas rápidas | ~771 | 3 min |
+| 14 | Animaciones profesionales | ~858 | 3 min |
+| 15 | Accesibilidad | ~922 | 3 min |
+| 16 | APIs Modernas (usar vs no usar) | ~983 | 3 min |
+| 17 | View Composition — Vistas reutilizables | ~1072 | 3 min |
+| 18 | Liquid Glass — iOS 26+ | ~1149 | 3 min |
+| — | Ejercicio guiado | ~1313 | 5 min |
 
-Cada patron se explica con:
+---
+
+## Por que está lección
+
+En las lecciones anteriores construimos dos pantallas (Login y Catalog) usando SwiftUI. Pero una app profesional necesita mucho más: modales, alertas, pull-to-refresh, busqueda, tabs, barras de herramientas, persistencia de preferencias... En está lección vamos a enriquecer nuestra app con los patrones SwiftUI que encontraras en **cualquier** app enterprise.
+
+Cada patrón se explica con:
 1. **Que es** — Descripcion para un junior.
 2. **Por que lo necesitas** — Caso de uso real en enterprise.
-3. **Como se integra** — Codigo aplicado a nuestra arquitectura.
+3. **Como se integra** — Código aplicado a nuestra arquitectura.
 4. **Donde vive** — En que capa de Clean Architecture encaja.
 
 ---
 
-## 1. TabView — Navegacion por pestanas
+## 1. TabView — Navegación por pestanas
 
 ### Que es
 
-`TabView` organiza la app en pestanas (tabs) en la parte inferior de la pantalla. Piensa en apps como App Store, Spotify, o Instagram: todas tienen una barra de pestanas abajo. Cada pestana es una seccion independiente de la app.
+`TabView` organiza la app en pestanas (tabs) en la parte inferior de la pantalla. Piensa en apps como App Store, Spotify, o Instagram: todas tienen una barra de pestanas abajo. Cada pestana es una sección independiente de la app.
 
 ### Por que lo necesitas
 
-En enterprise, las apps casi siempre tienen multiples secciones: catalogo, perfil, ajustes, notificaciones. `TabView` es la forma estandar de organizar esto en iOS.
+En enterprise, las apps casi siempre tienen multiples secciones: catálogo, perfil, ajustes, notificaciones. `TabView` es la forma estandar de organizar esto en iOS.
 
 ### Como se integra
 
@@ -71,19 +97,19 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 **Explicacion linea por linea:**
 
 `TabView { ... }` — Crea la barra de pestanas. Cada `Tab` dentro es una pestana.
 
-`Tab("Catalogo", systemImage: "book.fill")` — Crea una pestana con titulo "Catalogo" y un icono de SF Symbols. El icono y texto aparecen en la barra inferior.
+`Tab("Catalogo", systemImage: "book.fill")` — Crea una pestana con titulo "Catálogo" y un icono de SF Symbols. El icono y texto aparecen en la barra inferior.
 
-Cada tab tiene su propio `NavigationStack` — Esto es **critico**: cada pestana gestiona su propia pila de navegacion. Si navegas a un detalle en Catalogo y cambias a Perfil, al volver a Catalogo sigues en el detalle. Las pilas son independientes.
+Cada tab tiene su propio `NavigationStack` — Esto es **crítico**: cada pestana gestiona su propia pila de navegación. Si navegas a un detalle en Catálogo y cambias a Perfil, al volver a Catálogo sigues en el detalle. Las pilas son independientes.
 
 ### Donde vive
 
-En la **capa App** (`StackMyArchitectureApp.swift`). El `TabView` es una decision de presentacion de la app, no de una feature individual.
+En la **capa App** (`StackMyArchitectureApp.swift`). El `TabView` es una decisión de presentación de la app, no de una feature individual.
 
 ---
 
@@ -93,7 +119,7 @@ En la **capa App** (`StackMyArchitectureApp.swift`). El `TabView` es una decisio
 
 `@Environment` es un property wrapper que te da acceso a valores proporcionados por SwiftUI o por ti mismo. Piensalo como una **caja de herramientas compartida**: SwiftUI mete herramientas (dismiss, colorScheme, locale...) y tu las sacas cuando las necesitas.
 
-### Los mas usados en enterprise
+### Los más usados en enterprise
 
 ```swift
 // Cerrar/volver atras de una vista presentada modalmente
@@ -110,7 +136,7 @@ En la **capa App** (`StackMyArchitectureApp.swift`). El `TabView` es una decisio
 
 // Contexto de SwiftData (persistencia)
 @Environment(\.modelContext) private var modelContext
-```
+```text
 
 ### Ejemplo real: cerrar un modal
 
@@ -140,11 +166,11 @@ struct FilterView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
-`@Environment(\.dismiss)` — Obtiene la accion de "cerrar esta vista". Cuando esta vista se presenta como `.sheet`, llamar a `dismiss()` la cierra con animacion. Es como un boton de "cerrar" que SwiftUI te da gratis.
+`@Environment(\.dismiss)` — Obtiene la acción de "cerrar está vista". Cuando está vista se presenta como `.sheet`, llamar a `dismiss()` la cierra con animación. Es como un botón de "cerrar" que SwiftUI te da gratis.
 
 `\.dismiss` es un **key path al Environment**. El `\.` apunta a una propiedad del entorno de SwiftUI. Es la misma sintaxis que `\.id` en `List(products, id: \.id)`.
 
@@ -154,7 +180,7 @@ En la **capa Interface**. `@Environment` es exclusivo de SwiftUI — nunca en Do
 
 ---
 
-## 3. .sheet y .fullScreenCover — Presentacion modal
+## 3. .sheet y .fullScreenCover — Presentación modal
 
 ### Que es
 
@@ -162,11 +188,11 @@ Un **modal** es una pantalla que aparece deslizandose desde abajo, cubriendo par
 
 ### Por que lo necesitas
 
-En enterprise: formularios de edicion, pantallas de filtros, vistas de detalle rapido, flujos de onboarding, pantallas de compartir.
+En enterprise: formularios de edicion, pantallas de filtros, vistas de detalle rápido, flujos de onboarding, pantallas de compartir.
 
 ### Como se integra
 
-Anade un boton de filtros al catalogo:
+Anade un botón de filtros al catálogo:
 
 ```swift
 struct CatalogView: View {
@@ -202,13 +228,13 @@ struct CatalogView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion linea por linea:**
 
-`@State private var showingFilter = false` — Un booleano que controla si el modal esta visible. `false` = cerrado, `true` = abierto. Es `@State` porque SwiftUI necesita observar los cambios para animar la apertura/cierre.
+`@State private var showingFilter = false` — Un booleano que controla si el modal está visible. `false` = cerrado, `true` = abierto. Es `@State` porque SwiftUI necesita observar los cambios para animar la apertura/cierre.
 
-`.toolbar { ToolbarItem(placement: .topBarTrailing) { ... } }` — Anade un boton en la barra de navegacion, a la derecha (`.topBarTrailing`). Explicaremos `.toolbar` en detalle mas abajo.
+`.toolbar { ToolbarItem(placement: .topBarTrailing) { ... } }` — Anade un botón en la barra de navegación, a la derecha (`.topBarTrailing`). Explicaremos `.toolbar` en detalle más abajo.
 
 `showingFilter = true` — Cuando el usuario pulsa "Filtrar", ponemos el booleano en `true`. SwiftUI detecta el cambio y abre el sheet.
 
@@ -234,7 +260,7 @@ A veces quieres pasar un dato al modal. Usa `.sheet(item:)`:
 .sheet(item: $selectedProduct) { product in
     ProductQuickView(product: product)
 }
-```
+```text
 
 `item:` recibe un binding a un opcional. Cuando el valor NO es `nil`, el sheet se abre con ese dato. Cuando se cierra, SwiftUI pone el valor a `nil`. El tipo debe conformar `Identifiable` (que requiere una propiedad `id`).
 
@@ -280,15 +306,15 @@ struct ProfileView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
-`.alert("titulo", isPresented: $bool)` — Misma mecanica que `.sheet`: un booleano controla si se muestra. Cuando el usuario pulsa un boton del alert, SwiftUI pone el booleano en `false`.
+`.alert("titulo", isPresented: $bool)` — Misma mecanica que `.sheet`: un booleano controla si se muestra. Cuando el usuario pulsa un botón del alert, SwiftUI pone el booleano en `false`.
 
-`Button("Cancelar", role: .cancel)` — `role: .cancel` le dice a SwiftUI que es el boton de cancelar. En iOS, lo estiliza diferente (texto en azul, mas prominente). El bloque `{ }` esta vacio porque cancelar no hace nada.
+`Button("Cancelar", role: .cancel)` — `role: .cancel` le dice a SwiftUI que es el botón de cancelar. En iOS, lo estiliza diferente (texto en azul, más prominente). El bloque `{ }` está vacio porque cancelar no hace nada.
 
-`Button("Cerrar sesion", role: .destructive)` — `role: .destructive` pinta el texto en rojo para advertir al usuario que es una accion irreversible.
+`Button("Cerrar sesion", role: .destructive)` — `role: .destructive` pinta el texto en rojo para advertir al usuario que es una acción irreversible.
 
 `message: { Text("...") }` — El cuerpo del alert, debajo del titulo.
 
@@ -301,13 +327,13 @@ struct ProfileView: View {
     Button("Precio: mayor a menor") { viewModel.sortBy(.priceDescending) }
     Button("Cancelar", role: .cancel) { }
 }
-```
+```text
 
 Aparece como un menu desde abajo con las opciones. Es el reemplazo moderno del antiguo `ActionSheet`.
 
 ### Donde vive
 
-En la **capa Interface**. La logica de "que pasa cuando el usuario confirma" (ej: `onLogout()`) es un closure que viene del coordinador o del ViewModel.
+En la **capa Interface**. La lógica de "que pasa cuando el usuario confirma" (ej: `onLogout()`) es un closure que viene del coordinador o del ViewModel.
 
 ---
 
@@ -328,7 +354,7 @@ case .loaded(let products):
     .refreshable {
         await viewModel.load()
     }
-```
+```text
 
 **Eso es todo.** Una sola linea. SwiftUI se encarga de:
 - Mostrar el spinner de refresh cuando el usuario arrastra hacia abajo.
@@ -339,11 +365,11 @@ case .loaded(let products):
 
 `.refreshable { await viewModel.load() }` — El closure es `async`, por eso usamos `await`. SwiftUI sabe que `viewModel.load()` es asincrono y espera a que termine antes de ocultar el spinner. No necesitas gestionar ningun estado de "isRefreshing" — SwiftUI lo hace todo.
 
-**Fijate:** El diagrama de estados de CatalogView ya tenia flechas de "Pull-to-refresh" marcadas como "Etapa 3". Aqui lo activamos.
+**Fijate:** El diagrama de estados de CatalogView ya tenia flechas de "Pull-to-refresh" marcadas como "Etapa 3". Aquí lo activamos.
 
 ### Donde vive
 
-Modifier de SwiftUI — **capa Interface**. La logica de recarga (`viewModel.load()`) ya existe en el ViewModel.
+Modifier de SwiftUI — **capa Interface**. La lógica de recarga (`viewModel.load()`) ya existe en el ViewModel.
 
 ---
 
@@ -351,11 +377,11 @@ Modifier de SwiftUI — **capa Interface**. La logica de recarga (`viewModel.loa
 
 ### Que es
 
-Anade una barra de busqueda integrada en la navegacion. Cuando el usuario escribe, puedes filtrar los resultados.
+Anade una barra de busqueda integrada en la navegación. Cuando el usuario escribe, puedes filtrar los resultados.
 
 ### Como se integra
 
-Hay dos formas de busqueda: **local** (filtrar datos ya cargados) y **remota** (buscar en servidor). Veamos la local que es la mas comun:
+Hay dos formas de busqueda: **local** (filtrar datos ya cargados) y **remota** (buscar en servidor). Veamos la local que es la más comun:
 
 ```swift
 struct CatalogView: View {
@@ -385,19 +411,19 @@ struct CatalogView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
 `@State private var searchText = ""` — El texto que el usuario escribe en la barra de busqueda. Empieza vacio.
 
-`.searchable(text: $searchText, prompt: "Buscar productos...")` — Anade la barra de busqueda. `text:` es un **binding** al texto de busqueda. SwiftUI actualiza `searchText` automaticamente cuando el usuario escribe. `prompt:` es el texto gris que aparece cuando la barra esta vacia.
+`.searchable(text: $searchText, prompt: "Buscar productos...")` — Anade la barra de busqueda. `text:` es un **binding** al texto de busqueda. SwiftUI actualiza `searchText` automaticamente cuando el usuario escribe. `prompt:` es el texto gris que aparece cuando la barra está vacia.
 
-`products.filter { product in ... }` — Filtra el array en memoria. `.filter` crea un nuevo array con solo los elementos que cumplen la condicion. `localizedCaseInsensitiveContains` busca sin importar mayusculas/minusculas ni acentos: "cafe" encuentra "Cafe" y "Cafe".
+`products.filter { product in ... }` — Filtra el array en memoria. `.filter` crea un nuevo array con solo los elementos que cumplen la condición. `localizedCaseInsensitiveContains` busca sin importar mayusculas/minusculas ni acentos: "cafe" encuentra "Cafe" y "Cafe".
 
-`searchText.isEmpty || product.name.contains(...)` — Si el texto de busqueda esta vacio, muestra todos. Si no, filtra por nombre.
+`searchText.isEmpty || product.name.contains(...)` — Si el texto de busqueda está vacio, muestra todos. Si no, filtra por nombre.
 
-**Nota para enterprise:** En apps reales, el filtrado complejo (por multiples campos, con debounce para busqueda remota) se mueve al ViewModel. Aqui lo ponemos en la vista por simplicidad, pero en produccion harias:
+**Nota para enterprise:** En apps reales, el filtrado complejo (por multiples campos, con debounce para busqueda remota) se mueve al ViewModel. Aquí lo ponemos en la vista por simplicidad, pero en producción harias:
 
 ```swift
 // En CatalogViewModel
@@ -406,11 +432,11 @@ func search(_ query: String) {
     let filtered = allProducts.filter { ... }
     state = .loaded(filtered)
 }
-```
+```text
 
 ### Donde vive
 
-El modifier `.searchable` esta en la **Interface**. La logica de filtrado en enterprise se mueve al **ViewModel** (Interface) o incluso a un **UseCase** si la busqueda es remota (Application).
+El modifier `.searchable` está en la **Interface**. La lógica de filtrado en enterprise se mueve al **ViewModel** (Interface) o incluso a un **UseCase** si la busqueda es remota (Application).
 
 ---
 
@@ -418,9 +444,9 @@ El modifier `.searchable` esta en la **Interface**. La logica de filtrado en ent
 
 ### Que es
 
-`.toolbar` anade botones a la barra de navegacion (arriba) o a la barra inferior. Es el lugar para acciones contextuales: filtrar, editar, compartir, anadir.
+`.toolbar` anade botones a la barra de navegación (arriba) o a la barra inferior. Es el lugar para acciones contextuales: filtrar, editar, compartir, anadir.
 
-### Posiciones mas usadas
+### Posiciones más usadas
 
 ```swift
 .toolbar {
@@ -439,11 +465,11 @@ El modifier `.searchable` esta en la **Interface**. La logica de filtrado en ent
         Text("\(products.count) productos")
     }
 }
-```
+```text
 
 **Explicacion:**
 
-`ToolbarItem(placement:)` — Cada item tiene una posicion. SwiftUI adapta la posicion segun la plataforma (iPhone vs iPad vs Mac).
+`ToolbarItem(placement:)` — Cada item tiene una posición. SwiftUI adapta la posición segun la plataforma (iPhone vs iPad vs Mac).
 
 `placement: .topBarTrailing` — Arriba a la derecha. En idiomas RTL (arabe, hebreo), SwiftUI lo mueve automaticamente a la izquierda.
 
@@ -455,11 +481,11 @@ Modifier de SwiftUI — **capa Interface**.
 
 ---
 
-## 8. @Binding — Conexion bidireccional
+## 8. @Binding — Conexión bidireccional
 
 ### Que es
 
-`@Binding` crea una **conexion de ida y vuelta** entre una vista padre y una vista hija. La hija puede LEER y ESCRIBIR un valor que pertenece al padre. Ya lo usamos con `$` (ej: `$coordinator.path`), pero aqui lo explicamos en profundidad.
+`@Binding` crea una **conexión de ida y vuelta** entre una vista padre y una vista hija. La hija puede LEER y ESCRIBIR un valor que pertenece al padre. Ya lo usamos con `$` (ej: `$coordinator.path`), pero aquí lo explicamos en profundidad.
 
 ### Ejemplo: un toggle de filtro
 
@@ -485,7 +511,7 @@ struct FilterToggle: View {
             .padding()
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -509,7 +535,7 @@ En la **capa Interface**. `@Binding` es un mecanismo de SwiftUI para comunicar v
 
 ### Que es
 
-`Form` es un contenedor de SwiftUI disenado para pantallas de configuracion, perfil, o ajustes. Agrupa controles en `Section`es con cabeceras y pies. Es lo que ves en la app de Ajustes del iPhone.
+`Form` es un contenedor de SwiftUI disenado para pantallas de configuración, perfil, o ajustes. Agrupa controles en `Section`es con cabeceras y pies. Es lo que ves en la app de Ajustes del iPhone.
 
 ### Ejemplo: pantalla de ajustes
 
@@ -547,7 +573,7 @@ struct SettingsView: View {
         .navigationTitle("Ajustes")
     }
 }
-```
+```text
 
 **Explicacion linea por linea:**
 
@@ -561,9 +587,9 @@ struct SettingsView: View {
 
 `LabeledContent("Version", value: "1.0.0")` — Muestra una etiqueta a la izquierda y un valor a la derecha. Solo lectura (no editable).
 
-`NavigationLink("Licencias") { Text("...") }` — Un enlace que navega a otra vista al pulsarlo. Aqui vemos `NavigationLink` en accion: para navegacion simple (sin coordinador), es la forma mas directa.
+`NavigationLink("Licencias") { Text("...") }` — Un enlace que navega a otra vista al pulsarlo. Aquí vemos `NavigationLink` en acción: para navegación simple (sin coordinador), es la forma más directa.
 
-`Link("Soporte", destination: URL(...))` — Abre una URL en Safari. No es navegacion interna, es una apertura de navegador.
+`Link("Soporte", destination: URL(...))` — Abre una URL en Safari. No es navegación interna, es una apertura de navegador.
 
 ### @AppStorage — persistencia en UserDefaults
 
@@ -577,7 +603,7 @@ struct SettingsView: View {
 
 ### Donde vive
 
-`Form` y `@AppStorage` viven en la **capa Interface**. Si las preferencias afectan a la logica de negocio (ej: la moneda cambia como se muestran los precios), el ViewModel lee de `@AppStorage` y lo pasa al UseCase.
+`Form` y `@AppStorage` viven en la **capa Interface**. Si las preferencias afectan a la lógica de negocio (ej: la moneda cambia como se muestran los precios), el ViewModel lee de `@AppStorage` y lo pasa al UseCase.
 
 ---
 
@@ -585,14 +611,14 @@ struct SettingsView: View {
 
 ### Cuando usar cada uno
 
-Ya usamos `navigationDestination(for:)` con `NavigationPath` en la leccion de navegacion. Pero `NavigationLink` sigue siendo util en ciertos casos.
+Ya usamos `navigationDestination(for:)` con `NavigationPath` en la lección de navegación. Pero `NavigationLink` sigue siendo útil en ciertos casos.
 
 | | `NavigationLink` | `navigationDestination` |
 |---|---|---|
-| **Uso** | Navegacion simple, directa | Navegacion programatica, coordinada |
+| **Uso** | Navegación simple, directa | Navegación programatica, coordinada |
 | **Control** | La vista decide adonde ir | El coordinador decide |
-| **Cuando usarlo** | Pantallas de ajustes, contenido estatico | Features complejas, flujos de negocio |
-| **Ejemplo** | Ajustes → Licencias | Catalogo → Detalle producto |
+| **Cuando usarlo** | Pantallas de ajustes, contenido estático | Features complejas, flujos de negocio |
+| **Ejemplo** | Ajustes → Licencias | Catálogo → Detalle producto |
 
 ```swift
 // NavigationLink: la vista sabe adonde ir
@@ -606,9 +632,9 @@ Button("Ver detalle") {
 }
 // + en el NavigationStack:
 .navigationDestination(for: AppDestination.self) { ... }
-```
+```text
 
-**Regla practica:** Si la navegacion es parte de un **flujo de negocio** (login → catalogo → detalle), usa `navigationDestination` con coordinador. Si es **contenido estatico** (ajustes → licencias → sobre nosotros), usa `NavigationLink` directamente.
+**Regla practica:** Si la navegación es parte de un **flujo de negocio** (login → catálogo → detalle), usa `navigationDestination` con coordinador. Si es **contenido estático** (ajustes → licencias → sobre nosotros), usa `NavigationLink` directamente.
 
 ---
 
@@ -636,22 +662,22 @@ extension View {
         modifier(CardStyle())
     }
 }
-```
+```text
 
 **Uso:**
 
 ```swift
 ProductRow(product: product)
     .cardStyle()
-```
+```swift
 
 **Explicacion:**
 
 `struct CardStyle: ViewModifier` — Un struct que conforma el protocolo `ViewModifier`. Define como transformar una vista.
 
-`func body(content: Content) -> some View` — Recibe la vista original (`content`) y devuelve la vista modificada. Aqui le anadimos padding, fondo, esquinas redondeadas, y sombra.
+`func body(content: Content) -> some View` — Recibe la vista original (`content`) y devuelve la vista modificada. Aquí le anadimos padding, fondo, esquinas redondeadas, y sombra.
 
-`extension View { func cardStyle() ... }` — Una extension sobre `View` que permite usar `.cardStyle()` como cualquier modifier nativo. Sin esta extension, tendrias que escribir `.modifier(CardStyle())` que es menos legible.
+`extension View { func cardStyle() ... }` — Una extensión sobre `View` que permite usar `.cardStyle()` como cualquier modifier nativo. Sin está extensión, tendrias que escribir `.modifier(CardStyle())` que es menos legible.
 
 ### Donde vive
 
@@ -660,6 +686,10 @@ Los modifiers personalizados viven en la **capa Interface**, generalmente en una
 ---
 
 ## Resumen: mapa de conceptos SwiftUI enterprise
+
+Antes del diagrama, fija los ejes: **Navegacion** (`TabView`, `NavigationLink`, `navigationDestination`, `.toolbar`), **Presentacion modal** (`.sheet`, `.fullScreenCover`, `.alert`, `.confirmationDialog`), **Datos y busqueda** (`.refreshable`, `.searchable`, ``, ``) y **Composicion** (``, `ViewModifier`, `Form`, `Section`).
+
+La lectura correcta es de izquierda a derecha: navegacion y presentacion organizan flujo UI; datos y busqueda conectan estado; composicion estandariza estilos y reutilizacion para mantener coherencia enterprise.
 
 ```mermaid
 flowchart LR
@@ -689,7 +719,7 @@ flowchart LR
         COM2["ViewModifier<br/>Estilos custom"]
         COM3["Form + Section<br/>Ajustes"]
     end
-```
+```text
 
 ---
 
@@ -745,7 +775,7 @@ struct ProfileForm: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -764,7 +794,7 @@ struct ProfileForm: View {
 | `@Environment` | Vista lee valores del sistema | `@Environment(\.dismiss) var dismiss` |
 | `@AppStorage` | Persistencia simple en UserDefaults | `@AppStorage("theme") var theme = "light"` |
 
-**Regla de oro:** Si ves `@StateObject` o `@ObservedObject` en codigo nuevo, es legacy. Usa `@State` + `@Observable` y `@Bindable` en su lugar.
+**Regla de oro:** Si ves `@StateObject` o `@ObservedObject` en código nuevo, es legacy. Usa `@State` + `@Observable` y `@Bindable` en su lugar.
 
 ---
 
@@ -772,7 +802,7 @@ struct ProfileForm: View {
 
 ### LazyVStack y LazyHStack
 
-En el curso usamos `List` para el catalogo. Pero a veces necesitas mas control sobre el layout. Para eso existen los **lazy stacks**:
+En el curso usamos `List` para el catálogo. Pero a veces necesitas más control sobre el layout. Para eso existen los **lazy stacks**:
 
 ```swift
 // VStack normal: CREA todas las vistas de golpe (lento con 1000 items)
@@ -792,15 +822,15 @@ ScrollView {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
 `VStack` crea TODAS las vistas inmediatamente — si tienes 1000 productos, crea 1000 `ProductRow` aunque solo 10 sean visibles. Esto gasta memoria y CPU.
 
-`LazyVStack` solo crea las vistas que estan **visibles en pantalla**. Cuando el usuario hace scroll, crea las nuevas y destruye las que ya no se ven. Es la diferencia entre cargar un libro entero en memoria vs leer una pagina a la vez.
+`LazyVStack` solo crea las vistas que estan **visibles en pantalla**. Cuando el usuario hace scroll, crea las nuevas y destruye las que ya no se ven. Es la diferencia entre cargar un libro entero en memoria vs leer una página a la vez.
 
-**Regla:** Usa `LazyVStack`/`LazyHStack` siempre que tengas mas de ~20 elementos en un `ScrollView`. Para listas simples, `List` ya es lazy internamente.
+**Regla:** Usa `LazyVStack`/`LazyHStack` siempre que tengas más de ~20 elementos en un `ScrollView`. Para listas simples, `List` ya es lazy internamente.
 
 ### Identidad estable en ForEach
 
@@ -814,9 +844,9 @@ ForEach(products.indices, id: \.self) { index in
 ForEach(products, id: \.id) { product in
     ProductRow(product: product)
 }
-```
+```text
 
-**Por que importa:** SwiftUI usa la identidad (el `id`) para saber que vista corresponde a que dato. Si usas `.indices`, al eliminar el producto 3, SwiftUI cree que el producto 4 es el 3 (porque ahora tiene indice 3). Esto causa animaciones incorrectas y bugs visuales. Con `\.id`, SwiftUI sabe que cada vista corresponde a un producto concreto, sin importar su posicion.
+**Por que importa:** SwiftUI usa la identidad (el `id`) para saber que vista corresponde a que dato. Si usas `.indices`, al eliminar el producto 3, SwiftUI cree que el producto 4 es el 3 (porque ahora tiene indice 3). Esto causa animaciones incorrectas y bugs visuales. Con `\.id`, SwiftUI sabe que cada vista corresponde a un producto concreto, sin importar su posición.
 
 ### No filtrar dentro de ForEach
 
@@ -831,9 +861,9 @@ let expensiveProducts = products.filter { $0.price.amount > 10 }
 ForEach(expensiveProducts, id: \.id) { product in
     ProductRow(product: product)
 }
-```
+```text
 
-Cada vez que SwiftUI re-renderiza la vista, ejecuta `body`. Si el filtrado esta dentro de `ForEach`, se ejecuta cada vez. Pre-filtrando fuera, el resultado se cachea y el `ForEach` solo itera.
+Cada vez que SwiftUI re-renderiza la vista, ejecuta `body`. Si el filtrado está dentro de `ForEach`, se ejecuta cada vez. Pre-filtrando fuera, el resultado se cachea y el `ForEach` solo itera.
 
 ### Pasar solo lo necesario a las subvistas
 
@@ -849,7 +879,7 @@ struct ProductRow: View {
     let product: Product  // Solo se re-renderiza si ESE producto cambia
     // ...
 }
-```
+```text
 
 Si pasas un objeto grande (ViewModel, contexto), cualquier cambio en cualquier propiedad de ese objeto re-renderiza la fila. Pasando solo el dato necesario, la fila solo se actualiza cuando su dato cambia.
 
@@ -859,7 +889,7 @@ Si pasas un objeto grande (ViewModel, contexto), cualquier cambio en cualquier p
 
 ### withAnimation
 
-`withAnimation` envuelve un cambio de estado y SwiftUI anima la transicion entre el estado viejo y el nuevo:
+`withAnimation` envuelve un cambio de estado y SwiftUI anima la transición entre el estado viejo y el nuevo:
 
 ```swift
 // Sin animacion: el cambio es instantaneo (salta)
@@ -869,13 +899,13 @@ viewModel.state = .loaded(products)
 withAnimation(.easeInOut(duration: 0.3)) {
     viewModel.state = .loaded(products)
 }
-```
+```text
 
 **Explicacion:**
 
-`withAnimation` NO anima el codigo dentro del bloque. Lo que hace es decirle a SwiftUI: "el cambio que voy a hacer dentro de este bloque, animalo". SwiftUI detecta que propiedades cambiaron y genera una animacion fluida entre el estado anterior y el nuevo.
+`withAnimation` NO anima el código dentro del bloque. Lo que hace es decirle a SwiftUI: "el cambio que voy a hacer dentro de este bloque, animalo". SwiftUI detecta que propiedades cambiaron y genera una animación fluida entre el estado anterior y el nuevo.
 
-`.easeInOut(duration: 0.3)` — La curva de animacion. `easeInOut` empieza lento, acelera, y termina lento (0.3 segundos). Otras opciones: `.spring()` (rebote natural), `.linear` (velocidad constante), `.bouncy` (rebote divertido).
+`.easeInOut(duration: 0.3)` — La curva de animación. `easeInOut` empieza lento, acelera, y termina lento (0.3 segundos). Otras opciones: `.spring()` (rebote natural), `.linear` (velocidad constante), `.bouncy` (rebote divertido).
 
 ### .animation en la vista
 
@@ -885,37 +915,37 @@ Para animar cambios automaticamente cuando una propiedad cambia:
 Text(product.name)
     .opacity(isVisible ? 1 : 0)
     .animation(.easeIn, value: isVisible)
-```
+```text
 
 `.animation(.easeIn, value: isVisible)` — Cada vez que `isVisible` cambia, SwiftUI anima la opacidad. **Siempre especifica `value:`** para decirle a SwiftUI QUE cambio observar. Sin `value:`, SwiftUI anima TODO lo que cambie en esa vista, causando animaciones inesperadas.
 
-### .transition — Animacion de aparicion/desaparicion
+### .transition — Animación de aparicion/desaparicion
 
 ```swift
 if showDetails {
     Text("Detalles del producto...")
         .transition(.slide)
 }
-```
+```text
 
 `.transition(.slide)` — Cuando `showDetails` pasa a `true`, el texto aparece deslizandose. Cuando pasa a `false`, desaparece deslizandose. Otros: `.opacity` (fade), `.scale` (crece/encoge), `.move(edge: .bottom)` (desde un borde).
 
-**Importante:** `.transition` solo funciona si el cambio que controla `showDetails` esta dentro de `withAnimation`:
+**Importante:** `.transition` solo funciona si el cambio que controla `showDetails` está dentro de `withAnimation`:
 
 ```swift
 withAnimation {
     showDetails.toggle()
 }
-```
+```text
 
 ### .contentTransition — Animar cambios de contenido
 
 ```swift
 Text("\(cartCount) items")
     .contentTransition(.numericText())
-```
+```text
 
-Cuando `cartCount` cambia de 3 a 4, el numero hace una animacion de "ticker" (como un contador de kilometros). Sin `.contentTransition`, el texto simplemente salta de "3" a "4".
+Cuando `cartCount` cambia de 3 a 4, el número hace una animación de "ticker" (como un contador de kilometros). Sin `.contentTransition`, el texto simplemente salta de "3" a "4".
 
 ---
 
@@ -923,7 +953,7 @@ Cuando `cartCount` cambia de 3 a 4, el numero hace una animacion de "ticker" (co
 
 ### Por que
 
-En muchos paises (USA, EU), las apps deben ser accesibles por ley. Ademas, el 15% de la poblacion mundial tiene alguna discapacidad. Apple revisa la accesibilidad en el proceso de App Store Review. En enterprise, es un **requisito no negociable**.
+En muchos paises (USA, EU), las apps deben ser accesibles por ley. Además, el 15% de la poblacion mundial tiene alguna discapacidad. Apple revisa la accesibilidad en el proceso de App Store Review. En enterprise, es un **requisito no negociable**.
 
 ### Los basicos
 
@@ -944,19 +974,19 @@ Button {
 ProductRow(product: product)
     .accessibilityLabel("\(product.name), \(product.price.formatted)")
     .accessibilityHint("Pulsa dos veces para ver el detalle")
-```
+```text
 
 **Explicacion:**
 
-`.accessibilityLabel("...")` — Lo que VoiceOver **lee en voz alta**. Sin esto, un boton con solo un icono diria "boton" y el usuario ciego no sabria que hace.
+`.accessibilityLabel("...")` — Lo que VoiceOver **lee en voz alta**. Sin esto, un botón con solo un icono diria "botón" y el usuario ciego no sabria que hace.
 
-`.accessibilityHint("...")` — Instruccion adicional sobre que pasa al interactuar. VoiceOver lo lee despues del label, tras una pausa.
+`.accessibilityHint("...")` — Instrucción adicional sobre que pasa al interactuar. VoiceOver lo lee despues del label, tras una pausa.
 
-`.accessibilityHidden(true)` — Hace que VoiceOver ignore este elemento. Para imagenes decorativas que no aportan informacion.
+`.accessibilityHidden(true)` — Hace que VoiceOver ignore este elemento. Para imágenes decorativas que no aportan información.
 
-### Texto dinamico (Dynamic Type)
+### Texto dinámico (Dynamic Type)
 
-Los usuarios pueden cambiar el tamano del texto en Ajustes del iPhone. Tu app debe respetar esto:
+Los usuarios pueden cambiar el tamaño del texto en Ajustes del iPhone. Tu app debe respetar esto:
 
 ```swift
 // BIEN: usa fuentes del sistema que escalan automaticamente
@@ -966,14 +996,14 @@ Text(product.name)
 // MAL: tamano fijo que ignora las preferencias del usuario
 Text(product.name)
     .font(.system(size: 16))
-```
+```text
 
-Las fuentes semanticas (`.headline`, `.body`, `.caption`) escalan automaticamente con Dynamic Type. Las fuentes con tamano fijo no.
+Las fuentes semanticas (`.headline`, `.body`, `.caption`) escalan automaticamente con Dynamic Type. Las fuentes con tamaño fijo no.
 
 ### Checklist de accesibilidad
 
 - [ ] Todos los botones con icono tienen `.accessibilityLabel`
-- [ ] Las imagenes decorativas tienen `.accessibilityHidden(true)`
+- [ ] Las imágenes decorativas tienen `.accessibilityHidden(true)`
 - [ ] Las listas tienen labels descriptivos en cada fila
 - [ ] Usas fuentes semanticas (`.headline`, `.body`), no tamanos fijos
 - [ ] Tu app funciona con VoiceOver activado (probalo en el simulador: Settings → Accessibility → VoiceOver)
@@ -989,18 +1019,18 @@ Tu skill de SwiftUI Expert define estas correcciones que debes aplicar en cualqu
 | Deprecado / Incorrecto | Moderno / Correcto | Por que |
 |---|---|---|
 | `foregroundColor(.red)` | `foregroundStyle(.red)` | Acepta gradientes y estilos, no solo colores |
-| `cornerRadius(8)` | `clipShape(.rect(cornerRadius: 8))` | Mas flexible, soporta formas custom |
+| `cornerRadius(8)` | `clipShape(.rect(cornerRadius: 8))` | Más flexible, soporta formas custom |
 | `.tabItem { ... }` | `Tab("titulo", systemImage: "icon") { ... }` | API moderna iOS 18+ |
 | `.onTapGesture { }` | `Button { } label: { }` | Accesible para VoiceOver, focus, teclado |
 | `NavigationView` | `NavigationStack` | Moderno, soporta NavigationPath |
 | `onChange(of: x) { value in }` | `onChange(of: x) { old, new in }` | API con 2 parametros o sin parametros |
-| `GeometryReader` | `containerRelativeFrame()` | Mas eficiente, sin layout thrash |
+| `GeometryReader` | `containerRelativeFrame()` | Más eficiente, sin layout thrash |
 | `String(format: "%.2f", val)` | `Text(val, format: .number.precision(...))` | Localizado automaticamente |
 | `string.contains(search)` | `string.localizedStandardContains(search)` | Ignora mayusculas, acentos, idioma |
 
 ### onTapGesture vs Button
 
-Este es un error **muy comun** en codigo junior:
+Este es un error **muy comun** en código junior:
 
 ```swift
 // INCORRECTO: VoiceOver no puede interactuar con esto
@@ -1014,11 +1044,11 @@ Button {
     ProductRow(product: product)
 }
 .buttonStyle(.plain)  // Quita el estilo azul de boton
-```
+```text
 
-`onTapGesture` es invisible para VoiceOver — un usuario ciego no puede interactuar con esa fila. `Button` es accesible por defecto. `.buttonStyle(.plain)` quita el estilo visual de boton para que la fila se vea igual.
+`onTapGesture` es invisible para VoiceOver — un usuario ciego no puede interactuar con esa fila. `Button` es accesible por defecto. `.buttonStyle(.plain)` quita el estilo visual de botón para que la fila se vea igual.
 
-**Regla:** Usa `Button` siempre que algo sea interactivo. Usa `onTapGesture` solo si necesitas la posicion del toque o el conteo de toques (doble tap, triple tap).
+**Regla:** Usa `Button` siempre que algo sea interactivo. Usa `onTapGesture` solo si necesitas la posición del toque o el conteo de toques (doble tap, triple tap).
 
 ### .task(id:) — Tareas dependientes de un valor
 
@@ -1040,7 +1070,7 @@ struct ProductDetailView: View {
         }
     }
 }
-```
+```text
 
 `.task(id: productId)` — Como `.task` pero se **re-ejecuta** cada vez que `productId` cambia. Si el usuario navega del producto A al producto B, `.task(id:)` cancela la carga del A y empieza la del B automaticamente. Sin `id:`, solo se ejecutaria una vez.
 
@@ -1063,9 +1093,9 @@ struct ProductDetailView: View {
         ProductDetailView(product: product)
     }
 }
-```
+```text
 
-`.sheet(item:)` es mas limpio: cuando el valor no es nil, el sheet se abre CON ese dato. Cuando se cierra, el valor vuelve a nil. No necesitas un booleano extra. El tipo debe conformar `Identifiable`.
+`.sheet(item:)` es más limpio: cuando el valor no es nil, el sheet se abre CON ese dato. Cuando se cierra, el valor vuelve a nil. No necesitas un booleano extra. El tipo debe conformar `Identifiable`.
 
 ---
 
@@ -1098,11 +1128,11 @@ ContentCard(title: "Producto") {
     Text(product.price.formatted)
         .foregroundStyle(.secondary)
 }
-```
+```text
 
 **Explicacion:**
 
-`@ViewBuilder let content: Content` — El skill recomienda esta forma sobre closures. `@ViewBuilder` permite que el bloque `{ ... }` contenga multiples vistas (como `body`). `Content` es un **tipo generico** que representa "cualquier vista que me pases".
+`@ViewBuilder let content: Content` — El skill recomienda está forma sobre closures. `@ViewBuilder` permite que el bloque `{ ... }` contenga multiples vistas (como `body`). `Content` es un **tipo genérico** que representa "cualquier vista que me pases".
 
 ### Preferir modifiers sobre condicionales
 
@@ -1121,9 +1151,9 @@ if isHighlighted {
 Text(product.name)
     .foregroundStyle(isHighlighted ? .blue : .primary)
     .bold(isHighlighted)
-```
+```text
 
-Cuando usas `if/else` para mostrar vistas diferentes, SwiftUI las trata como **vistas distintas**. Las destruye y recrea, perdiendo estado y animaciones. Con modifiers condicionales, SwiftUI sabe que es la **misma vista** con propiedades diferentes, y puede animar la transicion suavemente.
+Cuando usas `if/else` para mostrar vistas diferentes, SwiftUI las trata como **vistas distintas**. Las destruye y recrea, perdiendo estado y animaciones. Con modifiers condicionales, SwiftUI sabe que es la **misma vista** con propiedades diferentes, y puede animar la transición suavemente.
 
 ### containerRelativeFrame — Tamanos relativos sin GeometryReader
 
@@ -1140,17 +1170,17 @@ Image("banner")
         width  // Usa todo el ancho disponible
     }
     .frame(height: 200)
-```
+```text
 
-`containerRelativeFrame` es el reemplazo moderno de `GeometryReader` para la mayoria de casos. Es mas eficiente porque no causa multiples pasadas de layout.
+`containerRelativeFrame` es el reemplazo moderno de `GeometryReader` para la mayoria de casos. Es más eficiente porque no causa multiples pasadas de layout.
 
 ---
 
-## 18. Liquid Glass — iOS 26+ (El futuro del diseno iOS)
+## 18. Liquid Glass — iOS 26+ (El futuro del diseño iOS)
 
 ### Que es
 
-Liquid Glass es el nuevo paradigma visual de Apple introducido en iOS 26 (WWDC 2025). Los elementos de UI tienen un efecto de cristal translucido y dinamico que reacciona al contenido que hay detras. Es el mayor cambio visual de iOS desde iOS 7.
+Liquid Glass es el nuevo paradigma visual de Apple introducido en iOS 26 (WWDC 2025). Los elementos de UI tienen un efecto de cristal translucido y dinámico que reacciona al contenido que hay detrás. Es el mayor cambio visual de iOS desde iOS 7.
 
 ### Como se aplica
 
@@ -1165,13 +1195,13 @@ if #available(iOS 26, *) {
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
 }
-```
+```text
 
 **Explicacion:**
 
-`#available(iOS 26, *)` — Verifica en tiempo de ejecucion si el dispositivo tiene iOS 26 o superior. El `*` significa "y cualquier otra plataforma". Es obligatorio cuando usas APIs nuevas que no existen en versiones anteriores.
+`#available(iOS 26, *)` — Verifica en tiempo de ejecución si el dispositivo tiene iOS 26 o superior. El `*` significa "y cualquier otra plataforma". Es obligatorio cuando usas APIs nuevas que no existen en versiones anteriores.
 
-`.glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))` — Aplica el efecto Liquid Glass. `.regular` es el estilo estandar. `.interactive()` indica que el elemento es tocable (boton, fila). `in:` define la forma del cristal.
+`.glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))` — Aplica el efecto Liquid Glass. `.regular` es el estilo estandar. `.interactive()` indica que el elemento es tocable (botón, fila). `in:` define la forma del cristal.
 
 **Fallback:** Para iOS < 26, usamos `.ultraThinMaterial` que da un efecto similar (pero no tan bonito).
 
@@ -1189,11 +1219,11 @@ if #available(iOS 26, *) {
         }
     }
 }
-```
+```text
 
-`GlassEffectContainer` — Agrupa multiples elementos glass para que compartan el mismo efecto visual. Sin el contenedor, cada boton tendria su propio glass independiente (no se fusionan).
+`GlassEffectContainer` — Agrupa multiples elementos glass para que compartan el mismo efecto visual. Sin el contenedor, cada botón tendria su propio glass independiente (no se fusionan).
 
-`.buttonStyle(.glassProminent)` — Estilo de boton glass prominente (mas visible). `.glass` es la variante normal.
+`.buttonStyle(.glassProminent)` — Estilo de botón glass prominente (más visible). `.glass` es la variante normal.
 
 ### Reglas del skill para Liquid Glass
 
@@ -1255,19 +1285,19 @@ flowchart LR
         COM2["Form + Section"]
         COM3["containerRelativeFrame"]
     end
-```
+```text
 
 ### Checklist COMPLETO para un junior
 
 Antes de entregar tu primera PR en una app enterprise, asegurate de dominar:
 
-**Navegacion y presentacion:**
+**Navegación y presentación:**
 - [ ] `TabView` para organizar secciones
 - [ ] `.sheet` / `.fullScreenCover` para modales
 - [ ] `.alert` / `.confirmationDialog` para confirmaciones
-- [ ] `.toolbar` para botones en barra de navegacion
-- [ ] `NavigationLink` para navegacion simple
-- [ ] `navigationDestination` para navegacion programatica
+- [ ] `.toolbar` para botones en barra de navegación
+- [ ] `NavigationLink` para navegación simple
+- [ ] `navigationDestination` para navegación programatica
 
 **State management:**
 - [ ] `@State` para datos propios
@@ -1296,7 +1326,7 @@ Antes de entregar tu primera PR en una app enterprise, asegurate de dominar:
 
 **Accesibilidad (obligatorio):**
 - [ ] `.accessibilityLabel` en todos los botones con icono
-- [ ] `.accessibilityHidden(true)` en imagenes decorativas
+- [ ] `.accessibilityHidden(true)` en imágenes decorativas
 - [ ] Fuentes semanticas (`.headline`, `.body`), no tamanos fijos
 - [ ] `Button` en vez de `onTapGesture` para elementos interactivos
 
@@ -1307,3 +1337,58 @@ Antes de entregar tu primera PR en una app enterprise, asegurate de dominar:
 - [ ] `localizedStandardContains()` para busqueda de texto
 
 Si dominas estos 28 puntos, estas preparado para cualquier proyecto enterprise en SwiftUI.
+
+---
+
+## Ejercicio guiado: aplicar 3 patrones al scaffold
+
+**Objetivo:** Integrar tres patrones de está lección en la app real del scaffold para consolidar lo aprendido.
+
+**Instrucciones:**
+
+1. Abre `apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/` y localiza la vista de lista de productos.
+2. Aplica estos tres patrones:
+   - **Pull-to-refresh:** Anade `.refreshable { await viewModel.load() }` a la lista.
+   - **Empty state:** Muestra un `ContentUnavailableView` cuando la lista está vacia y no hay error.
+   - **Loading state:** Muestra un `ProgressView` mientras `viewModel.isLoading` es true.
+3. Verifica que la vista compila con `swift build`.
+
+**Criterios de exito:**
+
+- La vista compila sin warnings.
+- Pull-to-refresh invoca el caso de uso real (no un stub hardcodeado).
+- El empty state usa `ContentUnavailableView` (iOS 17+), no un `Text` genérico.
+
+**Solución razonada:**
+
+```swift
+List {
+    ForEach(viewModel.products, id: \.name) { product in
+        Text("\(product.name) — \(product.price)")
+    }
+}
+.refreshable { await viewModel.load() }
+.overlay {
+    if viewModel.isLoading {
+        ProgressView()
+    } else if viewModel.products.isEmpty {
+        ContentUnavailableView("Sin productos",
+            systemImage: "tray",
+            description: Text("Desliza hacia abajo para recargar."))
+    }
+}
+```
+
+Estos tres patrones cubren los estados fundamentales de cualquier pantalla de datos: cargando, vacio y con datos. En enterprise, olvidar el empty state o el loading state es una de las causas más frecuentes de mala UX.
+
+---
+
+## Cierre
+
+Está lección no es una lista para memorizar. Es un catálogo de patrones que vas a necesitar en cualquier app enterprise. La clave no es aplicarlos todos de golpe, sino saber que existen y elegir los adecuados para cada pantalla. Cuando te enfrentes a una nueva feature, vuelve a está lección y revisa que patrones aplican antes de empezar a codificar.
+
+La siguiente lección complementa esta: si SwiftUI define como se ve la app, Swift Concurrency define como se comporta bajo carga, cancelación y concurrencia real.
+
+---
+
+**Anterior:** [Composition Root: donde se ensambla todo ←](06-composition-root.md) · **Siguiente:** [Swift Concurrency Enterprise: Patrones Imprescindibles →](08-swift-concurrency-enterprise.md)

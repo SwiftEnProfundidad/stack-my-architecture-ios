@@ -1,5 +1,12 @@
 # Etapa 3: Evolución — Resiliencia y calidad de producción
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Por qué esta etapa separa a un equipo “correcto” de un equipo “confiable”
 
 Hasta Etapa 2 ya tienes arquitectura limpia, integración entre features, navegación desacoplada y base de tests. Eso es mucho. Pero todavía hay una diferencia importante entre "funciona" y "resiste":
@@ -56,7 +63,7 @@ flowchart LR
     end
 
     E2 --> E3
-```
+```text
 
 Mensaje clave para el alumno:
 - Ya no se trata solo de “añadir código”,
@@ -134,7 +141,7 @@ flowchart TD
     K --> O["Observabilidad"]
     O --> T["Testing avanzado"]
     T --> D["Decisión de trade-offs"]
-```
+```text
 
 El orden no es accidental: cada bloque prepara el siguiente.
 
@@ -251,9 +258,6 @@ Etapa 3 está cerrada solo si se puede demostrar:
 ## Siguiente paso
 
 Empieza por `01-caching-offline.md` con mentalidad de sistema, no de feature. Vas a aprender a diseñar comportamiento degradado sin romper contratos.
-
-**Siguiente:** [Caching y offline →](01-caching-offline.md)
-
 ---
 
 ## Indicadores prácticos de que Etapa 3 está funcionando
@@ -371,3 +375,12 @@ Para evitar desviaciones:
 - no cubrir casos irrelevantes solo para subir conteo de tests.
 
 El foco es resiliencia útil y sostenible, no complejidad ornamental.
+
+---
+
+## Entregables de cierre de etapa
+
+- Revisa y completa los entregables oficiales aqui: [entregables-etapa-3.md](../03-evolucion/entregables-etapa-3.md).
+
+
+**Anterior:** [Consolidación: Etapa 2 - Integración ←](../anexos/consolidacion-etapa-2-integracion.md) · **Siguiente:** [Caching y offline →](01-caching-offline.md)

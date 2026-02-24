@@ -1,5 +1,10 @@
 # Feature Catalog: Capa Interface (SwiftUI)
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Una pantalla con cuatro estados
 
 La Interface del Catalog es más compleja que la de Login. Login tenía un formulario con dos campos, un botón, y un mensaje de error. Catalog tiene una pantalla que puede estar en cuatro estados diferentes (loading, loaded, empty, error), cada uno con una representación visual distinta. Esto nos obligará a pensar en cómo modelar el estado de la UI de forma limpia.
@@ -23,7 +28,7 @@ flowchart TD
     style Loaded fill:#d4edda,stroke:#28a745
     style Empty fill:#fff3cd,stroke:#ffc107
     style Error fill:#f8d7da,stroke:#dc3545
-```
+```swift
 
 ### Diagrama: enum de estado vs propiedades independientes
 
@@ -48,7 +53,7 @@ graph LR
 
     style Props fill:#fff3cd,stroke:#ffc107
     style EnumState fill:#d4edda,stroke:#28a745
-```
+```swift
 
 El enum de estado es más seguro que las propiedades independientes porque **elimina estados imposibles en tiempo de compilación**. Con propiedades sueltas, podrías tener `isLoading = true` y `errorMessage = "Error"` al mismo tiempo — un estado contradictorio que el compilador no detecta. Con el enum, eso es imposible.
 
@@ -113,7 +118,7 @@ final class CatalogViewModel {
         }
     }
 }
-```
+```swift
 
 **Explicacion linea por linea del CatalogViewModel:**
 
@@ -147,7 +152,7 @@ flowchart TD
     style EMPTY fill:#fff3cd,stroke:#ffc107
     style KNOWN fill:#f8d7da,stroke:#dc3545
     style UNKNOWN fill:#f8d7da,stroke:#dc3545
-```
+```swift
 
 `state = .loading` — Lo primero: poner el estado en loading. SwiftUI detecta el cambio y muestra el spinner.
 
@@ -172,7 +177,7 @@ Con propiedades independientes tendríamos estados imposibles:
 isLoading = true
 products = [product1, product2]  // ¿Loading con productos? ¿Qué muestra la UI?
 errorMessage = "Sin conexión"     // ¿Loading con error? ¿Y con productos?
-```
+```text
 
 Con un enum, cada estado es una variante única. No puedes estar en dos estados a la vez:
 
@@ -182,7 +187,7 @@ state = .loading              // Solo loading
 state = .loaded([p1, p2])     // Solo productos
 state = .empty                // Solo vacío
 state = .error("Sin conexión") // Solo error
-```
+```text
 
 ### La lógica de empty vs. loaded
 
@@ -248,7 +253,7 @@ struct CatalogView: View {
         }
     }
 }
-```
+```swift
 
 ### El switch sobre el estado
 
@@ -302,7 +307,7 @@ struct ProductRow: View {
         .padding(.vertical, 4)
     }
 }
-```
+```text
 
 La imagen se carga con `AsyncImage`, el componente de SwiftUI para carga asíncrona de imágenes por URL. Mientras la imagen carga, muestra un placeholder gris. Si la carga falla, también muestra el placeholder.
 
@@ -321,7 +326,7 @@ extension Price {
         return formatter.string(from: amount as NSDecimalNumber) ?? "\(amount) \(currency)"
     }
 }
-```
+```text
 
 Esto formatea el precio según la moneda: `29.99 EUR` se muestra como "29,99 €" en un dispositivo configurado en español. `NumberFormatter` usa la localización del dispositivo automáticamente.
 
@@ -443,7 +448,7 @@ final class CatalogViewModelTests: XCTestCase {
         XCTAssertEqual(receivedProduct, product)
     }
 }
-```
+```swift
 
 **Explicacion de cada test del CatalogViewModel:**
 
@@ -502,4 +507,26 @@ Ambas features siguen el mismo patrón arquitectónico (ViewModel con @Observabl
 
 ---
 
-**Anterior:** [Infrastructure ←](03-infrastructure.md) · **Siguiente:** [ADR-002: Catalog →](ADR-002-catalog.md)
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/04-interface-swiftui.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
+
+**Anterior:** [Feature Catalog: Capa Infrastructure ←](03-infrastructure.md) · **Siguiente:** [ADR-002: Diseño de la Feature Catalog →](ADR-002-catalog.md)

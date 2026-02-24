@@ -1,5 +1,12 @@
 # Entregables — Etapa 4: Arquitecto
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Lo que has construido en esta etapa
 
 La Etapa 4 no añade una feature nueva para el usuario final. Añade algo más importante para escalar: **plataforma, gobernanza y reglas de calidad**.
@@ -23,7 +30,7 @@ En palabras simples:
   05-guia-arquitectura.md       ← convenciones operativas del repositorio
   06-quality-gates.md           ← gates 0..6, severidad, pipeline y excepciones
   entregables-etapa-4.md        ← cierre verificable de etapa
-```
+```text
 
 ---
 
@@ -46,7 +53,7 @@ scripts/check-domain-imports.sh
 scripts/check-feature-imports.sh
 scripts/check-architecture-rules.sh
 .github/workflows/quality-gates.yml
-```
+```text
 
 ### 3) Navegación y deep links como plataforma
 
@@ -56,7 +63,7 @@ Artefactos esperados:
 StackMyArchitecture/App/Navigation/DeepLinkParser.swift
 StackMyArchitectureTests/App/Navigation/DeepLinkParserTests.swift
 StackMyArchitectureTests/App/Navigation/DeepLinkCoordinatorTests.swift
-```
+```text
 
 ### 4) Versionado y SPM
 
@@ -66,7 +73,7 @@ Artefactos esperados:
 docs/versioning/semver-policy.md
 docs/versioning/deprecation-policy.md
 Packages/ (cuando se active la separación por trigger)
-```
+```text
 
 ### 5) Guía de arquitectura y quality gates
 
@@ -168,5 +175,56 @@ Mitigación:
 3. Medir fricción real (tiempo CI, fallos por gate, lead time PR) y recalibrar.
 
 ---
+---
 
-**Anterior:** [Quality Gates ←](06-quality-gates.md)
+## Si no cumples todos los entregables
+
+La arquitectura es abstracta hasta que la necesitas. Muchos developers no entienden bounded contexts hasta que sufren el caos de no tenerlos.
+
+### Paso 1: Diagnóstico común
+
+| Síntoma | Probable causa | Solución rápida |
+|---------|----------------|-----------------|
+| No entiendo qué es un bounded context | Confusión con capas técnicas | Revisa [Bounded Contexts](01-bounded-contexts.md); es sobre lenguaje, no sobre código |
+| Quality gates suenan teóricos | No has sentido el dolor de un sistema sin reglas | Empieza con 1 regla: "Domain no importa Infrastructure" |
+| Modularización me abruma | Intentas hacerlo todo de una | Empieza con 2 módulos: Core y Features |
+| No sé cuándo modularizar | Falta de métricas | Mide tiempo de build; cuando supere 2 min, considera modularizar |
+
+### Paso 2: Plan de recuperación
+
+Orden de prioridad:
+1. **Entender bounded contexts** - Lee la analogía del restaurante en la lección
+2. **1 quality gate** - Solo uno, pero que lo cumplas
+3. **Dibujar el mapa** - Aunque sea en papel, define tus contextos
+4. **Reglas de dependencia** - Documenta qué puede importar qué
+5. **Scripts** - Opcional; puedes empezar con checklist manual
+
+### Paso 3: Checkpoint alternativo
+
+Si no puedes completar todo, asegúrate de:
+- [ ] Explicar qué es un bounded context con un ejemplo real
+- [ ] Saber por qué Domain no debe importar Infrastructure
+- [ ] Tener 1 regla de arquitectura documentada
+- [ ] Entender cuándo modularizar (y cuándo no)
+
+Con eso, puedes pasar a Etapa 5 y volver a E4 más adelante.
+
+---
+
+## Lo que ya sabes hacer
+
+Aunque no cierres todos los entregables:
+- ✅ Evolucionar un sistema con cache y offline
+- ✅ Escribir tests que protejan refactorizaciones
+- ✅ Explicar trade-offs técnicos
+- ✅ Usar observabilidad básica
+
+**Esto ya es nivel senior.** Estás pensando en mantenibilidad a largo plazo.
+
+---
+
+## Siguiente etapa
+
+---
+
+**Anterior:** [Quality Gates ←](06-quality-gates.md) · **Siguiente:** [Consolidación: Etapa 4 - Arquitecto →](../anexos/consolidacion-etapa-4-arquitecto.md)

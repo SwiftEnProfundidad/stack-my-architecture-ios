@@ -130,7 +130,9 @@ Capas y reglas de dependencia dentro de cada feature:
 - Módulo principal para DI, factories, wiring y adaptadores.
 - Regla: composición fuera del core.
 
-## 5) Progresión formativa: Junior -> Mid -> Senior -> Arquitecto
+## 5) Progresión formativa: Junior -> Mid -> Senior -> Arquitecto -> Maestría
+
+La progresión se diseñó para evitar saltos conceptuales. Primero se aprende a construir una feature completa con disciplina. Después se integra una segunda feature y se introduce concurrencia lo suficientemente pronto para sostener red/caché sin deuda técnica. Más tarde se trabaja resiliencia, y finalmente se escala a gobernanza y maestría.
 
 ### Etapa 1: Junior (fundamentos operables)
 
@@ -172,6 +174,7 @@ Construcción:
 - Segunda feature `Products/Catalog`.
 - Navegación por eventos entre features.
 - Infra real mínima (network) + contract tests de repositorio.
+- Swift Concurrency aplicada en casos de uso y ViewModels (cancelación, aislamiento, `Sendable`).
 - Primeros tests de integración entre 2+ componentes.
 
 Entregables:
@@ -179,18 +182,20 @@ Entregables:
 - Event bus/coordinador con tests.
 - Contratos entre features (eventos/modelos/dependencias).
 - Integration tests en infraestructura.
+- Evidencia de criterios de concurrencia en wiring y coordinación.
 - ADRs por feature.
 
 ### Etapa 3: Senior (evolución y resiliencia)
 
 Meta:
 
-- Tomar decisiones de arquitectura bajo cambio y escala.
+- Tomar decisiones de arquitectura bajo cambio y escala con datos reales de operación.
 
 Construcción:
 
 - Caching/offline en `Products`.
 - Estrategias de consistencia e invalidación.
+- SwiftData como adaptador de infraestructura (no como centro del diseño).
 - Observabilidad mínima (logging/tracing de eventos).
 - Pruebas avanzadas:
   - snapshot (si aplica),
@@ -215,16 +220,36 @@ Construcción:
 - Reglas de dependencia automatizadas (lint/CI conceptual).
 - Guía de navegación por eventos y deep links como plataforma.
 - Estrategia de versionado/paquetización (SPM, multi-target).
+- Quality gates medibles por tipo de cambio.
 
 Entregables:
 
 - Guía de arquitectura del repositorio con convenciones y enforcement.
 - ADRs macro de gobernanza.
-- Quality gates conceptuales:
+- Quality gates conceptuales con criterios verificables:
   - tests,
-  - cobertura,
+  - cobertura crítica,
   - reglas de dependencia,
   - strict concurrency.
+
+### Etapa 5: Maestría (concurrencia avanzada y composición)
+
+Meta:
+
+- Consolidar criterio de arquitecto senior para diseño concurrente, performance de UI y evolución segura a largo plazo.
+
+Construcción:
+
+- Isolation domains, `Sendable`, actores y structured concurrency.
+- Testing concurrente no flaky.
+- Estado moderno y performance en SwiftUI.
+- Composición avanzada, diagnóstico y migración progresiva.
+
+Entregables:
+
+- Evidencia de arquitectura concurrente segura en casos reales.
+- Pruebas concurrentes deterministas.
+- Plan de migración/evolución con riesgos explícitos y mitigaciones.
 
 ## 6) Persistencia del material del curso
 

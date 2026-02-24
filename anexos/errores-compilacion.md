@@ -10,14 +10,14 @@ Los errores del compilador Swift pueden parecer crípticos al principio. Esta gu
 
 ### Estructura del mensaje
 
-```
+```text
 /path/to/file.swift:42:15: error: cannot convert value of type 'String' to expected argument type 'Int'
 │                    │  │      │       └─ Descripción del problema
 │                    │  │      └─ Tipo de error (error/warning/note)
 │                    │  └─ Columna (15)
 │                    └─ Línea (42)
 └─ Archivo y ruta
-```
+```text
 
 **Lo que realmente importa:**
 1. **Archivo y línea** → Dónde mirar
@@ -37,7 +37,7 @@ func calculateAge(birthYear: Int) -> Int {
 
 let year = "1990"  // String
 calculateAge(birthYear: year)  // ❌ Cannot convert value of type 'String' to expected argument type 'Int'
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** Le diste un `String` cuando esperaba un `Int`
@@ -52,7 +52,7 @@ if let yearInt = Int(year) {
 
 // Opción 2: Forzar (solo si 100% seguro)
 calculateAge(birthYear: Int(year)!)  // ⚠️ Cuidado con force unwrap
-```
+```text
 
 ---
 
@@ -61,7 +61,7 @@ calculateAge(birthYear: Int(year)!)  // ⚠️ Cuidado con force unwrap
 ```swift
 let optionalName: String? = getUserName()
 print(optionalName.uppercased())  // ❌ Value of optional type 'String?' must be unwrapped
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** `optionalName` puede ser `nil`, no puedes llamar métodos directamente
@@ -87,7 +87,7 @@ print((optionalName ?? "Desconocido").uppercased())
 
 // Opción 4: Force unwrap (⚠️ peligroso, evitar)
 print(optionalName!.uppercased())  // Crashea si es nil
-```
+```swift
 
 ---
 
@@ -101,7 +101,7 @@ protocol Greetable {
 struct Person: Greetable {  // ❌ Type 'Person' does not conform to protocol 'Greetable'
     let name: String
 }
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** Dijiste que `Person` conforma `Greetable` pero falta implementar `greet()`
@@ -115,7 +115,7 @@ struct Person: Greetable {
         return "Hola, soy \(name)"
     }
 }
-```
+```text
 
 **Tip:** Presiona `Cmd + .` (Fix-it) en Xcode para que autocomplete el stub del método.
 
@@ -133,7 +133,7 @@ class ViewModel {
         }
     }
 }
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** En closures, Swift requiere que uses `self` explícitamente para capturar referencias
@@ -149,7 +149,7 @@ Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
 Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
     self.count += 1  // ✅ Usa self explícito
 }
-```
+```text
 
 ---
 
@@ -162,7 +162,7 @@ func process(data: String, completion: () -> Void) {
         completion()     // ❌ Escaping closure captures non-escaping parameter 'completion'
     }
 }
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** El closure se escapa (se ejecuta después de que la función retorna) pero captura parámetros que no están marcados para escapar
@@ -176,7 +176,7 @@ func process(data: String, completion: @escaping () -> Void) {
         completion()
     }
 }
-```
+```text
 
 **¿Cuándo usar `@escaping`?**
 - El closure se guarda para ejecutar después
@@ -194,7 +194,7 @@ struct User {
 
 var user = User(name: "Juan")
 user.name = "Pedro"  // ❌ Cannot assign to property: 'name' is a 'let' constant
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** `name` es constante (`let`), no puede cambiar
@@ -217,7 +217,7 @@ struct Counter {
         count += 1
     }
 }
-```
+```swift
 
 ---
 
@@ -232,7 +232,7 @@ class DatabaseManager {
 }
 
 let db = DatabaseManager()  // ❌ Inaccessible due to 'private' protection level
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** El inicializador es `private`, no puedes llamarlo desde fuera
@@ -247,7 +247,7 @@ let db = DatabaseManager.create()
 class DatabaseManager {
     init() {}  // ← Quita private si es necesario
 }
-```
+```text
 
 ---
 
@@ -261,7 +261,7 @@ func wrap<T>(value: T) -> [T] {
 let result = wrap(value: 42)  // ✅ OK, T se infiere como Int
 
 let another = wrap()  // ❌ Generic parameter 'T' could not be inferred
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** El compilador no sabe qué tipo es `T`
@@ -273,7 +273,7 @@ let another: [String] = wrap()  // T es String
 
 // Opción 2: Pasa un valor para inferir
 let another = wrap(value: "text")  // T se infiere como String
-```
+```text
 
 ---
 
@@ -287,7 +287,7 @@ var counter = 0
 Task {
     counter += 1  // ❌ Reference to captured var 'counter' in concurrently-executing code
 }
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** Estás accediendo a variable mutable desde múltiples hilos (data race)
@@ -314,7 +314,7 @@ let counter = 0  // let es thread-safe
 Task {
     print(counter)  // ✅ OK, no se modifica
 }
-```
+```text
 
 ---
 
@@ -326,7 +326,7 @@ func fetchData() async -> String { "data" }
 func load() {
     let data = fetchData()  // ❌ Expression is 'async' but not marked with 'await'
 }
-```
+```text
 
 **Diagnóstico:**
 - **Qué dice:** La función es `async`, debes usar `await` para llamarla
@@ -343,7 +343,7 @@ func load() {
         let data = await fetchData()  // ← await en contexto async
     }
 }
-```
+```text
 
 ---
 
@@ -351,14 +351,14 @@ func load() {
 
 ### Cuando la app crashea en runtime
 
-```
+```text
 Thread 1: Fatal error: Unexpectedly found nil while unwrapping an Optional value
 
 0  libswiftCore.dylib  specialized _fatalErrorMessage
 1  MyApp               LoginViewController.viewDidLoad() at LoginViewController.swift:25
 2  MyApp               @objc LoginViewController.viewDidLoad()
 3  UIKitCore           -[UIViewController loadViewIfRequired]
-```
+```text
 
 **Lectura:**
 1. **El error:** Force unwrap de nil (`!` en optional nil)
@@ -375,11 +375,11 @@ Thread 1: Fatal error: Unexpectedly found nil while unwrapping an Optional value
 
 Los errores de compilación se muestran en orden. El primero suele causar el resto.
 
-```
+```swift
 ❌ error 1: Type 'LoginViewModel' does not conform to protocol 'ObservableObject'
 ❌ error 2: Cannot assign to property: 'state' is immutable  
 ❌ error 3: Reference to invalid member
-```
+```text
 
 Arregla el **error 1** primero. Los otros dos probablemente desaparecerán.
 
@@ -391,9 +391,9 @@ Presiona `Cmd + .` (punto) sobre el error rojo. Xcode sugiere arreglos automáti
 
 ### Paso 3: Busca en documentación, no solo Stack Overflow
 
-```
+```text
 error: 'some' return types are only available in iOS 13.0.0 or newer
-```
+```text
 
 Busca en Apple Developer Docs: `some keyword Swift` o `opaque types`.
 
@@ -423,10 +423,10 @@ A veces Xcode muestra errores que no existen.
 - Error que "debería" estar arreglado
 
 **Solución:**
-```
+```text
 Product → Clean Build Folder (Cmd + Shift + K)
 Product → Build (Cmd + B)
-```
+```text
 
 **Nuclear option (si todo falla):**
 ```bash
@@ -441,3 +441,7 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 ---
 
 **Anexo relacionado:** [Debugging en Xcode](../05-maestria/10-debugging-xcode.md)
+
+---
+
+**Anterior:** [Mental Models: Cómo Pensar en Clean Architecture ←](mental-models.md) · **Siguiente:** [Anexo: Guía SOLID →](guia-solid.md)

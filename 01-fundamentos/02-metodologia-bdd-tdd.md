@@ -28,12 +28,12 @@ La idea central de BDD es que antes de escribir un solo test, te sientes a defin
 
 Los escenarios BDD siguen un formato que probablemente ya has visto, aunque no supieras que era BDD:
 
-```
+```text
 Scenario: [Descripción breve de lo que se está probando]
   Given [un contexto inicial, un estado del sistema]
   When [ocurre una acción o un evento]
   Then [el resultado esperado, lo que debería pasar]
-```
+```text
 
 **Given** describe el estado inicial del mundo antes de que ocurra la acción. Es el contexto. "Dado que existe un usuario registrado con email user@example.com y un password válido". "Dado que el dispositivo no tiene conexión a internet".
 
@@ -43,7 +43,7 @@ Scenario: [Descripción breve de lo que se está probando]
 
 Vamos a ver esto aplicado al Login con varios escenarios reales, no solo el caso feliz:
 
-```
+```text
 Feature: Login de usuario
 
 Scenario: Login exitoso con credenciales válidas
@@ -79,20 +79,20 @@ Scenario: Login rechazado por password vacío
   When el usuario intenta construir las credenciales
   Then el sistema rechaza el password antes de intentar la autenticación
   And devuelve un error de tipo password vacío
-```
+```text
 
 ### Cómo se lee un escenario BDD paso a paso
 
 Si nunca has leído un escenario Given/When/Then, vamos a desglosar uno palabra por palabra para que no quede duda:
 
-```
+```text
 Scenario: Login exitoso con credenciales válidas
   Given un usuario registrado con email "user@example.com"
   And un password válido "Pass1234"
   When el usuario envía sus credenciales
   Then el sistema autentica al usuario exitosamente
   And el sistema devuelve una sesión con un token de acceso
-```
+```text
 
 **Línea 1 — `Scenario:`** — Es el título. Describe en una frase corta qué estamos probando. Siempre empieza con `Scenario:`. Es como el título de una película: te dice de qué va sin darte todos los detalles.
 
@@ -130,11 +130,11 @@ graph TD
 
     style BDD fill:#f8f9fa,stroke:#6c757d
     style TEST fill:#d4edda,stroke:#28a745
-```
+```text
 
 Veamos la traducción completa del escenario del happy path:
 
-```
+```text
 BDD:                                          TEST SWIFT:
 ─────────────────────────────────────────     ─────────────────────────────────────────
 Given un usuario con email válido             let gateway = AuthGatewayStub(
@@ -147,11 +147,11 @@ When el usuario envía credenciales            let session = try await sut.execu
 
 Then autentica exitosamente                   XCTAssertEqual(session, expectedSession)
   And devuelve sesión con token               XCTAssertEqual(session.token, "valid-token")
-```
+```text
 
 Y la traducción de un sad path:
 
-```
+```text
 BDD:                                          TEST SWIFT:
 ─────────────────────────────────────────     ─────────────────────────────────────────
 Given un email sin formato válido             let sut = LoginUseCase(authGateway: gateway)
@@ -167,7 +167,7 @@ Then rechaza el email                         } catch {
   And devuelve error email inválido               XCTAssertEqual(error as? LoginUseCase.Error,
                                                       .invalidEmail)
                                               }
-```
+```swift
 
 **Regla de oro:** cada `Scenario` BDD se convierte en exactamente un `func test_...()` en Swift. Si tienes 5 escenarios, tienes 5 tests. El nombre del test describe el escenario: `test_execute_with_invalid_email_throws_invalidEmail`.
 
@@ -177,7 +177,7 @@ Mira lo que acabamos de conseguir sin escribir ni una línea de Swift. Tenemos u
 
 Si le enseñas estos escenarios a otro desarrollador, a tu jefe, o a un QA, pueden validar si es correcto o si falta algo. "Oye, ¿y qué pasa si el usuario cancela el login mientras está en progreso?" Buena pregunta. Añadimos un escenario:
 
-```
+```text
 Scenario: Login cancelado por el usuario
   Given un usuario con credenciales válidas
   And una autenticación en progreso
@@ -211,5 +211,24 @@ Hasta aquí hemos resuelto el **qué** y el **por qué** de la feature con escen
 En la siguiente lección pasamos al **cómo**: implementar cada comportamiento con TDD usando ciclos cortos Red-Green-Refactor.
 
 ---
+
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-bdd-tdd.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Principios de ingeniería ←](01-principios-ingenieria.md) · **Siguiente:** [Metodología TDD: práctica Red-Green-Refactor →](02-metodologia-tdd-practica.md)

@@ -103,3 +103,21 @@ No aceptable: lista genérica de amenazas sin priorización.
 ## Criterio de completitud
 
 Se considera paquete completo cuando el 100% de ítems obligatorios están presentes y son verificables por un tercero sin contexto oral adicional.
+
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+**Anterior:** [Propósito y Alcance ←](01-rubrica-empleabilidad-ios.md) · **Siguiente:** [Checklist de entrega para entrevista (1 página) →](03-checklist-entrega-para-entrevista.md)

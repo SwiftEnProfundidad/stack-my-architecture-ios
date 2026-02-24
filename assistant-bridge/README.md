@@ -4,10 +4,10 @@ Este servicio evita exponer la API key en el navegador.
 
 ## Qué hace
 
-- Expone [`/ask`](assistant-bridge/server.js) para consultas del panel IA.
-- Expone [`/metrics`](assistant-bridge/server.js) para coste/tokens/requests.
-- Expone [`/config`](assistant-bridge/server.js) para modelos y límites.
-- Guarda la API key solo en servidor vía [`.env`](assistant-bridge/.env.example:1).
+- Expone [`/ask`](server.js) para consultas del panel IA.
+- Expone [`/metrics`](server.js) para coste/tokens/requests.
+- Expone [`/config`](server.js) para modelos y límites.
+- Guarda la API key solo en servidor vía [`.env`](.env.example).
 
 ## Flujo de datos
 
@@ -19,7 +19,7 @@ Este servicio evita exponer la API key en el navegador.
 
 ## Configuración
 
-1. Copia [`.env.example`](assistant-bridge/.env.example:1) a `.env`.
+1. Copia [`.env.example`](.env.example) a `.env`.
 2. Rellena `OPENAI_API_KEY`.
 3. Opcional: ajusta `ASSISTANT_SOFT_DAILY_BUDGET_USD` y `ASSISTANT_MAX_TOKENS_CAP`.
 

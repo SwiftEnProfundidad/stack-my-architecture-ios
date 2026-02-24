@@ -1,5 +1,12 @@
 # Composición avanzada
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Decorator, Composite e Interception: los tres patrones que cambian cómo piensas sobre el código
 
 En la Etapa 3 usamos el patrón **Decorator** para añadir caché sin modificar el repositorio remoto. Ese fue solo el primer paso. En esta lección cubrimos los tres patrones de composición que te permiten añadir comportamiento a tu sistema **sin modificar código existente**: Decorator, Composite e Interception. Juntos, son la base del Open/Closed Principle en la práctica.
@@ -33,7 +40,7 @@ graph TD
     style Decorator fill:#d4edda,stroke:#28a745
     style Composite fill:#cce5ff,stroke:#007bff
     style Interception fill:#fff3cd,stroke:#ffc107
-```
+```text
 
 Y así es como se combinan en el Composition Root de nuestro proyecto:
 
@@ -51,7 +58,7 @@ graph LR
     style CACHE_SAVE fill:#fff3cd,stroke:#ffc107
     style REMOTE fill:#d4edda,stroke:#28a745
     style LOCAL fill:#d4edda,stroke:#28a745
-```
+```text
 
 El `LoadProductsUseCase` no sabe nada de esta cadena. Solo sabe que habla con algo que conforma `ProductRepository`. Toda la composición es **invisible** para la lógica de negocio.
 
@@ -90,7 +97,7 @@ graph TB
 
     style Sin fill:#f8d7da,stroke:#dc3545
     style Con fill:#d4edda,stroke:#28a745
-```
+```text
 
 Cada tipo tiene **una sola responsabilidad**. Si el logging cambia, solo tocas `LoggingProductRepository`. Si la estrategia de fallback cambia, solo tocas `ProductRepositoryWithFallback`. El resto del sistema no se entera.
 
@@ -122,7 +129,7 @@ final class CachedProductRepository: ProductRepository, @unchecked Sendable {
         }
     }
 }
-```
+```text
 
 El poder del Decorator es que el `LoadProductsUseCase` no sabe si está hablando con un repositorio real, un repositorio cacheado, o un repositorio con logging. Solo sabe que habla con algo que conforma `ProductRepository`.
 
@@ -154,7 +161,7 @@ final class LoggingProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```
+```text
 
 Y puedes apilar decoradores:
 
@@ -166,7 +173,7 @@ let logged = LoggingProductRepository(decoratee: cached, logger: consoleLogger)
 
 // El use case recibe el decorador más externo
 let useCase = LoadProductsUseCase(repository: logged)
-```
+```text
 
 El flujo es: `logged` → `cached` → `remote`. Cada capa añade comportamiento sin que las otras lo sepan.
 
@@ -194,7 +201,7 @@ final class ProductRepositoryWithFallback: ProductRepository, Sendable {
         }
     }
 }
-```
+```text
 
 ### Uso real: remoto → caché → servidor backup
 
@@ -211,7 +218,7 @@ let repository = ProductRepositoryWithFallback(
         fallback: backup
     )
 )
-```
+```text
 
 El Composite es recursivo: puedes anidar composites dentro de composites. Cada nivel no sabe si su primario/fallback es un repositorio real, un decorador, u otro composite.
 
@@ -284,7 +291,7 @@ final class ProductRepositoryWithFallbackTests: XCTestCase {
         )
     }
 }
-```
+```text
 
 ---
 
@@ -309,7 +316,7 @@ final class CacheSavingInterceptor: ProductRepository, Sendable {
         return products
     }
 }
-```
+```text
 
 La diferencia sutil con el Decorator de caché:
 
@@ -341,7 +348,7 @@ let withFallback = ProductRepositoryWithFallback(
 let withLogging = LoggingProductRepository(decoratee: withFallback, logger: logger)
 
 let useCase = LoadProductsUseCase(repository: withLogging)
-```
+```text
 
 El flujo resultante:
 1. `LoggingProductRepository` registra el inicio.
@@ -375,7 +382,7 @@ final class CompositionRootTests: XCTestCase {
         XCTAssertNotNil(catalogView)
     }
 }
-```
+```text
 
 Para un test más profundo, podemos verificar que la cadena de composición tiene el comportamiento esperado:
 
@@ -427,5 +434,27 @@ La composición avanzada te permite:
 > **💡 SOLID en acción:** Este patrón es la manifestación práctica del *Open/Closed Principle* (OCP). Cuando necesitas añadir logging, no modificas el repositorio existente (cerrado a modificación), creas un nuevo `LoggingRepository` que envuelve al original (abierto a extensión). El caso de uso ni sabe que ahora hay logging.
 
 ---
+
+---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `05-maestria/07-composicion-avanzada.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [SwiftUI performance ←](06-swiftui-performance.md) · **Siguiente:** [Memory leaks y diagnóstico →](08-memory-leaks-y-diagnostico.md)

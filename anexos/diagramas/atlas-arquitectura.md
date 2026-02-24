@@ -4,6 +4,21 @@
 
 ---
 
+## 0. Convención de flechas del curso (léela una vez)
+
+Antes de interpretar cualquier diagrama, usa esta clave semántica:
+
+![Leyenda de flechas para diagramas (genérica)](../../assets/leyenda-flechas-generica.svg)
+
+- Línea continua + punta cerrada = dependencia o llamada directa en runtime.
+- Línea discontinua + punta cerrada = relación de ensamblado/wiring.
+- Línea discontinua + punta abierta = contrato/abstracción (relación de tipo).
+- Línea continua + punta abierta = salida/notificación desacoplada.
+
+Nota de herramienta: en Mermaid `flowchart` no todos los estilos de punta (abierta/cerrada) tienen la misma expresividad que una lámina estática. Cuando uses Mermaid, preserva la semántica con etiquetas textuales (`"contrato/protocolo"` y `"evento"`).
+
+---
+
 ## 1. Clean Architecture: las capas y la regla de dependencia
 
 Clean Architecture organiza el código en **anillos concéntricos**. La regla fundamental es una sola: **las dependencias siempre apuntan hacia el centro**. Nunca al revés.
@@ -44,7 +59,7 @@ graph TB
     style APP fill:#cce5ff,stroke:#007bff
     style ADAPT fill:#fff3cd,stroke:#ffc107
     style OUTER fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 **Como leer este diagrama:**
 
@@ -69,7 +84,7 @@ graph LR
     end
 
     style SIN_INV fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 Problema: si cambias la implementación de `RemoteAuthGateway` (por ejemplo, migras de URLSession a Firebase), tienes que **tocar LoginUseCase**. Y si tocas LoginUseCase, tienes que re-testear todo el flujo.
 
@@ -78,14 +93,14 @@ Con inversión de dependencias, Application define un protocolo y no sabe quién
 ```mermaid
 graph LR
     subgraph CON_INV["CON inversion: desacoplamiento por protocolo"]
-        UC2["LoginUseCase"] --> PROTO["AuthGateway<br/>(protocolo)"]
+        UC2["LoginUseCase"] ..> PROTO["AuthGateway<br/>(protocolo)"]
         PROTO -.->|"implementa"| RG2["RemoteAuthGateway"]
         PROTO -.->|"implementa"| STUB["AuthGatewayStub<br/>(tests)"]
         RG2 --> URL2["URLSession"]
     end
 
     style CON_INV fill:#d4edda,stroke:#28a745
-```
+```text
 
 **La flecha de dependencia se invierte:** ahora `RemoteAuthGateway` depende de `AuthGateway` (el protocolo que vive en Application), no al revés. LoginUseCase solo conoce el protocolo.
 
@@ -132,7 +147,7 @@ sequenceDiagram
     VM->>VM: state = success
     VM->>VM: onLoginSucceeded(session)
     V-->>U: Navega al Catalogo
-```
+```text
 
 **Que datos viajan en cada tramo:**
 
@@ -188,7 +203,7 @@ sequenceDiagram
     end
 
     V-->>U: Muestra lista o mensaje
-```
+```text
 
 ---
 
@@ -281,7 +296,7 @@ graph TD
     style INFRA fill:#fff3cd,stroke:#ffc107
     style INTERFACE fill:#e2d5f1,stroke:#6f42c1
     style COMPOSITION fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 **Como leer este grafo:**
 
@@ -332,7 +347,7 @@ graph TD
     style MAIN fill:#e2d5f1,stroke:#6f42c1
     style NONISOLATED fill:#d4edda,stroke:#28a745
     style COOPERATIVE fill:#cce5ff,stroke:#007bff
-```
+```swift
 
 **Que significa cada zona:**
 
@@ -420,7 +435,7 @@ graph TD
     style CATALOG fill:#d4edda,stroke:#28a745
     style NAV fill:#e2d5f1,stroke:#6f42c1
     style COMP fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 **Reglas de dependencia (enforceables por CI):**
 
@@ -489,4 +504,8 @@ Si mañana migras de Firebase a Supabase, solo cambias `BackendFirebase` por `Ba
 - **Si quieres ver la estructura de modulos futura:** mira el diagrama 7 (SPM).
 - **Si quieres saber como encaja Firebase:** mira el diagrama 8 (backend).
 
-**Anterior:** [Glosario](../glosario.md) · **Inicio:** [README](../../README.md)
+**Anterior:** [Glosario](../glosario.md) · **Inicio:** [Informe del curso](../../00-informe/INFORME-CURSO.md)
+
+---
+
+**Anterior:** [Guía de Recuperación - Curso iOS ←](../guia-recuperacion-ios.md) · **Siguiente:** [Como anadir una feature nueva →](../guia-nueva-feature.md)

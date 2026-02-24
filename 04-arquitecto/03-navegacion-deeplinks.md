@@ -58,7 +58,7 @@ flowchart LR
     POLICY --> ROUTE["AppDestination valida"]
     ROUTE --> COORD["AppCoordinator"]
     COORD --> FEATURE["FeatureRouter propietario"]
-```
+```text
 
 Esto desacopla origen de intención y destino final.
 
@@ -84,7 +84,7 @@ struct ProductID: Hashable, Sendable {
         self.rawValue = rawValue
     }
 }
-```
+```text
 
 Por qué tipado fuerte:
 
@@ -118,7 +118,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```
+```text
 
 ### Ejemplo realista
 
@@ -150,7 +150,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```
+```text
 
 Parser solo interpreta URL. No decide auth ni navegación final.
 
@@ -184,7 +184,7 @@ struct NavigationPolicy: Sendable {
         }
     }
 }
-```
+```text
 
 Ventaja enterprise:
 
@@ -250,7 +250,7 @@ final class AppCoordinator: ObservableObject {
         }
     }
 }
-```
+```text
 
 ---
 
@@ -260,14 +260,14 @@ final class AppCoordinator: ObservableObject {
 sequenceDiagram
     participant OS as iOS (URL/Push/Widget)
     participant APP as App Entry
-    participant PAR as DeepLinkParser
+    participant DLP as DeepLinkParser
     participant COORD as AppCoordinator
     participant POL as NavigationPolicy
     participant NAV as NavigationStack
 
-    OS->>APP: myapp://product?id=123
-    APP->>PAR: parse(url)
-    PAR-->>APP: AppDestination.productDetail(123)
+    OS->>APP: deep link product id 123
+    APP->>DLP: parse(url)
+    DLP-->>APP: AppDestination.productDetail(123)
     APP->>COORD: handle(destination)
     COORD->>POL: evaluate(destination, isAuthenticated)
     alt no autenticado
@@ -278,7 +278,7 @@ sequenceDiagram
         POL-->>COORD: allow
         COORD->>NAV: route = productDetail(123)
     end
-```
+```text
 
 ---
 
@@ -298,7 +298,7 @@ stateDiagram-v2
 
     ProductDetail --> Catalog: back
     Settings --> Catalog: back
-```
+```text
 
 Esta máquina de estados evita comportamientos “mágicos” difíciles de depurar.
 
@@ -342,7 +342,7 @@ struct CatalogRouter: FeatureRouter {
         }
     }
 }
-```
+```text
 
 Supuesto: este patrón se activa cuando el coordinador supere complejidad razonable. En una app muy pequeña puede ser demasiado pronto.
 
@@ -400,7 +400,7 @@ final class AppCoordinatorNavigationTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 }
-```
+```text
 
 Nota: `path` vacío/append puede variar según implementación de root screen; lo importante es mantener contrato verificable.
 
@@ -441,7 +441,7 @@ No definir política produce navegación errática.
 Button("Ir al producto") {
     path.append("product-123")
 }
-```
+```text
 
 Problemas:
 
@@ -545,4 +545,29 @@ Trigger para pasar de A a B:
 
 Cuando la navegación es plataforma, añadir una nueva feature no implica tocar cinco pantallas y rezar. Implica registrar un contrato claro y dejar que el sistema haga su trabajo. Ese cambio de mentalidad es arquitectura enterprise real.
 
-**Anterior:** [Reglas de dependencia ←](02-reglas-dependencia-ci.md) · **Siguiente:** [Versionado y SPM →](04-versionado-spm.md)
+---
+
+## Ejercicio guiado: trazar un deep link de Login a Catalog
+
+**Objetivo:** Verificar que el flujo de navegación Login → Catalog funciona por eventos, no por acoplamiento directo.
+
+**Instrucciones:**
+
+1. Abre `Tests/AppCompositionTests/` y localiza el smoke test de flujo Login → Catalog.
+2. Revisa cómo el test simula un login exitoso y verifica que la navegación llega a Catalog.
+3. Identifica qué evento emite Login al completarse y qué componente lo consume para navegar.
+4. Escribe (o revisa) un test que verifique: si Login emite `.success(session)`, el coordinador navega a Catalog sin que Login importe `FeatureCatalogUI`.
+
+**Criterios de éxito:**
+
+- El test pasa con `swift test --filter Smoke`.
+- `LoginViewModel` no importa `FeatureCatalogUI` ni `FeatureCatalogDomain`.
+- La navegación se resuelve en `AppComposition` mediante un closure o coordinador, no por import directo.
+
+**Solución razonada:**
+
+El patrón es: `LoginViewModel` recibe un closure `onLoginSuccess: (Session) -> Void`. El `AppComposition` conecta ese closure con la presentación de Catalog. El test verifica que al invocar el closure, se activa la navegación esperada. Esto permite que Login y Catalog evolucionen independientemente: si mañana Catalog cambia su pantalla inicial, Login no se entera.
+
+---
+
+**Anterior:** [Reglas de dependencia y CI ←](02-reglas-dependencia-ci.md) · **Siguiente:** [Versionado y SPM →](04-versionado-spm.md)
