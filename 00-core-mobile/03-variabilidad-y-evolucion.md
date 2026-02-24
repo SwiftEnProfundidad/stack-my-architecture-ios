@@ -64,4 +64,18 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 
 ---
 
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `00-core-mobile/03-variabilidad-y-evolucion.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
 **Anterior:** [Invariantes y contratos ←](02-invariantes-y-contratos.md) · **Siguiente:** [Calidad PR-ready →](04-calidad-pr-ready.md)

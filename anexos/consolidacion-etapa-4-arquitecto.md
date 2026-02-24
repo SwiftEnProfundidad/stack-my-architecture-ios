@@ -123,12 +123,12 @@ Probablemente necesites:
 <details>
 <summary>💡 Pista 2: Dependencias</summary>
 
-```
+```text
 Task Management <-- Collaboration (colaboración necesita saber de tareas)
 Task Management <-- Notifications (notificaciones sobre cambios en tareas)
 Task Management <-- Sync (sync de tareas)
 Collaboration <-- Sync (sync de cambios colaborativos)
-```
+```text
 
 Task Management es el core; los demás son periféricos.
 
@@ -151,7 +151,7 @@ Ejemplo: "Ningún archivo en TaskManagement/Domain puede importar de Collaborati
 4. **Sync Engine** (infrastructure): Offline, cola de cambios, resolución de conflictos
 
 **Grafo de dependencias:**
-```
+```text
 Collaboration --> Task Management
 Notifications --> Task Management
 Sync Engine --> Task Management

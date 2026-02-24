@@ -51,4 +51,24 @@ Guía pragmática: protege reglas con unit/contract, wiring con integration y va
 
 ---
 
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `00-core-mobile/02-invariantes-y-contratos.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
+
 **Anterior:** [Marco de decisiones arquitectónicas ←](01-marco-de-decisiones.md) · **Siguiente:** [Variabilidad y evolución sin caos →](03-variabilidad-y-evolucion.md)

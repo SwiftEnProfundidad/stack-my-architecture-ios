@@ -97,7 +97,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 **Explicacion linea por linea:**
 
@@ -136,7 +136,7 @@ En la **capa App** (`StackMyArchitectureApp.swift`). El `TabView` es una decisi�
 
 // Contexto de SwiftData (persistencia)
 @Environment(\.modelContext) private var modelContext
-```
+```text
 
 ### Ejemplo real: cerrar un modal
 
@@ -166,7 +166,7 @@ struct FilterView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -228,7 +228,7 @@ struct CatalogView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion linea por linea:**
 
@@ -260,7 +260,7 @@ A veces quieres pasar un dato al modal. Usa `.sheet(item:)`:
 .sheet(item: $selectedProduct) { product in
     ProductQuickView(product: product)
 }
-```
+```text
 
 `item:` recibe un binding a un opcional. Cuando el valor NO es `nil`, el sheet se abre con ese dato. Cuando se cierra, SwiftUI pone el valor a `nil`. El tipo debe conformar `Identifiable` (que requiere una propiedad `id`).
 
@@ -306,7 +306,7 @@ struct ProfileView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -327,7 +327,7 @@ struct ProfileView: View {
     Button("Precio: mayor a menor") { viewModel.sortBy(.priceDescending) }
     Button("Cancelar", role: .cancel) { }
 }
-```
+```text
 
 Aparece como un menu desde abajo con las opciones. Es el reemplazo moderno del antiguo `ActionSheet`.
 
@@ -354,7 +354,7 @@ case .loaded(let products):
     .refreshable {
         await viewModel.load()
     }
-```
+```text
 
 **Eso es todo.** Una sola linea. SwiftUI se encarga de:
 - Mostrar el spinner de refresh cuando el usuario arrastra hacia abajo.
@@ -411,7 +411,7 @@ struct CatalogView: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -432,7 +432,7 @@ func search(_ query: String) {
     let filtered = allProducts.filter { ... }
     state = .loaded(filtered)
 }
-```
+```text
 
 ### Donde vive
 
@@ -465,7 +465,7 @@ El modifier `.searchable` está en la **Interface**. La lógica de filtrado en e
         Text("\(products.count) productos")
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -511,7 +511,7 @@ struct FilterToggle: View {
             .padding()
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -573,7 +573,7 @@ struct SettingsView: View {
         .navigationTitle("Ajustes")
     }
 }
-```
+```text
 
 **Explicacion linea por linea:**
 
@@ -632,7 +632,7 @@ Button("Ver detalle") {
 }
 // + en el NavigationStack:
 .navigationDestination(for: AppDestination.self) { ... }
-```
+```text
 
 **Regla practica:** Si la navegación es parte de un **flujo de negocio** (login → catálogo → detalle), usa `navigationDestination` con coordinador. Si es **contenido estático** (ajustes → licencias → sobre nosotros), usa `NavigationLink` directamente.
 
@@ -662,14 +662,14 @@ extension View {
         modifier(CardStyle())
     }
 }
-```
+```text
 
 **Uso:**
 
 ```swift
 ProductRow(product: product)
     .cardStyle()
-```
+```swift
 
 **Explicacion:**
 
@@ -686,6 +686,10 @@ Los modifiers personalizados viven en la **capa Interface**, generalmente en una
 ---
 
 ## Resumen: mapa de conceptos SwiftUI enterprise
+
+Antes del diagrama, fija los ejes: **Navegacion** (`TabView`, `NavigationLink`, `navigationDestination`, `.toolbar`), **Presentacion modal** (`.sheet`, `.fullScreenCover`, `.alert`, `.confirmationDialog`), **Datos y busqueda** (`.refreshable`, `.searchable`, ``, ``) y **Composicion** (``, `ViewModifier`, `Form`, `Section`).
+
+La lectura correcta es de izquierda a derecha: navegacion y presentacion organizan flujo UI; datos y busqueda conectan estado; composicion estandariza estilos y reutilizacion para mantener coherencia enterprise.
 
 ```mermaid
 flowchart LR
@@ -715,7 +719,7 @@ flowchart LR
         COM2["ViewModifier<br/>Estilos custom"]
         COM3["Form + Section<br/>Ajustes"]
     end
-```
+```text
 
 ---
 
@@ -771,7 +775,7 @@ struct ProfileForm: View {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -818,7 +822,7 @@ ScrollView {
         }
     }
 }
-```
+```text
 
 **Explicacion:**
 
@@ -840,7 +844,7 @@ ForEach(products.indices, id: \.self) { index in
 ForEach(products, id: \.id) { product in
     ProductRow(product: product)
 }
-```
+```text
 
 **Por que importa:** SwiftUI usa la identidad (el `id`) para saber que vista corresponde a que dato. Si usas `.indices`, al eliminar el producto 3, SwiftUI cree que el producto 4 es el 3 (porque ahora tiene indice 3). Esto causa animaciones incorrectas y bugs visuales. Con `\.id`, SwiftUI sabe que cada vista corresponde a un producto concreto, sin importar su posición.
 
@@ -857,7 +861,7 @@ let expensiveProducts = products.filter { $0.price.amount > 10 }
 ForEach(expensiveProducts, id: \.id) { product in
     ProductRow(product: product)
 }
-```
+```text
 
 Cada vez que SwiftUI re-renderiza la vista, ejecuta `body`. Si el filtrado está dentro de `ForEach`, se ejecuta cada vez. Pre-filtrando fuera, el resultado se cachea y el `ForEach` solo itera.
 
@@ -875,7 +879,7 @@ struct ProductRow: View {
     let product: Product  // Solo se re-renderiza si ESE producto cambia
     // ...
 }
-```
+```text
 
 Si pasas un objeto grande (ViewModel, contexto), cualquier cambio en cualquier propiedad de ese objeto re-renderiza la fila. Pasando solo el dato necesario, la fila solo se actualiza cuando su dato cambia.
 
@@ -895,7 +899,7 @@ viewModel.state = .loaded(products)
 withAnimation(.easeInOut(duration: 0.3)) {
     viewModel.state = .loaded(products)
 }
-```
+```text
 
 **Explicacion:**
 
@@ -911,7 +915,7 @@ Para animar cambios automaticamente cuando una propiedad cambia:
 Text(product.name)
     .opacity(isVisible ? 1 : 0)
     .animation(.easeIn, value: isVisible)
-```
+```text
 
 `.animation(.easeIn, value: isVisible)` — Cada vez que `isVisible` cambia, SwiftUI anima la opacidad. **Siempre especifica `value:`** para decirle a SwiftUI QUE cambio observar. Sin `value:`, SwiftUI anima TODO lo que cambie en esa vista, causando animaciones inesperadas.
 
@@ -922,7 +926,7 @@ if showDetails {
     Text("Detalles del producto...")
         .transition(.slide)
 }
-```
+```text
 
 `.transition(.slide)` — Cuando `showDetails` pasa a `true`, el texto aparece deslizandose. Cuando pasa a `false`, desaparece deslizandose. Otros: `.opacity` (fade), `.scale` (crece/encoge), `.move(edge: .bottom)` (desde un borde).
 
@@ -932,14 +936,14 @@ if showDetails {
 withAnimation {
     showDetails.toggle()
 }
-```
+```text
 
 ### .contentTransition — Animar cambios de contenido
 
 ```swift
 Text("\(cartCount) items")
     .contentTransition(.numericText())
-```
+```text
 
 Cuando `cartCount` cambia de 3 a 4, el número hace una animación de "ticker" (como un contador de kilometros). Sin `.contentTransition`, el texto simplemente salta de "3" a "4".
 
@@ -970,7 +974,7 @@ Button {
 ProductRow(product: product)
     .accessibilityLabel("\(product.name), \(product.price.formatted)")
     .accessibilityHint("Pulsa dos veces para ver el detalle")
-```
+```text
 
 **Explicacion:**
 
@@ -992,7 +996,7 @@ Text(product.name)
 // MAL: tamano fijo que ignora las preferencias del usuario
 Text(product.name)
     .font(.system(size: 16))
-```
+```text
 
 Las fuentes semanticas (`.headline`, `.body`, `.caption`) escalan automaticamente con Dynamic Type. Las fuentes con tamaño fijo no.
 
@@ -1040,7 +1044,7 @@ Button {
     ProductRow(product: product)
 }
 .buttonStyle(.plain)  // Quita el estilo azul de boton
-```
+```text
 
 `onTapGesture` es invisible para VoiceOver — un usuario ciego no puede interactuar con esa fila. `Button` es accesible por defecto. `.buttonStyle(.plain)` quita el estilo visual de botón para que la fila se vea igual.
 
@@ -1066,7 +1070,7 @@ struct ProductDetailView: View {
         }
     }
 }
-```
+```text
 
 `.task(id: productId)` — Como `.task` pero se **re-ejecuta** cada vez que `productId` cambia. Si el usuario navega del producto A al producto B, `.task(id:)` cancela la carga del A y empieza la del B automaticamente. Sin `id:`, solo se ejecutaria una vez.
 
@@ -1089,7 +1093,7 @@ struct ProductDetailView: View {
         ProductDetailView(product: product)
     }
 }
-```
+```text
 
 `.sheet(item:)` es más limpio: cuando el valor no es nil, el sheet se abre CON ese dato. Cuando se cierra, el valor vuelve a nil. No necesitas un booleano extra. El tipo debe conformar `Identifiable`.
 
@@ -1124,7 +1128,7 @@ ContentCard(title: "Producto") {
     Text(product.price.formatted)
         .foregroundStyle(.secondary)
 }
-```
+```text
 
 **Explicacion:**
 
@@ -1147,7 +1151,7 @@ if isHighlighted {
 Text(product.name)
     .foregroundStyle(isHighlighted ? .blue : .primary)
     .bold(isHighlighted)
-```
+```text
 
 Cuando usas `if/else` para mostrar vistas diferentes, SwiftUI las trata como **vistas distintas**. Las destruye y recrea, perdiendo estado y animaciones. Con modifiers condicionales, SwiftUI sabe que es la **misma vista** con propiedades diferentes, y puede animar la transición suavemente.
 
@@ -1166,7 +1170,7 @@ Image("banner")
         width  // Usa todo el ancho disponible
     }
     .frame(height: 200)
-```
+```text
 
 `containerRelativeFrame` es el reemplazo moderno de `GeometryReader` para la mayoria de casos. Es más eficiente porque no causa multiples pasadas de layout.
 
@@ -1191,7 +1195,7 @@ if #available(iOS 26, *) {
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
 }
-```
+```text
 
 **Explicacion:**
 
@@ -1215,7 +1219,7 @@ if #available(iOS 26, *) {
         }
     }
 }
-```
+```text
 
 `GlassEffectContainer` — Agrupa multiples elementos glass para que compartan el mismo efecto visual. Sin el contenedor, cada botón tendria su propio glass independiente (no se fusionan).
 
@@ -1281,7 +1285,7 @@ flowchart LR
         COM2["Form + Section"]
         COM3["containerRelativeFrame"]
     end
-```
+```text
 
 ### Checklist COMPLETO para un junior
 

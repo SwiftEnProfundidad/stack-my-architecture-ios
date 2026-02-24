@@ -58,7 +58,7 @@ flowchart LR
     POLICY --> ROUTE["AppDestination valida"]
     ROUTE --> COORD["AppCoordinator"]
     COORD --> FEATURE["FeatureRouter propietario"]
-```
+```text
 
 Esto desacopla origen de intención y destino final.
 
@@ -84,7 +84,7 @@ struct ProductID: Hashable, Sendable {
         self.rawValue = rawValue
     }
 }
-```
+```text
 
 Por qué tipado fuerte:
 
@@ -118,7 +118,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```
+```text
 
 ### Ejemplo realista
 
@@ -150,7 +150,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```
+```text
 
 Parser solo interpreta URL. No decide auth ni navegación final.
 
@@ -184,7 +184,7 @@ struct NavigationPolicy: Sendable {
         }
     }
 }
-```
+```text
 
 Ventaja enterprise:
 
@@ -250,7 +250,7 @@ final class AppCoordinator: ObservableObject {
         }
     }
 }
-```
+```text
 
 ---
 
@@ -278,7 +278,7 @@ sequenceDiagram
         POL-->>COORD: allow
         COORD->>NAV: route = productDetail(123)
     end
-```
+```text
 
 ---
 
@@ -298,7 +298,7 @@ stateDiagram-v2
 
     ProductDetail --> Catalog: back
     Settings --> Catalog: back
-```
+```text
 
 Esta máquina de estados evita comportamientos “mágicos” difíciles de depurar.
 
@@ -342,7 +342,7 @@ struct CatalogRouter: FeatureRouter {
         }
     }
 }
-```
+```text
 
 Supuesto: este patrón se activa cuando el coordinador supere complejidad razonable. En una app muy pequeña puede ser demasiado pronto.
 
@@ -400,7 +400,7 @@ final class AppCoordinatorNavigationTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 }
-```
+```text
 
 Nota: `path` vacío/append puede variar según implementación de root screen; lo importante es mantener contrato verificable.
 
@@ -441,7 +441,7 @@ No definir política produce navegación errática.
 Button("Ir al producto") {
     path.append("product-123")
 }
-```
+```text
 
 Problemas:
 

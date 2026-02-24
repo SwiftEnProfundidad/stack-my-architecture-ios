@@ -1,5 +1,12 @@
 # 12. Arquitectura Adaptativa: Más Allá del Patrón
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 > Cómo pensar como arquitecto senior cuando no hay "una respuesta correcta" en el libro
 
 ---
@@ -34,7 +41,7 @@ Esta lección te da el **marco mental** para diseñar arquitecturas custom cuand
 
 Cuando enfrentas un problema arquitectónico nuevo, piensa en tres niveles:
 
-```
+```text
 NIVEL 1: Principios Universales
 ├── Separation of Concerns
 ├── Single Responsibility
@@ -53,7 +60,7 @@ NIVEL 3: Implementación Específica
 ├── ¿Actor o lock?
 ├── ¿In-memory o persisted?
 └── ¿Sync o async?
-```
+```text
 
 **El error común:** Saltar directo al Nivel 2 ("¿MVP o MVVM?") sin entender el Nivel 1 ("¿Qué cambia independientemente de qué?").
 
@@ -65,7 +72,7 @@ NIVEL 3: Implementación Específica
 
 Todo problema arquitectónico tiene fuerzas en conflicto. Identifícalas:
 
-```
+```text
 Ejemplo: App de ventas offline-first para repartidores
 
 FUERZA A: Disponibilidad (debe funcionar sin red)
@@ -76,7 +83,7 @@ FUERZA D: Simplicidad (código mantenible)
 Conflicto: A vs B (offline vs fresh)
          A vs D (sync complejo vs simple)
          B vs C (validación vs velocidad)
-```
+```text
 
 **Herramienta:** Diagrama de fuerzas - dibuja cada fuerza como flecha, identifica tensiones.
 
@@ -95,13 +102,13 @@ Conflicto: A vs B (offline vs fresh)
 
 ¿Qué NUNCA debe pasar, independientemente de la solución?
 
-```
+```text
 Ejemplo: App bancaria
 
 INV 1: Nunca perdemos una transacción confirmada al usuario
 INV 2: Nunca mostramos saldo inconsistente entre pestañas
 INV 3: Nunca procesamos el mismo pago dos veces (idempotencia)
-```
+```text
 
 Las invariantes son tu brújula: **cualquier solución que las viole está descartada**.
 
@@ -109,7 +116,7 @@ Las invariantes son tu brújula: **cualquier solución que las viole está desca
 
 Pregúntate: **¿Qué va a cambiar y cuándo?**
 
-```
+```text
 Estrategia de capas según velocidad de cambio:
 
 CAMBIA RÁPIDO (semanas): UI, copy, analytics events
@@ -127,7 +134,7 @@ CAMBIA LENTO (años): Entidades core, invariantes
 NO CAMBIA: Principios matemáticos, leyes del negocio
 ├── Encapsula: En domain, documenta como ADR
 └── Asume: Son tu fundamento
-```
+```text
 
 ---
 
@@ -145,7 +152,7 @@ NO CAMBIA: Principios matemáticos, leyes del negocio
 
 **Soluciones posibles:**
 
-```
+```text
 OPCIÓN A: Strangler Fig Pattern
 ├── Envuelve features legacy en wrappers Swift
 ├── Crea "fachada" que enruta a old o new
@@ -163,7 +170,7 @@ OPCIÓN C: Feature Flags + Gradual Migration
 ├── Configuración en runtime decide cuál usar
 ├── A/B testing implícito: métricas comparativas
 └── Rollback instantáneo si algo falla
-```
+```text
 
 **Decisión:** Depende de tu invariante. Si es "zero downtime", usa C. Si es "minimizar código duplicado", usa A. Si es "equipos paralelos", usa B.
 
@@ -205,7 +212,7 @@ struct ProductView_Vision: View {
 if SupportsApplePencil {
     showPencilInterface()
 }
-```
+```text
 
 **Principio:** "Same brain, different face". La lógica de negocio es idéntica; la presentación se adapta.
 
@@ -226,11 +233,11 @@ class ViewController {
 func convertPaymentResult(_ sdkResult: PaySDK.Result) -> MyResult {
     // ... 50 líneas de mapping
 }
-```
+```text
 
 **Arquitectura Adaptativa - Anti-Corruption Layers (ACL):**
 
-```
+```text
 ┌─────────────────────────────────────┐
 │  TU APP (Clean Architecture)       │
 │  ┌──────────────────────────────┐ │
@@ -251,7 +258,7 @@ func convertPaymentResult(_ sdkResult: PaySDK.Result) -> MyResult {
 │  - Delegates con estado mutable    │
 │  - Documentación cambiante         │
 └─────────────────────────────────────┘
-```
+```text
 
 **Beneficios del ACL:**
 - Cambiar PaySDK por Stripe solo toca el Adapter
@@ -303,7 +310,7 @@ enum ConflictStrategy {
     case merge             // Ambos cambios: resolución manual
     case rejectBoth        // Transacciones críticas: abortar
 }
-```
+```text
 
 **Invariante protegida:** "Nunca cobramos por algo que no tenemos". El servidor es la única fuente de verdad para stock, pero la UI no espera bloqueando.
 
@@ -345,7 +352,7 @@ class ComplianceEngine {
 // Nuevas regulaciones = nuevas implementaciones de ComplianceRule
 // Tests garantizan que reglas cumplen la ley
 // Documentación vive en ADRs vinculados a cada rule
-```
+```text
 
 ---
 
@@ -389,7 +396,7 @@ extension ImageProcessor {
         // Implementation...
     }
 }
-```
+```text
 
 **Contención:**
 - Aislado en módulo separado
@@ -426,7 +433,7 @@ class BatchSyncUseCase {
     
     // ... implementación optimizada
 }
-```
+```text
 
 ---
 
@@ -436,7 +443,7 @@ class BatchSyncUseCase {
 
 Cuando dudas entre alternativas, visualiza:
 
-```
+```json
                     [PROBLEMA]
                         │
         ┌───────────────┼───────────────┐
@@ -455,7 +462,7 @@ Cuando dudas entre alternativas, visualiza:
                             PROTEGIDOS]
                         │
                  [CRITERIO DE ÉXITO]
-```
+```text
 
 ### 5.2 El "Architecture Journal"
 
@@ -484,7 +491,7 @@ manual en casos edge (0.1% estimado).
 intervención del dispatcher.
 
 **Revisar:** Métricas reales en 3 meses.
-```
+```text
 
 ### 5.3 Análisis de Escenarios
 
@@ -513,7 +520,7 @@ App de telemedicina con:
 
 ### Análisis de Fuerzas
 
-```
+```text
 HIPAA (hard constraint) ────────┐
                               │
 Offline availability ───────────┼──► Privacidad + Disponibilidad
@@ -523,11 +530,11 @@ Real-time requirements ─────────┘
 Multi-tenancy (hospitales) ───┐
                               ├──► Flexibilidad vs Uniformidad
 HIPAA audit trail ────────────┘
-```
+```text
 
 ### La Arquitectura Resultante
 
-```
+```text
 ┌──────────────────────────────────────────────────────────┐
 │  PRESENTATION LAYER (SwiftUI + UIKit híbrido)            │
 │  - Native UI per platform                                │
@@ -565,7 +572,7 @@ HIPAA audit trail ────────────┘
 │  - Filesystem: Video recordings (large, external refs) │
 │  - Sync: Custom with conflict resolution per entity type │
 └──────────────────────────────────────────────────────────┘
-```
+```text
 
 ### Decisiones No Estándar
 
@@ -632,7 +639,7 @@ HIPAA audit trail ────────────┘
 
 ### El Ciclo de Aprendizaje
 
-```
+```text
     ┌─────────────────┐
     │  ENFRENTA      │
     │  problema real │

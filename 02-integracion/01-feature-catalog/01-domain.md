@@ -1,5 +1,12 @@
 # Feature Catalog: Capa Domain
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a poder modelar un dominio de `Catalog` que no sea una colección pasiva de structs, sino un núcleo semántico estable: tipos con significado de negocio, invariantes explícitas y errores útiles para Application/UI.
@@ -42,7 +49,7 @@ flowchart LR
     INFRA --> DOMAIN["Domain\nsemantica de negocio"]
     DOMAIN --> APP["Application\norquesta casos"]
     APP ..> UI["Interface\npresenta estados"]
-```
+```text
 
 Si Domain acepta cualquier cosa sin criterio, todo lo demás hereda ruido.
 
@@ -74,7 +81,7 @@ struct Product: Equatable, Sendable {
     let price: Price
     let imageURL: URL
 }
-```
+```text
 
 ### `Price`
 
@@ -85,7 +92,7 @@ struct Price: Equatable, Sendable {
     let amount: Decimal
     let currency: String
 }
-```
+```text
 
 ### `CatalogError`
 
@@ -94,7 +101,7 @@ enum CatalogError: Error, Equatable, Sendable {
     case connectivity
     case invalidData
 }
-```
+```text
 
 Decisiones clave:
 
@@ -197,7 +204,7 @@ final class ProductDomainTests: XCTestCase {
         XCTAssertNotEqual(CatalogError.connectivity, .invalidData)
     }
 }
-```
+```swift
 
 **Explicación de cada test:**
 

@@ -52,7 +52,7 @@ La opción a es incorrecta (los VO pueden ocupar más memoria por el overhead). 
 
 **Domain** es el centro y no debe conocer ninguna otra capa. Las dependencias apuntan hacia Domain:
 
-```
+```text
 Interface -> Application -> Domain <- Infrastructure
 ```
 

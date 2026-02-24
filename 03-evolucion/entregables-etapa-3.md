@@ -1,5 +1,12 @@
 # Entregables — Etapa 3: Evolución
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Propósito de este cierre
 
 Etapa 3 no se evalúa por “cantidad de código nuevo”. Se evalúa por capacidad de evolucionar un sistema existente sin romper su confiabilidad.
@@ -251,5 +258,19 @@ Aunque no cierres todos los entregables:
 ## Siguiente etapa
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `03-evolucion/entregables-etapa-3.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
 **Anterior:** [Backend Firebase: integracion enterprise ←](07-backend-firebase.md) · **Siguiente:** [Calentamiento: Etapa 3 - Evolución →](../anexos/calentamiento-etapa-3-evolucion.md)

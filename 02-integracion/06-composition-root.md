@@ -1,5 +1,10 @@
 # Composition Root: donde se ensambla todo
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a entender qué es el Composition Root, por qué es el único lugar que conoce todas las implementaciones concretas, y cómo se cablea una app real con dos features (Login + Catalog) paso a paso.
@@ -40,7 +45,7 @@ flowchart TD
     CR -.-> COORD["Crea AppCoordinator<br/>conecta closures de navegacion"]
 
     style CR fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 ---
 
@@ -59,7 +64,7 @@ Con Composition Root + constructor injection:
 ```swift
 // Dependencias explícitas: ves todo en el init
 let useCase = LoginUseCase(gateway: authGateway)
-```
+```text
 
 Beneficios:
 
@@ -108,7 +113,7 @@ struct CompositionRoot {
         self.baseURL = URL(string: "https://api.example.com")!
     }
 }
-```
+```text
 
 **Línea por línea:**
 
@@ -143,7 +148,7 @@ extension CompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```
+```text
 
 **Qué pasa aquí:**
 
@@ -179,7 +184,7 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```
+```text
 
 Mismo patrón que Login. Misma estructura. Esa consistencia es intencional: cuando un nuevo desarrollador llega al equipo y ve cómo está montado Login, sabe automáticamente cómo está montado Catalog. Y cuando cree una tercera feature, sabe exactamente qué factory escribir.
 
@@ -215,7 +220,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 **Línea por línea:**
 
@@ -256,7 +261,7 @@ sequenceDiagram
     CR->>CR: CatalogViewModel(useCase, closure)
     CR->>CR: CatalogView(viewModel)
     CR-->>APP: CatalogView lista
-```
+```text
 
 ---
 
@@ -268,7 +273,7 @@ En producción, el Composition Root crea implementaciones reales:
 // Producción: red real
 let httpClient = URLSessionHTTPClient()
 let authGateway = RemoteAuthGateway(httpClient: httpClient, baseURL: prodURL)
-```
+```text
 
 En tests, cada test crea su propia cadena con stubs:
 
@@ -277,7 +282,7 @@ En tests, cada test crea su propia cadena con stubs:
 let authGateway = AuthGatewayStub(result: .success(session))
 let useCase = LoginUseCase(gateway: authGateway)
 let viewModel = LoginViewModel(loginUseCase: useCase, onLoginSucceeded: { _ in })
-```
+```text
 
 No hay un "Composition Root de tests". Cada test monta exactamente la cadena que necesita con el helper `makeSUT`. Eso es lo que hemos hecho en todas las lecciones anteriores: el patrón `makeSUT` ES un mini-composition-root local para cada test.
 

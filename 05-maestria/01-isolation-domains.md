@@ -1,5 +1,12 @@
 # Isolation domains y Sendable
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## El modelo mental que lo cambia todo
 
 Swift Concurrency no es solo `async/await`. Es un **sistema de tipos para concurrencia**: el compilador verifica en tiempo de compilación que tu código no tiene data races. Para entender cómo lo hace, necesitas entender dos conceptos fundamentales: **dominios de aislamiento** (isolation domains) y **Sendable**.
@@ -18,7 +25,7 @@ var count = 0
 
 Task { count += 1 }  // Hilo A escribe
 Task { print(count) } // Hilo B lee
-```
+```text
 
 Una **race condition** es diferente: es un bug lógico donde el resultado depende del orden de ejecución, pero no hay acceso simultáneo a la misma memoria. Las race conditions son bugs de lógica; los data races son bugs de memoria que pueden causar crashes y corrupción silenciosa.
 
@@ -36,7 +43,7 @@ let counter = Counter()
 // Pero NO hay data race: el actor serializa los accesos.
 Task { await counter.increment() }
 Task { await counter.decrement() }
-```
+```bash
 
 Swift Concurrency **elimina los data races** en tiempo de compilación. Las race conditions siguen siendo responsabilidad tuya como programador.
 
@@ -88,7 +95,7 @@ graph TB
     style MainActor fill:#d4edda,stroke:#28a745
     style ActorDomain fill:#cce5ff,stroke:#007bff
     style Nonisolated fill:#f8f9fa,stroke:#6c757d
-```
+```text
 
 Este diagrama muestra cómo se distribuye nuestro proyecto entre los tres dominios. Observa que:
 
@@ -123,7 +130,7 @@ sequenceDiagram
     Note over UC,UI: ⬆️ Cruce de dominio 3<br/>[Product] debe ser Sendable
 
     UI->>UI: products = result<br/>(actualiza UI en Main Thread)
-```
+```text
 
 Cada vez que un dato cruza una línea punteada entre dominios diferentes, el compilador verifica que ese dato es `Sendable`. Si no lo es, obtienes un error de compilación. Esto es lo que hace que Swift Concurrency sea un **sistema de tipos para concurrencia**, no solo una librería de async/await.
 
@@ -147,7 +154,7 @@ El código que no pertenece a ningún actor. Es el dominio por defecto de funcio
 func formatPrice(_ amount: Decimal) -> String {
     return "\(amount) EUR"
 }
-```
+```swift
 
 Este código es seguro si solo trabaja con datos locales (parámetros y variables locales). Es inseguro si accede a estado mutable compartido.
 
@@ -169,7 +176,7 @@ actor ProductCache {
         products[key]
     }
 }
-```
+```swift
 
 ### 3. Global-actor-isolated (aislado por actor global)
 
@@ -184,7 +191,7 @@ final class CatalogViewModel {
     // Todos los accesos a `products` e `isLoading` ocurren en el Main Thread.
     // SwiftUI puede leer estas propiedades de forma segura.
 }
-```
+```text
 
 ---
 
@@ -210,7 +217,7 @@ enum AuthError: Error, Sendable {
     case connectivity
     case invalidCredentials
 }
-```
+```text
 
 Los tipos primitivos (`Int`, `String`, `Bool`, `Double`, `URL`, `Date`, `UUID`) son todos `Sendable`. Los arrays, diccionarios, sets, y opcionales de tipos `Sendable` también lo son.
 
@@ -223,7 +230,7 @@ Las **clases** no son `Sendable` por defecto porque tienen identidad de referenc
 class UserSession {
     var token: String?  // Dos hilos podrían leer/escribir simultáneamente
 }
-```
+```text
 
 ### Cómo hacer una clase Sendable
 
@@ -240,7 +247,7 @@ final class APIConfiguration: Sendable {
         self.apiKey = apiKey
     }
 }
-```
+```text
 
 Opción 2 — **Convertirla en un actor** (si necesita estado mutable):
 
@@ -253,7 +260,7 @@ actor UserSession {
         self.token = token
     }
 }
-```
+```text
 
 Opción 3 — **Marcarla `@MainActor`** (si solo se accede desde el hilo principal):
 
@@ -265,7 +272,7 @@ final class LoginViewModel {
     var password = ""
     var isLoading = false
 }
-```
+```text
 
 ### @unchecked Sendable: la válvula de escape
 
@@ -280,7 +287,7 @@ final class FileProductStore: ProductStore, @unchecked Sendable {
     // La thread safety la garantizas tú con el DispatchQueue.
     // El compilador NO lo verifica.
 }
-```
+```text
 
 **Regla del curso:** `@unchecked Sendable` es deuda técnica. Cada uso debería tener un comentario explicando por qué es necesario y un ticket para eliminarlo. En nuestro proyecto, lo usamos en `FileProductStore` porque sincronizamos manualmente con un `DispatchQueue`. La alternativa correcta es convertirlo en un `actor` (lo haremos en la lección siguiente).
 
@@ -299,7 +306,7 @@ struct RemoteAuthGateway: AuthGateway, Sendable {
     private let baseURL: URL
     // ...
 }
-```
+```swift
 
 Es un `struct` con propiedades `let`. Eso lo hace **value type inmutable**, que es `Sendable` automáticamente. No necesitamos `@unchecked`, no necesitamos un actor, no necesitamos sincronización manual. Es la opción más simple y más segura.
 
@@ -314,7 +321,7 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
     private(set) var receivedRequests: [URLRequest] = []
     // ...
 }
-```
+```text
 
 Es una clase con `receivedRequests` mutable. El compilador no puede garantizar que sea thread-safe. Usamos `@unchecked Sendable` porque:
 
@@ -334,7 +341,7 @@ final class CatalogViewModel {
     var isLoading = false
     // ...
 }
-```
+```text
 
 Porque SwiftUI lee `products` e `isLoading` desde el Main Thread para renderizar la UI. Si el ViewModel estuviera en otro dominio de aislamiento, SwiftUI podría leer mientras el ViewModel escribe → data race. `@MainActor` garantiza que todos los accesos ocurren en el Main Thread.
 
@@ -346,7 +353,7 @@ final class FileProductStore: ProductStore, @unchecked Sendable {
     private let fileURL: URL
     // ...
 }
-```
+```text
 
 Porque accede al sistema de archivos, que es inherentemente compartido. Dos llamadas concurrentes a `save()` podrían escribir el mismo archivo simultáneamente. En la lección siguiente, lo convertiremos en un `actor` para que el compilador verifique la serialización.
 
@@ -379,7 +386,7 @@ flowchart TD
     style K fill:#fff3cd,stroke:#ffc107
     style L fill:#fff3cd,stroke:#ffc107
     style E fill:#f8d7da,stroke:#dc3545
-```
+```swift
 
 ### Mapping completo del proyecto con este flowchart
 
@@ -420,7 +427,7 @@ struct OrderProcessor: Sendable {
     let httpClient: any HTTPClient     // ✅ HTTPClient es Sendable
     let analytics: AnalyticsTracker    // ❌ AnalyticsTracker es una clase con estado mutable
 }
-```
+```swift
 
 El compilador te dirá: "Stored property 'analytics' of 'Sendable'-conforming struct 'OrderProcessor' has non-sendable type 'AnalyticsTracker'". La solución no es `@unchecked Sendable` en `OrderProcessor`. La solución es hacer que `AnalyticsTracker` sea Sendable (probablemente convirtiéndolo en actor o en protocolo con conformance Sendable).
 
@@ -443,7 +450,7 @@ init(
 ) {
     // ...
 }
-```
+```text
 
 Un closure `@Sendable` no puede capturar variables mutables del contexto que lo rodea:
 
@@ -456,7 +463,7 @@ let increment: @Sendable () -> Void = { count += 1 }
 // ✅ Correcto: captura valor inmutable
 let currentCount = count
 let report: @Sendable () -> Void = { print(currentCount) }
-```
+```text
 
 ---
 
@@ -478,7 +485,7 @@ actor ImageCache {
 let imageData = try await downloadImage(from: url)
 await cache.store(imageData, forURL: url)
 // `imageData` ya no se puede usar aquí: se transfirió al actor
-```
+```text
 
 `sending` es más preciso que `Sendable`: no requiere que el tipo sea inherentemente thread-safe, solo que la transferencia sea segura porque el caller deja de usarlo. Es útil para tipos grandes que no quieres copiar (como `Data` o arrays grandes).
 
@@ -490,9 +497,9 @@ En la Etapa 1, configuramos `SWIFT_STRICT_CONCURRENCY = complete`. Esto activa t
 
 Verifica que tu proyecto tiene esta configuración en Build Settings:
 
-```
+```text
 SWIFT_STRICT_CONCURRENCY = complete
-```
+```text
 
 Con `complete`, el compilador:
 
@@ -513,7 +520,7 @@ let client = HTTPClientStub(data: data, statusCode: 200)
 Task {
     await client.execute(request) // Error: client no es Sendable
 }
-```
+```text
 
 **Solución:** Haz que el tipo sea `Sendable`, o reestructura el código para no cruzar dominios.
 
@@ -523,13 +530,13 @@ Task {
 // ❌ Error: accediendo a propiedad del actor sin await
 let cache = ProductCache()
 let product = cache.product(forKey: "1") // Error: falta await
-```
+```text
 
 **Solución:** Usa `await`:
 
 ```swift
 let product = await cache.product(forKey: "1")
-```
+```text
 
 ### "Main actor-isolated property cannot be mutated from non-isolated context"
 
@@ -542,7 +549,7 @@ let product = await cache.product(forKey: "1")
 func loadData(viewModel: ViewModel) async {
     viewModel.isLoading = true // Error: no estamos en @MainActor
 }
-```
+```text
 
 **Solución:** Marca la función con `@MainActor` o accede con `await`:
 
@@ -570,5 +577,19 @@ func loadData(viewModel: ViewModel) async {
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `05-maestria/01-isolation-domains.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
 **Anterior:** [Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patron... ←](00-introduccion.md) · **Siguiente:** [Actors en arquitectura →](02-actors-en-arquitectura.md)

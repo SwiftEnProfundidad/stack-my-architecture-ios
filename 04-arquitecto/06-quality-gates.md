@@ -61,7 +61,7 @@ flowchart LR
     style G4 fill:#cce5ff,stroke:#007bff
     style G5 fill:#fff3cd,stroke:#ffc107
     style MERGE fill:#d4edda,stroke:#28a745
-```
+```text
 
 Los gates verdes son **bloqueantes**: si fallan, la PR no puede hacer merge. Los azules son bloqueantes pero con excepciones documentadas. Los amarillos son **informativos**: alertan pero no bloquean.
 
@@ -94,7 +94,7 @@ graph TD
     style Local fill:#d4edda,stroke:#28a745
     style CI_PR fill:#cce5ff,stroke:#007bff
     style Release fill:#fff3cd,stroke:#ffc107
-```
+```text
 
 ---
 

@@ -1,5 +1,12 @@
 # Contratos entre features
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Objetivo de aprendizaje
 
 Al terminar esta lección vas a poder diseñar contratos entre features que permitan integración real sin acoplamiento accidental. Eso incluye:
@@ -35,7 +42,7 @@ flowchart LR
     APP ..>|"Contrato"| CATALOG["Feature Catalog"]
 
     LOGIN -. "NO import directo" .-> CATALOG
-```
+```text
 
 La comunicación ocurre por contrato y coordinación, no por acceso lateral al código interno.
 
@@ -71,7 +78,7 @@ struct Session: Equatable, Hashable, Sendable {
     let token: String
     let email: String
 }
-```
+```text
 
 Por qué este tipo sí cruza:
 
@@ -101,7 +108,7 @@ enum AppEvent: Sendable, Equatable {
 struct ProductID: Sendable, Equatable, Hashable {
     let rawValue: String
 }
-```
+```text
 
 Con esto:
 
@@ -125,7 +132,7 @@ sequenceDiagram
     C->>G: crea Catalog con dependencias
     G-->>C: onProductSelected(ProductID)
     C->>C: decide siguiente ruta
-```
+```text
 
 Cada flecha usa contrato explícito. Ninguna feature entra a internals de otra.
 
@@ -186,7 +193,7 @@ final class AppCoordinatorContractTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 }
-```
+```text
 
 Este test protege interacción entre features sin acoplarlas.
 
@@ -210,7 +217,7 @@ struct Session: Equatable, Hashable, Sendable {
     let email: String
     let expiresAt: Date?
 }
-```
+```text
 
 Si en lugar de esto renombras campos directamente, rompes a todos los consumidores a la vez.
 

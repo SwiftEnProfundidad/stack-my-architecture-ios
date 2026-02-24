@@ -49,7 +49,7 @@ sequenceDiagram
         VM->>VM: isLoading = false
         Note over View: SwiftUI detecta cambio<br/>muestra error en rojo
     end
-```
+```text
 
 La vista **no sabe nada** de `LoginUseCase`, ni de `AuthGateway`, ni de `Email`, ni de `Password`. Solo conoce strings (`email`, `password`, `errorMessage`) y booleans (`isLoading`). **Esa es la separación de responsabilidades en acción.**
 
@@ -81,7 +81,7 @@ graph TD
     style View fill:#ffe0cc,stroke:#fd7e14
     style ViewModel fill:#cce5ff,stroke:#007bff
     style UseCase fill:#d4edda,stroke:#28a745
-```
+```text
 
 ---
 
@@ -142,7 +142,7 @@ final class LoginViewModel {
         }
     }
 }
-```
+```swift
 
 **Explicación línea por línea del LoginViewModel completo:**
 
@@ -183,7 +183,7 @@ flowchart TD
     style SUCCESS fill:#d4edda,stroke:#28a745
     style KNOWN fill:#f8d7da,stroke:#dc3545
     style UNKNOWN fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 `isLoading = true` — Lo primero que hace submit: pone el loading en true. SwiftUI detecta el cambio y muestra el spinner automáticamente.
 
@@ -286,7 +286,7 @@ struct LoginView: View {
         .navigationTitle("Login")
     }
 }
-```
+```text
 
 Vamos a repasar cada parte:
 
@@ -318,7 +318,7 @@ graph LR
     style STUB fill:#d4edda,stroke:#28a745
     style UC fill:#fff3cd,stroke:#ffc107
     style VM fill:#ffe0cc,stroke:#fd7e14
-```
+```text
 
 ```swift
 // StackMyArchitectureTests/Features/Login/Interface/LoginViewModelTests.swift
@@ -340,7 +340,7 @@ final class LoginViewModelTests: XCTestCase {
         let sut = LoginViewModel(login: useCase, onLoginSucceeded: onLoginSucceeded)
         return (sut, gateway)
     }
-```
+```swift
 
 **Explicación del makeSUT del ViewModel:**
 
@@ -363,7 +363,7 @@ Dentro de makeSUT, se crean los tres componentes en cadena: stub → useCase →
         XCTAssertFalse(sut.isLoading)
         XCTAssertNil(sut.errorMessage)
     }
-```
+```text
 
 **Explicación del test de estado inicial:**
 
@@ -393,7 +393,7 @@ Este test verifica que cuando creas un ViewModel nuevo, su estado es correcto: e
         XCTAssertEqual(receivedSession, expectedSession)
         XCTAssertNil(sut.errorMessage)
     }
-```
+```text
 
 **Explicación del test del happy path (el más interesante):**
 
@@ -425,7 +425,7 @@ Este test verifica que cuando el usuario escribe credenciales válidas y pulsa s
         
         XCTAssertEqual(sut.errorMessage, "El email no tiene un formato válido.")
     }
-```
+```text
 
 **Explicación del test de error de email:**
 
@@ -498,7 +498,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
         XCTAssertEqual(sut.errorMessage, "Email o contraseña incorrectos.")
     }
 }
-```
+```text
 
 Fíjate en que los tests del ViewModel son `@MainActor`. Esto es necesario porque el ViewModel es `@MainActor`, así que todas las interacciones con él deben ocurrir en el main actor. Los tests `async` de XCTest soportan esto correctamente.
 
@@ -529,7 +529,7 @@ Una de las grandes ventajas de nuestra arquitectura es que las previews de Swift
         )
     }
 }
-```
+```text
 
 El stub tiene un delay de 1 segundo para que puedas ver el estado de loading en la preview. Si quieres probar el estado de error, puedes crear un stub que siempre falle:
 
@@ -551,7 +551,7 @@ struct FailingAuthGateway: AuthGateway, Sendable {
         )
     }
 }
-```
+```text
 
 Esto te permite ver cómo se ve la pantalla de login con un mensaje de error sin necesidad de tener un servidor real que rechace credenciales. Las previews son una herramienta de desarrollo, y con nuestra arquitectura, son extremadamente potentes.
 
@@ -583,7 +583,7 @@ struct CompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```
+```text
 
 El Composition Root es el **único lugar** que conoce las implementaciones concretas. Es el único que sabe que `AuthGateway` se implementa con `RemoteAuthGateway`, que `HTTPClient` se implementa con `URLSessionHTTPClient`, y que la URL del servidor es `https://api.example.com`.
 
@@ -592,13 +592,13 @@ Si quieres cambiar a un stub para desarrollo local, cambias una línea:
 ```swift
 // Para desarrollo sin servidor:
 let gateway = StubAuthGateway()
-```
+```text
 
 Si quieres apuntar a staging:
 
 ```swift
 let baseURL = URL(string: "https://staging.example.com")!
-```
+```text
 
 Ningún otro archivo del proyecto cambia. Eso es inversión de dependencias en acción.
 
@@ -689,5 +689,25 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/04-interface-swiftui.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Feature Login: Capa Infrastructure ←](03-infrastructure.md) · **Siguiente:** [Feature Login: Retrospectiva del ciclo TDD completo →](05-tdd-ciclo-completo.md)

@@ -1,5 +1,12 @@
 # ADR-002: Diseño de la Feature Catalog
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 - Estado: Aprobado
 - Fecha: 2026-02-07
 - Contexto: Etapa 2 (Integración)
@@ -260,5 +267,22 @@ Esta ADR se considera implementada cuando:
 - [../03-contratos-features.md](../03-contratos-features.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/ADR-002-catalog.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Feature Catalog: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [Navegación por eventos: el AppCoordinator →](../02-navegacion-eventos.md)

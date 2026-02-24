@@ -59,7 +59,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [04-versionado-spm](../04-arquitecto/04-versionado-spm.md) para el código completo.
+Ver la lección [04-versionado-spm](../../04-arquitecto/04-versionado-spm.md) para el código completo.
 
 ---
 
@@ -85,9 +85,29 @@ Ver la lección [04-versionado-spm](../04-arquitecto/04-versionado-spm.md) para 
 
 ## Referencias
 
-- [Lección relacionada](../04-arquitecto/04-versionado-spm.md)
+- [Lección relacionada](../../04-arquitecto/04-versionado-spm.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-013-versionado-spm-progresivo.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-012: Reglas de dependencia progresivas ←](ADR-012-reglas-dependencia-progresivas.md) · **Siguiente:** [ADR-014: Quality gates conceptuales orientados a arquitec... →](ADR-014-quality-gates-conceptuales.md)

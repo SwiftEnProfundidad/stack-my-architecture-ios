@@ -1,5 +1,10 @@
 # Feature Catalog: Especificación BDD
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Objetivo de esta especificación
 
 Esta especificación no existe para "rellenar documentación". Existe para evitar una de las causas más comunes de deuda técnica: empezar a programar sin tener definido con precisión qué comportamiento espera negocio en escenarios reales.
@@ -59,7 +64,7 @@ flowchart TD
     ERR_CONN --> RETRY["Usuario pulsa reintentar"]
     ERR_DATA --> RETRY
     RETRY --> LOAD
-```
+```text
 
 Este diagrama define la lógica observable de negocio de la feature. Cualquier cambio funcional debería reflejarse aquí antes de tocar implementación.
 
@@ -82,7 +87,7 @@ Scenario: Carga exitosa con productos disponibles
   Then el usuario ve la lista de productos
   And cada producto muestra nombre, precio e imagen
   And el estado de carga desaparece
-```
+```text
 
 ### Interpretación técnica
 
@@ -101,7 +106,7 @@ Scenario: Respuesta válida sin productos
   When la pantalla Catalog se carga
   Then el usuario ve un estado vacío amigable
   And NO se muestra error de conectividad
-```
+```text
 
 ### Interpretación técnica
 
@@ -121,7 +126,7 @@ Scenario: No hay conexión de red
   Then el usuario ve mensaje de error de conectividad
   And se ofrece acción de reintentar
   And NO se muestra estado vacío
-```
+```text
 
 ### Interpretación técnica
 
@@ -139,7 +144,7 @@ Scenario: El backend devuelve payload inválido
   When Catalog intenta decodificar la respuesta
   Then el usuario ve un error genérico de carga
   And se ofrece reintentar
-```
+```text
 
 ### Interpretación técnica
 
@@ -157,7 +162,7 @@ Scenario: El usuario reintenta y la carga se recupera
   When el usuario pulsa Reintentar
   Then Catalog vuelve a estado loading
   And finalmente muestra productos cargados
-```
+```text
 
 ### Interpretación técnica
 
@@ -174,7 +179,7 @@ Scenario: Acceso a ruta protegida sin sesión
   When intenta acceder a Catalog por navegación interna o deep link
   Then el sistema redirige a Login
   And conserva intención de navegación cuando aplique
-```
+```text
 
 ### Interpretación técnica
 
@@ -191,7 +196,7 @@ Scenario: Usuario abandona la pantalla durante la carga
   When el usuario navega fuera antes de recibir respuesta
   Then la tarea de carga se cancela
   And no se publica un estado tardío que ensucie la UI
-```
+```text
 
 ### Interpretación técnica
 
@@ -209,7 +214,7 @@ Scenario: El backend devuelve productos duplicados
   When Catalog procesa la respuesta
   Then el sistema aplica política de normalización definida
   And NO rompe la UI por identidad inconsistente
-```
+```text
 
 ### Interpretación técnica
 
@@ -236,7 +241,7 @@ enum CatalogState: Equatable {
     case empty
     case error(CatalogErrorViewData)
 }
-```
+```text
 
 ## 2) Error modelado explícitamente
 

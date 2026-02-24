@@ -40,13 +40,13 @@ Una vez instalado, abre **Terminal** (Aplicaciones > Utilidades > Terminal) y ej
 
 ```bash
 swift --version
-```
+```text
 
 Deberías ver algo como:
 
-```
+```text
 swift-driver version: 1.115 Apple Swift version 6.0.2 (swiftlang-6.0.2.1.2)
-```
+```text
 
 **Importante:** Este curso requiere Swift 6.0 o superior. Si ves una versión anterior, actualiza Xcode desde la App Store.
 
@@ -112,14 +112,14 @@ Deberías ver algo como: `/Users/tu-nombre/Curso-iOS`
 **Contexto:** Quieres organizar tus proyectos del curso en carpetas separadas por etapas.
 
 **Tarea:** Crea la siguiente estructura de carpetas usando Terminal:
-```
+```text
 Curso-iOS/
 ├── Etapa-1/
 ├── Etapa-2/
 ├── Etapa-3/
 ├── Etapa-4/
 └── Etapa-5/
-```
+```xml
 
 <details>
 <summary>💡 Pista 1: Secuencia de comandos</summary>
@@ -143,7 +143,7 @@ cd ~
 cd Curso-iOS
 mkdir Etapa-1 Etapa-2 Etapa-3 Etapa-4 Etapa-5
 ls  # Verifica que se crearon
-```
+```xml
 
 </details>
 <!-- /sma:exercise:v1 -->
@@ -157,7 +157,7 @@ Git es un sistema de control de versiones. Piensa en él como el "deshacer" ilim
 ```bash
 git config --global user.name "Tu Nombre"
 git config --global user.email "tu@email.com"
-```
+```text
 
 ### 4.2 Comandos básicos
 
@@ -178,7 +178,7 @@ echo "# Mi Proyecto iOS" > README.md
 git add .
 git commit -m "Primer commit: setup inicial"
 git log
-```
+```text
 
 ## Pausa y practica
 <!-- sma:exercise:v1 -->
@@ -214,7 +214,7 @@ git status
 git add practica.txt
 git commit -m "Agrego archivo de practica"
 git log --oneline
-```
+```text
 
 Deberías ver tu commit en la lista.
 
@@ -230,10 +230,10 @@ SPM (Swift Package Manager) es la forma moderna de organizar código Swift. Es c
 ```bash
 cd ~/Curso-iOS/Etapa-1
 swift package init --type library --name MiLibreria
-```
+```text
 
 Esto crea:
-```
+```text
 MiLibreria/
 ├── Package.swift          # Configuración del paquete
 ├── Sources/
@@ -242,7 +242,7 @@ MiLibreria/
 └── Tests/
     └── MiLibreriaTests/
         └── MiLibreriaTests.swift
-```
+```text
 
 ### 5.2 Compilar y testear
 
@@ -250,14 +250,14 @@ MiLibreria/
 cd MiLibreria
 swift build        # Compila el código
 swift test         # Ejecuta los tests
-```
+```text
 
 Si todo va bien, verás:
-```
+```text
 Building for debugging...
 Build complete!
 Test Suite 'MiLibreriaTests' started...
-```
+```text
 
 ## Pausa y practica
 <!-- sma:exercise:v1 -->
@@ -275,7 +275,7 @@ swift package init --type library --name PruebaSetup
 cd PruebaSetup
 swift build
 swift test
-```
+```xml
 
 </details>
 
@@ -295,7 +295,7 @@ swift package init --type library --name PruebaSetup
 cd PruebaSetup
 swift build
 swift test
-```
+```text
 
 Si ves errores, verifica que `swift --version` sea 6.0+.
 

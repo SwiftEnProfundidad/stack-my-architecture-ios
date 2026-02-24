@@ -1,5 +1,12 @@
 # Entregables — Etapa 2: Integración
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Para qué sirve este documento
 
 Este documento define cómo se cierra de verdad la etapa de integración. No es una lista de archivos para "cumplir"; es una guía para comprobar que el alumno ha pasado de construir features aisladas a diseñar un sistema modular que coopera bien.
@@ -281,5 +288,19 @@ Aunque no cierres todos los entregables:
 ## Siguiente etapa
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `02-integracion/entregables-etapa-2.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
 **Anterior:** [App Final Etapa 2: Login + Catalog Funcionando Juntos ←](09-app-final-etapa-2.md) · **Siguiente:** [Consolidación: Etapa 2 - Integración →](../anexos/consolidacion-etapa-2-integracion.md)

@@ -118,7 +118,7 @@ protocol FavoritesRepository {
     func save(productId: String) async throws
     func getAll() async throws -> [String]
 }
-```
+```xml
 
 </details>
 

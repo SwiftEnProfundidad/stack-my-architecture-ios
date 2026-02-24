@@ -1,5 +1,10 @@
 # Navegación por eventos: el AppCoordinator
 
+
+<!-- snippet-mapping-note:auto -->
+> **Nota de nomenclatura pedagógica**
+> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
+> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## El problema de la navegación acoplada
 
 En la Etapa 1, la feature Login tenía un closure `onLoginSucceeded: (Session) -> Void` que el Composition Root inyectaba. Ese closure hacía un `print`. Ahora necesitamos que haga algo real: navegar a la pantalla del Catalog. Pero hay una restricción: Login no puede conocer Catalog. Si `LoginView` hiciera un `NavigationLink(destination: CatalogView(...))`, Login dependería de Catalog, violando el principio de independencia entre features.
@@ -29,7 +34,7 @@ graph LR
 
     style Coupled fill:#f8d7da,stroke:#dc3545
     style Decoupled fill:#d4edda,stroke:#28a745
-```
+```text
 
 En el modelo acoplado, cada vista conoce la siguiente. Si quieres cambiar el flujo (por ejemplo, mostrar un onboarding entre Login y Catalog), necesitas modificar LoginView. En el modelo desacoplado, solo cambias el Coordinator. Las features no se tocan.
 
@@ -54,7 +59,7 @@ sequenceDiagram
     Note over COORD: NavigationStack detecta<br/>el cambio en path
     COORD->>CV: Muestra CatalogView
     Note over CV: CatalogView no sabe<br/>que viene de Login
-```
+```swift
 
 Este flujo muestra la cadena completa: el usuario pulsa, el ViewModel ejecuta, emite un evento, el Composition Root lo redirige, el Coordinator navega. En ningún momento Login conoce la existencia de Catalog.
 
@@ -77,7 +82,7 @@ enum AppDestination: Hashable {
     case catalog
     case productDetail(Product)
 }
-```
+```swift
 
 Cada caso del enum representa una pantalla a la que se puede navegar. `catalog` es la pantalla del catálogo después del login. `productDetail(Product)` es la pantalla de detalle de un producto (la implementaremos en una etapa futura, pero la definimos ahora para que la arquitectura esté preparada).
 
@@ -134,7 +139,7 @@ final class AppCoordinator {
         )
     }
 }
-```
+```text
 
 Vamos a analizar las decisiones de diseño:
 
@@ -187,7 +192,7 @@ struct CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```
+```text
 
 ### La App principal con el coordinador
 
@@ -221,7 +226,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 El flujo completo es:
 
@@ -300,7 +305,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 }
-```
+```text
 
 Los tests verifican el estado del coordinador (autenticación y path) sin necesidad de renderizar UI. Esto es posible porque la lógica de navegación vive en el coordinador, no en las vistas.
 
@@ -308,7 +313,7 @@ Los tests verifican el estado del coordinador (autenticación y path) sin necesi
 
 ## El diagrama del flujo de navegación
 
-```
+```text
 ┌──────────────────────────────────────────────────────────┐
 │                    StackMyArchitectureApp                  │
 │                                                           │
@@ -362,5 +367,25 @@ Esta matriz evita rutas huérfanas y simplifica soporte de deep links futuros.
 Si puedes cambiar destino de un evento sin editar la feature emisora, la navegación está correctamente desacoplada.
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `02-integracion/02-navegacion-eventos.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-002: Diseño de la Feature Catalog ←](01-feature-catalog/ADR-002-catalog.md) · **Siguiente:** [Contratos entre features →](03-contratos-features.md)

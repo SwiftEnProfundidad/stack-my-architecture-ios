@@ -1,5 +1,12 @@
 # Testing concurrente
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Cómo testear código async sin flaky tests
 
 Los tests de código concurrente tienen fama de ser frágiles: pasan la mayoría de las veces, pero fallan aleatoriamente. Un test que falla 1 de cada 20 ejecuciones es peor que no tener test, porque erosiona la confianza del equipo en la suite. Si un test falla sin razón aparente, la reacción natural es ignorarlo, re-ejecutar, o marcarlo como "known issue". Eso es el principio del fin.
@@ -31,7 +38,7 @@ graph TD
     style ROOT fill:#cce5ff,stroke:#007bff
     style RESULT fill:#d4edda,stroke:#28a745
     style CI fill:#d4edda,stroke:#28a745
-```
+```text
 
 **En el trabajo enterprise:** un CI con tests flaky es un CI en el que nadie confía. Cuando un desarrollador dice "ese test falla a veces, dale a re-run", ya has perdido. Cada re-run es tiempo desperdiciado y confianza erosionada. Estos 5 principios eliminan esa categoría de problemas.
 
@@ -52,7 +59,7 @@ func test_loadProducts_updates_state() async {
     
     XCTAssertEqual(viewModel.products.count, 3)
 }
-```
+```text
 
 ### Diagrama: por qué Thread.sleep causa flaky tests
 
@@ -81,7 +88,7 @@ sequenceDiagram
         Test->>VM: XCTAssertEqual 💥<br/>products aún vacío!
         Note over Main: Actualización llega<br/>en 150ms... tarde
     end
-```
+```text
 
 Este test tiene dos problemas: el `Thread.sleep` es arbitrario (¿por qué 0.1 y no 0.5?) y bloquea el hilo (desperdicia tiempo de CI). Si el CI está bajo carga, 0.1 segundos puede no ser suficiente y el test falla. Si aumentas a 1 segundo, tu suite de 200 tests tarda 200 segundos extra.
 
@@ -102,7 +109,7 @@ func test_loadProducts_on_success_returns_products() async throws {
     
     XCTAssertEqual(result, expectedProducts)
 }
-```
+```text
 
 No hay sleep, no hay timeout, no hay dependencia del timing. La prueba espera exactamente lo necesario y ni un nanosegundo más.
 
@@ -135,7 +142,7 @@ func test_cache_expires_after_maxAge() async {
     
     XCTAssertNil(result)
 }
-```
+```text
 
 Ya lo hacemos en la Etapa 3 con el `currentDate` closure del `CachedProductRepository`. El principio es el mismo para cualquier dependencia temporal: no uses el reloj real, inyecta una función que devuelva la fecha que necesites para el test.
 
@@ -159,7 +166,7 @@ func test_loadProducts_sets_isLoading_to_true_before_request() async {
     // Después de await, sabemos que loadProducts() terminó completamente
     XCTAssertFalse(viewModel.isLoading) // isLoading vuelve a false al terminar
 }
-```
+```text
 
 ### Verificar estados intermedios
 
@@ -194,7 +201,7 @@ sequenceDiagram
     Test->>VM: XCTAssertFalse(isLoading)
     Test->>VM: XCTAssertEqual(products.count, 3)
     Note over Test: ✅ Test DETERMINISTA<br/>Sin sleeps, sin timings
-```
+```text
 
 Este patrón es **la técnica más importante de esta lección**. Te permite verificar estados intermedios (como `isLoading = true` durante la carga) de forma determinista. Sin `SuspendingStub`, tendrías que usar `Thread.sleep` y rezar para que el timing sea correcto.
 
@@ -243,7 +250,7 @@ func test_loadProducts_sets_isLoading_to_true_while_loading() async {
     // Verificar estado final
     XCTAssertFalse(viewModel.isLoading, "isLoading debería ser false al terminar")
 }
-```
+```text
 
 `Task.yield()` le dice al runtime "ejecuta cualquier trabajo pendiente antes de continuar". No es un sleep: no espera un tiempo fijo, sino que cede el control para que se procesen las tareas encoladas. Es mucho más fiable que un sleep.
 
@@ -277,7 +284,7 @@ func test_loadProducts_on_cancellation_throws_cancellationError() async {
         XCTFail("Expected CancellationError, got \(error)")
     }
 }
-```
+```text
 
 Para que este test pase, el caso de uso debe verificar la cancelación:
 
@@ -290,7 +297,7 @@ struct LoadProductsUseCase {
         return try await repository.loadAll()
     }
 }
-```
+```text
 
 ---
 
@@ -321,7 +328,7 @@ func test_concurrent_access_to_actor_does_not_crash() async {
     
     // Si llegamos aquí, no hubo crash por data race
 }
-```
+```text
 
 ### Cuándo usar este tipo de test
 
@@ -354,7 +361,7 @@ extension XCTestCase {
         }
     }
 }
-```
+```text
 
 ### Cómo funciona
 
@@ -381,7 +388,7 @@ private func makeSUT(
     
     return (sut, client)
 }
-```
+```text
 
 Para clases como ViewModels:
 

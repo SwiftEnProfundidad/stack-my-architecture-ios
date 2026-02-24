@@ -1,5 +1,12 @@
 # Etapa 4: Arquitecto — Plataforma y gobernanza
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Objetivo de la etapa
 
 Al terminar esta etapa, el alumno deja de pensar solo en “cómo implementar una feature” y pasa a pensar en “cómo escalar un sistema y un equipo sin perder control”.
@@ -24,7 +31,7 @@ flowchart LR
     E1["Etapa 1\nFeature correcta"] --> E2["Etapa 2\nIntegracion entre features"]
     E2 --> E3["Etapa 3\nResiliencia operativa"]
     E3 --> E4["Etapa 4\nPlataforma y gobernanza"]
-```
+```text
 
 Pregunta de etapa 3:
 
@@ -65,7 +72,7 @@ flowchart TD
     NAV --> PKG["Versionado y paquetizacion"]
     PKG --> GUIDE["Guia arquitectura viva"]
     GUIDE --> GATES["Quality gates CI"]
-```
+```text
 
 ---
 

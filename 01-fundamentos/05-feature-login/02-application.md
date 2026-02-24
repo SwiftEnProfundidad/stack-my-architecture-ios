@@ -41,7 +41,7 @@ La solución es definir un protocolo/puerto que diga "necesito algo que pueda re
 protocol AuthGateway: Sendable {
     func authenticate(credentials: Credentials) async throws -> Session
 }
-```
+```swift
 
 Vamos a analizar cada aspecto de esta declaración, porque cada palabra está ahí por una razón:
 
@@ -97,7 +97,7 @@ sequenceDiagram
         GW-->>UC: throws AuthError.connectivity
         UC-->>Caller: throws AuthError.connectivity
     end
-```
+```text
 
 Fíjate en que el UseCase hace **tres cosas** en orden:
 1. **Valida** los datos de entrada usando los Value Objects del Domain
@@ -120,7 +120,7 @@ graph LR
 
     style Test fill:#d4edda,stroke:#28a745
     style Prod fill:#cce5ff,stroke:#007bff
-```
+```text
 
 El mismo `LoginUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthGateway` (su protocolo/puerto). **Esto es inyección de dependencias en acción.**
 
@@ -153,7 +153,7 @@ final class AuthGatewayStub: AuthGateway, @unchecked Sendable {
         return try result.get()
     }
 }
-```
+```swift
 
 **Explicación línea por línea (esto es un spy, lee la guía de test doubles si no recuerdas qué es):**
 
@@ -193,7 +193,7 @@ final class LoginUseCaseTests: XCTestCase {
         XCTAssertEqual(session, expectedSession)
     }
 }
-```
+```text
 
 **Explicación línea por línea, siguiendo el patrón Arrange-Act-Assert:**
 
@@ -207,7 +207,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```
+```text
 
 **Fase ARRANGE (preparar el escenario):**
 
@@ -248,7 +248,7 @@ struct LoginUseCase: Sendable {
         return try await authGateway.authenticate(credentials: credentials)
     }
 }
-```
+```swift
 
 **Explicación línea por línea del LoginUseCase:**
 
@@ -287,7 +287,7 @@ flowchart TD
     style ERR2 fill:#f8d7da,stroke:#dc3545
     style ERR3 fill:#f8d7da,stroke:#dc3545
     style ERR4 fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 Ejecutamos. El test pasa. Fíjate en que la implementación ya hace algo útil: crea los Value Objects (que se validan solos) y delega al gateway. No hemos hecho "lo mínimo tonto" (como devolver una sesión hardcodeada) porque el test pide una sesión que viene del gateway, y la forma natural de satisfacer eso es pasar las credenciales al gateway. TDD no significa hacer trampas; significa no implementar más de lo que los tests piden.
 
@@ -309,7 +309,7 @@ func test_execute_sends_validated_credentials_to_gateway() async throws {
     XCTAssertEqual(gateway.receivedCredentials?.email.value, "user@example.com")
     XCTAssertEqual(gateway.receivedCredentials?.password.value, "pass123")
 }
-```
+```text
 
 Ejecutamos. Pasa sin cambios. Las credenciales ya se pasan correctamente. El test tiene valor documental: deja explícito que el caso de uso transforma los strings de entrada en Value Objects validados antes de pasarlos al gateway.
 
@@ -331,7 +331,7 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
         XCTAssertTrue(error is Email.ValidationError)
     }
 }
-```
+```text
 
 Ejecutamos. Pasa, porque `Email("invalid-email")` ya lanza `Email.ValidationError.invalidFormat` y nuestro `execute` propaga el error con `try`. Pero hay un problema: el error que recibe el llamante es `Email.ValidationError.invalidFormat`, que es un tipo interno del Domain. ¿Queremos que la UI tenga que conocer los tipos internos de validación del Domain? No. Queremos que el caso de uso traduzca ese error a un error propio, más limpio.
 
@@ -351,7 +351,7 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```
+```text
 
 Ejecutamos. Falla porque `LoginUseCase.Error` no existe y el caso de uso no traduce errores.
 
@@ -399,7 +399,7 @@ struct LoginUseCase: Sendable {
         }
     }
 }
-```
+```text
 
 Ejecutamos. Todos los tests pasan (incluido el test del happy path, que sigue funcionando).
 
@@ -423,7 +423,7 @@ func test_execute_with_empty_password_throws_emptyPassword() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```
+```text
 
 Ejecutamos. Pasa sin cambios, porque la implementación ya traduce `Password.ValidationError` a `LoginUseCase.Error.emptyPassword`.
 
@@ -442,7 +442,7 @@ func test_execute_with_invalid_email_does_not_call_gateway() async {
     
     XCTAssertNil(gateway.receivedCredentials)
 }
-```
+```text
 
 Ejecutamos. Pasa sin cambios, porque el `try Email(email)` falla antes de llegar a `authGateway.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
 
@@ -466,7 +466,7 @@ func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```
+```text
 
 Ejecutamos. Pasa sin cambios, porque la implementación ya captura `AuthError.invalidCredentials` y lo traduce a `LoginUseCase.Error.invalidCredentials`.
 
@@ -488,7 +488,7 @@ func test_execute_without_connectivity_throws_connectivity() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```
+```text
 
 Ejecutamos. Pasa. Todos los escenarios BDD están cubiertos.
 
@@ -542,7 +542,7 @@ struct LoginUseCase: Sendable {
         }
     }
 }
-```
+```text
 
 ### LoginUseCaseTests (tests completos)
 
@@ -706,5 +706,22 @@ En la siguiente lección implementaremos la capa Infrastructure: la implementaci
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/02-application.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Feature Login: Capa Domain ←](01-domain.md) · **Siguiente:** [Feature Login: Capa Infrastructure →](03-infrastructure.md)

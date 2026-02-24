@@ -1,5 +1,12 @@
 # SwiftUI performance
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Por qué tu vista se re-renderiza 47 veces cuando solo cambió un Bool
 
 SwiftUI promete que "solo actualiza lo que cambió". Pero en la práctica, muchas apps sufren de **invalidation storms**: cascadas de re-renderizados innecesarios que causan frame drops, scroll lento, y consumo excesivo de batería. Esta lección enseña a diagnosticar y prevenir estos problemas con las herramientas y patrones que tu skill de SwiftUI ofrece.
@@ -31,7 +38,7 @@ flowchart LR
     style EVAL fill:#f8d7da,stroke:#dc3545
     style RENDER fill:#d4edda,stroke:#28a745
     style SKIP fill:#f8f9fa,stroke:#6c757d
-```
+```text
 
 El coste real está en el paso "Re-evalúa body": aunque SwiftUI no actualice la pantalla, ya gastó CPU evaluando el body y todas sus subvistas. En una lista con 50 `ProductRow`, eso son 51 evaluaciones de body por un solo cambio de `isLoading`.
 
@@ -57,7 +64,7 @@ graph TD
     style PR2 fill:#f8d7da,stroke:#dc3545
     style PR3 fill:#f8d7da,stroke:#dc3545
     style PRN fill:#f8d7da,stroke:#dc3545
-```
+```text
 
 Un solo cambio de `isLoading` causó N+4 evaluaciones de body. Si ninguna de esas vistas usa `isLoading`, todas fueron innecesarias. Este es el **invalidation storm** que causa frame drops en apps enterprise con pantallas complejas.
 
@@ -83,7 +90,7 @@ graph LR
 
     style POD fill:#d4edda,stroke:#28a745
     style NonPOD fill:#fff3cd,stroke:#ffc107
-```
+```text
 
 SwiftUI usa dos mecanismos de diffing: `memcmp` (comparación de memoria byte a byte, extremadamente rápido) para vistas POD, y reflexión (introspección de propiedades, más lento) para vistas con property wrappers. En una lista con 1000 items, la diferencia es medible.
 
@@ -107,14 +114,14 @@ struct CatalogView: View {
         }
     }
 }
-```
+```text
 
 Output en consola:
-```
+```text
 CatalogView: _viewModel changed.
 CatalogView: _viewModel changed.
 CatalogView: @self changed.
-```
+```text
 
 Si ves que `_viewModel changed` aparece cuando solo cambió `isLoading` y tu vista no usa `isLoading`, tienes un problema de dependencias demasiado amplias.
 
@@ -150,7 +157,7 @@ struct ProductRow: View {
             .foregroundStyle(viewModel.theme.primaryColor)
     }
 }
-```
+```text
 
 ```swift
 // ✅ Correcto: ProductRow recibe solo lo que necesita
@@ -176,7 +183,7 @@ struct ProductRow: View {
             .foregroundStyle(primaryColor)
     }
 }
-```
+```text
 
 Con `@Observable`, SwiftUI trackea qué propiedades lee cada vista. Pero pasar el objeto completo crea una dependencia implícita que puede sorprenderte cuando añadas nuevas propiedades al ViewModel.
 
@@ -203,7 +210,7 @@ struct ProductRow: View {
         }
     }
 }
-```
+```text
 
 ```swift
 // Non-POD view: tiene @State → diffing más lento (reflexión)
@@ -216,7 +223,7 @@ struct ProductRow: View {
         // ...
     }
 }
-```
+```text
 
 ### Patrón avanzado: wrapper POD + inner con estado
 
@@ -247,7 +254,7 @@ private struct ProductRowContent: View {
         .onTapGesture { isExpanded.toggle() }
     }
 }
-```
+```text
 
 El padre (`ProductRow`) usa `memcmp` para decidir si re-evaluar. Solo si `product` cambió, se re-evalúa `ProductRowContent`.
 
@@ -284,7 +291,7 @@ struct OrderRow: View {
         Text(Self.dateFormatter.string(from: order.date))
     }
 }
-```
+```text
 
 Lo mismo aplica para ordenamientos, filtros, y transformaciones de datos:
 
@@ -313,7 +320,7 @@ var body: some View {
         ProductRow(product: product)
     }
 }
-```
+```text
 
 ---
 
@@ -333,7 +340,7 @@ SwiftUI **no compara valores antes de triggear actualizaciones**. Si asignas el 
         self.currentValue = value
     }
 }
-```
+```text
 
 Esto es especialmente importante en **hot paths**: código que se ejecuta frecuentemente, como scroll handlers o gesture recognizers:
 
@@ -350,7 +357,7 @@ Esto es especialmente importante en **hot paths**: código que se ejecuta frecue
         shouldShowTitle = shouldShow // Solo 2 actualizaciones: al cruzar y al volver
     }
 }
-```
+```text
 
 ---
 
@@ -376,7 +383,7 @@ ScrollView {
         }
     }
 }
-```
+```text
 
 `LazyVStack` solo crea las vistas que son visibles en pantalla (más un pequeño buffer). A medida que el usuario scrollea, crea las nuevas y descarta las que salen de pantalla.
 
@@ -450,5 +457,19 @@ Antes de considerar una vista "terminada":
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `05-maestria/06-swiftui-performance.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
 **Anterior:** [SwiftUI state moderno ←](05-swiftui-state-moderno.md) · **Siguiente:** [Composición avanzada →](07-composicion-avanzada.md)

@@ -29,25 +29,25 @@ Apple tiene 4 fuentes principales de documentación:
 
 La búsqueda es tu mejor amiga. No navegues por menús, busca directo:
 
-```
+```text
 Cmd + K → "Observable" → Enter
-```
+```text
 
 ### 2. Entiende la estructura de una página de API
 
-```
+```text
 https://developer.apple.com/documentation/swiftui/observable
                     │           │          │
                     │           │          └── Símbolo específico
                     │           └── Framework
                     └── Plataforma
-```
+```text
 
 ### 3. Las 5 secciones clave de toda página de documentación
 
 Cuando abres la doc de cualquier tipo (clase, struct, protocolo), busca en este orden:
 
-```
+```text
 1. Overview (resumen arriba)
    → ¿Para qué sirve esto? ¿Cuándo lo uso?
 
@@ -62,7 +62,7 @@ Cuando abres la doc de cualquier tipo (clase, struct, protocolo), busca en este 
 
 5. Relationships (Related Documentation)
    → Protocolos conformados, clases relacionadas
-```
+```text
 
 ---
 
@@ -88,17 +88,17 @@ Apple usa iconos para comunicar información rápida:
 
 ### Paso 1: Buscar
 
-```
+```text
 Cmd + K → "@Observable" → Seleccionar "Observable"
-```
+```text
 
 ### Paso 2: Leer Overview
 
-```
+```text
 "A property wrapper type that supports observing changes to a property."
 
 → Esto dice: "Esto detecta cambios en propiedades"
-```
+```text
 
 ### Paso 3: Encontrar el ejemplo de código
 
@@ -108,7 +108,7 @@ class Person {
     var name: String
     var age: Int
 }
-```
+```text
 
 **Análisis:**
 - La clase debe marcarse con `@Observable`
@@ -117,9 +117,9 @@ class Person {
 
 ### Paso 4: Ver Topics → Instance Properties
 
-```
+```text
 → wrappedValue: The underlying observable instance
-```
+```text
 
 **Conclusión:** Si el ViewModel está marcado con `@Observable` pero la UI no cambia, probablemente:
 1. No es `@MainActor`
@@ -139,16 +139,16 @@ func data(for request: URLRequest) async throws -> (Data, URLResponse)
           │              │                    └── Efectos (async throws)
           │              └── Parámetros
           └── Nombre del método
-```
+```text
 
 **Pero el Discussion es donde está el oro:**
 
-```
+```text
 Discussion:
 "This method returns immediately, but the associated loading ..."
 
 → Aquí explica el comportamiento real, edge cases, cuándo usarlo vs alternativas
-```
+```text
 
 ---
 
@@ -170,20 +170,20 @@ Los samples de Apple son proyectos completos. Cómo aprovecharlos:
 
 ### Estructura de un sample
 
-```
+```text
 Download → Abre en Xcode → Navega a:
   
 README.md        → Qué hace, requisitos, cómo ejecutar
 Source Code/     → Código organizado
 Configuration/   → Settings, entitlements
-```
+```text
 
 ### Cómo aprender de un sample (ejemplo: Scrumdinger)
 
 1. **Lee el README primero** → Entiende el objetivo
 2. **Ejecuta la app** → Vela funcionando
 3. **Navega el código en este orden:**
-   ```
+   ```text
    App.swift → Views → ViewModels → Use Cases → Domain
    ```
 4. **Busca patrones que conozcas:**
@@ -239,7 +239,7 @@ func foo(bar: Int) -> String
 
 // Lee el ejemplo:
 let result = foo(bar: 42)  // "Hello, 42"
-```
+```text
 
 ### ❌ No revisar version availability
 
@@ -249,7 +249,7 @@ let result = foo(bar: 42)  // "Hello, 42"
 
 // Usar sin saber que requiere iOS 17+
 // Tu app crashará en iOS 16
-```
+```text
 
 ### ❌ Copiar sin entender
 

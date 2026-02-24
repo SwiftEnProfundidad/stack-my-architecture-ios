@@ -105,7 +105,7 @@ Task {
 
 // ¿Cuál es el valor final esperado? ¿2000?
 // En realidad, es impredecible (data race)
-```
+```text
 
 **Tarea:** Explica por qué `valor` podría no ser 2000 al final, y propón una solución usando `actor`.
 
@@ -154,7 +154,7 @@ Task {
 }
 
 // Ahora valor SIEMPRE será 2000
-```
+```swift
 
 **Por qué funciona:** El actor garantiza que solo una operación se ejecute a la vez. El `await` permite que el sistema coordine el acceso.
 

@@ -36,7 +36,7 @@ graph TD
     style Application fill:#cce5ff,stroke:#007bff
     style Infrastructure fill:#fff3cd,stroke:#ffc107
     style Interface fill:#ffe0cc,stroke:#fd7e14
-```
+```text
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
 
@@ -50,7 +50,7 @@ Antes de reflexionar, pongamos sobre la mesa todo lo que hemos construido. Estos
 
 ### Tests de Domain (Value Objects)
 
-```
+```text
 EmailTests
 ├── test_init_with_valid_email_creates_email_successfully
 ├── test_init_with_string_without_at_sign_throws_invalidFormat
@@ -61,13 +61,13 @@ EmailTests
 PasswordTests
 ├── test_init_with_non_empty_string_creates_password_successfully
 └── test_init_with_empty_string_throws_empty
-```
+```text
 
 Siete tests. Se ejecutan en milisegundos. No necesitan simulador, ni red, ni base de datos. Son los tests más rápidos y más estables de todo el proyecto. Si fallan, sabes exactamente dónde está el problema: en la validación de un Value Object.
 
 ### Tests de Application (Caso de uso)
 
-```
+```text
 LoginUseCaseTests
 ├── test_execute_with_valid_credentials_returns_session
 ├── test_execute_sends_validated_credentials_to_gateway
@@ -76,13 +76,13 @@ LoginUseCaseTests
 ├── test_execute_with_invalid_email_does_not_call_gateway
 ├── test_execute_with_rejected_credentials_throws_invalidCredentials
 └── test_execute_without_connectivity_throws_connectivity
-```
+```text
 
 Siete tests. También rápidos (usan un stub, no hacen red real). Verifican que el caso de uso orquesta correctamente: valida con Value Objects, delega al gateway, traduce errores. Si fallan, el problema está en la lógica de orquestación.
 
 ### Tests de Infrastructure (Gateway)
 
-```
+```text
 RemoteAuthGatewayTests
 ├── test_authenticate_on_200_with_valid_json_returns_session
 ├── test_authenticate_sends_post_to_correct_url
@@ -90,13 +90,13 @@ RemoteAuthGatewayTests
 ├── test_authenticate_on_network_error_throws_connectivity
 ├── test_authenticate_on_401_throws_invalidCredentials
 └── test_authenticate_on_500_throws_invalidCredentials
-```
+```text
 
 Seis tests. Usan un stub de HTTPClient. Verifican el mapping entre HTTP/JSON y los tipos del Domain. Si fallan, el problema está en la serialización, el parsing, o la traducción de status codes.
 
 ### Tests de Interface (ViewModel)
 
-```
+```text
 LoginViewModelTests
 ├── test_init_starts_with_empty_fields_and_no_error
 ├── test_submit_with_valid_credentials_calls_onLoginSucceeded
@@ -106,7 +106,7 @@ LoginViewModelTests
 ├── test_submit_with_connectivity_error_shows_connectivity_message
 ├── test_submit_sets_isLoading_to_false_after_completion
 └── test_submit_clears_previous_error_before_new_attempt
-```
+```text
 
 Ocho tests. Verifican que el ViewModel traduce correctamente el resultado del caso de uso a estado de UI.
 
@@ -152,7 +152,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```
+```text
 
 Veamos un ejemplo real anotado para que quede cristalino:
 
@@ -183,7 +183,7 @@ func test_execute_with_valid_credentials_returns_session() async throws {
     // Si session != expectedSession, el test falla con un mensaje claro
     XCTAssertEqual(session, expectedSession)
 }
-```
+```text
 
 **¿Por qué siempre en este orden?** Porque cuando un test falla, necesitas entender rápidamente qué pasó. Si todos los tests siguen el mismo orden, sabes exactamente dónde mirar:
 
@@ -210,7 +210,7 @@ func test_1() {
     let (sut, client) = try makeSUT(data: json, statusCode: 200)  // 1 línea
     // ...
 }
-```
+```text
 
 Tres beneficios concretos:
 
@@ -228,7 +228,7 @@ let stub = AuthGatewayStub(result: .success(session))
 
 // Quiero testear un error → configuro fallo
 let stub = AuthGatewayStub(result: .failure(.invalidCredentials))
-```
+```text
 
 Cada test crea su propio stub con su propia configuración. No hay estado compartido entre tests. Esto garantiza que cada test es **independiente**: puedes ejecutarlos en cualquier orden y el resultado es siempre el mismo.
 
@@ -245,7 +245,7 @@ client.receivedRequests      // → los URLRequest que el gateway envió
 client.receivedRequests.first?.url       // → la URL de la petición
 client.receivedRequests.first?.httpMethod // → "POST"
 client.receivedRequests.first?.httpBody   // → el JSON del body
-```
+```text
 
 Esto nos permite verificar no solo **qué resultado** devuelve el SUT, sino **cómo interactúa** con sus dependencias. Por ejemplo, verificar que el UseCase NO llama al gateway cuando el email es inválido:
 
@@ -354,5 +354,22 @@ Esta es la primera feature completa del curso. Es pequeña (un formulario de log
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Feature Login: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [ADR-001: Diseño de la Feature Login →](ADR-001-login.md)

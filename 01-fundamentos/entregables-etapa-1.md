@@ -42,7 +42,7 @@
 
 ## Diagrama de dependencias esperado
 
-```
+```text
 LoginView
   └──> LoginViewModel (@Observable, @MainActor)
          └──> LoginUseCase (struct, Sendable)

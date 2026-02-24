@@ -59,7 +59,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [02-consistencia](../03-evolucion/02-consistencia.md) para el código completo.
+Ver la lección [02-consistencia](../../03-evolucion/02-consistencia.md) para el código completo.
 
 ---
 
@@ -85,9 +85,29 @@ Ver la lección [02-consistencia](../03-evolucion/02-consistencia.md) para el c�
 
 ## Referencias
 
-- [Lección relacionada](../03-evolucion/02-consistencia.md)
+- [Lección relacionada](../../03-evolucion/02-consistencia.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-008-consistencia-invalidation-policy.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-007: Estrategia de cache network-first + TTL + fallback ←](ADR-007-cache-network-first-ttl.md) · **Siguiente:** [ADR-009: Observabilidad por decoradores y logger de aplic... →](ADR-009-observabilidad-por-decoradores.md)

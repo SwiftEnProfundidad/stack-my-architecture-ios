@@ -36,7 +36,7 @@ flowchart TD
     EVA --> DEC["Decision actual"]
     DEC --> TRG["Trigger de reevaluacion"]
     TRG --> REV["Revision periodica o por incidente"]
-```
+```text
 
 ---
 

@@ -59,7 +59,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [03-contratos-features](../02-integracion/03-contratos-features.md) para el código completo.
+Ver la lección [03-contratos-features](../../02-integracion/03-contratos-features.md) para el código completo.
 
 ---
 
@@ -85,9 +85,29 @@ Ver la lección [03-contratos-features](../02-integracion/03-contratos-features.
 
 ## Referencias
 
-- [Lección relacionada](../02-integracion/03-contratos-features.md)
+- [Lección relacionada](../../02-integracion/03-contratos-features.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-005-contratos-features.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-004: Navegación event-driven desacoplada ←](ADR-004-navegacion-event-driven.md) · **Siguiente:** [ADR-006: Infraestructura real mínima con URLSessionHTTPCl... →](ADR-006-infra-network-urlsession.md)

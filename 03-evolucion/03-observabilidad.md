@@ -38,7 +38,7 @@ flowchart LR
     EV --> SINK["Sink de logs/metricas"]
     SINK --> TRACE["Correlacion por traceId"]
     TRACE --> DIAG["Diagnostico reproducible"]
-```
+```text
 
 Sin estructura, todo queda en ruido difícil de filtrar.
 
@@ -99,7 +99,7 @@ struct LogEvent: Sendable {
 protocol AppLogger: Sendable {
     func log(_ event: LogEvent)
 }
-```
+```text
 
 Campos de contexto mínimos recomendados:
 
@@ -127,7 +127,7 @@ let event = LogEvent(
     ]
 )
 logger.log(event)
-```
+```text
 
 Notar que `message` no es novela; es clave semántica consistente.
 
@@ -199,7 +199,7 @@ struct LoggingProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```
+```text
 
 Ventaja:
 
@@ -227,7 +227,7 @@ sequenceDiagram
     REM-->>LR: products o CatalogError
     LR-->>UC: products o CatalogError
     UC-->>UI: state update
-```
+```text
 
 Con un `traceId` estable, cada salto deja rastro conectado.
 
@@ -253,7 +253,7 @@ actor InMemoryLogger: AppLogger {
         events
     }
 }
-```
+```text
 
 ### `Sendable`
 
@@ -290,7 +290,7 @@ func loadProducts() async {
     let products = try? await repository.loadAll()
     print(products)
 }
-```
+```text
 
 Problemas:
 
@@ -337,7 +337,7 @@ final class LoggingProductRepositoryTests: XCTestCase {
         XCTAssertEqual(events.last?.message, "catalog.load.failed")
     }
 }
-```
+```text
 
 Estos tests convierten observabilidad en contrato estable, no en “buena intención”.
 
@@ -402,7 +402,7 @@ Trigger para pasar de B a C:
 - Decisión: introducir puerto `AppLogger`, eventos estructurados y correlación por `traceId`
 - Consecuencias: mejora fuerte de depuración con coste moderado de disciplina
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 

@@ -1,5 +1,12 @@
 # Entregables — Etapa 4: Arquitecto
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Lo que has construido en esta etapa
 
 La Etapa 4 no añade una feature nueva para el usuario final. Añade algo más importante para escalar: **plataforma, gobernanza y reglas de calidad**.
@@ -23,7 +30,7 @@ En palabras simples:
   05-guia-arquitectura.md       ← convenciones operativas del repositorio
   06-quality-gates.md           ← gates 0..6, severidad, pipeline y excepciones
   entregables-etapa-4.md        ← cierre verificable de etapa
-```
+```text
 
 ---
 
@@ -46,7 +53,7 @@ scripts/check-domain-imports.sh
 scripts/check-feature-imports.sh
 scripts/check-architecture-rules.sh
 .github/workflows/quality-gates.yml
-```
+```text
 
 ### 3) Navegación y deep links como plataforma
 
@@ -56,7 +63,7 @@ Artefactos esperados:
 StackMyArchitecture/App/Navigation/DeepLinkParser.swift
 StackMyArchitectureTests/App/Navigation/DeepLinkParserTests.swift
 StackMyArchitectureTests/App/Navigation/DeepLinkCoordinatorTests.swift
-```
+```text
 
 ### 4) Versionado y SPM
 
@@ -66,7 +73,7 @@ Artefactos esperados:
 docs/versioning/semver-policy.md
 docs/versioning/deprecation-policy.md
 Packages/ (cuando se active la separación por trigger)
-```
+```text
 
 ### 5) Guía de arquitectura y quality gates
 

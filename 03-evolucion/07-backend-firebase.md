@@ -53,7 +53,7 @@ graph LR
     style CORE fill:#d4edda,stroke:#28a745
     style INFRA fill:#fff3cd,stroke:#ffc107
     style SDK fill:#fce4ec,stroke:#e91e63
-```
+```text
 
 ---
 
@@ -104,7 +104,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 **`FirebaseApp.configure()`** — Se llama UNA sola vez, al iniciar la app. Lee el `GoogleService-Info.plist` y configura los servicios. Esta es la UNICA linea de Firebase que vive fuera de Infrastructure.
 
@@ -154,7 +154,7 @@ struct FirebaseAuthGateway: AuthGateway, Sendable {
         }
     }
 }
-```
+```swift
 
 **Linea por linea:**
 
@@ -205,7 +205,7 @@ struct FirestoreProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```
+```text
 
 **Linea por linea:**
 
@@ -243,7 +243,7 @@ struct FirestoreProductMapper {
         )
     }
 }
-```
+```text
 
 **Por que `[String: Any]`:** Firestore devuelve documentos como diccionarios sin tipo. El mapper extrae cada campo con `as?` y lanza error si falta o tiene tipo incorrecto. Es similar al `ProductDTO` de la infra HTTP, pero sin `Decodable` porque Firestore no usa `JSONDecoder`.
 
@@ -255,7 +255,7 @@ struct FirestoreProductMapper {
 
 Las Security Rules de Firestore definen quien puede leer y escribir cada coleccion. Son criticas para seguridad.
 
-```
+```text
 // firestore.rules
 
 rules_version = '2';
@@ -280,7 +280,7 @@ service cloud.firestore {
     }
   }
 }
-```
+```text
 
 **Linea por linea:**
 
@@ -310,7 +310,7 @@ firebase init emulators
 
 # Iniciar emuladores
 firebase emulators:start
-```
+```text
 
 ### Conectar la app a emuladores (solo en desarrollo)
 
@@ -334,7 +334,7 @@ struct FirebaseConfig {
         #endif
     }
 }
-```
+```text
 
 **`#if DEBUG`** — Solo activa emuladores en builds de debug. En producción, Firebase conecta con la nube automaticamente. Esto previene que un build de release accidentalmente use emuladores.
 
@@ -371,7 +371,7 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```
+```text
 
 **Comparacion con Etapa 2:** Lo único que cambia es la linea de creación del gateway/repository:
 
@@ -388,14 +388,14 @@ extension CompositionRoot {
 
 Estructura de la coleccion `products`:
 
-```
+```text
 products/
   {productId}/
     name: "Camiseta React"       (string)
     price: 29.99                  (number)
     currency: "EUR"               (string)
     image_url: "https://..."      (string)
-```
+```text
 
 **Reglas de modelado para Firestore:**
 
@@ -418,12 +418,12 @@ Nunca uses la misma base de datos para desarrollo y producción.
 
 Cada proyecto tiene su propio `GoogleService-Info.plist`. Puedes usar build configurations de Xcode o un script de build para copiar el plist correcto segun el scheme.
 
-```
+```text
 StackMyArchitecture/
   Config/
     Dev/GoogleService-Info.plist
     Prod/GoogleService-Info.plist
-```
+```text
 
 En el Build Phase, un script copia el plist correcto:
 
@@ -433,7 +433,7 @@ if [ "${CONFIGURATION}" == "Debug" ]; then
 else
     cp "${PROJECT_DIR}/Config/Prod/GoogleService-Info.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/"
 fi
-```
+```text
 
 ---
 
@@ -469,7 +469,7 @@ final class FirebaseAuthGatewayIntegrationTests: XCTestCase {
         XCTAssertFalse(session.userId.isEmpty)
     }
 }
-```
+```text
 
 **Nota:** Estos tests requieren que los emuladores de Firebase esten corriendo (`firebase emulators:start`). Son más lentos que los unit tests con stubs, pero verifican la integración real con el SDK.
 
@@ -532,7 +532,7 @@ Solución: Verificar en Firebase Console que los documentos tienen la estructura
 - Alternativa: Supabase (Postgres + RLS), documentada en apendice
 - Consecuencias: setup rapido, plan gratuito generoso, vendor lock-in mitigado por encapsulacion; si migramos, solo cambian archivos de Infrastructure
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 

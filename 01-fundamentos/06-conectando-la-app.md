@@ -43,7 +43,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```
+```text
 
 **Paso a paso en Xcode:**
 1. Click derecho en la carpeta `App/` en el navegador
@@ -119,7 +119,7 @@ struct CompositionRoot {
         return LoginView(viewModel: makeLoginViewModel())
     }
 }
-```
+```swift
 
 **¿Por qué struct y no class?**
 
@@ -136,14 +136,14 @@ Abre cada archivo que creaste y verifica que los imports sean correctos:
 import SwiftUI
 // No necesitas importar otros módulos porque
 // CompositionRoot está en el mismo target
-```
+```text
 
 **En `CompositionRoot.swift`:**
 ```swift
 import SwiftUI
 // AuthGateway, LoginUseCase, etc. están en el mismo target,
 // así que no necesitas imports adicionales
-```
+```text
 
 **Si tienes errores de "Cannot find in scope":**
 
@@ -156,7 +156,7 @@ import SwiftUI
    ```swift
    // En AuthGateway.swift
    protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
-   ```
+   ```text
 
 ---
 
@@ -308,5 +308,22 @@ Pero primero, asegúrate de completar los entregables de la Etapa 1.
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/06-conectando-la-app.md`.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-001: Diseño de la Feature Login ←](05-feature-login/ADR-001-login.md) · **Siguiente:** [Entregables — Etapa 1: Junior →](entregables-etapa-1.md)

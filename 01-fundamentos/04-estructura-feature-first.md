@@ -27,7 +27,7 @@ Ahora vamos a crear la estructura Feature-First dentro del proyecto. En Xcode, h
 
 La estructura final que queremos es esta:
 
-```
+```text
 StackMyArchitecture/
 ├── App/
 │   ├── StackMyArchitectureApp.swift
@@ -44,7 +44,7 @@ StackMyArchitecture/
 │       ├── Infrastructure/
 │       └── Interface/
 └── SharedKernel/
-```
+```text
 
 Vamos a explicar qué hace cada carpeta y por qué está donde está.
 
@@ -90,7 +90,7 @@ Por ejemplo, si en la Etapa 2 tanto Login como Catalog necesitan un tipo `Domain
 
 Ahora haz lo mismo con el target de tests (`StackMyArchitectureTests`). La estructura de tests refleja la estructura del código de producción:
 
-```
+```text
 StackMyArchitectureTests/
 ├── Features/
 │   └── Login/
@@ -103,7 +103,7 @@ StackMyArchitectureTests/
 │       │   └── RemoteAuthGatewayTests.swift
 │       └── Helpers/
 │           └── AuthGatewayStub.swift
-```
+```text
 
 Fíjate en la carpeta `Helpers/`. Aquí vivirán los dobles de test (stubs, spies) que necesitemos. Un stub es una implementación falsa de un protocolo que devuelve valores predeterminados. Por ejemplo, `AuthGatewayStub` será una implementación de `AuthGateway` que podemos configurar para que devuelva un éxito o un error, sin hacer ninguna petición de red real.
 
@@ -197,5 +197,25 @@ No tienes código de producción todavía. Eso viene en la siguiente lección, d
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/04-estructura-feature-first.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Stack tecnológico ←](03-stack-tecnologico.md) · **Siguiente:** [Feature Login: Especificación BDD →](05-feature-login/00-especificacion-bdd.md)

@@ -10,7 +10,7 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
-- [Roadmap V2 (práctico)](plans/roadmap-v2.md)
+- [Roadmap V2 (práctico)](docs/management/roadmap-v2.md)
 - [Scaffold ejecutable iOS (SPM)](apps/ios/ArchitectureKit/README.md)
 - [Host App UI smoke (XCUITest)](apps/ios/ArchitectureHostApp/README.md)
 - [ADRs del scaffold](docs/adr)
@@ -242,3 +242,22 @@ La meta no es “mencionar skills”, sino usarlas para tomar mejores decisiones
 - No es escribir producción y agregar tests al final.
 - No es usar `@MainActor` para silenciar warnings sin justificar límites.
 - No es adoptar modas; es construir un sistema coherente guiado por requisitos, tests y límites.
+
+## QA Pedagogico (auditoria automatizada)
+
+Para ejecutar la auditoria completa del curso y generar informes consolidados:
+
+```bash
+./scripts/run-qa-audit-bundle.sh
+```
+
+Artefactos principales en `00-informe/`:
+
+- `AUDITORIA-QA-INTEGRAL.md` y `AUDITORIA-QA-INTEGRAL.json`
+- `AUDITORIA-GUARDRAILS.md` y `AUDITORIA-GUARDRAILS.json`
+- `AUDITORIA-GUARDRAILS-BASELINE.json` (baseline de no regresion)
+
+Guardrails actuales:
+
+- Bloque tecnico base sin P1: snippets, enlaces, cierre y plantilla
+- Bloque pedagogico semantico sin regresion contra baseline: continuidad, saltos, mermaid y trazabilidad

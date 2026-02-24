@@ -2,7 +2,7 @@
 
 **Estado:** Aceptado  
 **Fecha:** 2026-02-07  
-**Contexto:** Etapa 2 - Integración / Lección: [Composition Root](../02-integracion/06-composition-root.md)
+**Contexto:** Etapa 2 - Integración / Lección: [Composition Root](../../02-integracion/06-composition-root.md)
 
 ---
 
@@ -41,7 +41,7 @@ Un registro global donde cualquier clase puede pedir sus dependencias.
 ```swift
 // ❌ Anti-patrón
 let repository = ServiceLocator.shared.resolve(AuthRepository.self)
-```
+```text
 
 - **Pros:** Fácil de implementar, no cambia la firma de constructores
 - **Contras:** 
@@ -60,7 +60,7 @@ struct LoginView: View {
         useCase: LoginUseCase(repository: RemoteAuthRepository())
     )
 }
-```
+```text
 
 - **Pros:** Simple en apps pequeñas, no necesitas archivos extra
 - **Contras:**
@@ -82,7 +82,7 @@ struct AppCompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```
+```text
 
 - **Pros:**
   - Domain/Application no saben nada de implementaciones
@@ -167,11 +167,31 @@ struct AppCompositionRoot {
 
 ## Referencias
 
-- [Lección: Composition Root](../02-integracion/06-composition-root.md)
-- [Lección: Feature Login - Infrastructure](../01-fundamentos/05-feature-login/03-infrastructure.md)
+- [Lección: Composition Root](../../02-integracion/06-composition-root.md)
+- [Lección: Feature Login - Infrastructure](../../01-fundamentos/05-feature-login/03-infrastructure.md)
 - [Código: AppCompositionRoot en ArchitectureKit](../../apps/ios/ArchitectureKit/Sources/AppComposition/AppCompositionRoot.swift)
 - [Patrón: Composition Root (Martin Fowler)](https://martinfowler.com/bliki/CompositionRoot.html)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-003-composition-root-unico.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Indice de ADRs (Architecture Decision Records) ←](INDICE-ADRS.md) · **Siguiente:** [ADR-004: Navegación event-driven desacoplada →](ADR-004-navegacion-event-driven.md)

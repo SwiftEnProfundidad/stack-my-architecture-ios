@@ -43,7 +43,7 @@
 class MiViewModel {  // ✅ class, no struct
     var contador = 0
 }
-```
+```text
 
 2. Si necesitas que sea struct, usa `@State` en lugar de `@Observable`:
 ```swift
@@ -53,7 +53,7 @@ struct MiViewModel {  // struct
 
 // En la View:
 @State private var viewModel = MiViewModel()  // ✅ @State para structs
-```
+```swift
 
 ---
 
@@ -69,7 +69,7 @@ struct MiModel: Sendable {  // ✅ Añade : Sendable
     let id: String
     let nombre: String
 }
-```
+```text
 
 2. Si tiene tipos no-Sendable (como `Date`), usa `@preconcurrency` o convierte:
 ```swift
@@ -77,7 +77,7 @@ struct MiModel: Sendable {
     let timestamp: TimeInterval  // ✅ TimeInterval es Sendable (Double)
     // ❌ NO: let date: Date
 }
-```
+```text
 
 ---
 
@@ -94,14 +94,14 @@ struct MiModel: Sendable {
         useCase: MockLoginUseCase()  // Usa mock, no el real
     ))
 }
-```
+```text
 
 2. Si usa `@Observable`, asegúrate de que el viewModel sea `var`:
 ```swift
 struct LoginView: View {
     @State private var viewModel: LoginViewModel  // ✅ var, no let
 }
-```
+```text
 
 3. Reinicia el canvas: Cmd+Option+Enter (cierra), Cmd+Option+Enter (abre)
 
@@ -120,7 +120,7 @@ struct LoginView: View {
 // En tu test
 let stubClient = HTTPClientStub(result: .success(mockData))
 let repository = RemoteAuthRepository(httpClient: stubClient)  // ✅ Inyecta stub
-```
+```text
 
 2. NUNCA uses `URLSession.shared` directamente:
 ```swift
@@ -131,7 +131,7 @@ let session = URLSession.shared
 init(httpClient: HTTPClient) {
     self.httpClient = httpClient
 }
-```
+```text
 
 ---
 
@@ -145,7 +145,7 @@ init(httpClient: HTTPClient) {
 ```swift
 // En LoginViewModel
 coordinator.handle(.loginSucceeded)  // ✅ Evento semántico, no navegación directa
-```
+```text
 
 2. Verifica que el coordinator está en el entorno:
 ```swift
@@ -158,12 +158,12 @@ var body: some Scene {
             .environment(coordinator)  // ✅ Inyecta coordinator
     }
 }
-```
+```text
 
 3. Verifica que la View accede al coordinator:
 ```swift
 @Environment(AppCoordinator.self) private var coordinator  // ✅ Usa @Environment
-```
+```text
 
 ---
 
@@ -184,7 +184,7 @@ struct AppCompositionRoot {
         self.sessionStore = sessionStore
     }
 }
-```
+```text
 
 2. Verifica que al crear el Composition Root pasas todo:
 ```swift
@@ -192,7 +192,7 @@ let root = AppCompositionRoot(
     httpClient: URLSessionHTTPClient(),  // ✅ httpClient
     sessionStore: UserDefaultsSessionStore()  // ✅ sessionStore
 )
-```
+```text
 
 ---
 
@@ -215,14 +215,14 @@ class ProductStore {
         try context.save()
     }
 }
-```
+```swift
 
 2. Si llamas desde un actor no-main, usa `MainActor.run`:
 ```swift
 await MainActor.run {
     try? store.save(product)
 }
-```
+```text
 
 ---
 
@@ -237,7 +237,7 @@ await MainActor.run {
 func isValid(createdAt: Date, ttl: TimeInterval) -> Bool {
     Date().timeIntervalSince(createdAt) < ttl  // ✅ Comparación correcta
 }
-```
+```text
 
 2. Asegúrate de invalidar cuando hay escrituras:
 ```swift
@@ -245,7 +245,7 @@ func updateProduct(_ product: Product) async throws {
     try await remote.update(product)
     await cache.invalidate(product.id)  // ✅ Invalida después de escritura
 }
-```
+```text
 
 ---
 
@@ -263,7 +263,7 @@ Task {
     expectation.fulfill()
 }
 await fulfillment(of: [expectation], timeout: 5.0)  // ✅ Espera explícita
-```
+```text
 
 2. Evita `sleep` en tests; usa `Task.yield()` si necesitas:
 ```swift
@@ -272,7 +272,7 @@ Thread.sleep(forTimeInterval: 0.1)
 
 // ✅ BIEN (si es necesario)
 await Task.yield()
-```
+```text
 
 ---
 
@@ -285,14 +285,14 @@ await Task.yield()
 **Pasos de recuperación:**
 
 1. Identifica el ciclo:
-```
+```text
 FeatureA -> FeatureB -> FeatureA  // ❌ Ciclo
-```
+```text
 
 2. Extrae lo común a un tercer módulo:
-```
+```text
 FeatureA -> SharedContracts ⬅️ FeatureB  // ✅ Sin ciclo
-```
+```text
 
 3. O usa inversión de dependencias (protocolos en módulo compartido):
 ```swift
@@ -300,7 +300,7 @@ FeatureA -> SharedContracts ⬅️ FeatureB  // ✅ Sin ciclo
 public protocol FeatureBProtocol { }
 
 // FeatureA depende del protocolo, no de FeatureB
-```
+```text
 
 ---
 
@@ -317,7 +317,7 @@ myapp://product/123
 
 // ❌ Formato incorrecto
 myapp://product?id=123  // Query params requieren parsing diferente
-```
+```text
 
 2. Asegúrate de que el AppDelegate/SceneDelegate pasa el URL al coordinator:
 ```swift
@@ -325,7 +325,7 @@ func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>)
     guard let url = URLContexts.first?.url else { return }
     coordinator.handle(.deepLink(path: url.path))  // ✅ Pasa al coordinator
 }
-```
+```text
 
 ---
 
@@ -340,7 +340,7 @@ func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>)
 - uses: maxim-lobanov/setup-xcode@v1
   with:
     xcode-version: '16.0'  # ✅ Misma versión que usas local
-```
+```text
 
 2. Asegúrate de que los tests no requieren simulador gráfico:
 ```swift
@@ -352,7 +352,7 @@ func test_UI() {  // UI tests requieren simulador
     let app = XCUIApplication()
     app.launch()
 }
-```
+```swift
 
 ---
 
@@ -379,7 +379,7 @@ await miActor.incrementar()
 
 // ❌ Incorrecto
 miActor.contador += 1  // Error: actor-isolated
-```
+```swift
 
 2. Si necesitas lectura, el actor debe exponer un método:
 ```swift
@@ -390,7 +390,7 @@ actor MiActor {
         return contador
     }
 }
-```
+```swift
 
 ---
 
@@ -412,7 +412,7 @@ class ViewModel {
         // let datos = repository.fetch()  // Sin await
     }
 }
-```
+```text
 
 2. Si necesitas sincronización compleja, considera `Task.detached`:
 ```swift
@@ -420,7 +420,7 @@ Task.detached {
     // Código que no bloquea MainActor
     await heavyComputation()
 }
-```
+```text
 
 ---
 
@@ -441,7 +441,7 @@ onCompletion = {
 onCompletion = { [weak self] in
     self?.actualizarUI()
 }
-```
+```text
 
 2. Si es un delegate, usa `weak var`:
 ```swift
@@ -450,13 +450,13 @@ weak var delegate: MiDelegate?
 
 // ❌ MAL
 var delegate: MiDelegate?  // Fuerte referencia, potencial ciclo
-```
+```text
 
 3. Verifica que no haya timers o observadores sin invalidate:
 ```swift
 timer?.invalidate()  // ✅ En deinit o cuando ya no se necesita
 timer = nil
-```
+```text
 
 ---
 
@@ -525,5 +525,25 @@ flowchart TD
 Cada error que resuelves ahora es uno que no cometerás en producción. ¡Sigue adelante!
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/guia-recuperacion-ios.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Quizzes de Autoevaluación ←](quizzes-autoevaluacion.md) · **Siguiente:** [Atlas visual de arquitectura →](diagramas/atlas-arquitectura.md)

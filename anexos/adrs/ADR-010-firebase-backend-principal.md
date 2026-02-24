@@ -59,7 +59,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [07-backend-firebase](../03-evolucion/07-backend-firebase.md) para el código completo.
+Ver la lección [07-backend-firebase](../../03-evolucion/07-backend-firebase.md) para el código completo.
 
 ---
 
@@ -85,9 +85,29 @@ Ver la lección [07-backend-firebase](../03-evolucion/07-backend-firebase.md) pa
 
 ## Referencias
 
-- [Lección relacionada](../03-evolucion/07-backend-firebase.md)
+- [Lección relacionada](../../03-evolucion/07-backend-firebase.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-010-firebase-backend-principal.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-009: Observabilidad por decoradores y logger de aplic... ←](ADR-009-observabilidad-por-decoradores.md) · **Siguiente:** [ADR-011: Bounded contexts con ownership y contratos →](ADR-011-bounded-contexts-governance.md)

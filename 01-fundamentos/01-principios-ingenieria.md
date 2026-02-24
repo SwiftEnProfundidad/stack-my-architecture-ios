@@ -125,7 +125,7 @@ graph LR
 
     style Alto fill:#f8d7da,stroke:#dc3545
     style Bajo fill:#d4edda,stroke:#28a745
-```
+```text
 
 En el primer caso, si quieres testear el ViewModel, necesitas un servidor HTTP real, acceso a UserDefaults, y una jerarquía de navegación. En el segundo, le pasas un `StubAuthGateway` que devuelve lo que tú quieras, y verificas el resultado. **La diferencia no es estilo: es la diferencia entre "puedo testear esto en 1 segundo" y "necesito 30 minutos montando infraestructura".**
 
@@ -190,5 +190,22 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/01-principios-ingenieria.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Setup: Preparación del entorno ←](00-setup.md) · **Siguiente:** [Metodología BDD: especificación y descubrimiento →](02-metodologia-bdd-tdd.md)

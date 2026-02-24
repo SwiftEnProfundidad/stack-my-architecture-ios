@@ -142,4 +142,21 @@ Cada decisión está demostrada con código real y tests en las lecciones corres
 
 ---
 
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/ADR-001-login.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
+
 **Anterior:** [Feature Login: Retrospectiva del ciclo TDD completo ←](05-tdd-ciclo-completo.md) · **Siguiente:** [Conectando la App: Tu Primera App Funcional →](../06-conectando-la-app.md)

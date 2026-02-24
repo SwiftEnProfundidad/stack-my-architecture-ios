@@ -66,7 +66,7 @@ flowchart TD
     CATALOG --> CAPP["Application"]
     CATALOG --> CINF["Infrastructure"]
     CATALOG ..> CUI["Interface"]
-```
+```text
 
 Ownership sugerido por contexto:
 
@@ -109,7 +109,7 @@ graph LR
     UI["Interface"] ..> APP["Application"]
     APP --> DOM["Domain"]
     INF["Infrastructure"] --> DOM
-```
+```text
 
 Regla cross-feature:
 
@@ -129,7 +129,7 @@ flowchart TD
     INFRA ..> UI["Interface + estado"]
     UI --> ADR["ADR si afecta arquitectura"]
     ADR --> PR["PR + quality gates"]
-```
+```text
 
 Esta secuencia evita construir UI sobre contratos inestables.
 
@@ -159,7 +159,7 @@ No hace falta ADR para micro-cambios locales reversibles.
 - Consecuencias:
 - Trigger de revision:
 - Fecha:
-```
+```text
 
 La parte más olvidada suele ser `Trigger de revision`. Sin trigger, las decisiones se fosilizan.
 

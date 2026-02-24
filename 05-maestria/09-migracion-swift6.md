@@ -40,7 +40,7 @@ graph BT
     style UI fill:#d4edda,stroke:#28a745
     style MAIN fill:#d4edda,stroke:#28a745
     style TESTS fill:#f8f9fa,stroke:#6c757d
-```
+```text
 
 **¿Por qué este orden?** Porque cada módulo depende del que tiene debajo. Si migras Domain primero, los errores de Sendable en Domain se propagan como soluciones hacia arriba. Si empiezas por UI, tendrás errores confusos porque los tipos de Domain aún no son Sendable.
 
@@ -76,7 +76,7 @@ flowchart TD
     style FIX7 fill:#d4edda,stroke:#28a745
     style FIX8 fill:#d4edda,stroke:#28a745
     style CLOS fill:#d4edda,stroke:#28a745
-```
+```text
 
 Este flowchart es tu **herramienta de triage** durante la migración. Cada error de compilación se resuelve siguiendo una de estas ramas. Después de resolver 50 errores, el flowchart se convierte en instinto: ves el error y sabes la solución en 3 segundos.
 
@@ -84,9 +84,9 @@ Este flowchart es tu **herramienta de triage** durante la migración. Cada error
 
 En Build Settings del target específico:
 
-```
+```text
 SWIFT_STRICT_CONCURRENCY = complete
-```
+```text
 
 O en `Package.swift` para un paquete SPM:
 
@@ -97,7 +97,7 @@ O en `Package.swift` para un paquete SPM:
         .enableExperimentalFeature("StrictConcurrency")
     ]
 )
-```
+```text
 
 ### Paso 2: Compilar y analizar los warnings/errores
 
@@ -115,7 +115,7 @@ let obj = MyClass()
 Task {
     print(obj.value) // Error: obj cruza dominios y no es Sendable
 }
-```
+```swift
 
 **Soluciones (en orden de preferencia):**
 
@@ -130,7 +130,7 @@ Task {
 ```swift
 // ❌ Error: variable global mutable
 var sharedConfig = AppConfig()
-```
+```text
 
 **Soluciones:**
 
@@ -150,7 +150,7 @@ actor ConfigStore {
 // Opción 3: nonisolated(unsafe) — válvula de escape temporal
 nonisolated(unsafe) var sharedConfig = AppConfig()
 // ⚠️ Documenta por qué es seguro y crea ticket para migrar
-```
+```text
 
 #### Error 3: "Main actor-isolated property cannot be referenced from non-isolated context"
 
@@ -164,7 +164,7 @@ class ViewModel {
 func process(vm: ViewModel) {
     print(vm.title) // Error
 }
-```
+```text
 
 **Soluciones:**
 
@@ -180,7 +180,7 @@ func process(vm: ViewModel) async {
     let title = await vm.title // ✅
     print(title)
 }
-```
+```text
 
 ### Paso 3: Verificar que los tests pasan
 
@@ -190,7 +190,7 @@ Después de arreglar todos los errores del módulo, ejecuta los tests del módul
 xcodebuild test \
     -scheme LoginFeature \
     -destination 'platform=iOS Simulator,name=iPhone 16'
-```
+```text
 
 ### Paso 4: Repetir para el siguiente módulo
 
@@ -221,7 +221,7 @@ func processData() async {
     }
     // result ya no se usa aquí → no hay data race posible
 }
-```
+```text
 
 Region-based isolation reduce los falsos positivos: casos donde el compilador reporta un error pero no hay data race real. Esto hace la migración a Swift 6 significativamente más fácil.
 
@@ -241,7 +241,7 @@ actor Cache {
 actor Cache {
     func store(_ data: sending Data) { /* ... */ }
 }
-```
+```swift
 
 La diferencia:
 - `Sendable`: el tipo es inherentemente seguro para compartir (puede copiarse o es inmutable).
@@ -261,7 +261,7 @@ Swift 6.2 permite configurar el aislamiento por defecto del módulo:
         .defaultIsolation(MainActor.self)
     ]
 )
-```
+```text
 
 Con `defaultIsolation(MainActor.self)`, todo el código del módulo está aislado al `@MainActor` por defecto. No necesitas añadir `@MainActor` a cada ViewModel o View. El código que necesita ser nonisolated lo marcas explícitamente:
 
@@ -276,7 +276,7 @@ class ViewModel { // Implícitamente @MainActor
 nonisolated func parseJSON(_ data: Data) -> [Product] {
     // Explícitamente nonisolated: puede ejecutarse en cualquier hilo
 }
-```
+```text
 
 ### ¿Es buena idea?
 
@@ -352,5 +352,19 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `05-maestria/09-migracion-swift6.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
 **Anterior:** [Memory leaks y diagnóstico ←](08-memory-leaks-y-diagnostico.md) · **Siguiente:** [Debugging en Xcode: Encuentra y arregla bugs como un prof... →](10-debugging-xcode.md)

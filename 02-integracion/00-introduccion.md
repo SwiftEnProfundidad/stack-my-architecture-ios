@@ -1,5 +1,12 @@
 # Etapa 2: Integración — Dos features que trabajan juntas sin acoplarse
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Por qué esta etapa cambia el juego
 
 En la Etapa 1 construiste una feature completa (Login) con límites limpios, tests y flujo end-to-end. Eso te dio una base sólida, pero todavía estabas en un entorno controlado: una feature aislada se parece a entrenar en gimnasio. La Etapa 2 es salir a jugar partido real: ahora hay dos features, contratos compartidos, navegación cross-feature y decisiones de composición.
@@ -70,7 +77,7 @@ flowchart LR
     CR --> CO
 
     E1 --> E2
-```
+```text
 
 ---
 
@@ -352,5 +359,10 @@ La meta de esta etapa es cerrar fuerte en nivel 2-3 para preparar nivel 4.
 Debe poder explicar y defender el flujo completo Login -> evento -> Coordinator -> Catalog con contratos y pruebas, sin depender de imports cruzados.
 
 ---
+
+## Entregables de cierre de etapa
+
+- Revisa y completa los entregables oficiales aqui: [entregables-etapa-2.md](../02-integracion/entregables-etapa-2.md).
+
 
 **Anterior:** [Entregables — Etapa 1: Junior ←](../01-fundamentos/entregables-etapa-1.md) · **Siguiente:** [Feature Catalog: Especificación BDD →](01-feature-catalog/00-especificacion-bdd.md)

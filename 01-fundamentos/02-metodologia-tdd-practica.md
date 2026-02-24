@@ -23,7 +23,7 @@ graph LR
     style RED fill:#f8d7da,stroke:#dc3545
     style GREEN fill:#d4edda,stroke:#28a745
     style REFACTOR fill:#cce5ff,stroke:#007bff
-```
+```text
 
 Cada vuelta al ciclo dura entre 2 y 10 minutos. Si llevas más de 10 minutos sin ejecutar tests, tu paso es demasiado grande. Pártelo.
 
@@ -52,7 +52,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email?.value, "user@example.com")
     }
 }
-```
+```text
 
 Ejecutamos. El test no compila porque `Email` no existe. Eso es el "rojo" en TDD: puede ser un fallo de compilación o un `XCTAssertEqual` que no se cumple. Ambos cuentan como rojo.
 
@@ -66,7 +66,7 @@ struct Email: Equatable {
         self.value = rawValue
     }
 }
-```
+```text
 
 Ejecutamos. El test pasa. ¿Es la implementación completa? No, ni de lejos. No valida nada. Pero el test que tenemos solo pide que se pueda crear un `Email` con un string válido, y eso funciona. Lo mínimo para que pase.
 
@@ -80,7 +80,7 @@ func test_init_with_string_without_at_sign_throws_error() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```
+```text
 
 Ejecutamos. Falla porque `Email.ValidationError` no existe y porque el `init` actual acepta cualquier string.
 
@@ -101,7 +101,7 @@ struct Email: Equatable {
         self.value = rawValue
     }
 }
-```
+```text
 
 Ejecutamos. Ambos tests pasan.
 
@@ -115,7 +115,7 @@ func test_init_with_empty_string_throws_error() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```
+```text
 
 Ejecutamos. Pasa sin cambiar nada, porque un string vacío no contiene "@" y nuestra validación ya lo cubre. ¿Eso es bueno o malo? Es bueno: significa que la implementación ya cubre este caso. Pero el test tiene valor documental: deja explícito que un email vacío es inválido. Lo dejamos.
 
@@ -159,7 +159,7 @@ graph TD
     style SPY fill:#cce5ff,stroke:#007bff
     style MOCK fill:#fff3cd,stroke:#ffc107
     style FAKE fill:#ffe0cc,stroke:#fd7e14
-```
+```text
 
 #### 1. Dummy (el maniquí)
 
@@ -176,7 +176,7 @@ struct DummyLogger: Logger {
 // Lo usas así en el test:
 let useCase = LoginUseCase(gateway: stubGateway, logger: DummyLogger())
 // El DummyLogger solo está ahí para que compile. No verificas nada sobre él.
-```
+```swift
 
 **Cuándo usarlo:** Cuando un componente pide una dependencia que no es relevante para lo que estás testeando. Si estás testeando la lógica de login, el logger no importa, así que pasas un dummy.
 
@@ -210,7 +210,7 @@ func test_login_exitoso_devuelve_session() async throws {
     // ASSERT: verifico que me devolvió la sesión del stub
     XCTAssertEqual(resultado, sessionEsperada)
 }
-```
+```text
 
 **Cuándo usarlo:** Cuando necesitas **controlar qué datos recibe** el componente que estás testeando. El stub es el test double más común. Lo usarás en casi todos los tests del curso.
 
@@ -258,7 +258,7 @@ func test_usecase_envia_credenciales_al_gateway() async throws {
     // Y que recibió las credenciales correctas
     XCTAssertEqual(spy.receivedCredentials.first?.email.value, "user@test.com")
 }
-```
+```text
 
 **Cuándo usarlo:** Cuando además de controlar la respuesta, necesitas **verificar que la llamada se hizo correctamente**. Por ejemplo: verificar que el UseCase NO llama al gateway cuando el email es inválido.
 
@@ -275,7 +275,7 @@ mock.expect(.authenticate, calledTimes: 1, withArguments: credentials)
 
 // Después de ejecutar el código...
 mock.verify() // Si no se cumplieron las expectativas, el test falla automáticamente
-```
+```text
 
 **Cuándo usarlo:** En frameworks de mocking como OCMock o Mockito (en Android). En Swift puro con XCTest, **no usamos mocks en este sentido**. Usamos spies + asserts manuales, que es más claro y más fácil de depurar. Si un spy tiene un `assert` manual que verifica la llamada, logra lo mismo que un mock pero de forma más explícita.
 
@@ -298,7 +298,7 @@ struct InMemoryProductStore: ProductStore {
         return products // Lee de memoria, no de disco
     }
 }
-```
+```text
 
 **Cuándo usarlo:** En **tests de integración** donde necesitas que la dependencia realmente funcione pero no quieres la complejidad de la implementación real. Un `InMemoryProductStore` funciona como el `FileProductStore` real pero sin tocar el disco, lo que hace los tests más rápidos y sin efectos secundarios.
 
@@ -319,7 +319,7 @@ graph TD
     style STUB fill:#d4edda,stroke:#28a745
     style SPY fill:#cce5ff,stroke:#007bff
     style FAKE fill:#ffe0cc,stroke:#fd7e14
-```
+```text
 
 **Regla práctica para este curso:** el 90% de las veces usarás un **spy** (que incluye la funcionalidad de stub). El 10% restante será un **fake** para tests de integración. Los dummies los usarás ocasionalmente. Los mocks automáticos, nunca.
 
@@ -362,7 +362,7 @@ flowchart TD
     style S5 fill:#cce5ff,stroke:#007bff
     style S6 fill:#fff3cd,stroke:#ffc107
     style S7 fill:#ffe0cc,stroke:#fd7e14
-```
+```text
 
 Fíjate en la dirección: **del centro hacia fuera**. Domain primero (las reglas puras), luego Application (la orquestación), luego Infrastructure (la conexión con el mundo real), y finalmente Interface (lo que ve el usuario). Esta dirección no es arbitraria — es lo que garantiza que cada capa sea testeable de forma independiente.
 
@@ -435,5 +435,22 @@ Hay muchas confusiones comunes sobre ambas prácticas. Vamos a aclararlas para q
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-tdd-practica.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Metodología BDD: especificación y descubrimiento ←](02-metodologia-bdd-tdd.md) · **Siguiente:** [Stack tecnológico →](03-stack-tecnologico.md)

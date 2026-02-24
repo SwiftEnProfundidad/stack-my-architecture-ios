@@ -2,7 +2,7 @@
 
 **Estado:** Aceptado  
 **Fecha:** 2026-02-07  
-**Contexto:** Etapa 2 - Integración / Lección: [Navegación por eventos](../02-integracion/02-navegacion-eventos.md)
+**Contexto:** Etapa 2 - Integración / Lección: [Navegación por eventos](../../02-integracion/02-navegacion-eventos.md)
 
 ---
 
@@ -25,7 +25,7 @@ El enfoque naive es que cada View tenga un `NavigationLink` directo:
 NavigationLink(destination: CatalogView()) {
     Text("Ir al catálogo")
 }
-```
+```text
 
 Esto crea:
 1. **Acoplamiento directo**: Login importa Catalog
@@ -55,7 +55,7 @@ struct LoginView: View {
         NavigationLink("Entrar", destination: CatalogView())
     }
 }
-```
+```text
 
 - **Pros:** Simple, nativo de SwiftUI, poco código
 - **Contras:**
@@ -70,7 +70,7 @@ Cada feature tiene su propio router que conoce las rutas internas.
 ```swift
 // ⚠️ Parcialmente válido pero complejo
 LoginRouter.shared.navigate(to: .catalog)
-```
+```text
 
 - **Pros:** Desacopla Views de destinos específicos
 - **Contras:**
@@ -94,7 +94,7 @@ class AppCoordinator {
         }
     }
 }
-```
+```text
 
 - **Pros:**
   - Features no conocen otras features
@@ -130,7 +130,7 @@ enum NavigationEvent {
     case backToCatalog
     case deepLink(path: String)
 }
-```
+```text
 
 El coordinator implementa la política de navegación:
 
@@ -189,10 +189,30 @@ class AppCoordinator {
 
 ## Referencias
 
-- [Lección: Navegación por eventos](../02-integracion/02-navegacion-eventos.md)
-- [Lección: Contratos entre features](../02-integracion/03-contratos-features.md)
+- [Lección: Navegación por eventos](../../02-integracion/02-navegacion-eventos.md)
+- [Lección: Contratos entre features](../../02-integracion/03-contratos-features.md)
 - [Patrón: Coordinator (Soroush Khanlou)](http://khanlou.com/2015/10/coordinators-redux/)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-004-navegacion-event-driven.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-003: Composition Root único para ensamblaje ←](ADR-003-composition-root-unico.md) · **Siguiente:** [ADR-005: Contratos entre features por eventos/modelos mín... →](ADR-005-contratos-features.md)

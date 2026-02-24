@@ -45,7 +45,7 @@ graph TD
     Identity --> Shared
     Catalog --> Shared
     Identity -. "sin import directo interno" .- Catalog
-```
+```text
 
 ---
 
@@ -116,7 +116,7 @@ Con ACL:
 flowchart LR
     B["Contexto B\nmodelo interno"] --> ACL["ACL / Mapper"]
     ACL --> A["Contexto A\nmodelo propio"]
-```
+```text
 
 ---
 
@@ -146,7 +146,7 @@ struct CatalogToOrderItemMapper {
         )
     }
 }
-```
+```text
 
 Parece simple, pero evita acoplamiento estructural entre contextos.
 
@@ -203,7 +203,7 @@ final class CatalogToOrderItemMapperTests: XCTestCase {
         XCTAssertEqual(item.unitPrice, 29.99)
     }
 }
-```
+```text
 
 ---
 
@@ -312,7 +312,7 @@ Trigger para revisar A:
 - Decisión: mantener contextos separados por lenguaje y ownership; usar ACL para traducciones y evitar imports directos entre contextos
 - Consecuencias: mayor claridad y escalabilidad; necesidad de disciplina documental y tests de frontera
 - Fecha: 2026-02-07
-```
+```text
 
 ---
 
@@ -410,7 +410,7 @@ flowchart TD
     STABLE -->|"No"| DEP{"A puede aceptar\nsemantica de B?"}
     DEP -->|"Si"| CS["Customer/Supplier"]
     DEP -->|"No"| ACL["Anti-Corruption Layer"]
-```
+```text
 
 ---
 

@@ -59,7 +59,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [06-quality-gates](../04-arquitecto/06-quality-gates.md) para el código completo.
+Ver la lección [06-quality-gates](../../04-arquitecto/06-quality-gates.md) para el código completo.
 
 ---
 
@@ -85,9 +85,29 @@ Ver la lección [06-quality-gates](../04-arquitecto/06-quality-gates.md) para el
 
 ## Referencias
 
-- [Lección relacionada](../04-arquitecto/06-quality-gates.md)
+- [Lección relacionada](../../04-arquitecto/06-quality-gates.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-014-quality-gates-conceptuales.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-013: Modularización/versionado SPM progresivos ←](ADR-013-versionado-spm-progresivo.md) · **Siguiente:** [ADR-NNN: [Título de la decisión] →](TEMPLATE-ADR.md)

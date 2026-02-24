@@ -59,7 +59,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [03-observabilidad](../03-evolucion/03-observabilidad.md) para el código completo.
+Ver la lección [03-observabilidad](../../03-evolucion/03-observabilidad.md) para el código completo.
 
 ---
 
@@ -85,9 +85,26 @@ Ver la lección [03-observabilidad](../03-evolucion/03-observabilidad.md) para e
 
 ## Referencias
 
-- [Lección relacionada](../03-evolucion/03-observabilidad.md)
+- [Lección relacionada](../../03-evolucion/03-observabilidad.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `anexos/adrs/ADR-009-observabilidad-por-decoradores.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-008: Política explícita de consistencia e invalidación ←](ADR-008-consistencia-invalidation-policy.md) · **Siguiente:** [ADR-010: Firebase como backend principal encapsulado →](ADR-010-firebase-backend-principal.md)

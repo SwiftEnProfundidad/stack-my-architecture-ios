@@ -45,7 +45,7 @@ Antes de empezar, asegúrate de:
 - Given el usuario está sin conexión
 - When intenta agregar un producto al carrito
 - Then ve un mensaje de error "Sin conexión. Intenta más tarde."
-```
+```swift
 
 ---
 
@@ -61,12 +61,12 @@ Antes de empezar, asegúrate de:
 
 **Orden TDD:**
 
-```
+```text
 1. Red:   test_cartItem_calculatesTotal_correctly()
 2. Green: crear CartItem con método total
 3. Red:   test_cart_addItem_incrementsCount()
 4. Green: crear Cart con método addItem
-```
+```swift
 
 **Checklist:**
 
@@ -103,7 +103,7 @@ protocol CartRepository: Sendable {
     func loadCart() async throws -> [CartItem]
     func addItem(_ item: CartItem) async throws
 }
-```
+```text
 
 ---
 
@@ -117,12 +117,12 @@ protocol CartRepository: Sendable {
 
 **Orden TDD:**
 
-```
+```text
 1. Red:   test_addToCart_withValidProduct_addsItem()
 2. Green: crear AddToCartUseCase con método execute
 3. Red:   test_addToCart_onConnectivityError_throwsCartError()
 4. Green: manejar error de connectivity
-```
+```swift
 
 **Checklist:**
 
@@ -149,7 +149,7 @@ struct AddToCartUseCase: Sendable {
         try await repository.addItem(item)
     }
 }
-```
+```text
 
 ---
 
@@ -194,7 +194,7 @@ struct FirestoreCartRepository: CartRepository, Sendable {
         // ...similar
     }
 }
-```
+```text
 
 ---
 
@@ -249,7 +249,7 @@ final class CartViewModel {
         }
     }
 }
-```
+```text
 
 ---
 

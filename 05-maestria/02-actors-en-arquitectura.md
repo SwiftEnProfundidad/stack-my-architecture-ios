@@ -1,5 +1,12 @@
 # Actors en arquitectura
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## De `@unchecked Sendable` a seguridad verificada por el compilador
 
 En la lección anterior aprendimos que `@unchecked Sendable` es deuda técnica: tú le dices al compilador "confía en mí, este tipo es thread-safe", pero si te equivocas, el compilador no te salvará. En esta lección vamos a hacer algo mejor: convertir componentes de nuestro proyecto en **actors**, para que el compilador verifique la seguridad por nosotros.
@@ -27,7 +34,7 @@ sequenceDiagram
     A-->>T2: CachedProducts?
 
     Note over T1,T2: ✅ Sin data race:<br/>save() y load() NUNCA se ejecutan a la vez
-```
+```swift
 
 Compara esto con lo que ocurre sin actor (con `@unchecked Sendable`):
 
@@ -43,7 +50,7 @@ sequenceDiagram
 
     C-->>T1: void (¿o crash?)
     C-->>T2: CachedProducts? (¿datos corruptos?)
-```
+```text
 
 Este segundo diagrama muestra el problema real: sin serialización, dos hilos acceden al mismo `JSONEncoder`/`JSONDecoder` simultáneamente. `JSONEncoder` mantiene estado interno durante la codificación. Si dos hilos lo usan a la vez, el resultado es indeterminado: puede funcionar, puede crashear, puede devolver JSON corrupto. **Lo peor es que funciona el 99% de las veces**, lo que te da falsa confianza.
 
@@ -73,7 +80,7 @@ final class FileProductStore: ProductStore, @unchecked Sendable {
         return CachedProducts(products: cache.products.map(\.toDomain), timestamp: cache.timestamp)
     }
 }
-```
+```text
 
 ¿Qué pasa si dos llamadas concurrentes ejecutan `save()` al mismo tiempo? Ambas intentan escribir el mismo archivo. Con `options: .atomic`, el sistema operativo protege la escritura final, pero el `encoder.encode()` ocurre antes de la escritura, y `JSONEncoder` no es thread-safe cuando se comparte entre hilos.
 
@@ -117,7 +124,7 @@ actor FileProductStore: ProductStore {
         )
     }
 }
-```
+```swift
 
 ### Qué cambió
 
@@ -132,7 +139,7 @@ actor FileProductStore: ProductStore {
 let store = FileProductStore(directory: cacheDir)
 try await store.save(products, timestamp: Date())       // await es obligatorio
 let cached = try await store.load()                      // await es obligatorio
-```
+```text
 
 ```swift
 // Dentro del actor, NO necesitas `await`
@@ -142,7 +149,7 @@ actor FileProductStore {
         return try load()                       // Sin await: estamos dentro del actor
     }
 }
-```
+```text
 
 ### Impacto en el protocolo ProductStore
 
@@ -153,7 +160,7 @@ protocol ProductStore: Sendable {
     func save(_ products: [Product], timestamp: Date) async throws
     func load() async throws -> CachedProducts?
 }
-```
+```swift
 
 El protocolo ya tiene `async throws`, lo que es compatible con actors. Cuando un actor conforma un protocolo con métodos `async`, el compilador añade la serialización automáticamente. No necesitamos cambiar el protocolo.
 
@@ -194,7 +201,7 @@ flowchart TD
     style ACTOR fill:#d4edda,stroke:#28a745
     style FINAL fill:#d4edda,stroke:#28a745
     style UC fill:#fff3cd,stroke:#ffc107
-```
+```swift
 
 ### Escenario enterprise: cómo se aplica en un equipo de 15 personas
 
@@ -224,7 +231,7 @@ graph LR
     
     style Struct fill:#d4edda,stroke:#28a745
     style Actor fill:#cce5ff,stroke:#007bff
-```
+```swift
 
 Cada `await` a un actor implica:
 1. **Suspensión**: el caller se suspende (deja de ejecutarse temporalmente).
@@ -267,7 +274,7 @@ actor InMemoryProductCache {
         timestamp = nil
     }
 }
-```
+```swift
 
 No hay locks, no hay queues, no hay `@unchecked Sendable`. El actor garantiza que `store()`, `retrieve()`, e `invalidate()` nunca se ejecutan simultáneamente.
 
@@ -371,7 +378,7 @@ final class InMemoryProductCacheTests: XCTestCase {
         // Con una clase sin protección, este test crashearía intermitentemente.
     }
 }
-```
+```swift
 
 Fíjate en el último test: `test_concurrent_store_and_retrieve_does_not_crash`. Este test lanza 100 operaciones concurrentes (50 escrituras y 50 lecturas) contra el mismo actor. Si hubiéramos usado una clase sin protección, este test crashearía aleatoriamente por data races. Con el actor, **nunca crashea** porque el actor serializa todas las operaciones.
 
@@ -404,7 +411,7 @@ actor FileProductStore {
 let store = FileProductStore(directory: cacheDir)
 let url = store.cacheFileURL        // Sin await: nonisolated
 try await store.save(products, timestamp: Date()) // Con await: actor-isolated
-```
+```swift
 
 `nonisolated` es útil para propiedades computadas que solo dependen de constantes, o para métodos utilitarios puros. No lo uses en métodos que acceden a propiedades `var` del actor — el compilador te lo impedirá.
 
@@ -440,7 +447,7 @@ sequenceDiagram
     Note over A: 💥 RACE CONDITION<br/>clear() fue ignorado!<br/>El usuario hizo logout<br/>pero products tiene datos
     
     A-->>C1: void
-```
+```swift
 
 Observa la secuencia:
 1. `refresh()` empieza y hace `await` al repositorio remoto.
@@ -467,7 +474,7 @@ actor ProductStore {
         products = []
     }
 }
-```
+```text
 
 La solución depende del caso:
 
@@ -506,5 +513,25 @@ actor ProductStore {
 ---
 
 ---
+
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `05-maestria/02-actors-en-arquitectura.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
+### Validacion
+- Checklist rapido:
+  - [ ] Entiendo la decision tecnica principal de la leccion.
+  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+  - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Isolation domains y Sendable ←](01-isolation-domains.md) · **Siguiente:** [Structured concurrency →](03-structured-concurrency.md)

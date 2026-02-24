@@ -40,4 +40,18 @@ Evita introducir SDKs sin justificar valor, riesgo y estrategia de salida.
 
 ---
 
+<!-- plantilla-pedagogica:auto -->
+
+## Refuerzo pedagogico
+Contexto: normalizacion automatica para `00-core-mobile/09-dependency-governance-supply-chain.md`.
+
+### Objetivo
+- Define el resultado concreto esperado al finalizar esta leccion.
+
+### Prerrequisitos
+- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+
+### Practica guiada
+- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+
 **Anterior:** [Seguridad, privacidad y threat modeling ←](08-seguridad-privacidad-threat-modeling.md) · **Siguiente:** [Plantillas operativas (con ejemplos reales) →](10-plantillas.md)

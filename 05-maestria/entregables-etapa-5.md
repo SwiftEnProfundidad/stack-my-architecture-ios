@@ -1,5 +1,12 @@
 # Entregables Etapa 5 — Maestría
 
+
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
+- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+
 ## Propósito de este documento
 
 Este documento no es una lista de tareas para marcar casillas. Es el contrato de cierre de la etapa más exigente del curso. Si la etapa 5 se aprueba con criterios blandos, el alumno sale con vocabulario bonito pero sin reflejos técnicos de nivel enterprise. Si se aprueba con criterios verificables, sale con habilidades que resisten presión real: concurrencia, regresiones, cambios de arquitectura y diagnóstico de producción.
