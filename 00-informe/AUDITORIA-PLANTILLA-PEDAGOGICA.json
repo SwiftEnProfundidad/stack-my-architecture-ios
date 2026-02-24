@@ -1,0 +1,1531 @@
+{
+  "source": "/Users/juancarlosmerlosalbarracin/Developer/Projects/stack-my-architecture/stack-my-architecture-ios/00-informe/AUDITORIA-MATRIZ-EJECUTABLE.json",
+  "total": 114,
+  "items": [
+    {
+      "rel_path": "00-core-mobile/00-introduccion.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/01-marco-de-decisiones.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/02-invariantes-y-contratos.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/03-variabilidad-y-evolucion.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/04-calidad-pr-ready.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "00-core-mobile/05-observabilidad-operacion.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/06-release-rollback-flags.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "00-core-mobile/07-apis-contratos-versionado.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "00-core-mobile/08-seguridad-privacidad-threat-modeling.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "00-core-mobile/09-dependency-governance-supply-chain.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/10-plantillas.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "00-core-mobile/11-crosswalk-ios-android.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "00-core-mobile/12-mobile-architect-parity-ios-android.md",
+      "stage": "Etapa 0 - Core Mobile",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": false
+      },
+      "missing": [
+        "prerrequisitos",
+        "validacion"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "01-fundamentos/00-introduccion.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": false
+      },
+      "missing": [
+        "objetivo",
+        "validacion"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "01-fundamentos/00-setup.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "01-fundamentos/01-principios-ingenieria.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/02-metodologia-bdd-tdd.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/02-metodologia-tdd-practica.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/03-stack-tecnologico.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/04-estructura-feature-first.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/00-especificacion-bdd.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/01-domain.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/02-application.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/03-infrastructure.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/04-interface-swiftui.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/05-feature-login/ADR-001-login.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/06-conectando-la-app.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "01-fundamentos/entregables-etapa-1.md",
+      "stage": "Etapa 1 - Junior",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": true,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/00-introduccion.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/01-feature-catalog/00-especificacion-bdd.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/01-feature-catalog/01-domain.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/01-feature-catalog/02-application.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/01-feature-catalog/03-infrastructure.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/01-feature-catalog/04-interface-swiftui.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "02-integracion/02-navegacion-eventos.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "02-integracion/03-contratos-features.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/04-infra-real-network.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/05-integration-tests.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/06-composition-root.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/07-swiftui-enterprise.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "02-integracion/08-swift-concurrency-enterprise.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "02-integracion/09-app-final-etapa-2.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "02-integracion/01-feature-catalog/ADR-002-catalog.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "02-integracion/entregables-etapa-2.md",
+      "stage": "Etapa 2 - Mid",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/consolidacion-etapa-2-integracion.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/00-introduccion.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/01-caching-offline.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/02-consistencia.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/03-observabilidad.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/04-tests-avanzados.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/05-trade-offs.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/06-swiftdata-store.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/07-backend-firebase.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "03-evolucion/entregables-etapa-3.md",
+      "stage": "Etapa 3 - Senior",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/calentamiento-etapa-3-evolucion.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": false
+      },
+      "missing": [
+        "validacion"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/00-introduccion.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/01-bounded-contexts.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/02-reglas-dependencia-ci.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/03-navegacion-deeplinks.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/04-versionado-spm.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/05-guia-arquitectura.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/06-quality-gates.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "04-arquitecto/entregables-etapa-4.md",
+      "stage": "Etapa 4 - Arquitecto",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/consolidacion-etapa-4-arquitecto.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/00-introduccion.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/01-isolation-domains.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/02-actors-en-arquitectura.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/03-structured-concurrency.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/04-testing-concurrente.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/05-swiftui-state-moderno.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/06-swiftui-performance.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/07-composicion-avanzada.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/08-memory-leaks-y-diagnostico.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/09-migracion-swift6.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/10-debugging-xcode.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/11-entrevista-arquitecto.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/12-arquitectura-adaptativa.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/entregables-etapa-5.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
+      "stage": "Etapa 5 - Maestria",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/calentamiento-etapa-5-maestria.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/quizzes-autoevaluacion.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/guia-recuperacion-ios.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/diagramas/atlas-arquitectura.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": false
+      },
+      "missing": [
+        "validacion"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/guia-nueva-feature.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": true,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/git-workflow-curso.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/xcode-cheat-sheet.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/como-leer-documentacion.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/simulator-tips.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/mental-models.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/errores-compilacion.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/guia-solid.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/guia-cqs-cqrs.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": false,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [
+        "objetivo",
+        "prerrequisitos"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/preguntas-entrevista.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": false
+      },
+      "missing": [
+        "prerrequisitos",
+        "validacion"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/hallazgos-y-correcciones.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": false,
+        "validacion": true
+      },
+      "missing": [
+        "prerrequisitos",
+        "practica"
+      ],
+      "severity": "P2"
+    },
+    {
+      "rel_path": "anexos/adrs/INDICE-ADRS.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-003-composition-root-unico.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-004-navegacion-event-driven.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-005-contratos-features.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-006-infra-network-urlsession.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-007-cache-network-first-ttl.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-008-consistencia-invalidation-policy.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-009-observabilidad-por-decoradores.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-010-firebase-backend-principal.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-011-bounded-contexts-governance.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-012-reglas-dependencia-progresivas.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-013-versionado-spm-progresivo.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/ADR-014-quality-gates-conceptuales.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/adrs/TEMPLATE-ADR.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/apendice-banca-ledger.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/glosario.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": true,
+        "practica": true,
+        "validacion": true
+      },
+      "missing": [],
+      "severity": "OK"
+    },
+    {
+      "rel_path": "anexos/proyecto-final.md",
+      "stage": "Anexos",
+      "hits": {
+        "objetivo": true,
+        "prerrequisitos": false,
+        "practica": true,
+        "validacion": false
+      },
+      "missing": [
+        "prerrequisitos",
+        "validacion"
+      ],
+      "severity": "P2"
+    }
+  ]
+}

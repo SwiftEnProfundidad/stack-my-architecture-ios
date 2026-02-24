@@ -1,0 +1,133 @@
+{
+  "source": "/Users/juancarlosmerlosalbarracin/Developer/Projects/stack-my-architecture/stack-my-architecture-ios/00-informe/AUDITORIA-MATRIZ-EJECUTABLE.json",
+  "stage_summary": [
+    {
+      "stage": "Etapa 0 - Core Mobile",
+      "lessons": 13,
+      "p1": 0,
+      "p2": 1
+    },
+    {
+      "stage": "Etapa 1 - Junior",
+      "lessons": 16,
+      "p1": 0,
+      "p2": 1
+    },
+    {
+      "stage": "Etapa 2 - Mid",
+      "lessons": 16,
+      "p1": 0,
+      "p2": 2
+    },
+    {
+      "stage": "Etapa 3 - Senior",
+      "lessons": 9,
+      "p1": 0,
+      "p2": 1
+    },
+    {
+      "stage": "Etapa 4 - Arquitecto",
+      "lessons": 8,
+      "p1": 0,
+      "p2": 0
+    },
+    {
+      "stage": "Etapa 5 - Maestria",
+      "lessons": 17,
+      "p1": 0,
+      "p2": 0
+    },
+    {
+      "stage": "Anexos",
+      "lessons": 35,
+      "p1": 0,
+      "p2": 5
+    }
+  ],
+  "findings_total": 10,
+  "findings": [
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Anexos",
+      "from": "anexos/calentamiento-etapa-5-maestria.md",
+      "to": "anexos/quizzes-autoevaluacion.md",
+      "message": "Salto de complejidad en transicion esperada: `anexos/calentamiento-etapa-5-maestria.md` (941) -> `anexos/quizzes-autoevaluacion.md` (2761)."
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Anexos",
+      "from": "anexos/preguntas-entrevista.md",
+      "to": "anexos/hallazgos-y-correcciones.md",
+      "message": "Salto de complejidad en transicion esperada: `anexos/preguntas-entrevista.md` (2874) -> `anexos/hallazgos-y-correcciones.md` (743)."
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Anexos",
+      "from": "anexos/adrs/TEMPLATE-ADR.md",
+      "to": "anexos/apendice-banca-ledger.md",
+      "message": "Salto de complejidad en transicion esperada: `anexos/adrs/TEMPLATE-ADR.md` (200) -> `anexos/apendice-banca-ledger.md` (1263)."
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Anexos",
+      "from": "anexos/glosario.md",
+      "to": "anexos/proyecto-final.md",
+      "message": "Salto de complejidad en transicion esperada: `anexos/glosario.md` (747) -> `anexos/proyecto-final.md` (1877)."
+    },
+    {
+      "severity": "P2",
+      "kind": "redundancy_adjacent",
+      "stage": "Anexos",
+      "path": "anexos/adrs/ADR-004-navegacion-event-driven.md",
+      "message": "Redundancia media entre lecciones consecutivas (Jaccard headings=0.62) en `anexos/adrs/ADR-004-navegacion-event-driven.md`."
+    },
+    {
+      "severity": "P2",
+      "kind": "implicit_prereq",
+      "stage": "Etapa 0 - Core Mobile",
+      "path": "00-core-mobile/10-plantillas.md",
+      "message": "Posible prerequisito implicito: `00-core-mobile/10-plantillas.md` introduce 3 terminos nuevos sin seccion de prerequisitos.",
+      "terms": [
+        "bdd",
+        "composition root",
+        "quality gates"
+      ]
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Etapa 1 - Junior",
+      "from": "01-fundamentos/06-conectando-la-app.md",
+      "to": "01-fundamentos/entregables-etapa-1.md",
+      "message": "Salto de complejidad en transicion esperada: `01-fundamentos/06-conectando-la-app.md` (1481) -> `01-fundamentos/entregables-etapa-1.md` (478)."
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Etapa 2 - Mid",
+      "from": "02-integracion/06-composition-root.md",
+      "to": "02-integracion/07-swiftui-enterprise.md",
+      "message": "Salto de complejidad en transicion esperada: `02-integracion/06-composition-root.md` (1858) -> `02-integracion/07-swiftui-enterprise.md` (6161)."
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Etapa 2 - Mid",
+      "from": "02-integracion/08-swift-concurrency-enterprise.md",
+      "to": "02-integracion/09-app-final-etapa-2.md",
+      "message": "Salto de complejidad en transicion esperada: `02-integracion/08-swift-concurrency-enterprise.md` (3922) -> `02-integracion/09-app-final-etapa-2.md` (1550)."
+    },
+    {
+      "severity": "P2",
+      "kind": "complexity_jump_transition",
+      "stage": "Etapa 3 - Senior",
+      "from": "03-evolucion/07-backend-firebase.md",
+      "to": "03-evolucion/entregables-etapa-3.md",
+      "message": "Salto de complejidad en transicion esperada: `03-evolucion/07-backend-firebase.md` (2530) -> `03-evolucion/entregables-etapa-3.md` (1113)."
+    }
+  ]
+}
