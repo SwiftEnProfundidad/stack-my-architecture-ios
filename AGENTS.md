@@ -98,6 +98,32 @@ Antes de realizar cualquier accion:
 - Prohibido asumir permiso implicito del usuario para saltar reglas.
 - Prohibido ejecutar `merge`, `rebase`, `cherry-pick` o `push --force` sin instruccion explicita del usuario.
 
+## Contrato hard de higiene documental y artefactos (enterprise clean)
+- Objetivo no negociable: mantener el repositorio limpio, trazable y sin acumulacion de basura operativa.
+- Prohibido crear un `.md` nuevo por cada micro-paso si la informacion cabe en un documento existente.
+- Antes de crear cualquier archivo en `docs/**`, verificar y priorizar actualizacion de:
+  - `docs/ENTERPRISE_EXECUTION_CYCLE_*.md`
+  - `docs/REFRACTOR_PROGRESS.md`
+  - `docs/README.md`
+  - `docs/validation/README.md`
+- Crear un `.md` nuevo solo si:
+  - lo pide explicitamente el usuario, o
+  - es un hito contractual de fase/ciclo que no puede consolidarse en un documento ya existente.
+- Si se crea un `.md` nuevo, en la misma entrega es obligatorio:
+  - indexarlo en los `README` correspondientes,
+  - consolidar o eliminar `.md` redundantes del mismo ambito funcional,
+  - dejar una sola fuente de verdad por tema.
+- Prohibido versionar artefactos efimeros de ejecucion o diagnostico:
+  - `.audit_tmp/**`, `.audit-reports/**`, `.coverage/**`
+  - `*.out`, `*.exit`, `*.log`, `*.tmp`, `*.bak`, `*.orig`, `*.rej`
+- Limpieza obligatoria antes de cerrar cualquier tarea:
+  - eliminar artefactos efimeros locales,
+  - eliminar directorios vacios huerfanos,
+  - verificar que `git status` no muestra basura no trackeada fuera del alcance de la tarea.
+- Criterio de bloqueo hard:
+  - si un archivo no aporta valor profesional claro (producto, arquitectura, operacion estable o compliance), no se mantiene.
+  - si hay duda razonable, declarar `STATUS: BLOCKED` y pedir decision explicita del usuario para conservar o eliminar.
+  
 ## Seguridad del repositorio
 - Hacer cambios SOLO dentro de este repositorio.
 - Evitar refactors amplios salvo peticion explicita.
