@@ -8,3 +8,4 @@ Directorio para diagramas del curso en formato texto (Mermaid, ASCII).
 - Usar **ASCII** cuando Mermaid no sea suficiente.
 - Nombrar archivos con el patrón: `[etapa]-[tema].md` (ej: `01-login-flujo.md`).
 - Cada diagrama debe tener un título y una breve descripción.
+- Usar la [guía de leyenda de flechas](guia-leyenda-flechas-mermaid.md) para mantener semántica uniforme.
