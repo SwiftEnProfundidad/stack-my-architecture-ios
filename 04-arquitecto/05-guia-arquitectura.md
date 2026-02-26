@@ -73,6 +73,58 @@ Ownership sugerido por contexto:
 - `Login` y `Catalog` con owners por feature;
 - `SharedKernel`, navegación y quality gates con ownership de plataforma.
 
+## Semántica de flechas sobre módulos y features reales
+
+Este es el punto que suele faltar en cursos: no basta con dibujar capas, hay que **explicar el tipo de acoplamiento** entre módulos.
+
+```mermaid
+flowchart TB
+    CR["App/CompositionRoot"]
+
+    subgraph LOGIN["Login feature"]
+        LUI["Login Interface"]
+        LAPP["Login Application"]
+        LDOM["Login Domain"]
+        LPORT["AuthGateway protocol"]
+        LINF["RemoteAuthGateway adapter"]
+    end
+
+    subgraph CATALOG["Catalog feature"]
+        CUI["Catalog Interface"]
+        CAPP["Catalog Application"]
+        CDOM["Catalog Domain"]
+        CPORT["ProductRepository protocol"]
+        CINF["RemoteProductRepository adapter"]
+        CSTORE["LocalProductStore"]
+    end
+
+    CR -.-> LINF
+    CR -.-> CINF
+
+    LUI --> LAPP
+    LAPP --> LDOM
+    LAPP -.o LPORT
+    LINF --o LPORT
+
+    CUI --> CAPP
+    CAPP --> CDOM
+    CAPP -.o CPORT
+    CINF --o CPORT
+    CINF --> CSTORE
+```text
+
+Cómo leerlo en revisión técnica:
+
+1. `-->` indica dependencia de ejecución real (flujo operativo).
+2. `-.->` indica solo ensamblaje/configuración (sin ejecutar negocio).
+3. `-.o` indica que el core depende de un contrato, no de una implementación.
+4. `--o` indica salida/propagación desde una implementación concreta que satisface ese contrato.
+
+Regla práctica de arquitectura:
+
+- si `Application` apunta con `-->` a `Remote...Repository`, hay fuga de infraestructura;
+- si `CompositionRoot` aparece con `-->` sobre use cases/domain, el diagrama está confundiendo wiring con ejecución.
+
 ---
 
 ## Convenciones de nombrado (por qué existen)
