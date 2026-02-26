@@ -61,35 +61,55 @@
     {
       "path": "01-fundamentos/00-introduccion.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.104,
+      "severity": "OK",
+      "overlap_ratio": 0.149,
       "mermaid_tokens": 67,
-      "context_tokens": 146,
+      "context_tokens": 145,
       "overlap_tokens": [
         "arquitecto",
         "completa",
         "escenarios",
         "etapa",
         "feature",
+        "junior",
         "login",
-        "navegación"
+        "maestria",
+        "navegación",
+        "senior"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Coherencia aceptable."
     },
     {
       "path": "01-fundamentos/00-introduccion.md",
       "block_index": 2,
-      "severity": "P2",
-      "overlap_ratio": 0.062,
+      "severity": "OK",
+      "overlap_ratio": 0.328,
       "mermaid_tokens": 64,
-      "context_tokens": 142,
+      "context_tokens": 133,
       "overlap_tokens": [
+        "application",
+        "authgateway",
+        "conecta",
+        "decisiones",
+        "domain",
         "email",
+        "especificacion",
+        "infrastructure",
+        "interface",
+        "loginusecase",
+        "loginview",
+        "loginviewmodel",
+        "mundo",
         "password",
+        "puras",
         "real",
+        "reglas",
+        "remoteauthgateway",
+        "stubauthgateway",
+        "swiftui",
         "tiene"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Coherencia aceptable."
     },
     {
       "path": "01-fundamentos/00-introduccion.md",
@@ -110,12 +130,15 @@
     {
       "path": "01-fundamentos/00-introduccion.md",
       "block_index": 4,
-      "severity": "P2",
-      "overlap_ratio": 0.0,
+      "severity": "OK",
+      "overlap_ratio": 0.5,
       "mermaid_tokens": 4,
-      "context_tokens": 135,
-      "overlap_tokens": [],
-      "message": "Bloque mermaid corto con poco puente narrativo cercano."
+      "context_tokens": 139,
+      "overlap_tokens": [
+        "elemento",
+        "grupo1"
+      ],
+      "message": "Coherencia aceptable."
     },
     {
       "path": "01-fundamentos/00-introduccion.md",
@@ -724,16 +747,24 @@
     {
       "path": "01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.064,
+      "severity": "OK",
+      "overlap_ratio": 0.234,
       "mermaid_tokens": 47,
-      "context_tokens": 111,
+      "context_tokens": 136,
       "overlap_tokens": [
+        "application",
         "domain",
         "emailtests",
+        "estado",
+        "infrastructure",
+        "interface",
+        "loginusecasetests",
+        "loginviewmodeltests",
+        "passwordtests",
+        "remoteauthgatewaytests",
         "tests"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Coherencia aceptable."
     },
     {
       "path": "01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md",
@@ -3175,20 +3206,32 @@
     {
       "path": "anexos/diagramas/atlas-arquitectura.md",
       "block_index": 8,
-      "severity": "P2",
-      "overlap_ratio": 0.121,
+      "severity": "OK",
+      "overlap_ratio": 0.328,
       "mermaid_tokens": 58,
-      "context_tokens": 124,
+      "context_tokens": 120,
       "overlap_tokens": [
         "appcomposition",
         "backend",
-        "encapsulado",
+        "backendfirebase",
+        "base",
+        "catalog",
+        "catalogapplication",
+        "catalogdomain",
+        "cataloginfrastructure",
+        "cataloginterface",
         "feature",
+        "login",
+        "loginapplication",
+        "logindomain",
+        "logininfrastructure",
+        "logininterface",
         "navigationplatform",
         "platform",
-        "sharedkernel"
+        "sharedkernel",
+        "wiring"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Coherencia aceptable."
     },
     {
       "path": "anexos/diagramas/atlas-arquitectura.md",
@@ -3198,23 +3241,23 @@
       "mermaid_tokens": 40,
       "context_tokens": 103,
       "overlap_tokens": [
-        "28a745",
         "authgateway",
         "backendfirebase",
         "conecta",
-        "d4edda",
         "domain",
-        "e91e63",
         "encapsulado",
-        "fce4ec",
-        "ffc107",
-        "fff3cd",
-        "fill",
         "firebase",
+        "firebaseauthadapter",
+        "firebaseauthgateway",
+        "firebaseconfig",
+        "firestoreproductadapter",
+        "firestoreproductrepository",
         "infrastructure",
+        "product",
         "productrepository",
         "protocolo",
-        "stroke"
+        "puertos",
+        "session"
       ],
       "message": "Coherencia aceptable."
     },

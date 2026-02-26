@@ -22,6 +22,8 @@ La diferencia entre esos dos escenarios no es talento ni años de experiencia. E
 
 Antes de empezar, mira dónde estás y a dónde vas. Este diagrama muestra el camino completo del curso. Cada etapa construye sobre la anterior, sin saltos:
 
+La lectura correcta es izquierda a derecha por etapas: **Etapa 1: Junior**, **Etapa 2: Mid**, **Etapa 3: Senior**, **Etapa 4: Arquitecto** y **Etapa 5: Maestria**. Dentro de cada subgraph, cada bloque representa una capacidad concreta que habilita la siguiente.
+
 ```mermaid
 graph TD
     subgraph E1["Etapa 1: Junior"]
@@ -108,6 +110,10 @@ Si te reconoces en algo de esto, este curso es para ti. No vamos a asumir que sa
 En la Etapa 1 vas a construir una **feature de Login** completa. "Completa" no significa "con animaciones bonitas y social login". Significa que va a tener todas las piezas que necesita una feature profesional.
 
 ### Diagrama: anatomía de tu primera feature
+
+En esta anatomía, cada subgraph tiene un rol explícito: **Especificacion BDD** define comportamiento, **Domain** define reglas puras, **Application** orquesta, **Infrastructure** conecta con el mundo real, **Interface** presenta estado en SwiftUI y **ADR** captura decisiones de arquitectura.
+
+Fíjate en nombres concretos del diagrama porque aparecerán en toda la etapa: `Email`, `Password`, `AuthGateway`, `LoginUseCase`, `RemoteAuthGateway`, `StubAuthGateway`, `LoginViewModel` y `LoginView`.
 
 ```mermaid
 graph TD
@@ -249,6 +255,8 @@ Cuando el diagrama se escriba en Mermaid, la convención se mantiene con **líne
 Regla práctica: antes de dibujar, decide si la flecha representa **uso directo**, **wiring**, **contrato** o **evento**. Si no puedes decirlo en una frase, el diagrama está mezclando conceptos.
 
 ### Las cajas grandes (subgraphs): agrupaciones
+
+Este mini-diagrama no representa una feature real; es un patrón de lectura para entender qué significa un `subgraph` y cómo interpretar que `Elemento 1` y `Elemento 2` pertenecen al mismo `Grupo1`.
 
 ```mermaid
 graph TD
