@@ -1,5 +1,11 @@
 # 11. Cómo Hablar de Arquitectura en una Entrevista
 
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
+
 > Guía para expresar tu pensamiento arquitectónico de forma natural y convincente
 
 ---

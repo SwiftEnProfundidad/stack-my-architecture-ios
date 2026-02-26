@@ -1,5 +1,11 @@
 # Propósito y Alcance
 
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
+
 Esta rúbrica define el **mínimo profesional exigible** para un ingeniero iOS y el **listón superior** esperado de un Mobile Architect.
 
 No está diseñada para premiar la familiaridad con APIs o frameworks de forma aislada, sino para evaluar la **calidad de las decisiones bajo restricciones reales**: corrección, seguridad, operabilidad y mantenibilidad a largo plazo.

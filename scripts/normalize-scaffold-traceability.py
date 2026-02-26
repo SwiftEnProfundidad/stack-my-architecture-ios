@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Adds scaffold traceability block to lessons flagged as P1."""
+"""Adds scaffold traceability block to lessons flagged in scaffold audit findings."""
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -15,6 +16,23 @@ BLOCK = (
     "- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.\n"
     "- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.\n"
 )
+
+
+def parse_severities(raw: str) -> set[str]:
+    return {token.strip().upper() for token in raw.split(",") if token.strip()}
+
+
+def select_targets(findings: list[dict], severities: set[str]) -> list[str]:
+    selected: list[str] = []
+    seen: set[str] = set()
+    for finding in findings:
+        sev = str(finding.get("severity", "")).upper()
+        path = finding.get("path")
+        if sev not in severities or not path or path in seen:
+            continue
+        selected.append(path)
+        seen.add(path)
+    return selected
 
 
 def inject_block(path: Path) -> bool:
@@ -36,13 +54,22 @@ def inject_block(path: Path) -> bool:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--severities",
+        default="P1",
+        help="Lista separada por comas de severidades a normalizar (por defecto: P1).",
+    )
+    args = parser.parse_args()
+
     if not REPORT.exists():
         print(f"Missing report: {REPORT}")
         return 1
 
     payload = json.loads(REPORT.read_text(encoding="utf-8"))
     findings = payload.get("findings", [])
-    targets = [f["path"] for f in findings if f.get("severity") == "P1"]
+    severities = parse_severities(args.severities)
+    targets = select_targets(findings, severities)
 
     changed = 0
     for rel in targets:
@@ -50,7 +77,12 @@ def main() -> int:
         if abs_path.exists() and inject_block(abs_path):
             changed += 1
 
-    print(json.dumps({"targets": len(targets), "changed": changed}, ensure_ascii=False))
+    print(
+        json.dumps(
+            {"severities": sorted(severities), "targets": len(targets), "changed": changed},
+            ensure_ascii=False,
+        )
+    )
     return 0
 
 
