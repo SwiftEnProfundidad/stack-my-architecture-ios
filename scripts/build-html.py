@@ -1343,17 +1343,29 @@ p code, li code, td code {{
 
 .sma-arrow {{
     position: relative;
-    width: 34px;
-    height: 0;
+    display: inline-block;
+    width: 36px;
+    height: 12px;
+    flex: 0 0 36px;
+    line-height: 0;
+}}
+
+.sma-arrow::before {{
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 8px;
+    top: 50%;
     border-top: 2px solid currentColor;
-    flex: 0 0 34px;
+    transform: translateY(-50%);
 }}
 
 .sma-arrow::after {{
     content: '';
     position: absolute;
-    right: -1px;
-    top: -5px;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     border-left: 8px solid currentColor;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
@@ -1363,25 +1375,29 @@ p code, li code, td code {{
 
 .sma-arrow.dashed-closed {{
     color: var(--mermaid-legend-dashed-closed);
+}}
+
+.sma-arrow.dashed-closed::before {{
     border-top-style: dashed;
 }}
 
 .sma-arrow.dashed-open {{
     color: var(--mermaid-legend-dashed-open);
+}}
+
+.sma-arrow.dashed-open::before {{
     border-top-style: dashed;
 }}
 
 .sma-arrow.dashed-open::after,
 .sma-arrow.solid-open::after {{
-    border-left-color: transparent;
-    border: 2px solid currentColor;
     width: 8px;
     height: 8px;
-    border-left: 0;
-    border-bottom: 0;
-    transform: rotate(45deg);
-    right: -2px;
-    top: -4px;
+    border: 0;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: translateY(-50%) rotate(45deg);
+    right: 1px;
     background: transparent;
 }}
 
