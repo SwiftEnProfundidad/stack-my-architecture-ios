@@ -11,7 +11,7 @@ Lecciones auditadas: 114
 | Plantilla pedagogica | 0 | 62 | OK |
 | Mermaid semantica | 0 | 0 | OK |
 | Snippets calidad | 0 | 0 | OK |
-| Trazabilidad scaffold | 0 | 4 | OK |
+| Trazabilidad scaffold | 0 | 0 | OK |
 | Enlaces cruzados | 0 | 0 | OK |
 | Artefactos de cierre | 0 | 0 | OK |
 
