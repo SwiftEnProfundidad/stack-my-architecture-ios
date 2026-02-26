@@ -10,9 +10,9 @@
 | Anexos | 35 | 14 | 187 | 6 | 5 | 2 | 2 |
 | Etapa 3 - Senior | 9 | 16 | 72 | 30 | 1 | 0 | 0 |
 | Etapa 4 - Arquitecto | 8 | 21 | 50 | 47 | 1 | 0 | 0 |
-| Etapa 5 - Maestria | 17 | 36 | 186 | 74 | 4 | 0 | 0 |
+| Etapa 5 - Maestria | 17 | 36 | 186 | 98 | 4 | 0 | 0 |
 
-Severidad global: OK=96, P1=5, P2=13, P0=0, P3=0
+Severidad global: OK=99, P1=5, P2=10, P0=0, P3=0
 
 ## Hallazgos P1
 
@@ -102,12 +102,12 @@ Severidad global: OK=96, P1=5, P2=13, P0=0, P3=0
 | `05-maestria/08-memory-leaks-y-diagnostico.md` | Etapa 5 - Maestria | 2181 | 4 | 14 | N | N | Y | Y | OK |
 | `05-maestria/09-migracion-swift6.md` | Etapa 5 - Maestria | 1950 | 2 | 15 | Y | Y | Y | Y | OK |
 | `05-maestria/10-debugging-xcode.md` | Etapa 5 - Maestria | 1706 | 0 | 11 | N | N | Y | Y | OK |
-| `05-maestria/11-entrevista-arquitecto.md` | Etapa 5 - Maestria | 2720 | 0 | 0 | N | N | Y | Y | P2 |
+| `05-maestria/11-entrevista-arquitecto.md` | Etapa 5 - Maestria | 2762 | 0 | 0 | N | N | Y | Y | P2 |
 | `05-maestria/12-arquitectura-adaptativa.md` | Etapa 5 - Maestria | 2917 | 0 | 17 | N | N | Y | Y | OK |
 | `05-maestria/entregables-etapa-5.md` | Etapa 5 - Maestria | 1856 | 1 | 1 | Y | N | N | Y | OK |
-| `05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md` | Etapa 5 - Maestria | 1791 | 0 | 0 | Y | N | N | Y | P2 |
-| `05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md` | Etapa 5 - Maestria | 820 | 0 | 0 | Y | Y | Y | Y | P2 |
-| `05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md` | Etapa 5 - Maestria | 327 | 0 | 0 | Y | N | N | Y | P2 |
+| `05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md` | Etapa 5 - Maestria | 1833 | 0 | 0 | Y | N | N | Y | OK |
+| `05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md` | Etapa 5 - Maestria | 862 | 0 | 0 | Y | Y | Y | Y | OK |
+| `05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md` | Etapa 5 - Maestria | 369 | 0 | 0 | Y | N | N | Y | OK |
 | `anexos/calentamiento-etapa-5-maestria.md` | Anexos | 941 | 1 | 3 | N | Y | N | Y | OK |
 | `anexos/quizzes-autoevaluacion.md` | Anexos | 2761 | 0 | 1 | N | N | N | Y | OK |
 | `anexos/guia-recuperacion-ios.md` | Anexos | 1827 | 1 | 34 | Y | Y | Y | Y | OK |

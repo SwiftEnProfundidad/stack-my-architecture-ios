@@ -7,9 +7,9 @@
 | Etapa 2 - Mid | 16 | 16 | 0 |
 | Etapa 3 - Senior | 9 | 9 | 0 |
 | Etapa 4 - Arquitecto | 8 | 8 | 0 |
-| Etapa 5 - Maestria | 17 | 13 | 4 |
+| Etapa 5 - Maestria | 17 | 17 | 0 |
 
-Hallazgos: total=4 (P1=0, P2=4)
+Hallazgos: total=0 (P1=0, P2=0)
 
 ## P1
 
@@ -17,10 +17,7 @@ Hallazgos: total=4 (P1=0, P2=4)
 
 ## P2
 
-- `05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md` (Etapa 5 - Maestria): Sin referencia explicita al scaffold.
-- `05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md` (Etapa 5 - Maestria): Sin referencia explicita al scaffold.
-- `05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md` (Etapa 5 - Maestria): Sin referencia explicita al scaffold.
-- `05-maestria/11-entrevista-arquitecto.md` (Etapa 5 - Maestria): Sin referencia explicita al scaffold.
+- Sin P2 detectados.
 
 ## Accion sugerida
 

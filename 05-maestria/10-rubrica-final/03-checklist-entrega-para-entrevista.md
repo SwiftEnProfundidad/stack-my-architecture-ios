@@ -1,5 +1,11 @@
 # Checklist de entrega para entrevista (1 página)
 
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
+
 ## Objetivo
 
 Este paquete sirve para defender tu perfil en entrevista técnica en 5 minutos con señal de arquitectura móvil real: profundidad iOS + criterios de Mobile Architect.

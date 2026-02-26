@@ -65,20 +65,20 @@
       },
       "Etapa 5 - Maestria": {
         "lessons": 17,
-        "words_total": 35146,
+        "words_total": 35314,
         "mermaid_total": 36,
         "code_total": 186,
-        "refs_total": 74,
+        "refs_total": 98,
         "no_practice": 4,
         "no_validation": 0,
         "p1_or_higher": 0
       }
     },
     "severity": {
-      "OK": 96,
+      "OK": 99,
       "P0": 0,
       "P1": 5,
-      "P2": 13,
+      "P2": 10,
       "P3": 0
     }
   },
@@ -1404,20 +1404,19 @@
       "rel_path": "05-maestria/11-entrevista-arquitecto.md",
       "stage": "Etapa 5 - Maestria",
       "title": "11. Cómo Hablar de Arquitectura en una Entrevista",
-      "heading_count": 16,
-      "word_count": 2720,
-      "line_count": 175,
+      "heading_count": 17,
+      "word_count": 2762,
+      "line_count": 181,
       "mermaid_blocks": 0,
       "code_blocks": 0,
-      "scaffold_ref_hits": 0,
+      "scaffold_ref_hits": 6,
       "has_objective": false,
       "has_prerequisites": false,
       "has_practice": true,
       "has_validation": true,
       "severity": "P2",
       "findings": [
-        "No se detectan snippets de codigo ni bloques tecnicos.",
-        "No se detecta trazabilidad explicita al scaffold/apps iOS."
+        "No se detectan snippets de codigo ni bloques tecnicos."
       ]
     },
     {
@@ -1458,58 +1457,52 @@
       "rel_path": "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
       "stage": "Etapa 5 - Maestria",
       "title": "Propósito y Alcance",
-      "heading_count": 30,
-      "word_count": 1791,
-      "line_count": 291,
+      "heading_count": 31,
+      "word_count": 1833,
+      "line_count": 297,
       "mermaid_blocks": 0,
       "code_blocks": 0,
-      "scaffold_ref_hits": 0,
+      "scaffold_ref_hits": 6,
       "has_objective": true,
       "has_prerequisites": false,
       "has_practice": false,
       "has_validation": true,
-      "severity": "P2",
-      "findings": [
-        "No se detecta trazabilidad explicita al scaffold/apps iOS."
-      ]
+      "severity": "OK",
+      "findings": []
     },
     {
       "rel_path": "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
       "stage": "Etapa 5 - Maestria",
       "title": "Evidencias obligatorias iOS (cierre defendible)",
-      "heading_count": 22,
-      "word_count": 820,
-      "line_count": 123,
+      "heading_count": 23,
+      "word_count": 862,
+      "line_count": 129,
       "mermaid_blocks": 0,
       "code_blocks": 0,
-      "scaffold_ref_hits": 0,
+      "scaffold_ref_hits": 6,
       "has_objective": true,
       "has_prerequisites": true,
       "has_practice": true,
       "has_validation": true,
-      "severity": "P2",
-      "findings": [
-        "No se detecta trazabilidad explicita al scaffold/apps iOS."
-      ]
+      "severity": "OK",
+      "findings": []
     },
     {
       "rel_path": "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
       "stage": "Etapa 5 - Maestria",
       "title": "Checklist de entrega para entrevista (1 página)",
-      "heading_count": 6,
-      "word_count": 327,
-      "line_count": 48,
+      "heading_count": 7,
+      "word_count": 369,
+      "line_count": 54,
       "mermaid_blocks": 0,
       "code_blocks": 0,
-      "scaffold_ref_hits": 0,
+      "scaffold_ref_hits": 6,
       "has_objective": true,
       "has_prerequisites": false,
       "has_practice": false,
       "has_validation": true,
-      "severity": "P2",
-      "findings": [
-        "No se detecta trazabilidad explicita al scaffold/apps iOS."
-      ]
+      "severity": "OK",
+      "findings": []
     },
     {
       "rel_path": "anexos/calentamiento-etapa-5-maestria.md",
