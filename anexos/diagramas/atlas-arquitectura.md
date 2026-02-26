@@ -365,6 +365,8 @@ graph TD
 
 Este diagrama muestra la estructura de targets SPM hacia la que evoluciona el proyecto:
 
+Antes de leer flechas, ubica los bloques principales: `SharedKernel`, `Platform`, `BackendFirebase`, `Feature Login`, `Feature Catalog`, `NavigationPlatform` y `AppComposition`. Dentro de Login y Catalog, el patrón se repite explícitamente (`LoginDomain`, `LoginApplication`, `LoginInterface`, `LoginInfrastructure`, `CatalogDomain`, `CatalogApplication`, `CatalogInterface`, `CatalogInfrastructure`).
+
 ```mermaid
 graph TD
     subgraph SHARED["SharedKernel"]
@@ -437,6 +439,8 @@ graph TD
     style COMP fill:#f8d7da,stroke:#dc3545
 ```text
 
+La semántica clave de este grafo es que `AppComposition` conecta wiring, mientras `SharedKernel` actúa como base común; `Platform` y `BackendFirebase` proveen infraestructura técnica; y las capas `Domain`, `Application`, `Interface` e `Infrastructure` se mantienen separadas por frontera de imports.
+
 **Reglas de dependencia (enforceables por CI):**
 
 | Target | Puede importar | NO puede importar |
@@ -454,6 +458,12 @@ graph TD
 ---
 
 ## 8. Backend Firebase encapsulado en Infrastructure
+
+Este diagrama separa tres fronteras: **Domain** (Session, Product, AuthGateway, ProductRepository), **Infrastructure** (implementaciones concretas) y **BackendFirebase** (adaptadores Firebase y configuración). La idea clave es que los puertos del Domain no dependen de Firebase.
+
+Lee el flujo así: `FirebaseAuthGateway` y `FirestoreProductRepository` viven en Infrastructure, implementan puertos del Domain y delegan en `FirebaseAuthAdapter`, `FirestoreProductAdapter` y `FirebaseConfig` dentro de BackendFirebase.
+
+En términos de contrato, `AuthGateway` y `ProductRepository` siguen siendo puertos del Domain; `FirebaseAuthGateway` y `FirestoreProductRepository` son adaptadores de Infrastructure, y `FirebaseAuthAdapter`, `FirestoreProductAdapter` junto con `FirebaseConfig` quedan encapsulados en BackendFirebase.
 
 ```mermaid
 graph TD
