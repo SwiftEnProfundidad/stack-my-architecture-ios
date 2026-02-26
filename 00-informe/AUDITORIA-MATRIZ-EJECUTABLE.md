@@ -39,7 +39,7 @@ Severidad global: OK=96, P1=5, P2=13, P0=0, P3=0
 | `00-core-mobile/10-plantillas.md` | Etapa 0 - Core Mobile | 854 | 0 | 0 | Y | N | Y | Y | P2 |
 | `00-core-mobile/11-crosswalk-ios-android.md` | Etapa 0 - Core Mobile | 252 | 0 | 0 | Y | Y | Y | Y | P2 |
 | `00-core-mobile/12-mobile-architect-parity-ios-android.md` | Etapa 0 - Core Mobile | 905 | 0 | 0 | Y | N | Y | N | P1 |
-| `01-fundamentos/00-introduccion.md` | Etapa 1 - Junior | 3691 | 6 | 6 | Y | Y | Y | Y | OK |
+| `01-fundamentos/00-introduccion.md` | Etapa 1 - Junior | 3825 | 6 | 6 | Y | Y | Y | Y | OK |
 | `01-fundamentos/00-setup.md` | Etapa 1 - Junior | 1813 | 0 | 14 | N | N | Y | Y | OK |
 | `01-fundamentos/01-principios-ingenieria.md` | Etapa 1 - Junior | 3585 | 2 | 2 | Y | Y | Y | Y | OK |
 | `01-fundamentos/02-metodologia-bdd-tdd.md` | Etapa 1 - Junior | 2149 | 1 | 7 | Y | Y | Y | Y | OK |
@@ -51,7 +51,7 @@ Severidad global: OK=96, P1=5, P2=13, P0=0, P3=0
 | `01-fundamentos/05-feature-login/02-application.md` | Etapa 1 - Junior | 4983 | 4 | 18 | Y | Y | Y | Y | OK |
 | `01-fundamentos/05-feature-login/03-infrastructure.md` | Etapa 1 - Junior | 3932 | 3 | 13 | Y | Y | Y | Y | OK |
 | `01-fundamentos/05-feature-login/04-interface-swiftui.md` | Etapa 1 - Junior | 5035 | 4 | 17 | Y | Y | Y | Y | OK |
-| `01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md` | Etapa 1 - Junior | 2965 | 2 | 11 | Y | Y | Y | Y | OK |
+| `01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md` | Etapa 1 - Junior | 3030 | 2 | 11 | Y | Y | Y | Y | OK |
 | `01-fundamentos/05-feature-login/ADR-001-login.md` | Etapa 1 - Junior | 1890 | 0 | 0 | Y | Y | Y | Y | P2 |
 | `01-fundamentos/06-conectando-la-app.md` | Etapa 1 - Junior | 1481 | 0 | 5 | Y | Y | Y | Y | OK |
 | `01-fundamentos/entregables-etapa-1.md` | Etapa 1 - Junior | 478 | 0 | 1 | N | Y | N | Y | OK |
@@ -111,7 +111,7 @@ Severidad global: OK=96, P1=5, P2=13, P0=0, P3=0
 | `anexos/calentamiento-etapa-5-maestria.md` | Anexos | 941 | 1 | 3 | N | Y | N | Y | OK |
 | `anexos/quizzes-autoevaluacion.md` | Anexos | 2761 | 0 | 1 | N | N | N | Y | OK |
 | `anexos/guia-recuperacion-ios.md` | Anexos | 1827 | 1 | 34 | Y | Y | Y | Y | OK |
-| `anexos/diagramas/atlas-arquitectura.md` | Anexos | 2150 | 9 | 9 | Y | Y | Y | N | P1 |
+| `anexos/diagramas/atlas-arquitectura.md` | Anexos | 2317 | 9 | 9 | Y | Y | Y | N | P1 |
 | `anexos/guia-nueva-feature.md` | Anexos | 1393 | 1 | 8 | N | Y | N | Y | OK |
 | `anexos/git-workflow-curso.md` | Anexos | 1214 | 0 | 13 | Y | Y | Y | Y | OK |
 | `anexos/xcode-cheat-sheet.md` | Anexos | 971 | 0 | 4 | N | N | N | Y | OK |
