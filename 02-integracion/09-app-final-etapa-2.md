@@ -40,6 +40,64 @@ graph TD
 
 El `AppCoordinator` es el centro de todo. Recibe eventos de las features y decide a qué pantalla navegar.
 
+## Lectura de flechas aplicada a la app ejemplo
+
+Aquí no solo importa “que haya cajas conectadas”, importa **qué significa cada conexión** en términos arquitectónicos.
+
+```mermaid
+flowchart LR
+    subgraph APP["App module (composition)"]
+        APPROOT["StackMyArchitectureApp"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph LOGIN["Login feature module"]
+        LVM["LoginViewModel"]
+        LUC["LoginUseCase"]
+        LGW["AuthGateway (protocol)"]
+        LREMOTE["RemoteAuthGateway"]
+    end
+
+    subgraph CATALOG["Catalog feature module"]
+        CVM["CatalogViewModel"]
+        CUC["LoadProductsUseCase"]
+        CREPO["ProductRepository (protocol)"]
+        CREMOTE["RemoteProductRepository"]
+        CSTORE["LocalProductStore"]
+    end
+
+    APPROOT -.-> CR
+    CR -.-> COORD
+    CR -.-> LREMOTE
+    CR -.-> CREMOTE
+
+    LVM --> LUC
+    CVM --> CUC
+    LVM --> COORD
+    CVM --> COORD
+
+    LUC -.o LGW
+    CUC -.o CREPO
+
+    LREMOTE --o LGW
+    CREMOTE --o CREPO
+    CREMOTE --> CSTORE
+```text
+
+Lectura semántica (la clave didáctica):
+
+1. `-->` dependencia directa en runtime:
+   `LoginViewModel --> LoginUseCase`, `CatalogViewModel --> LoadProductsUseCase`, `RemoteProductRepository --> LocalProductStore`.
+2. `-.->` wiring/configuración:
+   `CompositionRoot` no “ejecuta negocio”; **construye e inyecta** `AppCoordinator` y adapters.
+3. `-.o` contrato/abstracción:
+   los use cases apuntan a puertos (`AuthGateway`, `ProductRepository`) y no a implementaciones concretas.
+4. `--o` salida/propagación:
+   los adapters concretos satisfacen y propagan el contrato hacia el core (`RemoteAuthGateway --o AuthGateway`, `RemoteProductRepository --o ProductRepository`).
+
+Si en un diagrama de arquitectura de la app ves estas flechas mezcladas sin criterio, casi siempre hay acoplamiento oculto.
+
 ---
 
 ## Paso 1: Actualizar el AppCoordinator para múltiples features
