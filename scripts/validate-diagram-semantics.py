@@ -19,7 +19,7 @@ IGNORE_DIRS = {
     "assistant-bridge",
 }
 
-ARROWS = ("-->", "-.->", "-.o", "--o")
+ARROWS = ("-->", "-.->", "==>", "--o")
 MERMAID_BLOCK = re.compile(r"```mermaid\s*\n(.*?)\n```", re.IGNORECASE | re.DOTALL)
 
 blocks = []
