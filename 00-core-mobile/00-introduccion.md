@@ -59,27 +59,27 @@ Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
 flowchart LR
   subgraph CORE["Core / Domain"]
     direction TB
-    ENT[Entity]
-    POL[Policy]
+    ENT[Product Entity]
+    POL[Domain Policy]
   end
 
   subgraph APP["Application"]
     direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
+    BOOT[App Composition Root]
+    UC[LoadProductsUseCase]
+    PORT["ProductRepositoryPort"]
   end
 
   subgraph UI["Interface"]
     direction TB
-    VM[ViewModel]
-    VIEW[View]
+    VM[CatalogViewModel]
+    VIEW[CatalogView]
   end
 
   subgraph INFRA["Infrastructure"]
     direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
+    API[URLSession API Client]
+    STORE[File Product Store]
   end
 
   VM --> UC
@@ -108,8 +108,4 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+La leyenda visual superior define la semántica de cada flecha y color aplicado en el diagrama.
