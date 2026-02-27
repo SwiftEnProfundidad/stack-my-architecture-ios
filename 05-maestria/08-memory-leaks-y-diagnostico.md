@@ -452,3 +452,40 @@ Antes de mergear cualquier PR:
 ---
 
 **Anterior:** [Composición avanzada ←](07-composicion-avanzada.md) · **Siguiente:** [Migración a Swift 6 →](09-migracion-swift6.md)
+
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+
