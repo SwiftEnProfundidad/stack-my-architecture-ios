@@ -579,11 +579,13 @@ def build_nav(files_content):
     """Construye la barra de navegacion con anchors y numeracion estable por etapa."""
     nav = (
         '<nav id="sidebar">\n'
+        '<div class="sidebar-top">\n'
         '<h2>Indice</h2>\n'
         '<div class="sidebar-search-wrap">\n'
         '  <input id="sidebar-search" type="search" placeholder="Buscar leccion..." '
         'aria-label="Buscar leccion en el curso" autocomplete="off">\n'
         '  <div id="sidebar-search-count" aria-live="polite"></div>\n'
+        '</div>\n'
         '</div>\n'
         '<ul>\n'
     )
@@ -975,7 +977,7 @@ body {{
     overflow-y: auto;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
-    padding: var(--space-lg) var(--space-md);
+    padding: calc(var(--space-lg) + 8px) var(--space-md) var(--space-lg);
     font-size: 0.875rem;
     z-index: 100;
     scrollbar-width: thin;
@@ -990,18 +992,29 @@ body {{
     border-radius: 3px;
 }}
 
+#sidebar .sidebar-top {{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--sidebar-bg);
+    padding-top: var(--space-xs);
+}}
+
 #sidebar h2 {{
     font-size: 1rem;
     font-weight: 700;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
     color: var(--accent);
     letter-spacing: -0.02em;
     text-transform: uppercase;
     font-size: 0.75rem;
+    line-height: 1.25;
 }}
 
 #sidebar .sidebar-search-wrap {{
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
 }}
 
 #sidebar #sidebar-search {{
