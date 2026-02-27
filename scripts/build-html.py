@@ -12,6 +12,7 @@ import sys
 import shutil
 import html
 import time
+import hashlib
 from pathlib import Path, PurePosixPath
 
 COURSE_ROOT = Path(__file__).parent.parent
@@ -262,22 +263,209 @@ def normalize_mermaid_source(raw_code_content: str) -> str:
     return normalized
 
 
+def _clean_mermaid_label(raw_label: str) -> str:
+    label = raw_label.strip()
+    if len(label) >= 2 and ((label[0] == '"' and label[-1] == '"') or (label[0] == "'" and label[-1] == "'")):
+        label = label[1:-1]
+    label = label.replace("<br/>", "\n").replace("<br>", "\n").replace("\\n", "\n")
+    label = re.sub(r"\s*\n\s*", "\n", label)
+    return label.strip()
+
+
+def _extract_mermaid_label(raw_code_content: str, node_id: str, default: str) -> str:
+    pattern = rf"^\s*{re.escape(node_id)}\s*\[(.+?)\]\s*$"
+    match = re.search(pattern, raw_code_content, flags=re.MULTILINE)
+    if not match:
+        return default
+    parsed = _clean_mermaid_label(match.group(1))
+    return parsed if parsed else default
+
+
+def _extract_mermaid_subgraph_title(raw_code_content: str, subgraph_id: str, default: str) -> str:
+    pattern = rf"subgraph\s+{re.escape(subgraph_id)}\s*\[(.+?)\]"
+    match = re.search(pattern, raw_code_content)
+    if not match:
+        return default
+    parsed = _clean_mermaid_label(match.group(1))
+    return parsed if parsed else default
+
+
+def _split_svg_lines(label: str, max_chars: int = 20) -> list[str]:
+    lines = []
+    for raw_line in label.split("\n"):
+        normalized = re.sub(r"\s+", " ", raw_line).strip()
+        if not normalized:
+            continue
+        words = normalized.split(" ")
+        current = ""
+        for word in words:
+            candidate = word if not current else f"{current} {word}"
+            if len(candidate) <= max_chars:
+                current = candidate
+            else:
+                if current:
+                    lines.append(current)
+                current = word
+        if current:
+            lines.append(current)
+    return lines if lines else [label.strip() or "-"]
+
+
+def _svg_text(x: float, y: float, label: str, css_class: str, max_chars: int = 20) -> str:
+    lines = _split_svg_lines(label, max_chars=max_chars)
+    base_y = y - (len(lines) - 1) * 8
+    tspans = []
+    for index, line in enumerate(lines):
+        dy = "0" if index == 0 else "1.3em"
+        tspans.append(f'<tspan x="{x}" dy="{dy}">{html.escape(line)}</tspan>')
+    return f'<text x="{x}" y="{base_y}" class="{css_class}" text-anchor="middle">{"".join(tspans)}</text>'
+
+
+def is_layered_architecture_mermaid(raw_code_content: str) -> bool:
+    normalized = raw_code_content.lower()
+    required_tokens = (
+        "flowchart",
+        "subgraph core",
+        "subgraph app",
+        "subgraph ui",
+        "subgraph infra",
+        "vm --> uc",
+        "uc --> ent",
+        "uc ==> port",
+        "boot -.->",
+        "port --o",
+    )
+    return all(token in normalized for token in required_tokens)
+
+
+def render_mermaid_arrow_legend() -> str:
+    return (
+        '<div class="sma-mermaid-legend" role="note" aria-label="Leyenda de flechas para diagramas de arquitectura">'
+        '<p class="sma-mermaid-legend-title">Leyenda de flechas</p>'
+        '<div class="sma-mermaid-legend-grid">'
+        '<span class="sma-mermaid-legend-item">'
+        '<svg class="sma-legend-arrow direct-closed" viewBox="0 0 40 12" aria-hidden="true">'
+        '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
+        "</svg>Dependencia directa (runtime)</span>"
+        '<span class="sma-mermaid-legend-item">'
+        '<svg class="sma-legend-arrow dashed-closed" viewBox="0 0 40 12" aria-hidden="true">'
+        '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
+        "</svg>Wiring / configuracion</span>"
+        '<span class="sma-mermaid-legend-item">'
+        '<svg class="sma-legend-arrow contract-closed" viewBox="0 0 40 12" aria-hidden="true">'
+        '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
+        "</svg>Contrato / abstraccion</span>"
+        '<span class="sma-mermaid-legend-item">'
+        '<svg class="sma-legend-arrow solid-open" viewBox="0 0 40 12" aria-hidden="true">'
+        '<line x1="2" y1="6" x2="30" y2="6"></line><polyline points="30,2 38,6 30,10"></polyline>'
+        "</svg>Salida / propagacion</span>"
+        "</div>"
+        "</div>\n"
+    )
+
+
+def render_layered_architecture_svg(raw_code_content: str) -> str:
+    titles = {
+        "CORE": _extract_mermaid_subgraph_title(raw_code_content, "CORE", "Core / Domain"),
+        "APP": _extract_mermaid_subgraph_title(raw_code_content, "APP", "Application"),
+        "UI": _extract_mermaid_subgraph_title(raw_code_content, "UI", "Interface"),
+        "INFRA": _extract_mermaid_subgraph_title(raw_code_content, "INFRA", "Infrastructure"),
+    }
+
+    labels = {
+        "VM": _extract_mermaid_label(raw_code_content, "VM", "ViewModel"),
+        "VIEW": _extract_mermaid_label(raw_code_content, "VIEW", "View"),
+        "ENT": _extract_mermaid_label(raw_code_content, "ENT", "Entity"),
+        "POL": _extract_mermaid_label(raw_code_content, "POL", "Policy"),
+        "BOOT": _extract_mermaid_label(raw_code_content, "BOOT", "Composition Root"),
+        "UC": _extract_mermaid_label(raw_code_content, "UC", "UseCase"),
+        "PORT": _extract_mermaid_label(raw_code_content, "PORT", "FeaturePort"),
+        "API": _extract_mermaid_label(raw_code_content, "API", "API Client"),
+        "STORE": _extract_mermaid_label(raw_code_content, "STORE", "Persistence Adapter"),
+    }
+
+    layer_boxes = {
+        "UI": (100, 80, 300, 240),
+        "CORE": (100, 350, 300, 220),
+        "APP": (420, 520, 380, 190),
+        "INFRA": (830, 80, 350, 630),
+    }
+    nodes = {
+        "VM": (145, 140, 170, 58, "UI"),
+        "VIEW": (165, 235, 130, 58, "UI"),
+        "ENT": (170, 395, 130, 58, "CORE"),
+        "POL": (175, 480, 120, 58, "CORE"),
+        "BOOT": (470, 550, 280, 54, "APP"),
+        "UC": (470, 625, 120, 58, "APP"),
+        "PORT": (620, 625, 170, 58, "APP"),
+        "API": (900, 220, 200, 70, "INFRA"),
+        "STORE": (880, 520, 240, 74, "INFRA"),
+    }
+
+    node_markup = []
+    for node_id, (x, y, width, height, layer_id) in nodes.items():
+        node_markup.append(
+            f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="8" class="sma-arch-node sma-arch-node-{layer_id.lower()}"></rect>'
+        )
+        node_markup.append(_svg_text(x + width / 2, y + height / 2 + 5, labels[node_id], "sma-arch-node-label", max_chars=22))
+
+    layer_markup = []
+    for layer_id, (x, y, width, height) in layer_boxes.items():
+        layer_markup.append(
+            f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="16" class="sma-arch-layer sma-arch-layer-{layer_id.lower()}"></rect>'
+        )
+        layer_markup.append(
+            _svg_text(x + width / 2, y + 26, titles[layer_id], "sma-arch-layer-label", max_chars=28)
+        )
+
+    marker_seed = hashlib.md5(raw_code_content.encode("utf-8")).hexdigest()[:10]
+    marker_direct = f"sma-head-direct-{marker_seed}"
+    marker_wiring = f"sma-head-wiring-{marker_seed}"
+    marker_contract = f"sma-head-contract-{marker_seed}"
+    marker_open = f"sma-head-open-{marker_seed}"
+
+    legend_html = render_mermaid_arrow_legend()
+    return (
+        '<div class="sma-mermaid-block sma-architecture-block">\n'
+        f"{legend_html}"
+        '<div class="sma-architecture-svg-wrap" role="img" aria-label="Diagrama de arquitectura por capas del curso">'
+        '<svg class="sma-architecture-svg" viewBox="0 0 1280 780" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'
+        "<defs>"
+        f'<marker id="{marker_direct}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-direct"></path></marker>'
+        f'<marker id="{marker_wiring}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-wiring"></path></marker>'
+        f'<marker id="{marker_contract}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-contract"></path></marker>'
+        f'<marker id="{marker_open}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        '<path d="M0,0 L10,5 L0,10" class="sma-arch-head-open"></path></marker>'
+        "</defs>"
+        '<rect x="8" y="8" width="1264" height="764" rx="20" class="sma-arch-board"></rect>'
+        f'{"".join(layer_markup)}'
+        f'{"".join(node_markup)}'
+        f'<path d="M315 169 C380 250 410 470 470 654" class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
+        f'<path d="M470 654 C400 620 300 540 235 424" class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
+        f'<path d="M590 654 L620 654" class="sma-arch-edge sma-arch-edge-contract" marker-end="url(#{marker_contract})"></path>'
+        f'<path d="M610 604 L705 625" class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
+        f'<path d="M750 577 C810 510 850 360 900 255" class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
+        f'<path d="M750 594 L880 557" class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
+        f'<path d="M790 654 C860 600 890 410 900 255" class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+        f'<path d="M790 654 L880 557" class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+        f'<path d="M470 654 C400 520 345 330 315 169" class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+        "</svg>"
+        "</div>\n"
+        "</div>\n"
+    )
+
+
 def render_mermaid_block(raw_code_content: str, file_path: str) -> str:
     normalized_code_content = normalize_mermaid_source(raw_code_content)
+    if is_layered_architecture_mermaid(normalized_code_content):
+        return render_layered_architecture_svg(normalized_code_content)
     escaped_mermaid_code = html.escape(normalized_code_content)
     legend_html = ""
     if mermaid_needs_arrow_legend(normalized_code_content, file_path):
-        legend_html = (
-            '<div class="sma-mermaid-legend" role="note" aria-label="Leyenda de flechas para diagramas de arquitectura">'
-            '<p class="sma-mermaid-legend-title">Leyenda de flechas</p>'
-            '<div class="sma-mermaid-legend-grid">'
-            '<span class="sma-mermaid-legend-item"><i class="sma-arrow direct-closed"></i>Dependencia directa (runtime)</span>'
-            '<span class="sma-mermaid-legend-item"><i class="sma-arrow dashed-closed"></i>Wiring / configuracion</span>'
-            '<span class="sma-mermaid-legend-item"><i class="sma-arrow contract-closed"></i>Contrato / abstraccion</span>'
-            '<span class="sma-mermaid-legend-item"><i class="sma-arrow solid-open"></i>Salida / propagacion</span>'
-            "</div>"
-            "</div>\n"
-        )
+        legend_html = render_mermaid_arrow_legend()
     return f'<div class="sma-mermaid-block">\n{legend_html}<pre class="mermaid">{escaped_mermaid_code}</pre>\n</div>\n'
 
 
@@ -1396,66 +1584,142 @@ p code, li code, td code {{
     color: var(--text);
 }}
 
-.sma-arrow {{
-    position: relative;
-    display: inline-block;
-    width: 36px;
+.sma-legend-arrow {{
+    width: 40px;
     height: 12px;
-    flex: 0 0 36px;
-    line-height: 0;
+    flex: 0 0 40px;
+    overflow: visible;
 }}
 
-.sma-arrow::before {{
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 8px;
-    top: 50%;
-    border-top: 2px solid currentColor;
-    transform: translateY(-50%);
+.sma-legend-arrow line,
+.sma-legend-arrow polygon,
+.sma-legend-arrow polyline {{
+    stroke: currentColor;
+    fill: currentColor;
+    stroke-width: 2.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }}
 
-.sma-arrow::after {{
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    border-left: 8px solid currentColor;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
+.sma-legend-arrow polyline {{
+    fill: none;
 }}
 
-.sma-arrow.direct-closed {{ color: var(--mermaid-legend-direct); }}
-
-.sma-arrow.dashed-closed {{
-    color: var(--mermaid-legend-dashed-closed);
+.sma-legend-arrow.dashed-closed line,
+.sma-legend-arrow.contract-closed line {{
+    stroke-dasharray: 6 4;
 }}
 
-.sma-arrow.dashed-closed::before {{
-    border-top-style: dashed;
+.sma-legend-arrow.direct-closed {{ color: var(--mermaid-legend-direct); }}
+.sma-legend-arrow.dashed-closed {{ color: var(--mermaid-legend-dashed-closed); }}
+.sma-legend-arrow.contract-closed {{ color: var(--mermaid-legend-contract); }}
+.sma-legend-arrow.solid-open {{ color: var(--mermaid-legend-solid-open); }}
+
+.sma-architecture-block {{
+    margin-top: var(--space-md);
 }}
 
-.sma-arrow.contract-closed {{
-    color: var(--mermaid-legend-contract);
+.sma-architecture-svg-wrap {{
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 16px;
+    background: radial-gradient(circle at 20% 10%, rgba(59, 130, 246, 0.16), transparent 42%), #0b1220;
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.25), 0 8px 28px rgba(15, 23, 42, 0.32);
+    padding: 12px;
+    overflow-x: auto;
 }}
 
-.sma-arrow.contract-closed::before {{
-    border-top-width: 3px;
+.sma-architecture-svg {{
+    display: block;
+    width: 100%;
+    min-width: 960px;
+    height: auto;
 }}
 
-.sma-arrow.solid-open::after {{
-    width: 8px;
-    height: 8px;
-    border: 0;
-    border-top: 2px solid currentColor;
-    border-right: 2px solid currentColor;
-    transform: translateY(-50%) rotate(45deg);
-    right: 1px;
-    background: transparent;
+.sma-arch-board {{
+    fill: rgba(15, 23, 42, 0.92);
+    stroke: rgba(148, 163, 184, 0.32);
+    stroke-width: 1.5;
 }}
 
-.sma-arrow.solid-open {{ color: var(--mermaid-legend-solid-open); }}
+.sma-arch-layer {{
+    stroke-width: 2;
+}}
+
+.sma-arch-layer-ui {{
+    fill: rgba(29, 78, 216, 0.14);
+    stroke: #7dd3fc;
+}}
+
+.sma-arch-layer-core {{
+    fill: rgba(14, 116, 144, 0.12);
+    stroke: #67e8f9;
+}}
+
+.sma-arch-layer-app {{
+    fill: rgba(124, 58, 237, 0.1);
+    stroke: #f97316;
+}}
+
+.sma-arch-layer-infra {{
+    fill: rgba(168, 85, 247, 0.11);
+    stroke: #d8b4fe;
+}}
+
+.sma-arch-layer-label {{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    fill: #e2e8f0;
+}}
+
+.sma-arch-node {{
+    stroke-width: 1.6;
+    fill: rgba(15, 23, 42, 0.72);
+}}
+
+.sma-arch-node-ui {{ stroke: #93c5fd; }}
+.sma-arch-node-core {{ stroke: #67e8f9; }}
+.sma-arch-node-app {{ stroke: #fb923c; }}
+.sma-arch-node-infra {{ stroke: #d8b4fe; }}
+
+.sma-arch-node-label {{
+    font-family: var(--font-body);
+    font-size: 17px;
+    font-weight: 600;
+    fill: #f8fafc;
+}}
+
+.sma-arch-edge {{
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+}}
+
+.sma-arch-edge-direct {{ stroke: #f472b6; }}
+
+.sma-arch-edge-wiring {{
+    stroke: #94a3b8;
+    stroke-dasharray: 8 6;
+}}
+
+.sma-arch-edge-contract {{
+    stroke: #60a5fa;
+    stroke-dasharray: 8 5;
+}}
+
+.sma-arch-edge-open {{ stroke: #86efac; }}
+
+.sma-arch-head-direct {{ fill: #f472b6; stroke: #f472b6; }}
+.sma-arch-head-wiring {{ fill: #94a3b8; stroke: #94a3b8; }}
+.sma-arch-head-contract {{ fill: #60a5fa; stroke: #60a5fa; }}
+.sma-arch-head-open {{
+    fill: none;
+    stroke: #86efac;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}}
 
 pre.mermaid {{
     background: var(--mermaid-bg);
