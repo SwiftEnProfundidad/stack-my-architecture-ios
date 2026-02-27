@@ -577,7 +577,16 @@ def inline_format(text, current_file_path, current_file_id, file_id_by_path):
 
 def build_nav(files_content):
     """Construye la barra de navegacion con anchors y numeracion estable por etapa."""
-    nav = '<nav id="sidebar">\n<h2>Indice</h2>\n<ul>\n'
+    nav = (
+        '<nav id="sidebar">\n'
+        '<h2>Indice</h2>\n'
+        '<div class="sidebar-search-wrap">\n'
+        '  <input id="sidebar-search" type="search" placeholder="Buscar leccion..." '
+        'aria-label="Buscar leccion en el curso" autocomplete="off">\n'
+        '  <div id="sidebar-search-count" aria-live="polite"></div>\n'
+        '</div>\n'
+        '<ul>\n'
+    )
 
     section_meta = {
         "00-informe": {"title": "Informe fundacional", "lesson_label": "Documento", "numbered": False},
@@ -989,6 +998,38 @@ body {{
     letter-spacing: -0.02em;
     text-transform: uppercase;
     font-size: 0.75rem;
+}}
+
+#sidebar .sidebar-search-wrap {{
+    margin-bottom: var(--space-md);
+}}
+
+#sidebar #sidebar-search {{
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}}
+
+#sidebar #sidebar-search::placeholder {{
+    color: var(--text-muted);
+}}
+
+#sidebar #sidebar-search:focus {{
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}}
+
+#sidebar #sidebar-search-count {{
+    margin-top: 6px;
+    min-height: 1em;
+    font-size: 0.72rem;
+    color: var(--text-muted);
 }}
 
 #sidebar ul {{ list-style: none; padding-left: 0; }}
@@ -2137,6 +2178,68 @@ document.querySelectorAll('#sidebar a').forEach(link => {{
         }}
     }});
 }});
+
+// Sidebar search/filter
+const sidebarSearchInput = document.getElementById('sidebar-search');
+const sidebarSearchCount = document.getElementById('sidebar-search-count');
+
+function normalizeSearchText(value) {{
+    return (value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}}
+
+function applySidebarSearch() {{
+    if (!sidebarSearchInput) return;
+    const query = normalizeSearchText(sidebarSearchInput.value.trim());
+    const sections = document.querySelectorAll('#sidebar li.nav-section');
+    let visibleLessons = 0;
+
+    sections.forEach(section => {{
+        const sectionTitle = section.querySelector(':scope > strong');
+        const sectionLabel = normalizeSearchText(sectionTitle ? sectionTitle.textContent : '');
+        const links = section.querySelectorAll('a.doc-nav-link');
+        let sectionHasVisible = false;
+
+        links.forEach(link => {{
+            const item = link.closest('li');
+            if (!item) return;
+            const lessonPath = normalizeSearchText(link.dataset.lessonPath || '');
+            const lessonTitle = normalizeSearchText(link.textContent || '');
+            const match = !query || lessonTitle.includes(query) || lessonPath.includes(query) || sectionLabel.includes(query);
+            item.style.display = match ? '' : 'none';
+            if (match) {{
+                sectionHasVisible = true;
+                visibleLessons += 1;
+            }}
+        }});
+
+        section.style.display = sectionHasVisible ? '' : 'none';
+    }});
+
+    if (sidebarSearchCount) {{
+        if (!query) {{
+            sidebarSearchCount.textContent = '';
+        }} else if (visibleLessons === 1) {{
+            sidebarSearchCount.textContent = '1 resultado';
+        }} else {{
+            sidebarSearchCount.textContent = `${{visibleLessons}} resultados`;
+        }}
+    }}
+}}
+
+if (sidebarSearchInput) {{
+    sidebarSearchInput.addEventListener('input', applySidebarSearch);
+    sidebarSearchInput.addEventListener('keydown', event => {{
+        if (event.key === 'Escape') {{
+            sidebarSearchInput.value = '';
+            applySidebarSearch();
+            sidebarSearchInput.blur();
+        }}
+    }});
+    applySidebarSearch();
+}}
 </script>
 
 </body>
