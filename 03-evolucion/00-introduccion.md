@@ -384,3 +384,40 @@ El foco es resiliencia útil y sostenible, no complejidad ornamental.
 
 
 **Anterior:** [Consolidación: Etapa 2 - Integración ←](../anexos/consolidacion-etapa-2-integracion.md) · **Siguiente:** [Caching y offline →](01-caching-offline.md)
+
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

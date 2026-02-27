@@ -593,3 +593,40 @@ Contexto: normalizacion automatica para `05-maestria/01-isolation-domains.md`.
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
 **Anterior:** [Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patron... ←](00-introduccion.md) · **Siguiente:** [Actors en arquitectura →](02-actors-en-arquitectura.md)
+
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

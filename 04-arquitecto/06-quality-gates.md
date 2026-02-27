@@ -444,3 +444,40 @@ Un gate que podría añadirse es verificación de strict concurrency (`-strict-c
 ---
 
 **Anterior:** [Guía de arquitectura del repositorio ←](05-guia-arquitectura.md) · **Siguiente:** [Entregables — Etapa 4: Arquitecto →](entregables-etapa-4.md)
+
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+
