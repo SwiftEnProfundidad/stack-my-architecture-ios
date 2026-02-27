@@ -240,6 +240,11 @@ MERMAID_ARROW_LEGEND_KEYWORDS = (
     "service",
 )
 
+# Activacion progresiva: solo aplicar SVG por leccion revisada.
+LAYERED_SVG_FILE_WHITELIST = {
+    "00-core-mobile/00-introduccion.md",
+}
+
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
@@ -385,22 +390,34 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
     }
 
     layer_boxes = {
-        "UI": (100, 80, 300, 240),
-        "CORE": (100, 350, 300, 220),
-        "APP": (420, 520, 380, 190),
-        "INFRA": (830, 80, 350, 630),
+        "UI": (90, 80, 330, 238),
+        "CORE": (90, 352, 330, 228),
+        "APP": (430, 510, 410, 206),
+        "INFRA": (850, 80, 340, 636),
     }
     nodes = {
-        "VM": (145, 140, 170, 58, "UI"),
-        "VIEW": (165, 235, 130, 58, "UI"),
-        "ENT": (170, 395, 130, 58, "CORE"),
-        "POL": (175, 480, 120, 58, "CORE"),
-        "BOOT": (470, 550, 280, 54, "APP"),
-        "UC": (470, 625, 120, 58, "APP"),
-        "PORT": (620, 625, 170, 58, "APP"),
-        "API": (900, 220, 200, 70, "INFRA"),
-        "STORE": (880, 520, 240, 74, "INFRA"),
+        "VM": (132, 138, 178, 60, "UI"),
+        "VIEW": (152, 236, 138, 58, "UI"),
+        "ENT": (165, 398, 138, 60, "CORE"),
+        "POL": (165, 485, 138, 58, "CORE"),
+        "BOOT": (472, 540, 326, 58, "APP"),
+        "UC": (472, 625, 126, 60, "APP"),
+        "PORT": (628, 625, 170, 60, "APP"),
+        "API": (914, 218, 188, 72, "INFRA"),
+        "STORE": (898, 518, 220, 76, "INFRA"),
     }
+
+    def anchor(node_id: str, side: str) -> tuple[float, float]:
+        x, y, width, height, _ = nodes[node_id]
+        if side == "left":
+            return (x, y + height / 2)
+        if side == "right":
+            return (x + width, y + height / 2)
+        if side == "top":
+            return (x + width / 2, y)
+        if side == "bottom":
+            return (x + width / 2, y + height)
+        raise ValueError(f"unsupported side: {side}")
 
     node_markup = []
     for node_id, (x, y, width, height, layer_id) in nodes.items():
@@ -424,6 +441,65 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
     marker_contract = f"sma-head-contract-{marker_seed}"
     marker_open = f"sma-head-open-{marker_seed}"
 
+    vm_right = anchor("VM", "right")
+    vm_bottom = anchor("VM", "bottom")
+    uc_left = anchor("UC", "left")
+    uc_right = anchor("UC", "right")
+    uc_top = anchor("UC", "top")
+    ent_right = anchor("ENT", "right")
+    boot_bottom = anchor("BOOT", "bottom")
+    boot_right = anchor("BOOT", "right")
+    port_left = anchor("PORT", "left")
+    port_right = anchor("PORT", "right")
+    port_top = anchor("PORT", "top")
+    api_left = anchor("API", "left")
+    store_left = anchor("STORE", "left")
+
+    edges = []
+    # Dependencia directa (runtime)
+    edges.append(
+        f'<path d="M{vm_right[0]} {vm_right[1]} L380 {vm_right[1]} L380 646 L{uc_left[0]} {uc_left[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
+    )
+    edges.append(
+        f'<path d="M{uc_left[0]} {uc_left[1]} L430 {uc_left[1]} L430 {ent_right[1]} L{ent_right[0]} {ent_right[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
+    )
+
+    # Contrato / abstracción
+    edges.append(
+        f'<path d="M{uc_right[0]} {uc_right[1]} L{port_left[0]} {port_left[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-contract" marker-end="url(#{marker_contract})"></path>'
+    )
+
+    # Wiring / configuración
+    edges.append(
+        f'<path d="M{boot_bottom[0]} {boot_bottom[1]} L{boot_bottom[0]} 612 L{port_top[0]} 612 L{port_top[0]} {port_top[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
+    )
+    edges.append(
+        f'<path d="M{boot_right[0]} {boot_right[1]} L840 {boot_right[1]} L840 {api_left[1]} L{api_left[0]} {api_left[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
+    )
+    edges.append(
+        f'<path d="M{boot_right[0]} {boot_right[1]} L840 {boot_right[1]} L840 {store_left[1]} L{store_left[0]} {store_left[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
+    )
+
+    # Salida / propagación
+    edges.append(
+        f'<path d="M{port_right[0]} {port_right[1]} L865 {port_right[1]} L865 {api_left[1]} L{api_left[0]} {api_left[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+    )
+    edges.append(
+        f'<path d="M{port_right[0]} {port_right[1]} L865 {port_right[1]} L865 {store_left[1]} L{store_left[0]} {store_left[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+    )
+    edges.append(
+        f'<path d="M{uc_top[0]} {uc_top[1]} L{uc_top[0]} 610 L260 610 L260 {vm_bottom[1]} L{vm_bottom[0]} {vm_bottom[1]}" '
+        f'class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+    )
+
     legend_html = render_mermaid_arrow_legend()
     return (
         '<div class="sma-mermaid-block sma-architecture-block">\n'
@@ -431,27 +507,19 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
         '<div class="sma-architecture-svg-wrap" role="img" aria-label="Diagrama de arquitectura por capas del curso">'
         '<svg class="sma-architecture-svg" viewBox="0 0 1280 780" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'
         "<defs>"
-        f'<marker id="{marker_direct}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        f'<marker id="{marker_direct}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
         '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-direct"></path></marker>'
-        f'<marker id="{marker_wiring}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        f'<marker id="{marker_wiring}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
         '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-wiring"></path></marker>'
-        f'<marker id="{marker_contract}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        f'<marker id="{marker_contract}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
         '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-contract"></path></marker>'
-        f'<marker id="{marker_open}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">'
+        f'<marker id="{marker_open}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
         '<path d="M0,0 L10,5 L0,10" class="sma-arch-head-open"></path></marker>'
         "</defs>"
         '<rect x="8" y="8" width="1264" height="764" rx="20" class="sma-arch-board"></rect>'
         f'{"".join(layer_markup)}'
         f'{"".join(node_markup)}'
-        f'<path d="M315 169 C380 250 410 470 470 654" class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
-        f'<path d="M470 654 C400 620 300 540 235 424" class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
-        f'<path d="M590 654 L620 654" class="sma-arch-edge sma-arch-edge-contract" marker-end="url(#{marker_contract})"></path>'
-        f'<path d="M610 604 L705 625" class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
-        f'<path d="M750 577 C810 510 850 360 900 255" class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
-        f'<path d="M750 594 L880 557" class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
-        f'<path d="M790 654 C860 600 890 410 900 255" class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
-        f'<path d="M790 654 L880 557" class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
-        f'<path d="M470 654 C400 520 345 330 315 169" class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
+        f'{"".join(edges)}'
         "</svg>"
         "</div>\n"
         "</div>\n"
@@ -460,7 +528,10 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
 
 def render_mermaid_block(raw_code_content: str, file_path: str) -> str:
     normalized_code_content = normalize_mermaid_source(raw_code_content)
-    if is_layered_architecture_mermaid(normalized_code_content):
+    if (
+        is_layered_architecture_mermaid(normalized_code_content)
+        and file_path in LAYERED_SVG_FILE_WHITELIST
+    ):
         return render_layered_architecture_svg(normalized_code_content)
     escaped_mermaid_code = html.escape(normalized_code_content)
     legend_html = ""
