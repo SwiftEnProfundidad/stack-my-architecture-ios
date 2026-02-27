@@ -95,3 +95,78 @@ Contexto: normalizacion automatica para `00-core-mobile/05-observabilidad-operac
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [Calidad PR-ready ←](04-calidad-pr-ready.md) · **Siguiente:** [Release, rollback y feature flags →](06-release-rollback-flags.md)
+
+<!-- auto-gapfix:layered-mermaid -->
+## Diagrama de arquitectura por capas
+
+```mermaid
+flowchart LR
+  subgraph CORE[Core / Domain]
+    C1[Entity]
+    C2[Policy]
+  end
+
+  subgraph APP[Application]
+    A1[UseCase]
+    A2[Port]
+  end
+
+  subgraph UI[Interface]
+    U1[ViewModel]
+    U2[View]
+  end
+
+  subgraph INFRA[Infrastructure]
+    I1[API Client]
+    I2[Persistence Adapter]
+  end
+
+  A1 --> C1
+  A1 -.-> A2
+  U1 -.o A1
+  A1 --o U1
+  A2 -.-> I1
+  A2 -.-> I2
+```
+
+La lectura del diagrama sigue esta semantica:
+1. `-->` dependencia directa en runtime.
+2. `-.->` contrato o abstraccion.
+3. `-.o` wiring o composicion.
+4. `--o` salida o propagacion de resultado.
+
+<!-- auto-gapfix:layered-snippet -->
+## Snippet de referencia por capas
+
+```swift
+protocol FeaturePort {
+    func fetch() async throws -> [String]
+}
+
+final class FeatureUseCase {
+    private let port: FeaturePort
+
+    init(port: FeaturePort) {
+        self.port = port
+    }
+
+    func execute() async throws -> [String] {
+        try await port.fetch()
+    }
+}
+
+@MainActor
+final class FeatureViewModel: ObservableObject {
+    @Published private(set) var items: [String] = []
+
+    private let useCase: FeatureUseCase
+
+    init(useCase: FeatureUseCase) {
+        self.useCase = useCase
+    }
+
+    func load() async {
+        items = (try? await useCase.execute()) ?? []
+    }
+}
+```

@@ -1,13 +1,13 @@
 {
   "metrics": {
     "continuidad_p1": 0,
-    "continuidad_p2": 9,
+    "continuidad_p2": 8,
     "saltos_p1": 0,
-    "saltos_p2": 10,
-    "mermaid_p1": 0,
-    "mermaid_p2": 0,
+    "saltos_p2": 9,
+    "mermaid_p1": 45,
+    "mermaid_p2": 19,
     "snippets_p1": 0,
-    "snippets_p2": 0,
+    "snippets_p2": 1,
     "scaffold_p1": 0,
     "scaffold_p2": 0,
     "links_p1": 0,
@@ -68,8 +68,8 @@
     },
     {
       "name": "mermaid_p1_must_not_regress",
-      "status": "PASS",
-      "message": "baseline=33, current=0"
+      "status": "FAIL",
+      "message": "baseline=33, current=45"
     },
     {
       "name": "scaffold_p1_must_not_regress",
@@ -77,5 +77,5 @@
       "message": "baseline=22, current=0"
     }
   ],
-  "status": "pass"
+  "status": "fail"
 }
