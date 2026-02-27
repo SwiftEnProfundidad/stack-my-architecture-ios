@@ -23,7 +23,7 @@
       "stage": "Etapa 3 - Senior",
       "lessons": 9,
       "p1": 0,
-      "p2": 1
+      "p2": 0
     },
     {
       "stage": "Etapa 4 - Arquitecto",
@@ -44,7 +44,7 @@
       "p2": 5
     }
   ],
-  "findings_total": 10,
+  "findings_total": 9,
   "findings": [
     {
       "severity": "P2",
@@ -103,7 +103,7 @@
       "stage": "Etapa 1 - Junior",
       "from": "01-fundamentos/06-conectando-la-app.md",
       "to": "01-fundamentos/entregables-etapa-1.md",
-      "message": "Salto de complejidad en transicion esperada: `01-fundamentos/06-conectando-la-app.md` (1481) -> `01-fundamentos/entregables-etapa-1.md` (478)."
+      "message": "Salto de complejidad en transicion esperada: `01-fundamentos/06-conectando-la-app.md` (1570) -> `01-fundamentos/entregables-etapa-1.md` (567)."
     },
     {
       "severity": "P2",
@@ -111,7 +111,7 @@
       "stage": "Etapa 2 - Mid",
       "from": "02-integracion/06-composition-root.md",
       "to": "02-integracion/07-swiftui-enterprise.md",
-      "message": "Salto de complejidad en transicion esperada: `02-integracion/06-composition-root.md` (1858) -> `02-integracion/07-swiftui-enterprise.md` (6161)."
+      "message": "Salto de complejidad en transicion esperada: `02-integracion/06-composition-root.md` (1948) -> `02-integracion/07-swiftui-enterprise.md` (6251)."
     },
     {
       "severity": "P2",
@@ -119,15 +119,7 @@
       "stage": "Etapa 2 - Mid",
       "from": "02-integracion/08-swift-concurrency-enterprise.md",
       "to": "02-integracion/09-app-final-etapa-2.md",
-      "message": "Salto de complejidad en transicion esperada: `02-integracion/08-swift-concurrency-enterprise.md` (3922) -> `02-integracion/09-app-final-etapa-2.md` (1550)."
-    },
-    {
-      "severity": "P2",
-      "kind": "complexity_jump_transition",
-      "stage": "Etapa 3 - Senior",
-      "from": "03-evolucion/07-backend-firebase.md",
-      "to": "03-evolucion/entregables-etapa-3.md",
-      "message": "Salto de complejidad en transicion esperada: `03-evolucion/07-backend-firebase.md` (2530) -> `03-evolucion/entregables-etapa-3.md` (1113)."
+      "message": "Salto de complejidad en transicion esperada: `02-integracion/08-swift-concurrency-enterprise.md` (4012) -> `02-integracion/09-app-final-etapa-2.md` (1747)."
     }
   ]
 }

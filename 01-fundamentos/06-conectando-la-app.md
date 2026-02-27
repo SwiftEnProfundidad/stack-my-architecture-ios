@@ -327,3 +327,42 @@ Contexto: normalizacion automatica para `01-fundamentos/06-conectando-la-app.md`
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 **Anterior:** [ADR-001: Diseño de la Feature Login ←](05-feature-login/ADR-001-login.md) · **Siguiente:** [Entregables — Etapa 1: Junior →](entregables-etapa-1.md)
+
+<!-- auto-gapfix:layered-mermaid -->
+## Diagrama de arquitectura por capas
+
+```mermaid
+flowchart LR
+  subgraph CORE[Core / Domain]
+    C1[Entity]
+    C2[Policy]
+  end
+
+  subgraph APP[Application]
+    A1[UseCase]
+    A2[Port]
+  end
+
+  subgraph UI[Interface]
+    U1[ViewModel]
+    U2[View]
+  end
+
+  subgraph INFRA[Infrastructure]
+    I1[API Client]
+    I2[Persistence Adapter]
+  end
+
+  A1 --> C1
+  A1 -.-> A2
+  U1 -.o A1
+  A1 --o U1
+  A2 -.-> I1
+  A2 -.-> I2
+```
+
+La lectura del diagrama sigue esta semantica:
+1. `-->` dependencia directa en runtime.
+2. `-.->` contrato o abstraccion.
+3. `-.o` wiring o composicion.
+4. `--o` salida o propagacion de resultado.
