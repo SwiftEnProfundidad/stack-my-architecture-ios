@@ -907,3 +907,40 @@ La Etapa 5 (Maestria) profundiza en estos conceptos con isolation domains, actor
 ---
 
 **Anterior:** [SwiftUI Enterprise: Patrones Imprescindibles ←](07-swiftui-enterprise.md) · **Siguiente:** [App Final Etapa 2: Login + Catalog Funcionando Juntos →](09-app-final-etapa-2.md)
+
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+
