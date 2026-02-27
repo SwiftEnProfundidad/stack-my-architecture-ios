@@ -242,7 +242,7 @@ MERMAID_ARROW_LEGEND_KEYWORDS = (
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
-    relation_tokens = ("-->", "-.->", "<|--", "--|>", "..|>", "..>", "o--", "*--")
+    relation_tokens = ("-->", "-.->", "==>", "--o", "<|--", "--|>", "..|>", "..>", "o--", "*--")
     has_relations = any(token in raw_code_content for token in relation_tokens)
     if not has_relations:
         return False
@@ -258,6 +258,7 @@ def normalize_mermaid_source(raw_code_content: str) -> str:
     if is_flowchart:
         normalized = re.sub(r"\.\.\>\|", "-.->|", normalized)
         normalized = re.sub(r"\.\.\>", "-.->", normalized)
+        normalized = normalized.replace("-.o", "-.->")
     return normalized
 
 
@@ -272,7 +273,7 @@ def render_mermaid_block(raw_code_content: str, file_path: str) -> str:
             '<div class="sma-mermaid-legend-grid">'
             '<span class="sma-mermaid-legend-item"><i class="sma-arrow direct-closed"></i>Dependencia directa (runtime)</span>'
             '<span class="sma-mermaid-legend-item"><i class="sma-arrow dashed-closed"></i>Wiring / configuracion</span>'
-            '<span class="sma-mermaid-legend-item"><i class="sma-arrow dashed-open"></i>Contrato / abstraccion</span>'
+            '<span class="sma-mermaid-legend-item"><i class="sma-arrow contract-closed"></i>Contrato / abstraccion</span>'
             '<span class="sma-mermaid-legend-item"><i class="sma-arrow solid-open"></i>Salida / propagacion</span>'
             "</div>"
             "</div>\n"
@@ -1356,7 +1357,7 @@ p code, li code, td code {{
     --mermaid-label-bg: #eef2ff;
     --mermaid-legend-direct: #d946ef;
     --mermaid-legend-dashed-closed: #64748b;
-    --mermaid-legend-dashed-open: #2563eb;
+    --mermaid-legend-contract: #2563eb;
     --mermaid-legend-solid-open: #059669;
 }}
 
@@ -1435,15 +1436,14 @@ p code, li code, td code {{
     border-top-style: dashed;
 }}
 
-.sma-arrow.dashed-open {{
-    color: var(--mermaid-legend-dashed-open);
+.sma-arrow.contract-closed {{
+    color: var(--mermaid-legend-contract);
 }}
 
-.sma-arrow.dashed-open::before {{
-    border-top-style: dashed;
+.sma-arrow.contract-closed::before {{
+    border-top-width: 3px;
 }}
 
-.sma-arrow.dashed-open::after,
 .sma-arrow.solid-open::after {{
     width: 8px;
     height: 8px;
