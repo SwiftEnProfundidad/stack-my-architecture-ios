@@ -53,7 +53,7 @@ Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
-![Diagrama de arquitectura por capas (Core Mobile)](assets/architecture-ios-core-mobile.png)
+![Diagrama de arquitectura por capas (Core Mobile)](../assets/architecture-ios-core-mobile.png)
 
 La leyenda visual superior define la semántica por tipo de trazo y punta de flecha; el color de cada flecha indica el módulo de origen.
 
@@ -63,8 +63,8 @@ Para evitar sobrecarga visual en el mapa global, aquí tienes dos vistas de deta
 
 #### Login (detalle)
 
-![Diagrama de arquitectura Login (detalle)](assets/architecture-ios-login-detail-v3.png)
+![Diagrama de arquitectura Login (detalle)](../assets/architecture-ios-login-detail-v3.png)
 
 #### Catalog (detalle)
 
-![Diagrama de arquitectura Catalog (detalle)](assets/architecture-ios-catalog-detail-v4.png)
+![Diagrama de arquitectura Catalog (detalle)](../assets/architecture-ios-catalog-detail-v4.png)

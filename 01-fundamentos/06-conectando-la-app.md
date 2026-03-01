@@ -43,7 +43,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```text
+```
 
 **Paso a paso en Xcode:**
 1. Click derecho en la carpeta `App/` en el navegador
@@ -119,7 +119,7 @@ struct CompositionRoot {
         return LoginView(viewModel: makeLoginViewModel())
     }
 }
-```swift
+```
 
 **¿Por qué struct y no class?**
 
@@ -136,14 +136,14 @@ Abre cada archivo que creaste y verifica que los imports sean correctos:
 import SwiftUI
 // No necesitas importar otros módulos porque
 // CompositionRoot está en el mismo target
-```text
+```
 
 **En `CompositionRoot.swift`:**
 ```swift
 import SwiftUI
 // AuthGateway, LoginUseCase, etc. están en el mismo target,
 // así que no necesitas imports adicionales
-```text
+```
 
 **Si tienes errores de "Cannot find in scope":**
 
@@ -153,10 +153,11 @@ import SwiftUI
    - Verifica que "Target Membership" tenga check en tu app target
 
 2. Verifica que los protocolos y structs tengan visibilidad `internal` o `public`:
-   ```swift
-   // En AuthGateway.swift
-   protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
-   ```text
+
+```swift
+// En AuthGateway.swift
+protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
+```
 
 ---
 

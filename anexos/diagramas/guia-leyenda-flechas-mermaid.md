@@ -6,7 +6,7 @@ Referencia mínima para mantener semántica consistente en los diagramas del cur
 flowchart LR
     VIEW[SwiftUI View] --> VM[ViewModel]
     VM -.-> ROOT[Composition Root]
-    VM -.o PORT[Protocol / Port]
+    VM ==> PORT[Protocol / Port]
     VM --o OUT[Telemetry / Output]
 ```
 
@@ -14,5 +14,5 @@ flowchart LR
 
 - `-->` Dependencia directa (runtime).
 - `-.->` Wiring / configuración.
-- `-.o` Contrato / abstracción.
+- `==>` Contrato / abstracción.
 - `--o` Salida / propagación.

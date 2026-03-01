@@ -76,8 +76,8 @@ flowchart LR
     LVM --> COORD
     CVM --> COORD
 
-    LUC -.o LGW
-    CUC -.o CREPO
+    LUC ==> LGW
+    CUC ==> CREPO
 
     LREMOTE --o LGW
     CREMOTE --o CREPO
@@ -90,7 +90,7 @@ Lectura semántica (la clave didáctica):
    `LoginViewModel --> LoginUseCase`, `CatalogViewModel --> LoadProductsUseCase`, `RemoteProductRepository --> LocalProductStore`.
 2. `-.->` wiring/configuración:
    `CompositionRoot` no “ejecuta negocio”; **construye e inyecta** `AppCoordinator` y adapters.
-3. `-.o` contrato/abstracción:
+3. `==>` contrato/abstracción:
    los use cases apuntan a puertos (`AuthGateway`, `ProductRepository`) y no a implementaciones concretas.
 4. `--o` salida/propagación:
    los adapters concretos satisfacen y propagan el contrato hacia el core (`RemoteAuthGateway --o AuthGateway`, `RemoteProductRepository --o ProductRepository`).

@@ -103,12 +103,12 @@ flowchart TB
 
     LUI --> LAPP
     LAPP --> LDOM
-    LAPP -.o LPORT
+    LAPP ==> LPORT
     LINF --o LPORT
 
     CUI --> CAPP
     CAPP --> CDOM
-    CAPP -.o CPORT
+    CAPP ==> CPORT
     CINF --o CPORT
     CINF --> CSTORE
 ```text
@@ -117,7 +117,7 @@ Cómo leerlo en revisión técnica:
 
 1. `-->` indica dependencia de ejecución real (flujo operativo).
 2. `-.->` indica solo ensamblaje/configuración (sin ejecutar negocio).
-3. `-.o` indica que el core depende de un contrato, no de una implementación.
+3. `==>` indica que el core depende de un contrato, no de una implementación.
 4. `--o` indica salida/propagación desde una implementación concreta que satisface ese contrato.
 
 Regla práctica de arquitectura:
