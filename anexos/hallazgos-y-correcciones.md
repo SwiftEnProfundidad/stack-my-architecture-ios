@@ -165,4 +165,3 @@ Ese es el objetivo del curso: convertir criterio técnico en hábito de trabajo 
 
 ---
 
-**Anterior:** [Anexo: Batería de Preguntas para Entrevistas Técnicas ←](preguntas-entrevista.md) · **Siguiente:** [Indice de ADRs (Architecture Decision Records) →](adrs/INDICE-ADRS.md)

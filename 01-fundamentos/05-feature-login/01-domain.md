@@ -593,8 +593,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/01-doma
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Anterior:** [Feature Login: Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Feature Login: Capa Application →](02-application.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

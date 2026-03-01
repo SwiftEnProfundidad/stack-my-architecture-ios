@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-014-quality-gates-conce
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-013: Modularización/versionado SPM progresivos ←](ADR-013-versionado-spm-progresivo.md) · **Siguiente:** [ADR-NNN: [Título de la decisión] →](TEMPLATE-ADR.md)

@@ -54,8 +54,6 @@ Contexto: normalizacion automatica para `00-core-mobile/09-dependency-governance
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Anterior:** [Seguridad, privacidad y threat modeling ←](08-seguridad-privacidad-threat-modeling.md) · **Siguiente:** [Plantillas operativas (con ejemplos reales) →](10-plantillas.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

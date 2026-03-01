@@ -1,6 +1,5 @@
 # Entregables — Etapa 3: Evolución
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -272,8 +271,6 @@ Contexto: normalizacion automatica para `03-evolucion/entregables-etapa-3.md`.
 
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-**Anterior:** [Backend Firebase: integracion enterprise ←](07-backend-firebase.md) · **Siguiente:** [Calentamiento: Etapa 3 - Evolución →](../anexos/calentamiento-etapa-3-evolucion.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

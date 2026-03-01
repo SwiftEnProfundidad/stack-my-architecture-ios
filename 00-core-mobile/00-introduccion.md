@@ -50,8 +50,6 @@ Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Siguiente:** [Marco de decisiones arquitectónicas →](01-marco-de-decisiones.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
@@ -65,8 +63,8 @@ Para evitar sobrecarga visual en el mapa global, aquí tienes dos vistas de deta
 
 #### Login (detalle)
 
-![Diagrama de arquitectura Login (detalle)](assets/architecture-ios-login-detail.png)
+![Diagrama de arquitectura Login (detalle)](assets/architecture-ios-login-detail-v3.png)
 
 #### Catalog (detalle)
 
-![Diagrama de arquitectura Catalog (detalle)](assets/architecture-ios-catalog-detail.png)
+![Diagrama de arquitectura Catalog (detalle)](assets/architecture-ios-catalog-detail-v4.png)

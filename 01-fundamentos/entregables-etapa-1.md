@@ -98,8 +98,6 @@ Aunque no cumplas todos los entregables, seguro que has aprendido algo:
 
 ---
 
-**Anterior:** [Conectando la App: Tu Primera App Funcional ←](06-conectando-la-app.md) · **Siguiente:** [Etapa 2: Integración — Dos features que trabajan juntas s... →](../02-integracion/00-introduccion.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

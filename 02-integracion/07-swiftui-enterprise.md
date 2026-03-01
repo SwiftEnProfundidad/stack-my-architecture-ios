@@ -1391,8 +1391,6 @@ La siguiente lección complementa esta: si SwiftUI define como se ve la app, Swi
 
 ---
 
-**Anterior:** [Composition Root: donde se ensambla todo ←](06-composition-root.md) · **Siguiente:** [Swift Concurrency Enterprise: Patrones Imprescindibles →](08-swift-concurrency-enterprise.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -211,4 +211,3 @@ Antes de pasar a la Etapa 5, verifica:
 
 ---
 
-**Anterior:** [Entregables — Etapa 4: Arquitecto ←](../04-arquitecto/entregables-etapa-4.md) · **Siguiente:** [Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patron... →](../05-maestria/00-introduccion.md)

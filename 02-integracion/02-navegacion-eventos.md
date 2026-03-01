@@ -1,6 +1,5 @@
 # Navegación por eventos: el AppCoordinator
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -387,8 +386,6 @@ Contexto: normalizacion automatica para `02-integracion/02-navegacion-eventos.md
   - [ ] Entiendo la decision tecnica principal de la leccion.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-**Anterior:** [ADR-002: Diseño de la Feature Catalog ←](01-feature-catalog/ADR-002-catalog.md) · **Siguiente:** [Contratos entre features →](03-contratos-features.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

@@ -294,8 +294,6 @@ Sin este set mínimo, aplica hard blocker de trazabilidad:
 
 ---
 
-**Anterior:** [Entregables Etapa 5 — Maestría ←](../entregables-etapa-5.md) · **Siguiente:** [Evidencias obligatorias iOS (cierre defendible) →](02-evidencias-obligatorias-ios.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

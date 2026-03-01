@@ -724,8 +724,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/02-appl
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Login: Capa Domain ←](01-domain.md) · **Siguiente:** [Feature Login: Capa Infrastructure →](03-infrastructure.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -1,6 +1,5 @@
 # App Final Etapa 2: Login + Catalog Funcionando Juntos
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -522,4 +521,3 @@ Contexto: normalizacion automatica para `02-integracion/09-app-final-etapa-2.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Swift Concurrency Enterprise: Patrones Imprescindibles ←](08-swift-concurrency-enterprise.md) · **Siguiente:** [Entregables — Etapa 2: Integración →](entregables-etapa-2.md)

@@ -485,8 +485,6 @@ El test verifica que SwiftData no corrompe `Decimal` al persistir (un error com�
 
 ---
 
-**Anterior:** [Trade-offs y riesgos ←](05-trade-offs.md) · **Siguiente:** [Backend Firebase: integración enterprise →](07-backend-firebase.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

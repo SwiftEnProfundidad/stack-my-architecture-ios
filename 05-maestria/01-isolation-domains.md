@@ -1,6 +1,5 @@
 # Isolation domains y Sendable
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -591,8 +590,6 @@ Contexto: normalizacion automatica para `05-maestria/01-isolation-domains.md`.
 
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-**Anterior:** [Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patron... ←](00-introduccion.md) · **Siguiente:** [Actors en arquitectura →](02-actors-en-arquitectura.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

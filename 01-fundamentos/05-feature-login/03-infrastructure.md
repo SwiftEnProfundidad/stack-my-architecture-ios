@@ -551,8 +551,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/03-infr
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Login: Capa Application ←](02-application.md) · **Siguiente:** [Feature Login: Capa Interface (SwiftUI) →](04-interface-swiftui.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

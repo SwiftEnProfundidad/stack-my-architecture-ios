@@ -70,4 +70,3 @@ Contexto: normalizacion automatica para `anexos/glosario.md`.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Apendice: Dominio Banca / Ledger ←](apendice-banca-ledger.md) · **Siguiente:** [Proyecto Final: Demuestra lo que has aprendido →](proyecto-final.md)

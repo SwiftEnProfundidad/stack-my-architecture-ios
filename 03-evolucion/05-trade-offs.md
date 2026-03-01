@@ -451,8 +451,6 @@ La decisión de network-first prioriza frescura de datos sobre velocidad percibi
 
 ---
 
-**Anterior:** [Tests avanzados ←](04-tests-avanzados.md) · **Siguiente:** [SwiftData como ProductStore →](06-swiftdata-store.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -403,4 +403,3 @@ func updateUserName(_ name: String)  // Command
 
 ---
 
-**Anterior:** [Anexo: Guía SOLID ←](guia-solid.md) · **Siguiente:** [Anexo: Batería de Preguntas para Entrevistas Técnicas →](preguntas-entrevista.md)

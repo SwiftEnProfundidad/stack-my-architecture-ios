@@ -1,6 +1,5 @@
 # Tests avanzados
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -477,8 +476,6 @@ func test_loadProducts_respectsCancellation() async throws {
 La cancelación es un caso funcional, no una excepción ignorable. Si el caso de uso no la respeta, el usuario puede ver datos de una operación que ya descartó.
 
 ---
-
-**Anterior:** [Observabilidad ←](03-observabilidad.md) · **Siguiente:** [Trade-offs y riesgos →](05-trade-offs.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

@@ -1,6 +1,5 @@
 # Etapa 4: Arquitecto — Plataforma y gobernanza
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -394,8 +393,6 @@ Si no cumple estos criterios, probablemente aún debe quedarse como convención 
 Al cerrar Arquitecto, el siguiente salto es optimización fina de concurrencia, rendimiento y operaciones avanzadas. El objetivo de esta etapa no es competir con Etapa 5, sino dejar una plataforma lo bastante sólida para que esas optimizaciones sean seguras y acumulativas.
 
 ---
-
-**Anterior:** [Calentamiento: Etapa 3 - Evolución ←](../anexos/calentamiento-etapa-3-evolucion.md) · **Siguiente:** [Bounded Contexts →](01-bounded-contexts.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

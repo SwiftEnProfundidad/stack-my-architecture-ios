@@ -75,8 +75,6 @@ Bajo este marco, el valor del Mobile Architect no se mide por cantidad de códig
 
 ---
 
-**Anterior:** [Crosswalk iOS ↔ Android ←](11-crosswalk-ios-android.md) · **Siguiente:** [Introducción al curso →](../01-fundamentos/00-introduccion.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

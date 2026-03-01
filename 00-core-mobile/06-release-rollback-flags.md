@@ -42,8 +42,6 @@ Diseña kill-switch para desactivar funciones críticas con seguridad, auditabil
 
 ---
 
-**Anterior:** [Observabilidad y operación ←](05-observabilidad-operacion.md) · **Siguiente:** [APIs, contratos y versionado →](07-apis-contratos-versionado.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

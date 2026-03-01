@@ -1,6 +1,5 @@
 # Structured concurrency
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -545,8 +544,6 @@ Contexto: normalizacion automatica para `05-maestria/03-structured-concurrency.m
   - [ ] Entiendo la decision tecnica principal de la leccion.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-**Anterior:** [Actors en arquitectura ←](02-actors-en-arquitectura.md) · **Siguiente:** [Testing concurrente →](04-testing-concurrente.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

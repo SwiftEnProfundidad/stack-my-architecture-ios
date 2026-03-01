@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-010-firebase-backend-pr
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-009: Observabilidad por decoradores y logger de aplic... ←](ADR-009-observabilidad-por-decoradores.md) · **Siguiente:** [ADR-011: Bounded contexts con ownership y contratos →](ADR-011-bounded-contexts-governance.md)

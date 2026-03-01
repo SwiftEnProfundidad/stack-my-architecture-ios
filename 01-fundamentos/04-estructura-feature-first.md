@@ -218,8 +218,6 @@ Contexto: normalizacion automatica para `01-fundamentos/04-estructura-feature-fi
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Stack tecnológico ←](03-stack-tecnologico.md) · **Siguiente:** [Feature Login: Especificación BDD →](05-feature-login/00-especificacion-bdd.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -291,8 +291,6 @@ En la siguiente lección empezaremos a implementar, empezando por la capa Domain
 
 ---
 
-**Anterior:** [Estructura Feature-First: paso a paso en Xcode ←](../04-estructura-feature-first.md) · **Siguiente:** [Feature Login: Capa Domain →](01-domain.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

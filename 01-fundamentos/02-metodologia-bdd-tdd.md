@@ -231,8 +231,6 @@ Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-bdd-tdd.m
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Principios de ingeniería ←](01-principios-ingenieria.md) · **Siguiente:** [Metodología TDD: práctica Red-Green-Refactor →](02-metodologia-tdd-practica.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

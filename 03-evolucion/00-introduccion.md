@@ -1,6 +1,5 @@
 # Etapa 3: Evolución — Resiliencia y calidad de producción
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -381,9 +380,6 @@ El foco es resiliencia útil y sostenible, no complejidad ornamental.
 ## Entregables de cierre de etapa
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-3.md](../03-evolucion/entregables-etapa-3.md).
-
-
-**Anterior:** [Consolidación: Etapa 2 - Integración ←](../anexos/consolidacion-etapa-2-integracion.md) · **Siguiente:** [Caching y offline →](01-caching-offline.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

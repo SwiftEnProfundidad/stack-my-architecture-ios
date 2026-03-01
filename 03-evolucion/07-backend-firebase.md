@@ -591,8 +591,6 @@ La clave no es testear Firebase en sí, sino verificar que la arquitectura permi
 
 ---
 
-**Anterior:** [SwiftData como ProductStore ←](06-swiftdata-store.md) · **Siguiente:** [Entregables — Etapa 3: Evolución →](entregables-etapa-3.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -1,6 +1,5 @@
 # Actors en arquitectura
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -533,8 +532,6 @@ Contexto: normalizacion automatica para `05-maestria/02-actors-en-arquitectura.m
   - [ ] Entiendo la decision tecnica principal de la leccion.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-**Anterior:** [Isolation domains y Sendable ←](01-isolation-domains.md) · **Siguiente:** [Structured concurrency →](03-structured-concurrency.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

@@ -400,4 +400,3 @@ Buena suerte. Ya tienes las herramientas. Ahora, a construir.
 
 ---
 
-**Anterior:** [Glosario ←](glosario.md)

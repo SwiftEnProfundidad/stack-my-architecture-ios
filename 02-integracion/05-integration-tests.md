@@ -1,6 +1,5 @@
 # Integration Tests
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -333,8 +332,6 @@ Si aún falla, reducir el caso hasta reproducir en 10 ejecuciones consecutivas l
 Un equipo junior suele confiar demasiado en unit tests y un equipo cansado suele abusar de E2E. Un equipo senior domina el punto medio: integration tests que protegen ensamblaje real con coste controlado. Esa es la habilidad que te prepara para enterprise diario.
 
 ---
-
-**Anterior:** [Infraestructura real: URLSessionHTTPClient ←](04-infra-real-network.md) · **Siguiente:** [Composition Root: donde se ensambla todo →](06-composition-root.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

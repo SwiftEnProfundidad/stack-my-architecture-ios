@@ -115,8 +115,6 @@ Fecha de revisión:
 
 ---
 
-**Anterior:** [APIs, contratos y versionado ←](07-apis-contratos-versionado.md) · **Siguiente:** [Dependency governance y supply chain →](09-dependency-governance-supply-chain.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

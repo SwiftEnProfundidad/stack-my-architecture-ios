@@ -1,6 +1,5 @@
 # Feature Catalog: Capa Interface (SwiftUI)
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -528,8 +527,6 @@ Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/04-in
   - [ ] Entiendo la decision tecnica principal de la leccion.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-**Anterior:** [Feature Catalog: Capa Infrastructure ←](03-infrastructure.md) · **Siguiente:** [ADR-002: Diseño de la Feature Catalog →](ADR-002-catalog.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

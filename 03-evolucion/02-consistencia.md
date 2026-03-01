@@ -477,8 +477,6 @@ La razón de separar invalidación en su propio protocolo es que permite compone
 
 ---
 
-**Anterior:** [Caching y offline ←](01-caching-offline.md) · **Siguiente:** [Observabilidad →](03-observabilidad.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

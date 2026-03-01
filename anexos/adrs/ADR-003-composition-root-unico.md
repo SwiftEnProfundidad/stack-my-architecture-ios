@@ -194,4 +194,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-003-composition-root-un
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Indice de ADRs (Architecture Decision Records) ←](INDICE-ADRS.md) · **Siguiente:** [ADR-004: Navegación event-driven desacoplada →](ADR-004-navegacion-event-driven.md)
