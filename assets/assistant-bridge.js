@@ -1,4 +1,39 @@
 ; (function () {
+    var assistantPanelScriptPromise = null;
+
+    function resolveAssistantPanelSrc() {
+        var explicit = window.__SMA_ASSISTANT_PANEL_SRC;
+        if (explicit && typeof explicit === 'string') return explicit;
+        return 'assets/assistant-panel.js';
+    }
+
+    function ensureAssistantPanelLoaded() {
+        if (window.SMAAssistantPanel) return Promise.resolve(window.SMAAssistantPanel);
+        if (assistantPanelScriptPromise) return assistantPanelScriptPromise;
+
+        assistantPanelScriptPromise = new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = resolveAssistantPanelSrc();
+            script.async = true;
+            script.onload = function () {
+                if (window.SMAAssistantPanel) {
+                    resolve(window.SMAAssistantPanel);
+                    return;
+                }
+                reject(new Error('No se pudo inicializar el panel IA.'));
+            };
+            script.onerror = function () {
+                reject(new Error('No se pudo cargar assistant-panel.js.'));
+            };
+            document.head.appendChild(script);
+        }).catch(function (error) {
+            assistantPanelScriptPromise = null;
+            throw error;
+        });
+
+        return assistantPanelScriptPromise;
+    }
+
     function ensureAiButtonInControls() {
         var controls = document.getElementById('study-ux-controls');
         if (!controls) return;
@@ -10,9 +45,11 @@
         btn.textContent = '💬 Asistente IA';
         btn.title = 'Abrir panel de asistente IA';
         btn.addEventListener('click', function () {
-            if (window.SMAAssistantPanel) {
-                window.SMAAssistantPanel.toggle();
-            }
+            ensureAssistantPanelLoaded()
+                .then(function (panel) {
+                    panel.toggle();
+                })
+                .catch(function () { });
         });
 
         controls.appendChild(btn);
@@ -190,9 +227,11 @@
             lastPayload = null;
             lastRect = null;
             if (!payload) return;
-            if (window.SMAAssistantPanel) {
-                window.SMAAssistantPanel.askSelection(payload);
-            }
+            ensureAssistantPanelLoaded()
+                .then(function (panel) {
+                    panel.askSelection(payload);
+                })
+                .catch(function () { });
         });
 
         document.body.appendChild(btn);

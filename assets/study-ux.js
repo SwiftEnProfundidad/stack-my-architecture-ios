@@ -56,6 +56,7 @@
   if (!currentTopic) return;
 
   renderTopic(currentTopic.id, false);
+  markUiHydrated();
   applyZen(localStorage.getItem(keyZen) === '1');
   updateCompletionUi();
   updateReviewUi();
@@ -233,6 +234,10 @@
     return topicList[0] || null;
   }
 
+  function markUiHydrated() {
+    document.body.classList.add('sma-hydrated');
+  }
+
   function ensureTopicNavigation() {
     topics.forEach((topic, index) => {
       let nav = topic.section.querySelector('.study-topic-nav');
@@ -282,6 +287,7 @@
     topics.forEach((t) => {
       t.section.style.display = t.id === topicId ? '' : 'none';
     });
+    markUiHydrated();
 
     navLinks.forEach((link) => {
       const active = link.dataset.topicId === topicId;
