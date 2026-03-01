@@ -48,6 +48,7 @@
   mapLinksToTopics(navLinks, topics);
   const navLinksByTopicId = indexNavLinksByTopicId(navLinks);
   setupTopBarLayout();
+  syncTopbarOffset();
 
   const reviewBtn = ensureReviewTopButton();
 
@@ -97,6 +98,7 @@
     updateReviewUi();
     updateProgressUi();
     applyZen(document.body.classList.contains('study-ux-zen'));
+    syncTopbarOffset();
   }, 120));
 
   function ensureStatsShape(raw) {
@@ -125,16 +127,76 @@
     bar.id = 'global-topbar';
     bar.className = 'global-topbar';
 
+    const left = document.createElement('div');
+    left.id = 'global-topbar-left';
+    left.className = 'global-topbar-left';
+
+    const sidebarToggle = ensureSidebarToggleButton();
     const switcher = document.getElementById('course-switcher');
     const study = document.getElementById('study-ux-controls');
     const theme = document.getElementById('theme-controls');
 
-    if (switcher) bar.appendChild(switcher);
+    if (sidebarToggle) left.appendChild(sidebarToggle);
+    if (switcher) left.appendChild(switcher);
+    if (left.children.length > 0) bar.appendChild(left);
     if (study) bar.appendChild(study);
     if (theme) bar.appendChild(theme);
 
     body.insertBefore(bar, body.firstChild);
     body.classList.add('with-global-topbar');
+    setupSidebarToggleStateSync();
+  }
+
+  function ensureSidebarToggleButton() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return null;
+
+    let button = document.getElementById('sidebar-toggle-topbar');
+    if (!button) {
+      button = document.createElement('button');
+      button.id = 'sidebar-toggle-topbar';
+      button.type = 'button';
+      button.textContent = '☰ Índice';
+      button.setAttribute('aria-controls', 'sidebar');
+      button.setAttribute('aria-expanded', String(document.body.classList.contains('sidebar-open')));
+      button.addEventListener('click', function () {
+        toggleSidebarFromTopbar();
+      });
+    }
+    return button;
+  }
+
+  function toggleSidebarFromTopbar() {
+    if (typeof window.toggleSidebar === 'function') {
+      window.toggleSidebar();
+    } else {
+      document.body.classList.toggle('sidebar-open');
+    }
+    syncSidebarToggleState();
+  }
+
+  function setupSidebarToggleStateSync() {
+    syncSidebarToggleState();
+    if (typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(function () {
+      syncSidebarToggleState();
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function syncSidebarToggleState() {
+    const button = document.getElementById('sidebar-toggle-topbar');
+    if (!button) return;
+    const isOpen = document.body.classList.contains('sidebar-open');
+    button.setAttribute('aria-expanded', String(isOpen));
+    button.textContent = isOpen ? '✕ Índice' : '☰ Índice';
+  }
+
+  function syncTopbarOffset() {
+    const bar = document.getElementById('global-topbar');
+    if (!bar) return;
+    const height = Math.ceil(bar.getBoundingClientRect().height) + 8;
+    document.body.style.setProperty('--global-topbar-offset', `${height}px`);
   }
 
   function setupFontControls() {
@@ -207,6 +269,7 @@
     if (alreadyOrdered) return;
 
     desired.forEach((el) => controls.appendChild(el));
+    syncTopbarOffset();
   }
 
   function observeTopControlsOrder() {
@@ -215,6 +278,7 @@
 
     const observer = new MutationObserver(function () {
       reorderTopControls();
+      syncTopbarOffset();
     });
     observer.observe(controls, { childList: true });
   }
