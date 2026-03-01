@@ -15,12 +15,20 @@ body.with-global-topbar {
   background: var(--bg-elevated, #0f172a);
   border-bottom: 1px solid var(--border, #334155);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.18));
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
-.global-topbar > * {
+.global-topbar > *:not(#course-switcher) {
   position: static !important;
+}
+
+#course-switcher {
+  position: relative !important;
+  z-index: 13050;
+}
+
+#course-switcher-menu {
+  z-index: 13100;
 }
 
 #study-ux-controls {
