@@ -255,44 +255,46 @@
     document.body.classList.add('sma-hydrated');
   }
 
-  function ensureTopicNavigation() {
-    topics.forEach((topic, index) => {
-      let nav = topic.section.querySelector('.study-topic-nav');
-      if (!nav) {
-        nav = document.createElement('div');
-        nav.className = 'study-topic-nav';
-        topic.section.appendChild(nav);
-      }
-      nav.innerHTML = '';
+  function ensureTopicNavigation(topic) {
+    if (!topic) return;
+    const index = topics.findIndex((t) => t.id === topic.id);
+    if (index < 0) return;
 
-      const prevBtn = document.createElement('button');
-      prevBtn.type = 'button';
-      prevBtn.textContent = '⬅ Lección anterior';
-      prevBtn.disabled = index === 0;
-      prevBtn.addEventListener('click', function () {
-        if (index > 0) renderTopic(topics[index - 1].id, true);
-      });
+    let nav = topic.section.querySelector('.study-topic-nav');
+    if (!nav) {
+      nav = document.createElement('div');
+      nav.className = 'study-topic-nav';
+      topic.section.appendChild(nav);
+    }
+    nav.innerHTML = '';
 
-      const doneBtn = document.createElement('button');
-      doneBtn.type = 'button';
-      doneBtn.className = 'study-topic-nav-complete';
-      doneBtn.textContent = completed[topic.id] ? '↩ Desmarcar completado' : '✅ Marcar completado';
-      doneBtn.addEventListener('click', function () {
-        toggleCompletion(topic.id);
-      });
-
-      const nextBtn = document.createElement('button');
-      nextBtn.type = 'button';
-      nextBtn.textContent = 'Siguiente lección ➡';
-      nextBtn.disabled = index === topics.length - 1;
-      nextBtn.addEventListener('click', function () {
-        if (index < topics.length - 1) renderTopic(topics[index + 1].id, true);
-      });
-
-      nav.appendChild(prevBtn);
-      nav.appendChild(doneBtn);
-      nav.appendChild(nextBtn);
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.textContent = '⬅ Lección anterior';
+    prevBtn.disabled = index === 0;
+    prevBtn.addEventListener('click', function () {
+      if (index > 0) renderTopic(topics[index - 1].id, true);
     });
+
+    const doneBtn = document.createElement('button');
+    doneBtn.type = 'button';
+    doneBtn.className = 'study-topic-nav-complete';
+    doneBtn.textContent = completed[topic.id] ? '↩ Desmarcar completado' : '✅ Marcar completado';
+    doneBtn.addEventListener('click', function () {
+      toggleCompletion(topic.id);
+    });
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.textContent = 'Siguiente lección ➡';
+    nextBtn.disabled = index === topics.length - 1;
+    nextBtn.addEventListener('click', function () {
+      if (index < topics.length - 1) renderTopic(topics[index + 1].id, true);
+    });
+
+    nav.appendChild(prevBtn);
+    nav.appendChild(doneBtn);
+    nav.appendChild(nextBtn);
   }
 
   function renderTopic(topicId, shouldRestoreScroll) {
@@ -326,7 +328,7 @@
       history.replaceState(null, '', `#${currentTopic.id}`);
     }
 
-    ensureTopicNavigation();
+    ensureTopicNavigation(currentTopic);
     updateCompletionUi();
     updateReviewUi();
     updateProgressUi();
@@ -510,7 +512,8 @@
       completed[id] = true;
     }
     localStorage.setItem(keyCompleted, JSON.stringify(completed));
-    ensureTopicNavigation();
+    const topic = topics.find((t) => t.id === id) || currentTopic;
+    ensureTopicNavigation(topic);
     updateCompletionUi();
     updateProgressUi();
     decorateNavStates();
