@@ -30,6 +30,8 @@
 
   let timerState = { topicId: null, startedAt: null };
   let filterReviewOnly = false;
+  let indexActionsInitialized = false;
+  let indexActionsPending = false;
 
   const topics = Array.from(document.querySelectorAll('section.lesson')).map((section, index) => {
     const topicId = section.getAttribute('data-topic-id') || section.id || `topic-${index + 1}`;
@@ -66,7 +68,7 @@
   setupButtons();
   setupShortcuts();
   setupScrollPersistence();
-  setupIndexActions();
+  scheduleIndexActionsSetup();
   startTopicTimer(currentTopic.id);
 
   document.addEventListener('visibilitychange', function () {
@@ -397,6 +399,22 @@
       localStorage.setItem(keyScroll, JSON.stringify(scrollMap));
     }, 180);
     window.addEventListener('scroll', save, { passive: true });
+  }
+
+  function scheduleIndexActionsSetup() {
+    if (!indexActions || indexActionsInitialized || indexActionsPending) return;
+    indexActionsPending = true;
+    const run = function () {
+      if (indexActionsInitialized) return;
+      indexActionsPending = false;
+      setupIndexActions();
+      indexActionsInitialized = true;
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(function () { run(); }, { timeout: 700 });
+      return;
+    }
+    setTimeout(run, 180);
   }
 
   function setupIndexActions() {
