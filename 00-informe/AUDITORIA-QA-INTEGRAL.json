@@ -22,7 +22,7 @@
     {
       "control": "Mermaid semantica",
       "p1": 0,
-      "p2": 5,
+      "p2": 0,
       "status": "OK"
     },
     {
@@ -34,7 +34,7 @@
     {
       "control": "Trazabilidad scaffold",
       "p1": 0,
-      "p2": 4,
+      "p2": 0,
       "status": "OK"
     },
     {

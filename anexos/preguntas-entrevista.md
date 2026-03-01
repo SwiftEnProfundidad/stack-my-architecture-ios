@@ -266,4 +266,3 @@ Este documento organiza preguntas por nivel (Junior → Mid → Senior → Archi
 
 ---
 
-**Anterior:** [Anexo: Guía CQS y CQRS ←](guia-cqs-cqrs.md) · **Siguiente:** [Hallazgos y correcciones pedagógicas →](hallazgos-y-correcciones.md)

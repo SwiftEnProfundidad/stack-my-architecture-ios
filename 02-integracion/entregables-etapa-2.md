@@ -1,6 +1,5 @@
 # Entregables — Etapa 2: Integración
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -303,4 +302,39 @@ Contexto: normalizacion automatica para `02-integracion/entregables-etapa-2.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Anterior:** [App Final Etapa 2: Login + Catalog Funcionando Juntos ←](09-app-final-etapa-2.md) · **Siguiente:** [Consolidación: Etapa 2 - Integración →](../anexos/consolidacion-etapa-2-integracion.md)
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC ==> PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `==>` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

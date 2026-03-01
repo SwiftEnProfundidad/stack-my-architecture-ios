@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-013-versionado-spm-prog
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-012: Reglas de dependencia progresivas ←](ADR-012-reglas-dependencia-progresivas.md) · **Siguiente:** [ADR-014: Quality gates conceptuales orientados a arquitec... →](ADR-014-quality-gates-conceptuales.md)

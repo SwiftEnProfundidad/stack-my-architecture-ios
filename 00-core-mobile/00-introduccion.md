@@ -50,4 +50,21 @@ Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Siguiente:** [Marco de decisiones arquitectónicas →](01-marco-de-decisiones.md)
+<!-- auto-gapfix:layered-mermaid -->
+## Diagrama de arquitectura por capas
+
+![Diagrama de arquitectura por capas (Core Mobile)](../assets/architecture-ios-core-mobile.png)
+
+La leyenda visual superior define la semántica por tipo de trazo y punta de flecha; el color de cada flecha indica el módulo de origen.
+
+### Zoom de detalle por feature
+
+Para evitar sobrecarga visual en el mapa global, aquí tienes dos vistas de detalle separadas:
+
+#### Login (detalle)
+
+![Diagrama de arquitectura Login (detalle)](../assets/architecture-ios-login-detail-v3.png)
+
+#### Catalog (detalle)
+
+![Diagrama de arquitectura Catalog (detalle)](../assets/architecture-ios-catalog-detail-v4.png)

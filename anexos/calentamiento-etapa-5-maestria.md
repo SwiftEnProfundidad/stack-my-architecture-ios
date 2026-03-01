@@ -214,8 +214,5 @@ Los actores y Swift 6 te dan herramientas para que los errores sean imposibles e
 
 ¿Listo para el nivel más alto? Adelante:
 
-- **Siguiente:** [Introducción a la Etapa 5: Maestría](../05-maestria/00-introduccion.md)
-
 ---
 
-**Anterior:** [Checklist de entrega para entrevista (1 página) ←](../05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md) · **Siguiente:** [Quizzes de Autoevaluación →](quizzes-autoevaluacion.md)

@@ -160,4 +160,3 @@ Si falta algo, **vuelve a la Etapa 2**. La Etapa 3 asume que dominas esos concep
 
 ---
 
-**Anterior:** [Entregables — Etapa 3: Evolución ←](../03-evolucion/entregables-etapa-3.md) · **Siguiente:** [Etapa 4: Arquitecto — Plataforma y gobernanza →](../04-arquitecto/00-introduccion.md)

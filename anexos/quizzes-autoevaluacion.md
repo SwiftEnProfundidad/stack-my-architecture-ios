@@ -561,4 +561,3 @@ Ejemplo de respuesta:
 
 ---
 
-**Anterior:** [Calentamiento: Etapa 5 - Maestría ←](calentamiento-etapa-5-maestria.md) · **Siguiente:** [Guía de Recuperación - Curso iOS →](guia-recuperacion-ios.md)

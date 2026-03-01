@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-012-reglas-dependencia-
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-011: Bounded contexts con ownership y contratos ←](ADR-011-bounded-contexts-governance.md) · **Siguiente:** [ADR-013: Modularización/versionado SPM progresivos →](ADR-013-versionado-spm-progresivo.md)

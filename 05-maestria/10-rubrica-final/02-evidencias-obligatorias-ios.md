@@ -1,5 +1,11 @@
 # Evidencias obligatorias iOS (cierre defendible)
 
+## Ruta scaffold relacionada
+
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
+
 ## Propósito
 
 Este checklist define qué artefactos debes mostrar para demostrar production-readiness y empleabilidad arquitectónica en iOS. Está alineado con las plantillas de [`00-core-mobile/10-plantillas.md`](../../00-core-mobile/10-plantillas.md).
@@ -120,4 +126,64 @@ Contexto: normalizacion automatica para `05-maestria/10-rubrica-final/02-evidenc
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Anterior:** [Propósito y Alcance ←](01-rubrica-empleabilidad-ios.md) · **Siguiente:** [Checklist de entrega para entrevista (1 página) →](03-checklist-entrega-para-entrevista.md)
+<!-- auto-gapfix:layered-mermaid -->
+## Diagrama de arquitectura por capas
+
+```mermaid
+flowchart LR
+  subgraph CORE["Core / Domain"]
+    direction TB
+    ENT[Entity]
+    POL[Policy]
+  end
+
+  subgraph APP["Application"]
+    direction TB
+    BOOT[Composition Root]
+    UC[UseCase]
+    PORT["FeaturePort (contrato)"]
+  end
+
+  subgraph UI["Interface"]
+    direction TB
+    VM[ViewModel]
+    VIEW[View]
+  end
+
+  subgraph INFRA["Infrastructure"]
+    direction TB
+    API[API Client]
+    STORE[Persistence Adapter]
+  end
+
+  VM --> UC
+  UC --> ENT
+  UC ==> PORT
+  BOOT -.-> PORT
+  BOOT -.-> API
+  BOOT -.-> STORE
+  PORT --o API
+  PORT --o STORE
+  UC --o VM
+
+  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
+  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
+  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
+  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
+
+  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
+  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
+  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
+  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
+  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
+  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
+  linkStyle 6 stroke:#86efac,stroke-width:2.6px
+  linkStyle 7 stroke:#86efac,stroke-width:2.6px
+  linkStyle 8 stroke:#86efac,stroke-width:2.6px
+```
+
+La lectura del diagrama sigue esta semantica:
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring o configuracion.
+3. `==>` contrato o abstraccion.
+4. `--o` salida o propagacion de resultado.

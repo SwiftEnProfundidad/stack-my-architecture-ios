@@ -43,7 +43,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```text
+```
 
 **Paso a paso en Xcode:**
 1. Click derecho en la carpeta `App/` en el navegador
@@ -119,7 +119,7 @@ struct CompositionRoot {
         return LoginView(viewModel: makeLoginViewModel())
     }
 }
-```swift
+```
 
 **¿Por qué struct y no class?**
 
@@ -136,14 +136,14 @@ Abre cada archivo que creaste y verifica que los imports sean correctos:
 import SwiftUI
 // No necesitas importar otros módulos porque
 // CompositionRoot está en el mismo target
-```text
+```
 
 **En `CompositionRoot.swift`:**
 ```swift
 import SwiftUI
 // AuthGateway, LoginUseCase, etc. están en el mismo target,
 // así que no necesitas imports adicionales
-```text
+```
 
 **Si tienes errores de "Cannot find in scope":**
 
@@ -153,10 +153,11 @@ import SwiftUI
    - Verifica que "Target Membership" tenga check en tu app target
 
 2. Verifica que los protocolos y structs tengan visibilidad `internal` o `public`:
-   ```swift
-   // En AuthGateway.swift
-   protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
-   ```text
+
+```swift
+// En AuthGateway.swift
+protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
+```
 
 ---
 
@@ -326,4 +327,64 @@ Contexto: normalizacion automatica para `01-fundamentos/06-conectando-la-app.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-001: Diseño de la Feature Login ←](05-feature-login/ADR-001-login.md) · **Siguiente:** [Entregables — Etapa 1: Junior →](entregables-etapa-1.md)
+<!-- auto-gapfix:layered-mermaid -->
+## Diagrama de arquitectura por capas
+
+```mermaid
+flowchart LR
+  subgraph CORE["Core / Domain"]
+    direction TB
+    ENT[Entity]
+    POL[Policy]
+  end
+
+  subgraph APP["Application"]
+    direction TB
+    BOOT[Composition Root]
+    UC[UseCase]
+    PORT["FeaturePort (contrato)"]
+  end
+
+  subgraph UI["Interface"]
+    direction TB
+    VM[ViewModel]
+    VIEW[View]
+  end
+
+  subgraph INFRA["Infrastructure"]
+    direction TB
+    API[API Client]
+    STORE[Persistence Adapter]
+  end
+
+  VM --> UC
+  UC --> ENT
+  UC ==> PORT
+  BOOT -.-> PORT
+  BOOT -.-> API
+  BOOT -.-> STORE
+  PORT --o API
+  PORT --o STORE
+  UC --o VM
+
+  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
+  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
+  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
+  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
+
+  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
+  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
+  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
+  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
+  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
+  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
+  linkStyle 6 stroke:#86efac,stroke-width:2.6px
+  linkStyle 7 stroke:#86efac,stroke-width:2.6px
+  linkStyle 8 stroke:#86efac,stroke-width:2.6px
+```
+
+La lectura del diagrama sigue esta semantica:
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring o configuracion.
+3. `==>` contrato o abstraccion.
+4. `--o` salida o propagacion de resultado.

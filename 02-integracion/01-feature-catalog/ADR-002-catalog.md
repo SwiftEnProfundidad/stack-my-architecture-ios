@@ -1,6 +1,5 @@
 # ADR-002: Diseño de la Feature Catalog
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -285,4 +284,39 @@ Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/ADR-0
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Catalog: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [Navegación por eventos: el AppCoordinator →](../02-navegacion-eventos.md)
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC ==> PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `==>` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

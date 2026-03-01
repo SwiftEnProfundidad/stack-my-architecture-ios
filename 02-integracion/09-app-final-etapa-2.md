@@ -1,6 +1,5 @@
 # App Final Etapa 2: Login + Catalog Funcionando Juntos
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -39,6 +38,64 @@ graph TD
 ```text
 
 El `AppCoordinator` es el centro de todo. Recibe eventos de las features y decide a qué pantalla navegar.
+
+## Lectura de flechas aplicada a la app ejemplo
+
+Aquí no solo importa “que haya cajas conectadas”, importa **qué significa cada conexión** en términos arquitectónicos.
+
+```mermaid
+flowchart LR
+    subgraph APP["App module (composition)"]
+        APPROOT["StackMyArchitectureApp"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph LOGIN["Login feature module"]
+        LVM["LoginViewModel"]
+        LUC["LoginUseCase"]
+        LGW["AuthGateway (protocol)"]
+        LREMOTE["RemoteAuthGateway"]
+    end
+
+    subgraph CATALOG["Catalog feature module"]
+        CVM["CatalogViewModel"]
+        CUC["LoadProductsUseCase"]
+        CREPO["ProductRepository (protocol)"]
+        CREMOTE["RemoteProductRepository"]
+        CSTORE["LocalProductStore"]
+    end
+
+    APPROOT -.-> CR
+    CR -.-> COORD
+    CR -.-> LREMOTE
+    CR -.-> CREMOTE
+
+    LVM --> LUC
+    CVM --> CUC
+    LVM --> COORD
+    CVM --> COORD
+
+    LUC ==> LGW
+    CUC ==> CREPO
+
+    LREMOTE --o LGW
+    CREMOTE --o CREPO
+    CREMOTE --> CSTORE
+```text
+
+Lectura semántica (la clave didáctica):
+
+1. `-->` dependencia directa en runtime:
+   `LoginViewModel --> LoginUseCase`, `CatalogViewModel --> LoadProductsUseCase`, `RemoteProductRepository --> LocalProductStore`.
+2. `-.->` wiring/configuración:
+   `CompositionRoot` no “ejecuta negocio”; **construye e inyecta** `AppCoordinator` y adapters.
+3. `==>` contrato/abstracción:
+   los use cases apuntan a puertos (`AuthGateway`, `ProductRepository`) y no a implementaciones concretas.
+4. `--o` salida/propagación:
+   los adapters concretos satisfacen y propagan el contrato hacia el core (`RemoteAuthGateway --o AuthGateway`, `RemoteProductRepository --o ProductRepository`).
+
+Si en un diagrama de arquitectura de la app ves estas flechas mezcladas sin criterio, casi siempre hay acoplamiento oculto.
 
 ---
 
@@ -464,4 +521,3 @@ Contexto: normalizacion automatica para `02-integracion/09-app-final-etapa-2.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Swift Concurrency Enterprise: Patrones Imprescindibles ←](08-swift-concurrency-enterprise.md) · **Siguiente:** [Entregables — Etapa 2: Integración →](entregables-etapa-2.md)

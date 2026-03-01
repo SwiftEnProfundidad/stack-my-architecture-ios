@@ -333,4 +333,3 @@ Si encontraste todo en < 2 minutos, estás leyendo documentación efectivamente.
 
 ---
 
-**Anterior:** [Xcode Cheat Sheet: Atajos Esenciales para Productividad ←](xcode-cheat-sheet.md) · **Siguiente:** [Tips del Simulador: Testing como Profesional →](simulator-tips.md)

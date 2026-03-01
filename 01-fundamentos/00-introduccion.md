@@ -22,6 +22,8 @@ La diferencia entre esos dos escenarios no es talento ni años de experiencia. E
 
 Antes de empezar, mira dónde estás y a dónde vas. Este diagrama muestra el camino completo del curso. Cada etapa construye sobre la anterior, sin saltos:
 
+La lectura correcta es izquierda a derecha por etapas: **Etapa 1: Junior**, **Etapa 2: Mid**, **Etapa 3: Senior**, **Etapa 4: Arquitecto** y **Etapa 5: Maestria**. Dentro de cada subgraph, cada bloque representa una capacidad concreta que habilita la siguiente.
+
 ```mermaid
 graph TD
     subgraph E1["Etapa 1: Junior"]
@@ -108,6 +110,10 @@ Si te reconoces en algo de esto, este curso es para ti. No vamos a asumir que sa
 En la Etapa 1 vas a construir una **feature de Login** completa. "Completa" no significa "con animaciones bonitas y social login". Significa que va a tener todas las piezas que necesita una feature profesional.
 
 ### Diagrama: anatomía de tu primera feature
+
+En esta anatomía, cada subgraph tiene un rol explícito: **Especificacion BDD** define comportamiento, **Domain** define reglas puras, **Application** orquesta, **Infrastructure** conecta con el mundo real, **Interface** presenta estado en SwiftUI y **ADR** captura decisiones de arquitectura.
+
+Fíjate en nombres concretos del diagrama porque aparecerán en toda la etapa: `Email`, `Password`, `AuthGateway`, `LoginUseCase`, `RemoteAuthGateway`, `StubAuthGateway`, `LoginViewModel` y `LoginView`.
 
 ```mermaid
 graph TD
@@ -250,6 +256,8 @@ Regla práctica: antes de dibujar, decide si la flecha representa **uso directo*
 
 ### Las cajas grandes (subgraphs): agrupaciones
 
+Este mini-diagrama no representa una feature real; es un patrón de lectura para entender qué significa un `subgraph` y cómo interpretar que `Elemento 1` y `Elemento 2` pertenecen al mismo `Grupo1`.
+
 ```mermaid
 graph TD
     subgraph Grupo1["Nombre del grupo"]
@@ -332,5 +340,39 @@ El curso está dividido en cinco etapas que progresan en complejidad sin saltos.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-1.md](../01-fundamentos/entregables-etapa-1.md).
 
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
 
-**Anterior:** [1) Purpose of This Document ←](../00-core-mobile/12-mobile-architect-parity-ios-android.md) · **Siguiente:** [Setup: Preparación del entorno →](00-setup.md)
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC ==> PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `==>` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

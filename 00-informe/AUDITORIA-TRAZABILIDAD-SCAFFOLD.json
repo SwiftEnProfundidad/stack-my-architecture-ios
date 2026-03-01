@@ -18,43 +18,10 @@
     },
     "Etapa 5 - Maestria": {
       "total": 17,
-      "with_refs": 13,
-      "without_refs": 4
+      "with_refs": 17,
+      "without_refs": 0
     }
   },
-  "findings_total": 4,
-  "findings": [
-    {
-      "severity": "P2",
-      "stage": "Etapa 5 - Maestria",
-      "path": "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
-      "code_blocks": 0,
-      "mermaid_blocks": 0,
-      "reason": "Sin referencia explicita al scaffold."
-    },
-    {
-      "severity": "P2",
-      "stage": "Etapa 5 - Maestria",
-      "path": "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
-      "code_blocks": 0,
-      "mermaid_blocks": 0,
-      "reason": "Sin referencia explicita al scaffold."
-    },
-    {
-      "severity": "P2",
-      "stage": "Etapa 5 - Maestria",
-      "path": "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
-      "code_blocks": 0,
-      "mermaid_blocks": 0,
-      "reason": "Sin referencia explicita al scaffold."
-    },
-    {
-      "severity": "P2",
-      "stage": "Etapa 5 - Maestria",
-      "path": "05-maestria/11-entrevista-arquitecto.md",
-      "code_blocks": 0,
-      "mermaid_blocks": 0,
-      "reason": "Sin referencia explicita al scaffold."
-    }
-  ]
+  "findings_total": 0,
+  "findings": []
 }

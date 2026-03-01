@@ -20,15 +20,15 @@ Hallazgos: P1=0, P2=9
 
 ## Hallazgos P2 (pulido)
 
-- Salto de carga en transicion esperada entre `01-fundamentos/06-conectando-la-app.md` (1481 palabras) y `01-fundamentos/entregables-etapa-1.md` (478 palabras).
-- Salto de carga en transicion esperada entre `02-integracion/06-composition-root.md` (1858 palabras) y `02-integracion/07-swiftui-enterprise.md` (6161 palabras).
-- Salto de carga en transicion esperada entre `02-integracion/08-swift-concurrency-enterprise.md` (3922 palabras) y `02-integracion/09-app-final-etapa-2.md` (1550 palabras).
-- Salto de carga en transicion esperada entre `03-evolucion/07-backend-firebase.md` (2530 palabras) y `03-evolucion/entregables-etapa-3.md` (1113 palabras).
+- Salto de carga en transicion esperada entre `01-fundamentos/06-conectando-la-app.md` (1688 palabras) y `01-fundamentos/entregables-etapa-1.md` (681 palabras).
+- Salto de carga en transicion esperada entre `02-integracion/06-composition-root.md` (1930 palabras) y `02-integracion/07-swiftui-enterprise.md` (6227 palabras).
+- Salto de carga en transicion esperada entre `02-integracion/08-swift-concurrency-enterprise.md` (3986 palabras) y `02-integracion/09-app-final-etapa-2.md` (1723 palabras).
+- Salto de carga en transicion esperada entre `03-evolucion/07-backend-firebase.md` (2600 palabras) y `03-evolucion/entregables-etapa-3.md` (1180 palabras).
 - Dos lecciones consecutivas sin practica explicita: `05-maestria/entregables-etapa-5.md` -> `05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md`.
-- Salto de carga en transicion esperada entre `anexos/calentamiento-etapa-5-maestria.md` (941 palabras) y `anexos/quizzes-autoevaluacion.md` (2761 palabras).
-- Salto de carga en transicion esperada entre `anexos/preguntas-entrevista.md` (2874 palabras) y `anexos/hallazgos-y-correcciones.md` (743 palabras).
-- Salto de carga en transicion esperada entre `anexos/adrs/TEMPLATE-ADR.md` (200 palabras) y `anexos/apendice-banca-ledger.md` (1263 palabras).
-- Salto de carga en transicion esperada entre `anexos/glosario.md` (747 palabras) y `anexos/proyecto-final.md` (1877 palabras).
+- Salto de carga en transicion esperada entre `anexos/calentamiento-etapa-5-maestria.md` (899 palabras) y `anexos/quizzes-autoevaluacion.md` (2738 palabras).
+- Salto de carga en transicion esperada entre `anexos/preguntas-entrevista.md` (2853 palabras) y `anexos/hallazgos-y-correcciones.md` (719 palabras).
+- Salto de carga en transicion esperada entre `anexos/adrs/TEMPLATE-ADR.md` (176 palabras) y `anexos/apendice-banca-ledger.md` (1246 palabras).
+- Salto de carga en transicion esperada entre `anexos/glosario.md` (727 palabras) y `anexos/proyecto-final.md` (1873 palabras).
 
 ## Propuesta inmediata
 

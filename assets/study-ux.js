@@ -10,6 +10,8 @@
   const keyZen = `sma:${courseId}:zen`;
   const keyStats = `sma:${courseId}:stats`;
   const keyFontSize = `sma:${courseId}:font:size`;
+  const keyCloudProfile = 'sma:cloud:profile:v1';
+  const keyCloudUpdatedAt = `sma:${courseId}:cloud:updated-at`;
 
   const completionBtn = document.getElementById('study-completion-toggle');
   const zenBtn = document.getElementById('study-zen-toggle');
@@ -30,6 +32,10 @@
 
   let timerState = { topicId: null, startedAt: null };
   let filterReviewOnly = false;
+  let indexActionsInitialized = false;
+  let indexActionsPending = false;
+  let navDecorPending = false;
+  const cloudSync = createCloudSync();
 
   const topics = Array.from(document.querySelectorAll('section.lesson')).map((section, index) => {
     const topicId = section.getAttribute('data-topic-id') || section.id || `topic-${index + 1}`;
@@ -43,7 +49,9 @@
 
   const navLinks = Array.from(document.querySelectorAll('a.doc-nav-link'));
   mapLinksToTopics(navLinks, topics);
+  const navLinksByTopicId = indexNavLinksByTopicId(navLinks);
   setupTopBarLayout();
+  syncTopbarOffset();
 
   const reviewBtn = ensureReviewTopButton();
 
@@ -55,17 +63,20 @@
   let currentTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
   if (!currentTopic) return;
 
+  applyCompactMobileClass();
   renderTopic(currentTopic.id, false);
+  markUiHydrated();
   applyZen(localStorage.getItem(keyZen) === '1');
   updateCompletionUi();
   updateReviewUi();
   updateProgressUi();
-  decorateNavStates();
+  scheduleDecorateNavStates();
   setupButtons();
   setupShortcuts();
   setupScrollPersistence();
-  setupIndexActions();
+  scheduleIndexActionsSetup();
   startTopicTimer(currentTopic.id);
+  cloudSync.bootstrap();
 
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
@@ -85,6 +96,15 @@
     renderTopic(next.id, true);
   });
 
+  window.addEventListener('resize', debounce(function () {
+    applyCompactMobileClass();
+    updateCompletionUi();
+    updateReviewUi();
+    updateProgressUi();
+    applyZen(document.body.classList.contains('study-ux-zen'));
+    syncTopbarOffset();
+  }, 120));
+
   function ensureStatsShape(raw) {
     return {
       totalTimeMs: Number(raw.totalTimeMs || 0),
@@ -93,8 +113,17 @@
     };
   }
 
+  function isCompactMobileViewport() {
+    return window.innerWidth <= 480;
+  }
+
+  function applyCompactMobileClass() {
+    document.body.classList.toggle('study-ux-compact-mobile', isCompactMobileViewport());
+  }
+
   function persistStats() {
     localStorage.setItem(keyStats, JSON.stringify(stats));
+    cloudSync.schedulePush();
   }
 
   function setupTopBarLayout() {
@@ -103,16 +132,76 @@
     bar.id = 'global-topbar';
     bar.className = 'global-topbar';
 
+    const left = document.createElement('div');
+    left.id = 'global-topbar-left';
+    left.className = 'global-topbar-left';
+
+    const sidebarToggle = ensureSidebarToggleButton();
     const switcher = document.getElementById('course-switcher');
     const study = document.getElementById('study-ux-controls');
     const theme = document.getElementById('theme-controls');
 
-    if (switcher) bar.appendChild(switcher);
+    if (sidebarToggle) left.appendChild(sidebarToggle);
+    if (switcher) left.appendChild(switcher);
+    if (left.children.length > 0) bar.appendChild(left);
     if (study) bar.appendChild(study);
     if (theme) bar.appendChild(theme);
 
     body.insertBefore(bar, body.firstChild);
     body.classList.add('with-global-topbar');
+    setupSidebarToggleStateSync();
+  }
+
+  function ensureSidebarToggleButton() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return null;
+
+    let button = document.getElementById('sidebar-toggle-topbar');
+    if (!button) {
+      button = document.createElement('button');
+      button.id = 'sidebar-toggle-topbar';
+      button.type = 'button';
+      button.textContent = '☰ Índice';
+      button.setAttribute('aria-controls', 'sidebar');
+      button.setAttribute('aria-expanded', String(document.body.classList.contains('sidebar-open')));
+      button.addEventListener('click', function () {
+        toggleSidebarFromTopbar();
+      });
+    }
+    return button;
+  }
+
+  function toggleSidebarFromTopbar() {
+    if (typeof window.toggleSidebar === 'function') {
+      window.toggleSidebar();
+    } else {
+      document.body.classList.toggle('sidebar-open');
+    }
+    syncSidebarToggleState();
+  }
+
+  function setupSidebarToggleStateSync() {
+    syncSidebarToggleState();
+    if (typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(function () {
+      syncSidebarToggleState();
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function syncSidebarToggleState() {
+    const button = document.getElementById('sidebar-toggle-topbar');
+    if (!button) return;
+    const isOpen = document.body.classList.contains('sidebar-open');
+    button.setAttribute('aria-expanded', String(isOpen));
+    button.textContent = isOpen ? '✕ Índice' : '☰ Índice';
+  }
+
+  function syncTopbarOffset() {
+    const bar = document.getElementById('global-topbar');
+    if (!bar) return;
+    const height = Math.ceil(bar.getBoundingClientRect().height) + 8;
+    document.body.style.setProperty('--global-topbar-offset', `${height}px`);
   }
 
   function setupFontControls() {
@@ -185,6 +274,7 @@
     if (alreadyOrdered) return;
 
     desired.forEach((el) => controls.appendChild(el));
+    syncTopbarOffset();
   }
 
   function observeTopControlsOrder() {
@@ -193,6 +283,7 @@
 
     const observer = new MutationObserver(function () {
       reorderTopControls();
+      syncTopbarOffset();
     });
     observer.observe(controls, { childList: true });
   }
@@ -220,6 +311,18 @@
     });
   }
 
+  function indexNavLinksByTopicId(links) {
+    const byTopicId = new Map();
+    links.forEach((link) => {
+      const topicId = link.dataset.topicId;
+      if (!topicId) return;
+      const list = byTopicId.get(topicId) || [];
+      list.push(link);
+      byTopicId.set(topicId, list);
+    });
+    return byTopicId;
+  }
+
   function resolveCurrentTopic(topicList, hash, stored) {
     const fromHash = (hash || '').replace('#', '');
     if (fromHash) {
@@ -233,44 +336,50 @@
     return topicList[0] || null;
   }
 
-  function ensureTopicNavigation() {
-    topics.forEach((topic, index) => {
-      let nav = topic.section.querySelector('.study-topic-nav');
-      if (!nav) {
-        nav = document.createElement('div');
-        nav.className = 'study-topic-nav';
-        topic.section.appendChild(nav);
-      }
-      nav.innerHTML = '';
+  function markUiHydrated() {
+    document.body.classList.add('sma-hydrated');
+  }
 
-      const prevBtn = document.createElement('button');
-      prevBtn.type = 'button';
-      prevBtn.textContent = '⬅ Lección anterior';
-      prevBtn.disabled = index === 0;
-      prevBtn.addEventListener('click', function () {
-        if (index > 0) renderTopic(topics[index - 1].id, true);
-      });
+  function ensureTopicNavigation(topic) {
+    if (!topic) return;
+    const index = topics.findIndex((t) => t.id === topic.id);
+    if (index < 0) return;
 
-      const doneBtn = document.createElement('button');
-      doneBtn.type = 'button';
-      doneBtn.className = 'study-topic-nav-complete';
-      doneBtn.textContent = completed[topic.id] ? '↩ Desmarcar completado' : '✅ Marcar completado';
-      doneBtn.addEventListener('click', function () {
-        toggleCompletion(topic.id);
-      });
+    let nav = topic.section.querySelector('.study-topic-nav');
+    if (!nav) {
+      nav = document.createElement('div');
+      nav.className = 'study-topic-nav';
+      topic.section.appendChild(nav);
+    }
+    nav.innerHTML = '';
 
-      const nextBtn = document.createElement('button');
-      nextBtn.type = 'button';
-      nextBtn.textContent = 'Siguiente lección ➡';
-      nextBtn.disabled = index === topics.length - 1;
-      nextBtn.addEventListener('click', function () {
-        if (index < topics.length - 1) renderTopic(topics[index + 1].id, true);
-      });
-
-      nav.appendChild(prevBtn);
-      nav.appendChild(doneBtn);
-      nav.appendChild(nextBtn);
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.textContent = '⬅ Lección anterior';
+    prevBtn.disabled = index === 0;
+    prevBtn.addEventListener('click', function () {
+      if (index > 0) renderTopic(topics[index - 1].id, true);
     });
+
+    const doneBtn = document.createElement('button');
+    doneBtn.type = 'button';
+    doneBtn.className = 'study-topic-nav-complete';
+    doneBtn.textContent = completed[topic.id] ? '↩ Desmarcar completado' : '✅ Marcar completado';
+    doneBtn.addEventListener('click', function () {
+      toggleCompletion(topic.id);
+    });
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.textContent = 'Siguiente lección ➡';
+    nextBtn.disabled = index === topics.length - 1;
+    nextBtn.addEventListener('click', function () {
+      if (index < topics.length - 1) renderTopic(topics[index + 1].id, true);
+    });
+
+    nav.appendChild(prevBtn);
+    nav.appendChild(doneBtn);
+    nav.appendChild(nextBtn);
   }
 
   function renderTopic(topicId, shouldRestoreScroll) {
@@ -282,6 +391,7 @@
     topics.forEach((t) => {
       t.section.style.display = t.id === topicId ? '' : 'none';
     });
+    markUiHydrated();
 
     navLinks.forEach((link) => {
       const active = link.dataset.topicId === topicId;
@@ -298,12 +408,13 @@
 
     currentTopic = target;
     localStorage.setItem(keyLastTopic, currentTopic.id);
+    cloudSync.schedulePush();
 
     if (location.hash.replace('#', '') !== currentTopic.id) {
       history.replaceState(null, '', `#${currentTopic.id}`);
     }
 
-    ensureTopicNavigation();
+    ensureTopicNavigation(currentTopic);
     updateCompletionUi();
     updateReviewUi();
     updateProgressUi();
@@ -372,6 +483,22 @@
       localStorage.setItem(keyScroll, JSON.stringify(scrollMap));
     }, 180);
     window.addEventListener('scroll', save, { passive: true });
+  }
+
+  function scheduleIndexActionsSetup() {
+    if (!indexActions || indexActionsInitialized || indexActionsPending) return;
+    indexActionsPending = true;
+    const run = function () {
+      if (indexActionsInitialized) return;
+      indexActionsPending = false;
+      setupIndexActions();
+      indexActionsInitialized = true;
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(function () { run(); }, { timeout: 700 });
+      return;
+    }
+    setTimeout(run, 180);
   }
 
   function setupIndexActions() {
@@ -487,10 +614,12 @@
       completed[id] = true;
     }
     localStorage.setItem(keyCompleted, JSON.stringify(completed));
-    ensureTopicNavigation();
+    cloudSync.schedulePush();
+    const topic = topics.find((t) => t.id === id) || currentTopic;
+    ensureTopicNavigation(topic);
     updateCompletionUi();
     updateProgressUi();
-    decorateNavStates();
+    decorateNavStateByTopicId(id);
     renderStats();
   }
 
@@ -503,20 +632,31 @@
       review[id] = true;
     }
     localStorage.setItem(keyReview, JSON.stringify(review));
+    cloudSync.schedulePush();
     updateReviewUi();
-    decorateNavStates();
+    decorateNavStateByTopicId(id);
     applyReviewFilter();
     renderStats();
   }
 
   function updateCompletionUi() {
     if (!completionBtn || !currentTopic) return;
-    completionBtn.textContent = completed[currentTopic.id] ? '↩ Desmarcar' : '✅ Marcar completado';
+    const isDone = !!completed[currentTopic.id];
+    const fullLabel = isDone ? '↩ Desmarcar' : '✅ Marcar completado';
+    const compactLabel = isDone ? '↩ Hecho' : '✅ Hecho';
+    completionBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+    completionBtn.setAttribute('aria-label', fullLabel);
+    completionBtn.title = fullLabel;
   }
 
   function updateReviewUi() {
     if (!reviewBtn || !currentTopic) return;
-    reviewBtn.textContent = review[currentTopic.id] ? '❌ Quitar repaso' : '🔁 Marcar para repaso';
+    const isReview = !!review[currentTopic.id];
+    const fullLabel = isReview ? '❌ Quitar repaso' : '🔁 Marcar para repaso';
+    const compactLabel = isReview ? '❌ Repaso' : '🔁 Repaso';
+    reviewBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+    reviewBtn.setAttribute('aria-label', fullLabel);
+    reviewBtn.title = fullLabel;
   }
 
   function updateProgressUi() {
@@ -524,15 +664,33 @@
     const done = topics.filter((t) => !!completed[t.id]).length;
     const percent = total === 0 ? 0 : Math.round((done / total) * 100);
     if (progressEl) {
-      progressEl.textContent = `Progreso: ${done}/${total} (${percent}%)`;
+      const fullLabel = `Progreso: ${done}/${total} (${percent}%)`;
+      progressEl.textContent = isCompactMobileViewport() ? `${done}/${total}` : fullLabel;
+      progressEl.setAttribute('aria-label', fullLabel);
+      progressEl.title = fullLabel;
     }
   }
 
-  function decorateNavStates() {
-    navLinks.forEach((link) => {
-      const topicId = link.dataset.topicId;
-      if (!topicId) return;
+  function scheduleDecorateNavStates() {
+    if (navDecorPending) return;
+    navDecorPending = true;
+    const run = function () {
+      navDecorPending = false;
+      navLinksByTopicId.forEach((_links, topicId) => {
+        decorateNavStateByTopicId(topicId);
+      });
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(function () { run(); }, { timeout: 700 });
+      return;
+    }
+    setTimeout(run, 180);
+  }
 
+  function decorateNavStateByTopicId(topicId) {
+    if (!topicId) return;
+    const links = navLinksByTopicId.get(topicId) || [];
+    links.forEach((link) => {
       let completedBadge = link.querySelector('.study-ux-completed-badge');
       if (completed[topicId]) {
         if (!completedBadge) {
@@ -708,8 +866,10 @@
         localStorage.setItem(key, data[key]);
       });
 
-      alert('Progreso importado correctamente');
-      window.location.reload();
+      cloudSync.pushNow({ force: true }).finally(function () {
+        alert('Progreso importado correctamente');
+        window.location.reload();
+      });
     };
 
     reader.onerror = function () {
@@ -750,7 +910,7 @@
     return { ok: true };
   }
 
-  function resetProgress() {
+  async function resetProgress() {
     if (!window.confirm('Esto borrará tu progreso de este curso. ¿Deseas continuar?')) return;
     const prefix = `sma:${courseId}:`;
     const keys = [];
@@ -759,13 +919,18 @@
       if (key && key.startsWith(prefix)) keys.push(key);
     }
     keys.forEach((k) => localStorage.removeItem(k));
+    await cloudSync.pushNow({ force: true });
     window.location.reload();
   }
 
   function applyZen(isOn) {
     document.body.classList.toggle('study-ux-zen', isOn);
     if (zenBtn) {
-      zenBtn.textContent = isOn ? '🧘 Salir enfoque' : '🧘 Enfoque';
+      const fullLabel = isOn ? '🧘 Salir enfoque' : '🧘 Enfoque';
+      const compactLabel = isOn ? '🧘 Salir' : '🧘 Zen';
+      zenBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+      zenBtn.setAttribute('aria-label', fullLabel);
+      zenBtn.title = fullLabel;
     }
   }
 
@@ -789,6 +954,275 @@
     p = p.replace(/^\/+/, '');
     p = p.split('?')[0];
     return p;
+  }
+
+  function createCloudSync() {
+    const state = {
+      bootstrapped: false,
+      enabled: false,
+      profileKey: '',
+      pendingTimer: null,
+      pushing: false,
+      lastSnapshot: ''
+    };
+
+    async function bootstrap() {
+      if (state.bootstrapped) return;
+      state.bootstrapped = true;
+      state.profileKey = await resolveProfileKey();
+      if (!state.profileKey) return;
+
+      const config = await fetchConfig();
+      state.enabled = !!(config && config.enabled);
+      if (!state.enabled) return;
+
+      await pull();
+      schedulePush(1400);
+    }
+
+    function schedulePush(wait = 900) {
+      if (!state.enabled || !state.profileKey) return;
+      if (state.pendingTimer) clearTimeout(state.pendingTimer);
+      state.pendingTimer = setTimeout(function () {
+        void pushNow();
+      }, wait);
+    }
+
+    async function pushNow(options = {}) {
+      if (!state.enabled || !state.profileKey || state.pushing) return false;
+      const payload = collectCloudPayload();
+      const snapshot = stableSerialize(payload);
+      if (!options.force && snapshot === state.lastSnapshot) return false;
+
+      state.pushing = true;
+      try {
+        const response = await fetch(stateUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId,
+            profileKey: state.profileKey,
+            clientUpdatedAt: new Date().toISOString(),
+            data: payload
+          })
+        });
+
+        if (!response.ok) return false;
+        const body = await response.json().catch(function () { return null; });
+        const updatedAt = body && body.state && body.state.updatedAt ? String(body.state.updatedAt) : '';
+        if (updatedAt) localStorage.setItem(keyCloudUpdatedAt, updatedAt);
+        state.lastSnapshot = snapshot;
+        return true;
+      } catch (_error) {
+        return false;
+      } finally {
+        state.pushing = false;
+      }
+    }
+
+    async function pull() {
+      const query = new URLSearchParams({
+        courseId: courseId,
+        profileKey: state.profileKey
+      });
+      try {
+        const response = await fetch(`${stateUrl()}?${query.toString()}`, { method: 'GET' });
+        if (!response.ok) return false;
+        const body = await response.json().catch(function () { return null; });
+        if (!body || !body.ok || !body.state || !body.state.data || typeof body.state.data !== 'object') {
+          return false;
+        }
+
+        const remoteData = body.state.data;
+        const remoteUpdatedAt = toTimestamp(body.state.updatedAt);
+        const localUpdatedAt = toTimestamp(localStorage.getItem(keyCloudUpdatedAt));
+        const shouldApply = remoteUpdatedAt > localUpdatedAt || isLocalPayloadEmpty();
+        if (!shouldApply) {
+          state.lastSnapshot = stableSerialize(collectCloudPayload());
+          return false;
+        }
+
+        applyCloudPayload(remoteData);
+        if (body.state.updatedAt) localStorage.setItem(keyCloudUpdatedAt, String(body.state.updatedAt));
+        state.lastSnapshot = stableSerialize(collectCloudPayload());
+        return true;
+      } catch (_error) {
+        return false;
+      }
+    }
+
+    function collectCloudPayload() {
+      return {
+        completed: readJson(keyCompleted, {}),
+        review: readJson(keyReview, {}),
+        lastTopic: localStorage.getItem(keyLastTopic) || '',
+        stats: readJson(keyStats, {}),
+        zen: localStorage.getItem(keyZen) === '1',
+        fontSize: Number(localStorage.getItem(keyFontSize) || baseFontSize)
+      };
+    }
+
+    function isLocalPayloadEmpty() {
+      const payload = collectCloudPayload();
+      const doneKeys = Object.keys(payload.completed || {});
+      const reviewKeys = Object.keys(payload.review || {});
+      const lastTopic = String(payload.lastTopic || '').trim();
+      return doneKeys.length === 0 && reviewKeys.length === 0 && !lastTopic;
+    }
+
+    function applyCloudPayload(payload) {
+      if (payload.completed && typeof payload.completed === 'object') {
+        localStorage.setItem(keyCompleted, JSON.stringify(payload.completed));
+      }
+      if (payload.review && typeof payload.review === 'object') {
+        localStorage.setItem(keyReview, JSON.stringify(payload.review));
+      }
+      if (typeof payload.lastTopic === 'string') {
+        localStorage.setItem(keyLastTopic, payload.lastTopic);
+      }
+      if (payload.stats && typeof payload.stats === 'object') {
+        localStorage.setItem(keyStats, JSON.stringify(payload.stats));
+      }
+      if (typeof payload.zen === 'boolean') {
+        localStorage.setItem(keyZen, payload.zen ? '1' : '0');
+      }
+      if (Number.isFinite(Number(payload.fontSize))) {
+        localStorage.setItem(keyFontSize, String(Number(payload.fontSize)));
+      }
+
+      replaceObject(completed, readJson(keyCompleted, {}));
+      replaceObject(review, readJson(keyReview, {}));
+      const refreshedStats = ensureStatsShape(readJson(keyStats, {}));
+      stats.totalTimeMs = refreshedStats.totalTimeMs;
+      stats.perTopicTimeMs = refreshedStats.perTopicTimeMs;
+      stats.lastSessionStart = null;
+
+      const targetTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
+      if (targetTopic && currentTopic && targetTopic.id !== currentTopic.id) {
+        renderTopic(targetTopic.id, true);
+      } else {
+        ensureTopicNavigation(currentTopic);
+        updateCompletionUi();
+        updateReviewUi();
+        updateProgressUi();
+        scheduleDecorateNavStates();
+        applyReviewFilter();
+        renderStats();
+      }
+      updateResumeButtonState();
+    }
+
+    async function resolveProfileKey() {
+      const stored = localStorage.getItem(keyCloudProfile);
+      if (isValidProfileKey(stored)) return stored;
+
+      const fromQuery = new URLSearchParams(location.search).get('progressProfile');
+      if (isValidProfileKey(fromQuery)) {
+        localStorage.setItem(keyCloudProfile, String(fromQuery));
+        return String(fromQuery);
+      }
+
+      const generated = await fingerprintProfileKey();
+      if (generated) localStorage.setItem(keyCloudProfile, generated);
+      return generated;
+    }
+
+    async function fetchConfig() {
+      try {
+        const response = await fetch(configUrl(), { method: 'GET' });
+        if (!response.ok) return { enabled: false };
+        const body = await response.json().catch(function () { return null; });
+        if (!body || typeof body !== 'object') return { enabled: false };
+        return body;
+      } catch (_error) {
+        return { enabled: false };
+      }
+    }
+
+    function configUrl() {
+      return '/progress/config';
+    }
+
+    function stateUrl() {
+      return '/progress/state';
+    }
+
+    function stableSerialize(value) {
+      try {
+        return JSON.stringify(value);
+      } catch (_error) {
+        return '';
+      }
+    }
+
+    function toTimestamp(value) {
+      const date = new Date(String(value || ''));
+      const time = date.getTime();
+      return Number.isFinite(time) ? time : 0;
+    }
+
+    function isValidProfileKey(value) {
+      const key = String(value || '').trim();
+      if (!key) return false;
+      if (key.length > 128) return false;
+      return /^[A-Za-z0-9._:-]+$/.test(key);
+    }
+
+    async function fingerprintProfileKey() {
+      const parts = [
+        navigator.userAgent || '',
+        navigator.language || '',
+        (navigator.languages || []).join(','),
+        navigator.platform || '',
+        String(navigator.hardwareConcurrency || ''),
+        String(navigator.deviceMemory || ''),
+        String(screen.width || ''),
+        String(screen.height || ''),
+        String(screen.colorDepth || ''),
+        String(window.devicePixelRatio || ''),
+        Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+      ];
+      const source = parts.join('|');
+      const digest = await sha256Hex(source);
+      if (!digest) return `pf-${fallbackHash(source)}`;
+      return `pf-${digest.slice(0, 48)}`;
+    }
+
+    async function sha256Hex(text) {
+      if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') return '';
+      try {
+        const bytes = new TextEncoder().encode(text);
+        const hash = await window.crypto.subtle.digest('SHA-256', bytes);
+        const list = Array.from(new Uint8Array(hash));
+        return list.map((n) => n.toString(16).padStart(2, '0')).join('');
+      } catch (_error) {
+        return '';
+      }
+    }
+
+    function fallbackHash(text) {
+      let value = 2166136261;
+      for (let i = 0; i < text.length; i += 1) {
+        value ^= text.charCodeAt(i);
+        value += (value << 1) + (value << 4) + (value << 7) + (value << 8) + (value << 24);
+      }
+      return Math.abs(value >>> 0).toString(16).padStart(8, '0');
+    }
+
+    function replaceObject(target, source) {
+      Object.keys(target).forEach((key) => {
+        delete target[key];
+      });
+      Object.keys(source || {}).forEach((key) => {
+        target[key] = source[key];
+      });
+    }
+
+    return {
+      bootstrap,
+      schedulePush,
+      pushNow
+    };
   }
 
   function readJson(key, fallback) {

@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-008-consistencia-invali
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-007: Estrategia de cache network-first + TTL + fallback ←](ADR-007-cache-network-first-ttl.md) · **Siguiente:** [ADR-009: Observabilidad por decoradores y logger de aplic... →](ADR-009-observabilidad-por-decoradores.md)

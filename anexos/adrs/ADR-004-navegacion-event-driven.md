@@ -215,4 +215,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-004-navegacion-event-dr
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-003: Composition Root único para ensamblaje ←](ADR-003-composition-root-unico.md) · **Siguiente:** [ADR-005: Contratos entre features por eventos/modelos mín... →](ADR-005-contratos-features.md)

@@ -10,6 +10,8 @@ Esta lección no tiene código nuevo. Es una lección de reflexión y consolidac
 
 ### Diagrama: mapa de tests por capa de la feature Login
 
+El mapa distribuye evidencia por capa para evitar huecos: **Domain** valida reglas (`EmailTests`, `PasswordTests`), **Application** valida orquestación (`LoginUseCaseTests`), **Infrastructure** valida integración remota (`RemoteAuthGatewayTests`) y **Interface** valida estado/UI (`LoginViewModelTests`).
+
 ```mermaid
 graph TD
     subgraph Domain["Domain - 7 tests"]
@@ -39,6 +41,8 @@ graph TD
 ```text
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
+
+La relación entre cajas también importa: `Domain -> Application -> Infrastructure` indica profundidad técnica, mientras `Application -> Interface` confirma que el estado de UI depende del caso de uso y no al revés.
 
 > **Nota:** Los 28 tests descritos aquí son el diseño conceptual completo de la feature Login. El scaffold SPM del repositorio (`apps/ios/ArchitectureKit`) consolida algunos de estos tests y tiene 26 tests totales incluyendo Login, Catalog y Composition. La diferencia se debe a que el scaffold agrupa ciertos escenarios en tests de integración de mayor nivel.
 
@@ -372,4 +376,39 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/05-tdd-
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Login: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [ADR-001: Diseño de la Feature Login →](ADR-001-login.md)
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC ==> PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `==>` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

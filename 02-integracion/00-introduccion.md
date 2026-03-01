@@ -1,6 +1,5 @@
 # Etapa 2: Integración — Dos features que trabajan juntas sin acoplarse
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -364,5 +363,39 @@ Debe poder explicar y defender el flujo completo Login -> evento -> Coordinator 
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-2.md](../02-integracion/entregables-etapa-2.md).
 
+<!-- semantica-flechas:auto -->
+## Semantica de flechas aplicada a esta arquitectura
 
-**Anterior:** [Entregables — Etapa 1: Junior ←](../01-fundamentos/entregables-etapa-1.md) · **Siguiente:** [Feature Catalog: Especificación BDD →](01-feature-catalog/00-especificacion-bdd.md)
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC ==> PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `==>` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
+

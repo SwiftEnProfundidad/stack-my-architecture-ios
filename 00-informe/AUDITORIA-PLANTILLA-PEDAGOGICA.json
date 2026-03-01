@@ -1111,10 +1111,11 @@
         "objetivo": false,
         "prerrequisitos": true,
         "practica": true,
-        "validacion": true
+        "validacion": false
       },
       "missing": [
-        "objetivo"
+        "objetivo",
+        "validacion"
       ],
       "severity": "P2"
     },
