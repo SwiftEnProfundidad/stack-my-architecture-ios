@@ -10,6 +10,8 @@
   const keyZen = `sma:${courseId}:zen`;
   const keyStats = `sma:${courseId}:stats`;
   const keyFontSize = `sma:${courseId}:font:size`;
+  const keyCloudProfile = 'sma:cloud:profile:v1';
+  const keyCloudUpdatedAt = `sma:${courseId}:cloud:updated-at`;
 
   const completionBtn = document.getElementById('study-completion-toggle');
   const zenBtn = document.getElementById('study-zen-toggle');
@@ -33,6 +35,7 @@
   let indexActionsInitialized = false;
   let indexActionsPending = false;
   let navDecorPending = false;
+  const cloudSync = createCloudSync();
 
   const topics = Array.from(document.querySelectorAll('section.lesson')).map((section, index) => {
     const topicId = section.getAttribute('data-topic-id') || section.id || `topic-${index + 1}`;
@@ -73,6 +76,7 @@
   setupScrollPersistence();
   scheduleIndexActionsSetup();
   startTopicTimer(currentTopic.id);
+  cloudSync.bootstrap();
 
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
@@ -119,6 +123,7 @@
 
   function persistStats() {
     localStorage.setItem(keyStats, JSON.stringify(stats));
+    cloudSync.schedulePush();
   }
 
   function setupTopBarLayout() {
@@ -403,6 +408,7 @@
 
     currentTopic = target;
     localStorage.setItem(keyLastTopic, currentTopic.id);
+    cloudSync.schedulePush();
 
     if (location.hash.replace('#', '') !== currentTopic.id) {
       history.replaceState(null, '', `#${currentTopic.id}`);
@@ -608,6 +614,7 @@
       completed[id] = true;
     }
     localStorage.setItem(keyCompleted, JSON.stringify(completed));
+    cloudSync.schedulePush();
     const topic = topics.find((t) => t.id === id) || currentTopic;
     ensureTopicNavigation(topic);
     updateCompletionUi();
@@ -625,6 +632,7 @@
       review[id] = true;
     }
     localStorage.setItem(keyReview, JSON.stringify(review));
+    cloudSync.schedulePush();
     updateReviewUi();
     decorateNavStateByTopicId(id);
     applyReviewFilter();
@@ -858,8 +866,10 @@
         localStorage.setItem(key, data[key]);
       });
 
-      alert('Progreso importado correctamente');
-      window.location.reload();
+      cloudSync.pushNow({ force: true }).finally(function () {
+        alert('Progreso importado correctamente');
+        window.location.reload();
+      });
     };
 
     reader.onerror = function () {
@@ -900,7 +910,7 @@
     return { ok: true };
   }
 
-  function resetProgress() {
+  async function resetProgress() {
     if (!window.confirm('Esto borrará tu progreso de este curso. ¿Deseas continuar?')) return;
     const prefix = `sma:${courseId}:`;
     const keys = [];
@@ -909,6 +919,7 @@
       if (key && key.startsWith(prefix)) keys.push(key);
     }
     keys.forEach((k) => localStorage.removeItem(k));
+    await cloudSync.pushNow({ force: true });
     window.location.reload();
   }
 
@@ -943,6 +954,275 @@
     p = p.replace(/^\/+/, '');
     p = p.split('?')[0];
     return p;
+  }
+
+  function createCloudSync() {
+    const state = {
+      bootstrapped: false,
+      enabled: false,
+      profileKey: '',
+      pendingTimer: null,
+      pushing: false,
+      lastSnapshot: ''
+    };
+
+    async function bootstrap() {
+      if (state.bootstrapped) return;
+      state.bootstrapped = true;
+      state.profileKey = await resolveProfileKey();
+      if (!state.profileKey) return;
+
+      const config = await fetchConfig();
+      state.enabled = !!(config && config.enabled);
+      if (!state.enabled) return;
+
+      await pull();
+      schedulePush(1400);
+    }
+
+    function schedulePush(wait = 900) {
+      if (!state.enabled || !state.profileKey) return;
+      if (state.pendingTimer) clearTimeout(state.pendingTimer);
+      state.pendingTimer = setTimeout(function () {
+        void pushNow();
+      }, wait);
+    }
+
+    async function pushNow(options = {}) {
+      if (!state.enabled || !state.profileKey || state.pushing) return false;
+      const payload = collectCloudPayload();
+      const snapshot = stableSerialize(payload);
+      if (!options.force && snapshot === state.lastSnapshot) return false;
+
+      state.pushing = true;
+      try {
+        const response = await fetch(stateUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId,
+            profileKey: state.profileKey,
+            clientUpdatedAt: new Date().toISOString(),
+            data: payload
+          })
+        });
+
+        if (!response.ok) return false;
+        const body = await response.json().catch(function () { return null; });
+        const updatedAt = body && body.state && body.state.updatedAt ? String(body.state.updatedAt) : '';
+        if (updatedAt) localStorage.setItem(keyCloudUpdatedAt, updatedAt);
+        state.lastSnapshot = snapshot;
+        return true;
+      } catch (_error) {
+        return false;
+      } finally {
+        state.pushing = false;
+      }
+    }
+
+    async function pull() {
+      const query = new URLSearchParams({
+        courseId: courseId,
+        profileKey: state.profileKey
+      });
+      try {
+        const response = await fetch(`${stateUrl()}?${query.toString()}`, { method: 'GET' });
+        if (!response.ok) return false;
+        const body = await response.json().catch(function () { return null; });
+        if (!body || !body.ok || !body.state || !body.state.data || typeof body.state.data !== 'object') {
+          return false;
+        }
+
+        const remoteData = body.state.data;
+        const remoteUpdatedAt = toTimestamp(body.state.updatedAt);
+        const localUpdatedAt = toTimestamp(localStorage.getItem(keyCloudUpdatedAt));
+        const shouldApply = remoteUpdatedAt > localUpdatedAt || isLocalPayloadEmpty();
+        if (!shouldApply) {
+          state.lastSnapshot = stableSerialize(collectCloudPayload());
+          return false;
+        }
+
+        applyCloudPayload(remoteData);
+        if (body.state.updatedAt) localStorage.setItem(keyCloudUpdatedAt, String(body.state.updatedAt));
+        state.lastSnapshot = stableSerialize(collectCloudPayload());
+        return true;
+      } catch (_error) {
+        return false;
+      }
+    }
+
+    function collectCloudPayload() {
+      return {
+        completed: readJson(keyCompleted, {}),
+        review: readJson(keyReview, {}),
+        lastTopic: localStorage.getItem(keyLastTopic) || '',
+        stats: readJson(keyStats, {}),
+        zen: localStorage.getItem(keyZen) === '1',
+        fontSize: Number(localStorage.getItem(keyFontSize) || baseFontSize)
+      };
+    }
+
+    function isLocalPayloadEmpty() {
+      const payload = collectCloudPayload();
+      const doneKeys = Object.keys(payload.completed || {});
+      const reviewKeys = Object.keys(payload.review || {});
+      const lastTopic = String(payload.lastTopic || '').trim();
+      return doneKeys.length === 0 && reviewKeys.length === 0 && !lastTopic;
+    }
+
+    function applyCloudPayload(payload) {
+      if (payload.completed && typeof payload.completed === 'object') {
+        localStorage.setItem(keyCompleted, JSON.stringify(payload.completed));
+      }
+      if (payload.review && typeof payload.review === 'object') {
+        localStorage.setItem(keyReview, JSON.stringify(payload.review));
+      }
+      if (typeof payload.lastTopic === 'string') {
+        localStorage.setItem(keyLastTopic, payload.lastTopic);
+      }
+      if (payload.stats && typeof payload.stats === 'object') {
+        localStorage.setItem(keyStats, JSON.stringify(payload.stats));
+      }
+      if (typeof payload.zen === 'boolean') {
+        localStorage.setItem(keyZen, payload.zen ? '1' : '0');
+      }
+      if (Number.isFinite(Number(payload.fontSize))) {
+        localStorage.setItem(keyFontSize, String(Number(payload.fontSize)));
+      }
+
+      replaceObject(completed, readJson(keyCompleted, {}));
+      replaceObject(review, readJson(keyReview, {}));
+      const refreshedStats = ensureStatsShape(readJson(keyStats, {}));
+      stats.totalTimeMs = refreshedStats.totalTimeMs;
+      stats.perTopicTimeMs = refreshedStats.perTopicTimeMs;
+      stats.lastSessionStart = null;
+
+      const targetTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
+      if (targetTopic && currentTopic && targetTopic.id !== currentTopic.id) {
+        renderTopic(targetTopic.id, true);
+      } else {
+        ensureTopicNavigation(currentTopic);
+        updateCompletionUi();
+        updateReviewUi();
+        updateProgressUi();
+        scheduleDecorateNavStates();
+        applyReviewFilter();
+        renderStats();
+      }
+      updateResumeButtonState();
+    }
+
+    async function resolveProfileKey() {
+      const stored = localStorage.getItem(keyCloudProfile);
+      if (isValidProfileKey(stored)) return stored;
+
+      const fromQuery = new URLSearchParams(location.search).get('progressProfile');
+      if (isValidProfileKey(fromQuery)) {
+        localStorage.setItem(keyCloudProfile, String(fromQuery));
+        return String(fromQuery);
+      }
+
+      const generated = await fingerprintProfileKey();
+      if (generated) localStorage.setItem(keyCloudProfile, generated);
+      return generated;
+    }
+
+    async function fetchConfig() {
+      try {
+        const response = await fetch(configUrl(), { method: 'GET' });
+        if (!response.ok) return { enabled: false };
+        const body = await response.json().catch(function () { return null; });
+        if (!body || typeof body !== 'object') return { enabled: false };
+        return body;
+      } catch (_error) {
+        return { enabled: false };
+      }
+    }
+
+    function configUrl() {
+      return '/progress/config';
+    }
+
+    function stateUrl() {
+      return '/progress/state';
+    }
+
+    function stableSerialize(value) {
+      try {
+        return JSON.stringify(value);
+      } catch (_error) {
+        return '';
+      }
+    }
+
+    function toTimestamp(value) {
+      const date = new Date(String(value || ''));
+      const time = date.getTime();
+      return Number.isFinite(time) ? time : 0;
+    }
+
+    function isValidProfileKey(value) {
+      const key = String(value || '').trim();
+      if (!key) return false;
+      if (key.length > 128) return false;
+      return /^[A-Za-z0-9._:-]+$/.test(key);
+    }
+
+    async function fingerprintProfileKey() {
+      const parts = [
+        navigator.userAgent || '',
+        navigator.language || '',
+        (navigator.languages || []).join(','),
+        navigator.platform || '',
+        String(navigator.hardwareConcurrency || ''),
+        String(navigator.deviceMemory || ''),
+        String(screen.width || ''),
+        String(screen.height || ''),
+        String(screen.colorDepth || ''),
+        String(window.devicePixelRatio || ''),
+        Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+      ];
+      const source = parts.join('|');
+      const digest = await sha256Hex(source);
+      if (!digest) return `pf-${fallbackHash(source)}`;
+      return `pf-${digest.slice(0, 48)}`;
+    }
+
+    async function sha256Hex(text) {
+      if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') return '';
+      try {
+        const bytes = new TextEncoder().encode(text);
+        const hash = await window.crypto.subtle.digest('SHA-256', bytes);
+        const list = Array.from(new Uint8Array(hash));
+        return list.map((n) => n.toString(16).padStart(2, '0')).join('');
+      } catch (_error) {
+        return '';
+      }
+    }
+
+    function fallbackHash(text) {
+      let value = 2166136261;
+      for (let i = 0; i < text.length; i += 1) {
+        value ^= text.charCodeAt(i);
+        value += (value << 1) + (value << 4) + (value << 7) + (value << 8) + (value << 24);
+      }
+      return Math.abs(value >>> 0).toString(16).padStart(8, '0');
+    }
+
+    function replaceObject(target, source) {
+      Object.keys(target).forEach((key) => {
+        delete target[key];
+      });
+      Object.keys(source || {}).forEach((key) => {
+        target[key] = source[key];
+      });
+    }
+
+    return {
+      bootstrap,
+      schedulePush,
+      pushNow
+    };
   }
 
   function readJson(key, fallback) {
