@@ -32,6 +32,7 @@
   let filterReviewOnly = false;
   let indexActionsInitialized = false;
   let indexActionsPending = false;
+  let navDecorPending = false;
 
   const topics = Array.from(document.querySelectorAll('section.lesson')).map((section, index) => {
     const topicId = section.getAttribute('data-topic-id') || section.id || `topic-${index + 1}`;
@@ -45,6 +46,7 @@
 
   const navLinks = Array.from(document.querySelectorAll('a.doc-nav-link'));
   mapLinksToTopics(navLinks, topics);
+  const navLinksByTopicId = indexNavLinksByTopicId(navLinks);
   setupTopBarLayout();
 
   const reviewBtn = ensureReviewTopButton();
@@ -64,7 +66,7 @@
   updateCompletionUi();
   updateReviewUi();
   updateProgressUi();
-  decorateNavStates();
+  scheduleDecorateNavStates();
   setupButtons();
   setupShortcuts();
   setupScrollPersistence();
@@ -238,6 +240,18 @@
         link.dataset.topicId = topic.id;
       }
     });
+  }
+
+  function indexNavLinksByTopicId(links) {
+    const byTopicId = new Map();
+    links.forEach((link) => {
+      const topicId = link.dataset.topicId;
+      if (!topicId) return;
+      const list = byTopicId.get(topicId) || [];
+      list.push(link);
+      byTopicId.set(topicId, list);
+    });
+    return byTopicId;
   }
 
   function resolveCurrentTopic(topicList, hash, stored) {
@@ -534,7 +548,7 @@
     ensureTopicNavigation(topic);
     updateCompletionUi();
     updateProgressUi();
-    decorateNavStates();
+    decorateNavStateByTopicId(id);
     renderStats();
   }
 
@@ -548,7 +562,7 @@
     }
     localStorage.setItem(keyReview, JSON.stringify(review));
     updateReviewUi();
-    decorateNavStates();
+    decorateNavStateByTopicId(id);
     applyReviewFilter();
     renderStats();
   }
@@ -585,11 +599,26 @@
     }
   }
 
-  function decorateNavStates() {
-    navLinks.forEach((link) => {
-      const topicId = link.dataset.topicId;
-      if (!topicId) return;
+  function scheduleDecorateNavStates() {
+    if (navDecorPending) return;
+    navDecorPending = true;
+    const run = function () {
+      navDecorPending = false;
+      navLinksByTopicId.forEach((_links, topicId) => {
+        decorateNavStateByTopicId(topicId);
+      });
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(function () { run(); }, { timeout: 700 });
+      return;
+    }
+    setTimeout(run, 180);
+  }
 
+  function decorateNavStateByTopicId(topicId) {
+    if (!topicId) return;
+    const links = navLinksByTopicId.get(topicId) || [];
+    links.forEach((link) => {
       let completedBadge = link.querySelector('.study-ux-completed-badge');
       if (completed[topicId]) {
         if (!completedBadge) {
