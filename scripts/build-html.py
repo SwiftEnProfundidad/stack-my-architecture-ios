@@ -1091,6 +1091,11 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
             i += 1
             continue
 
+        # Remove legacy inline next-topic hints to avoid duplicated navigation UI
+        if re.match(r"^\s*siguiente:\s+", line, flags=re.IGNORECASE):
+            i += 1
+            continue
+
         # Paragraphs
         html += f"<p>{inline_format(line, file_path, file_id, file_id_by_path)}</p>\n"
         i += 1
@@ -2394,7 +2399,31 @@ blockquote p {{
 
 @media (max-width: 768px) {{
     :root {{ --sidebar-width: 0; }}
-    #sidebar {{ display: none; }}
+    #sidebar {{
+        display: block;
+        width: min(86vw, 320px);
+        max-width: 320px;
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+        z-index: 400;
+    }}
+    body.sidebar-open #sidebar {{
+        transform: translateX(0);
+    }}
+    #sidebar-backdrop {{
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 8, 23, 0.52);
+        z-index: 360;
+    }}
+    body.sidebar-open #sidebar-backdrop {{
+        display: block;
+    }}
+    body.sidebar-open {{
+        overflow: hidden;
+    }}
     #content {{ 
         margin-left: 0; 
         padding: 20px 16px;
@@ -2520,13 +2549,14 @@ blockquote p {{
 
 @media (max-width: 600px) {{
     #theme-controls {{
-        flex-direction: column;
-        align-items: flex-end;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
         gap: 6px;
     }}
     
     #theme-controls button {{
-        width: 120px;
+        width: auto;
         padding: 6px 10px;
         font-size: 0.7rem;
     }}
@@ -2543,11 +2573,16 @@ blockquote p {{
     background-color: var(--bg-elevated);
     color: var(--text);
 }}
+
+#sidebar-backdrop {{
+    display: none;
+}}
+
 #menu-toggle {{
     display: none;
     position: fixed;
-    top: 12px;
-    left: 12px;
+    top: 10px;
+    left: 10px;
     background: var(--sidebar-bg);
     color: var(--text);
     border: 1px solid var(--border);
@@ -2555,7 +2590,7 @@ blockquote p {{
     padding: 8px 12px;
     font-size: 1.1rem;
     cursor: pointer;
-    z-index: 250;
+    z-index: 13050;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }}
 
@@ -2609,6 +2644,7 @@ blockquote p {{
 <body>
 
 <button id="menu-toggle" onclick="toggleSidebar()" title="Abrir menú">&#9776;</button>
+<div id="sidebar-backdrop" onclick="closeSidebar()" aria-hidden="true"></div>
 
 <div id="study-ux-controls" class="study-ux-controls" aria-label="Controles de estudio">
     <button id="study-completion-toggle" type="button">✅ Marcar completado</button>
@@ -2974,18 +3010,29 @@ sections.forEach(s => observer.observe(s));
 
 // Mobile sidebar toggle
 function toggleSidebar() {{
-    const sidebar = document.getElementById('sidebar');
-    const current = sidebar.style.display;
-    sidebar.style.display = current === 'block' ? 'none' : 'block';
+    if (window.innerWidth > 768) return;
+    document.body.classList.toggle('sidebar-open');
+}}
+
+function closeSidebar() {{
+    document.body.classList.remove('sidebar-open');
 }}
 
 // Close sidebar when clicking a link on mobile
 document.querySelectorAll('#sidebar a').forEach(link => {{
     link.addEventListener('click', () => {{
         if (window.innerWidth <= 768) {{
-            document.getElementById('sidebar').style.display = 'none';
+            closeSidebar();
         }}
     }});
+}});
+
+document.addEventListener('keydown', event => {{
+    if (event.key === 'Escape') closeSidebar();
+}});
+
+window.addEventListener('resize', () => {{
+    if (window.innerWidth > 768) closeSidebar();
 }});
 
 // Sidebar search/filter
