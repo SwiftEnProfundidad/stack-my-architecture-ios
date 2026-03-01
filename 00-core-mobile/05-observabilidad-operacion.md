@@ -94,8 +94,6 @@ Contexto: normalizacion automatica para `00-core-mobile/05-observabilidad-operac
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Calidad PR-ready ←](04-calidad-pr-ready.md) · **Siguiente:** [Release, rollback y feature flags →](06-release-rollback-flags.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

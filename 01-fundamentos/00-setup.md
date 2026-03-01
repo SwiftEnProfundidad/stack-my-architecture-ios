@@ -424,8 +424,6 @@ sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
 ---
 
-**Anterior:** [Introducción al curso ←](00-introduccion.md) · **Siguiente:** [Principios de ingeniería →](01-principios-ingenieria.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

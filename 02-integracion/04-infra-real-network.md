@@ -1,6 +1,5 @@
 # Infraestructura real: URLSessionHTTPClient
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -455,8 +454,6 @@ Una buena infraestructura no se mide por “cuánto framework usa”, sino por c
 Si un cambio de proveedor HTTP obliga a tocar UseCases o Domain, no cambiaste infraestructura: rompiste la arquitectura. Ese test mental te protege en cada refactor.
 
 ---
-
-**Anterior:** [Contratos entre features ←](03-contratos-features.md) · **Siguiente:** [Integration Tests →](05-integration-tests.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

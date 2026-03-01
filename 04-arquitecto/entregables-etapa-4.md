@@ -1,6 +1,5 @@
 # Entregables — Etapa 4: Arquitecto
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -226,8 +225,6 @@ Aunque no cierres todos los entregables:
 ## Siguiente etapa
 
 ---
-
-**Anterior:** [Quality Gates ←](06-quality-gates.md) · **Siguiente:** [Consolidación: Etapa 4 - Arquitecto →](../anexos/consolidacion-etapa-4-arquitecto.md)
 
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas

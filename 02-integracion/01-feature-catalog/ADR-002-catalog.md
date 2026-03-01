@@ -1,6 +1,5 @@
 # ADR-002: Diseño de la Feature Catalog
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -284,8 +283,6 @@ Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/ADR-0
   - [ ] Entiendo la decision tecnica principal de la leccion.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-**Anterior:** [Feature Catalog: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [Navegación por eventos: el AppCoordinator →](../02-navegacion-eventos.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

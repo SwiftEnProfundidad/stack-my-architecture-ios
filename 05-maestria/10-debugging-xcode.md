@@ -1,6 +1,5 @@
 # Debugging en Xcode: Encuentra y arregla bugs como un profesional
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -406,8 +405,6 @@ Fix: Normalizar el email en el init.
 ---
 
 ---
-
-**Anterior:** [Migración a Swift 6 ←](09-migracion-swift6.md) · **Siguiente:** [11. Cómo Hablar de Arquitectura en una Entrevista →](11-entrevista-arquitecto.md)
 
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas

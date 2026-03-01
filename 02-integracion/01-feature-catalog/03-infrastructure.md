@@ -1,6 +1,5 @@
 # Feature Catalog: Capa Infrastructure
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -467,8 +466,6 @@ Cómo depurarlo:
 Si Application es el director de orquesta, Infrastructure es el técnico de sonido: nadie le aplaude cuando todo va bien, pero si falla, el concierto se cae. Esta capa bien diseñada te da algo muy enterprise: cambiar proveedores externos sin romper reglas de negocio.
 
 ---
-
-**Anterior:** [Feature Catalog: Capa Application ←](02-application.md) · **Siguiente:** [Feature Catalog: Capa Interface (SwiftUI) →](04-interface-swiftui.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

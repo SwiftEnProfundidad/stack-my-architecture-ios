@@ -208,8 +208,6 @@ Contexto: normalizacion automatica para `01-fundamentos/01-principios-ingenieria
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Setup: Preparación del entorno ←](00-setup.md) · **Siguiente:** [Metodología BDD: especificación y descubrimiento →](02-metodologia-bdd-tdd.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -453,8 +453,6 @@ El script `check-dependencies.sh` recorre los archivos `.swift` de cada target y
 
 ---
 
-**Anterior:** [Bounded Contexts ←](01-bounded-contexts.md) · **Siguiente:** [Navegación y deep links como plataforma →](03-navegacion-deeplinks.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

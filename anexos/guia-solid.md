@@ -415,4 +415,3 @@ class PaymentService {
 
 ---
 
-**Anterior:** [Errores de Compilación: Cómo Leerlos y Solucionarlos ←](errores-compilacion.md) · **Siguiente:** [Anexo: Guía CQS y CQRS →](guia-cqs-cqrs.md)

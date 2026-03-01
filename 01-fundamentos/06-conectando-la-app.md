@@ -326,8 +326,6 @@ Contexto: normalizacion automatica para `01-fundamentos/06-conectando-la-app.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-001: Diseño de la Feature Login ←](05-feature-login/ADR-001-login.md) · **Siguiente:** [Entregables — Etapa 1: Junior →](entregables-etapa-1.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

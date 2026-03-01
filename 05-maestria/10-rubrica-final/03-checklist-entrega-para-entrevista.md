@@ -51,8 +51,6 @@ Se considera paquete defendible si un entrevistador puede seguir problema → de
 
 ---
 
-**Anterior:** [Evidencias obligatorias iOS (cierre defendible) ←](02-evidencias-obligatorias-ios.md) · **Siguiente:** [Calentamiento: Etapa 5 - Maestría →](../../anexos/calentamiento-etapa-5-maestria.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

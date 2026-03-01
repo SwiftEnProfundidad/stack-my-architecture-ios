@@ -1,6 +1,5 @@
 # SwiftUI performance
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -471,8 +470,6 @@ Contexto: normalizacion automatica para `05-maestria/06-swiftui-performance.md`.
 
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-**Anterior:** [SwiftUI state moderno ←](05-swiftui-state-moderno.md) · **Siguiente:** [Composición avanzada →](07-composicion-avanzada.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

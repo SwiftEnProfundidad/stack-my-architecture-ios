@@ -1,6 +1,5 @@
 # Feature Catalog: Capa Application
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -501,8 +500,6 @@ Trigger para pasar de A a diseño más complejo:
 Una capa Application buena no se juzga por cuántas líneas tiene, sino por cuánto protege la arquitectura cuando cambian requisitos. En `Catalog`, este diseño te permite crecer sin deuda lateral: puedes evolucionar infraestructura y UI sin romper el corazón semántico del flujo.
 
 ---
-
-**Anterior:** [Feature Catalog: Capa Domain ←](01-domain.md) · **Siguiente:** [Feature Catalog: Capa Infrastructure →](03-infrastructure.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

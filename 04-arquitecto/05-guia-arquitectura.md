@@ -447,4 +447,3 @@ Este ejercicio no tiene código nuevo; es una auditoría. La habilidad que entre
 
 ---
 
-**Anterior:** [Versionado y SPM ←](04-versionado-spm.md) · **Siguiente:** [Quality Gates →](06-quality-gates.md)

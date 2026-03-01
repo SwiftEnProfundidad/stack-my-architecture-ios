@@ -1,6 +1,5 @@
 # Feature Catalog: Capa Domain
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -363,8 +362,6 @@ Este ejercicio entrena evolución de dominio con impacto controlado por tests.
 Si puedes cambiar proveedor de datos o presentación sin renombrar conceptos de negocio (`Product`, `Price`, `CatalogError`), el dominio está bien aislado.
 
 ---
-
-**Anterior:** [Feature Catalog: Especificación BDD ←](00-especificacion-bdd.md) · **Siguiente:** [Feature Catalog: Capa Application →](02-application.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

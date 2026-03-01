@@ -710,8 +710,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/04-inte
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Login: Capa Infrastructure ←](03-infrastructure.md) · **Siguiente:** [Feature Login: Retrospectiva del ciclo TDD completo →](05-tdd-ciclo-completo.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

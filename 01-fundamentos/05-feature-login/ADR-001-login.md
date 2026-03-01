@@ -159,4 +159,3 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/ADR-001
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Login: Retrospectiva del ciclo TDD completo ←](05-tdd-ciclo-completo.md) · **Siguiente:** [Conectando la App: Tu Primera App Funcional →](../06-conectando-la-app.md)

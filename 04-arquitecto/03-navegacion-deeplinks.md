@@ -570,8 +570,6 @@ El patrón es: `LoginViewModel` recibe un closure `onLoginSuccess: (Session) -> 
 
 ---
 
-**Anterior:** [Reglas de dependencia y CI ←](02-reglas-dependencia-ci.md) · **Siguiente:** [Versionado y SPM →](04-versionado-spm.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

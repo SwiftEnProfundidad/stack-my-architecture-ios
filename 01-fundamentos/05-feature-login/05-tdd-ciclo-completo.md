@@ -376,8 +376,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/05-tdd-
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Feature Login: Capa Interface (SwiftUI) ←](04-interface-swiftui.md) · **Siguiente:** [ADR-001: Diseño de la Feature Login →](ADR-001-login.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

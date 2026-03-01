@@ -457,4 +457,3 @@ class ProductListViewModel: ObservableObject {
 
 ---
 
-**Anterior:** [Tips del Simulador: Testing como Profesional ←](simulator-tips.md) · **Siguiente:** [Errores de Compilación: Cómo Leerlos y Solucionarlos →](errores-compilacion.md)

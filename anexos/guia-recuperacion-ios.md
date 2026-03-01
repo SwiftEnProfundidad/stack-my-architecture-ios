@@ -546,4 +546,3 @@ Contexto: normalizacion automatica para `anexos/guia-recuperacion-ios.md`.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Quizzes de Autoevaluación ←](quizzes-autoevaluacion.md) · **Siguiente:** [Atlas visual de arquitectura →](diagramas/atlas-arquitectura.md)

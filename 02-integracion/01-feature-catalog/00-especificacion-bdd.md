@@ -1,6 +1,5 @@
 # Feature Catalog: Especificación BDD
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -358,8 +357,6 @@ Corrección:
 Con esta especificación cerrada, ya se puede implementar con TDD sin improvisar comportamiento.
 
 ---
-
-**Anterior:** [Etapa 2: Integración — Dos features que trabajan juntas s... ←](../00-introduccion.md) · **Siguiente:** [Feature Catalog: Capa Domain →](01-domain.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

@@ -1,6 +1,5 @@
 # Entregables Etapa 5 — Maestría
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -283,8 +282,6 @@ El mejor código que escribiste en la Etapa 5 es mejor que el mejor código que 
 **¡Felicidades por completar el curso!** 🎉
 
 ---
-
-**Anterior:** [12. Arquitectura Adaptativa: Más Allá del Patrón ←](12-arquitectura-adaptativa.md) · **Siguiente:** [Propósito y Alcance →](10-rubrica-final/01-rubrica-empleabilidad-ios.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

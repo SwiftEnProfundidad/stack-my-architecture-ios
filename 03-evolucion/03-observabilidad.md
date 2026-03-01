@@ -539,8 +539,6 @@ El patrón decorador permite componer logging, métricas y tracing sin tocar el 
 
 ---
 
-**Anterior:** [Consistencia e invalidación ←](02-consistencia.md) · **Siguiente:** [Tests avanzados →](04-tests-avanzados.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

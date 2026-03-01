@@ -1,6 +1,5 @@
 # 12. Arquitectura Adaptativa: Más Allá del Patrón
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -708,8 +707,6 @@ Este portfolio demuestra que no solo aplicas patrones, **piensas como arquitecto
 > *"La arquitectura no es seguir recetas. Es entender qué estás cocinando, por qué, para quién, y bajo qué constraints. Las recetas son útiles, pero el chef adaptativo sabe cuándo improvisar."*
 
 ---
-
-**Anterior:** [11. Cómo Hablar de Arquitectura en una Entrevista ←](11-entrevista-arquitecto.md) · **Siguiente:** [Entregables Etapa 5 — Maestría →](entregables-etapa-5.md)
 
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas

@@ -207,4 +207,3 @@ Busca el comando → Doble click en atajo → Pulsar combinación deseada
 
 ---
 
-**Anterior:** [Git Workflow para el Curso ←](git-workflow-curso.md) · **Siguiente:** [Cómo Leer Documentación de Apple Efectivamente →](como-leer-documentacion.md)

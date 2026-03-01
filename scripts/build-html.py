@@ -10,6 +10,8 @@ import posixpath
 import re
 import sys
 import shutil
+import subprocess
+import tempfile
 import html
 import time
 import hashlib
@@ -245,6 +247,10 @@ LAYERED_SVG_FILE_WHITELIST = {
     "00-core-mobile/00-introduccion.md",
 }
 
+LAYERED_SVG_ASSET_BY_FILE = {
+    "00-core-mobile/00-introduccion.md": "assets/architecture-ios-core-mobile.png",
+}
+
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
@@ -357,8 +363,8 @@ def render_mermaid_arrow_legend() -> str:
         '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
         "</svg>Wiring / configuracion</span>"
         '<span class="sma-mermaid-legend-item">'
-        '<svg class="sma-legend-arrow contract-closed" viewBox="0 0 40 12" aria-hidden="true">'
-        '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
+        '<svg class="sma-legend-arrow contract-open" viewBox="0 0 40 12" aria-hidden="true">'
+        '<line x1="2" y1="6" x2="30" y2="6"></line><polyline points="30,2 38,6 30,10"></polyline>'
         "</svg>Contrato / abstraccion</span>"
         '<span class="sma-mermaid-legend-item">'
         '<svg class="sma-legend-arrow solid-open" viewBox="0 0 40 12" aria-hidden="true">'
@@ -369,7 +375,253 @@ def render_mermaid_arrow_legend() -> str:
     )
 
 
-def render_layered_architecture_svg(raw_code_content: str) -> str:
+def _d2_quote(value: str) -> str:
+    normalized = re.sub(r"\s+", " ", value.strip())
+    escaped = normalized.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
+def _build_layered_architecture_d2_source(raw_code_content: str) -> str:
+    titles = {
+        "CORE": _extract_mermaid_subgraph_title(raw_code_content, "CORE", "Core / Domain"),
+        "APP": _extract_mermaid_subgraph_title(raw_code_content, "APP", "Application"),
+        "UI": _extract_mermaid_subgraph_title(raw_code_content, "UI", "Interface"),
+        "INFRA": _extract_mermaid_subgraph_title(raw_code_content, "INFRA", "Infrastructure"),
+    }
+
+    labels = {
+        "VM": _extract_mermaid_label(raw_code_content, "VM", "ViewModel"),
+        "VIEW": _extract_mermaid_label(raw_code_content, "VIEW", "View"),
+        "ENT": _extract_mermaid_label(raw_code_content, "ENT", "Entity"),
+        "POL": _extract_mermaid_label(raw_code_content, "POL", "Policy"),
+        "BOOT": _extract_mermaid_label(raw_code_content, "BOOT", "Composition Root"),
+        "UC": _extract_mermaid_label(raw_code_content, "UC", "UseCase"),
+        "PORT": _extract_mermaid_label(raw_code_content, "PORT", "FeaturePort"),
+        "API": _extract_mermaid_label(raw_code_content, "API", "API Client"),
+        "STORE": _extract_mermaid_label(raw_code_content, "STORE", "Persistence Adapter"),
+    }
+
+    return f"""
+direction: right
+
+ui: {{
+  label: {_d2_quote(titles["UI"])}
+  style: {{
+    fill: "#182343"
+    stroke: "#93c5fd"
+    stroke-width: 2
+    border-radius: 16
+  }}
+  vm: {_d2_quote(labels["VM"])}
+  view: {_d2_quote(labels["VIEW"])}
+}}
+
+core: {{
+  label: {_d2_quote(titles["CORE"])}
+  style: {{
+    fill: "#1b2a3f"
+    stroke: "#67e8f9"
+    stroke-width: 2
+    border-radius: 16
+  }}
+  ent: {_d2_quote(labels["ENT"])}
+  pol: {_d2_quote(labels["POL"])}
+}}
+
+shell: {{
+  label: "Composition / App Shell"
+  style: {{
+    fill: "#1b2038"
+    stroke: "#facc15"
+    stroke-width: 2
+    border-radius: 14
+  }}
+  boot: {_d2_quote(labels["BOOT"])}
+}}
+
+app: {{
+  label: {_d2_quote(titles["APP"])}
+  style: {{
+    fill: "#231f46"
+    stroke: "#fb923c"
+    stroke-width: 2
+    border-radius: 16
+  }}
+  uc: {_d2_quote(labels["UC"])}
+  port: {_d2_quote(labels["PORT"])}
+}}
+
+infra: {{
+  label: {_d2_quote(titles["INFRA"])}
+  style: {{
+    fill: "#271f46"
+    stroke: "#d8b4fe"
+    stroke-width: 2
+    border-radius: 16
+  }}
+  api: {_d2_quote(labels["API"])}
+  store: {_d2_quote(labels["STORE"])}
+}}
+
+classes: {{
+  hidden: {{
+    style: {{
+      opacity: 0
+      stroke-width: 0
+    }}
+  }}
+  node: {{
+    style: {{
+      fill: "#0f172a"
+      stroke: "#94a3b8"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 18
+      font-color: "#f8fafc"
+    }}
+  }}
+}}
+
+ui.vm.class: node
+ui.view.class: node
+core.ent.class: node
+core.pol.class: node
+shell.boot.class: node
+app.uc.class: node
+app.port.class: node
+infra.api.class: node
+infra.store.class: node
+
+ui -> core: {{ class: hidden }}
+ui -> app: {{ class: hidden }}
+core -> app: {{ class: hidden }}
+core -> shell: {{ class: hidden }}
+app -> infra: {{ class: hidden }}
+shell -> infra: {{ class: hidden }}
+
+ui.vm -> app.uc: {{
+  style: {{
+    stroke: "#f472b6"
+    stroke-width: 3
+  }}
+}}
+app.uc -> core.ent: {{
+  style: {{
+    stroke: "#f472b6"
+    stroke-width: 3
+  }}
+}}
+app.uc -> app.port: {{
+  style: {{
+    stroke: "#60a5fa"
+    stroke-width: 3
+    stroke-dash: 6
+  }}
+}}
+shell.boot -> app.port: {{
+  style: {{
+    stroke: "#94a3b8"
+    stroke-width: 2
+    stroke-dash: 8
+  }}
+}}
+shell.boot -> infra.api: {{
+  style: {{
+    stroke: "#94a3b8"
+    stroke-width: 2
+    stroke-dash: 8
+  }}
+}}
+shell.boot -> infra.store: {{
+  style: {{
+    stroke: "#94a3b8"
+    stroke-width: 2
+    stroke-dash: 8
+  }}
+}}
+app.port -> infra.api: {{
+  style: {{
+    stroke: "#86efac"
+    stroke-width: 3
+  }}
+}}
+app.port -> infra.store: {{
+  style: {{
+    stroke: "#86efac"
+    stroke-width: 3
+  }}
+}}
+app.uc -> ui.vm: {{
+  style: {{
+    stroke: "#86efac"
+    stroke-width: 3
+  }}
+}}
+""".strip() + "\n"
+
+
+def _render_layered_architecture_svg_with_d2(raw_code_content: str) -> str | None:
+    d2_binary = shutil.which("d2")
+    if not d2_binary:
+        return None
+
+    marker_seed = hashlib.md5(raw_code_content.encode("utf-8")).hexdigest()[:10]
+    d2_source = _build_layered_architecture_d2_source(raw_code_content)
+    try:
+        with tempfile.TemporaryDirectory(prefix="sma-d2-") as temp_dir:
+            source_path = Path(temp_dir) / "layered-architecture.d2"
+            output_path = Path(temp_dir) / "layered-architecture.svg"
+            source_path.write_text(d2_source, encoding="utf-8")
+            subprocess.run(
+                [
+                    d2_binary,
+                    "--layout",
+                    "dagre",
+                    "--theme",
+                    "201",
+                    "--pad",
+                    "24",
+                    "--no-xml-tag",
+                    "--salt",
+                    marker_seed,
+                    str(source_path),
+                    str(output_path),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            rendered_svg = output_path.read_text(encoding="utf-8")
+    except (OSError, subprocess.CalledProcessError, UnicodeDecodeError) as error:
+        print(f"  [WARN] d2 layered architecture rendering failed: {error}")
+        return None
+
+    cleaned_svg = rendered_svg.strip()
+    cleaned_svg = re.sub(r'^<\?xml[^>]*>\s*', "", cleaned_svg, count=1)
+    cleaned_svg = re.sub(
+        r"<svg\b",
+        '<svg class="sma-architecture-svg d2-architecture-svg"',
+        cleaned_svg,
+        count=1,
+    )
+    cleaned_svg = cleaned_svg.replace(
+        'preserveAspectRatio="xMinYMin meet"',
+        'preserveAspectRatio="xMidYMid meet"',
+        1,
+    )
+
+    legend_html = render_mermaid_arrow_legend()
+    return (
+        '<div class="sma-mermaid-block sma-architecture-block">\n'
+        f"{legend_html}"
+        '<div class="sma-architecture-svg-wrap" role="img" aria-label="Diagrama de arquitectura por capas del curso">'
+        f"{cleaned_svg}"
+        "</div>\n"
+        "</div>\n"
+    )
+
+
+def _render_layered_architecture_svg_manual(raw_code_content: str) -> str:
     titles = {
         "CORE": _extract_mermaid_subgraph_title(raw_code_content, "CORE", "Core / Domain"),
         "APP": _extract_mermaid_subgraph_title(raw_code_content, "APP", "Application"),
@@ -390,21 +642,32 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
     }
 
     layer_boxes = {
-        "UI": (90, 80, 330, 238),
-        "CORE": (90, 352, 330, 228),
-        "APP": (430, 510, 410, 206),
-        "INFRA": (850, 80, 340, 636),
+        "UI": (70, 100, 320, 470),
+        "CORE": (430, 70, 640, 250),
+        "APP": (500, 360, 600, 270),
+        "INFRA": (1120, 100, 260, 560),
     }
+    shell_box = (620, 660, 350, 150)
+
+    def build_node(label: str, center_x: float, center_y: float, layer: str) -> tuple[float, float, float, float, str]:
+        wrapped = _split_svg_lines(label, max_chars=22)
+        max_len = max((len(part) for part in wrapped), default=8)
+        width = max(188.0, min(320.0, 68.0 + max_len * 8.7))
+        height = 58.0 + max(0, len(wrapped) - 1) * 18.0
+        x = center_x - width / 2
+        y = center_y - height / 2
+        return (x, y, width, height, layer)
+
     nodes = {
-        "VM": (132, 138, 178, 60, "UI"),
-        "VIEW": (152, 236, 138, 58, "UI"),
-        "ENT": (165, 398, 138, 60, "CORE"),
-        "POL": (165, 485, 138, 58, "CORE"),
-        "BOOT": (472, 540, 326, 58, "APP"),
-        "UC": (472, 625, 126, 60, "APP"),
-        "PORT": (628, 625, 170, 60, "APP"),
-        "API": (914, 218, 188, 72, "INFRA"),
-        "STORE": (898, 518, 220, 76, "INFRA"),
+        "VM": build_node(labels["VM"], 230, 430, "ui"),
+        "VIEW": build_node(labels["VIEW"], 230, 255, "ui"),
+        "ENT": build_node(labels["ENT"], 865, 185, "core"),
+        "POL": build_node(labels["POL"], 580, 185, "core"),
+        "UC": build_node(labels["UC"], 675, 495, "app"),
+        "PORT": build_node(labels["PORT"], 925, 495, "app"),
+        "BOOT": build_node(labels["BOOT"], 795, 735, "boot"),
+        "API": build_node(labels["API"], 1255, 300, "infra"),
+        "STORE": build_node(labels["STORE"], 1255, 505, "infra"),
     }
 
     def anchor(node_id: str, side: str) -> tuple[float, float]:
@@ -422,9 +685,17 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
     node_markup = []
     for node_id, (x, y, width, height, layer_id) in nodes.items():
         node_markup.append(
-            f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="8" class="sma-arch-node sma-arch-node-{layer_id.lower()}"></rect>'
+            f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="10" class="sma-arch-node sma-arch-node-{layer_id}"></rect>'
         )
-        node_markup.append(_svg_text(x + width / 2, y + height / 2 + 5, labels[node_id], "sma-arch-node-label", max_chars=22))
+        node_markup.append(
+            _svg_text(
+                x + width / 2,
+                y + height / 2 + 5,
+                labels[node_id],
+                "sma-arch-node-label",
+                max_chars=21,
+            )
+        )
 
     layer_markup = []
     for layer_id, (x, y, width, height) in layer_boxes.items():
@@ -432,8 +703,13 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
             f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="16" class="sma-arch-layer sma-arch-layer-{layer_id.lower()}"></rect>'
         )
         layer_markup.append(
-            _svg_text(x + width / 2, y + 26, titles[layer_id], "sma-arch-layer-label", max_chars=28)
+            _svg_text(x + width / 2, y + 30, titles[layer_id], "sma-arch-layer-label", max_chars=28)
         )
+    shell_x, shell_y, shell_w, shell_h = shell_box
+    shell_markup = [
+        f'<rect x="{shell_x}" y="{shell_y}" width="{shell_w}" height="{shell_h}" rx="14" class="sma-arch-shell"></rect>',
+        _svg_text(shell_x + shell_w / 2, shell_y + 30, "Composition / App Shell", "sma-arch-shell-label", max_chars=28),
+    ]
 
     marker_seed = hashlib.md5(raw_code_content.encode("utf-8")).hexdigest()[:10]
     marker_direct = f"sma-head-direct-{marker_seed}"
@@ -442,82 +718,149 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
     marker_open = f"sma-head-open-{marker_seed}"
 
     vm_right = anchor("VM", "right")
-    vm_bottom = anchor("VM", "bottom")
+    vm_top = anchor("VM", "top")
+    vm_left = anchor("VM", "left")
+    ent_bottom = anchor("ENT", "bottom")
+    uc_top = anchor("UC", "top")
     uc_left = anchor("UC", "left")
     uc_right = anchor("UC", "right")
-    uc_top = anchor("UC", "top")
-    ent_right = anchor("ENT", "right")
-    boot_bottom = anchor("BOOT", "bottom")
+    boot_top = anchor("BOOT", "top")
     boot_right = anchor("BOOT", "right")
     port_left = anchor("PORT", "left")
     port_right = anchor("PORT", "right")
-    port_top = anchor("PORT", "top")
+    port_bottom = anchor("PORT", "bottom")
     api_left = anchor("API", "left")
     store_left = anchor("STORE", "left")
 
-    edges = []
-    # Dependencia directa (runtime)
-    edges.append(
-        f'<path d="M{vm_right[0]} {vm_right[1]} L380 {vm_right[1]} L380 646 L{uc_left[0]} {uc_left[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
-    )
-    edges.append(
-        f'<path d="M{uc_left[0]} {uc_left[1]} L430 {uc_left[1]} L430 {ent_right[1]} L{ent_right[0]} {ent_right[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-direct" marker-end="url(#{marker_direct})"></path>'
-    )
+    lane_vm_to_uc_x = 470
+    lane_uc_entity_y = 300
+    lane_boot_to_port_y = 620
+    lane_open_x = 1118
+    lane_wiring_api_x = 1088
+    lane_wiring_store_x = 1105
+    lane_return_x = 96
+    lane_return_y = 352
 
-    # Contrato / abstracción
-    edges.append(
-        f'<path d="M{uc_right[0]} {uc_right[1]} L{port_left[0]} {port_left[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-contract" marker-end="url(#{marker_contract})"></path>'
-    )
+    def polyline_path(points: list[tuple[float, float]]) -> str:
+        start_x, start_y = points[0]
+        segments = [f"M{start_x} {start_y}"]
+        for x, y in points[1:]:
+            segments.append(f"L{x} {y}")
+        return " ".join(segments)
 
-    # Wiring / configuración
-    edges.append(
-        f'<path d="M{boot_bottom[0]} {boot_bottom[1]} L{boot_bottom[0]} 612 L{port_top[0]} 612 L{port_top[0]} {port_top[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
-    )
-    edges.append(
-        f'<path d="M{boot_right[0]} {boot_right[1]} L840 {boot_right[1]} L840 {api_left[1]} L{api_left[0]} {api_left[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
-    )
-    edges.append(
-        f'<path d="M{boot_right[0]} {boot_right[1]} L840 {boot_right[1]} L840 {store_left[1]} L{store_left[0]} {store_left[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-wiring" marker-end="url(#{marker_wiring})"></path>'
-    )
-
-    # Salida / propagación
-    edges.append(
-        f'<path d="M{port_right[0]} {port_right[1]} L865 {port_right[1]} L865 {api_left[1]} L{api_left[0]} {api_left[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
-    )
-    edges.append(
-        f'<path d="M{port_right[0]} {port_right[1]} L865 {port_right[1]} L865 {store_left[1]} L{store_left[0]} {store_left[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
-    )
-    edges.append(
-        f'<path d="M{uc_top[0]} {uc_top[1]} L{uc_top[0]} 610 L260 610 L260 {vm_bottom[1]} L{vm_bottom[0]} {vm_bottom[1]}" '
-        f'class="sma-arch-edge sma-arch-edge-open" marker-end="url(#{marker_open})"></path>'
-    )
+    edge_specs = [
+        (
+            [
+                vm_right,
+                (lane_vm_to_uc_x, vm_right[1]),
+                (lane_vm_to_uc_x, uc_left[1]),
+                uc_left,
+            ],
+            "sma-arch-edge sma-arch-edge-direct",
+            marker_direct,
+        ),
+        (
+            [
+                uc_top,
+                (uc_top[0], lane_uc_entity_y),
+                (ent_bottom[0], lane_uc_entity_y),
+                ent_bottom,
+            ],
+            "sma-arch-edge sma-arch-edge-direct",
+            marker_direct,
+        ),
+        (
+            [uc_right, port_left],
+            "sma-arch-edge sma-arch-edge-contract",
+            marker_contract,
+        ),
+        (
+            [
+                boot_top,
+                (boot_top[0], lane_boot_to_port_y),
+                (port_bottom[0], lane_boot_to_port_y),
+                port_bottom,
+            ],
+            "sma-arch-edge sma-arch-edge-wiring",
+            marker_wiring,
+        ),
+        (
+            [
+                boot_right,
+                (lane_wiring_api_x, boot_right[1]),
+                (lane_wiring_api_x, api_left[1]),
+                api_left,
+            ],
+            "sma-arch-edge sma-arch-edge-wiring",
+            marker_wiring,
+        ),
+        (
+            [
+                boot_right,
+                (lane_wiring_store_x, boot_right[1]),
+                (lane_wiring_store_x, store_left[1]),
+                store_left,
+            ],
+            "sma-arch-edge sma-arch-edge-wiring",
+            marker_wiring,
+        ),
+        (
+            [
+                port_right,
+                (lane_open_x, port_right[1]),
+                (lane_open_x, api_left[1]),
+                api_left,
+            ],
+            "sma-arch-edge sma-arch-edge-open",
+            marker_open,
+        ),
+        (
+            [
+                port_right,
+                (lane_open_x, port_right[1]),
+                (lane_open_x, store_left[1]),
+                store_left,
+            ],
+            "sma-arch-edge sma-arch-edge-open",
+            marker_open,
+        ),
+        (
+            [
+                uc_left,
+                (460, uc_left[1]),
+                (460, lane_return_y),
+                (lane_return_x, lane_return_y),
+                (lane_return_x, vm_left[1]),
+                vm_left,
+            ],
+            "sma-arch-edge sma-arch-edge-open",
+            marker_open,
+        ),
+    ]
+    edges = [
+        f'<path d="{polyline_path(points)}" class="{css_classes}" marker-end="url(#{marker_id})"></path>'
+        for points, css_classes, marker_id in edge_specs
+    ]
 
     legend_html = render_mermaid_arrow_legend()
     return (
         '<div class="sma-mermaid-block sma-architecture-block">\n'
         f"{legend_html}"
         '<div class="sma-architecture-svg-wrap" role="img" aria-label="Diagrama de arquitectura por capas del curso">'
-        '<svg class="sma-architecture-svg" viewBox="0 0 1280 780" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'
+        '<svg class="sma-architecture-svg" viewBox="0 0 1440 860" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'
         "<defs>"
-        f'<marker id="{marker_direct}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
-        '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-direct"></path></marker>'
-        f'<marker id="{marker_wiring}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
-        '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-wiring"></path></marker>'
-        f'<marker id="{marker_contract}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
-        '<path d="M0,0 L10,5 L0,10 z" class="sma-arch-head-contract"></path></marker>'
-        f'<marker id="{marker_open}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">'
-        '<path d="M0,0 L10,5 L0,10" class="sma-arch-head-open"></path></marker>'
+        f'<marker id="{marker_direct}" viewBox="0 0 11 11" markerWidth="11" markerHeight="11" refX="9.3" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">'
+        '<path d="M1,1 L10,5.5 L1,10 Z" class="sma-arch-head-direct"></path></marker>'
+        f'<marker id="{marker_wiring}" viewBox="0 0 11 11" markerWidth="11" markerHeight="11" refX="9.3" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">'
+        '<path d="M1,1 L10,5.5 L1,10 Z" class="sma-arch-head-wiring"></path></marker>'
+        f'<marker id="{marker_contract}" viewBox="0 0 11 11" markerWidth="11" markerHeight="11" refX="9.3" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">'
+        '<path d="M1,1 L10,5.5 L1,10 Z" class="sma-arch-head-contract"></path></marker>'
+        f'<marker id="{marker_open}" viewBox="0 0 11 11" markerWidth="11" markerHeight="11" refX="9.3" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">'
+        '<path d="M1,1 L10,5.5 L1,10" class="sma-arch-head-open"></path></marker>'
         "</defs>"
-        '<rect x="8" y="8" width="1264" height="764" rx="20" class="sma-arch-board"></rect>'
+        '<rect x="16" y="16" width="1408" height="828" rx="20" class="sma-arch-board"></rect>'
         f'{"".join(layer_markup)}'
+        f'{"".join(shell_markup)}'
         f'{"".join(node_markup)}'
         f'{"".join(edges)}'
         "</svg>"
@@ -526,12 +869,28 @@ def render_layered_architecture_svg(raw_code_content: str) -> str:
     )
 
 
+def render_layered_architecture_svg(raw_code_content: str) -> str:
+    # Layout deterministico para mantener consistencia visual de modulo/capas sin autolayout.
+    return _render_layered_architecture_svg_manual(raw_code_content)
+
+
 def render_mermaid_block(raw_code_content: str, file_path: str) -> str:
     normalized_code_content = normalize_mermaid_source(raw_code_content)
     if (
         is_layered_architecture_mermaid(normalized_code_content)
         and file_path in LAYERED_SVG_FILE_WHITELIST
     ):
+        svg_asset_path = LAYERED_SVG_ASSET_BY_FILE.get(file_path)
+        if svg_asset_path:
+            legend_html = render_mermaid_arrow_legend()
+            return (
+                '<div class="sma-mermaid-block sma-architecture-block">\n'
+                f"{legend_html}"
+                '<div class="sma-architecture-svg-wrap" role="img" aria-label="Diagrama de arquitectura por capas del curso">'
+                f'<img src="{html.escape(svg_asset_path)}" class="sma-architecture-svg" alt="Diagrama de arquitectura por capas del curso"/>'
+                "</div>\n"
+                "</div>\n"
+            )
         return render_layered_architecture_svg(normalized_code_content)
     escaped_mermaid_code = html.escape(normalized_code_content)
     legend_html = ""
@@ -1575,8 +1934,8 @@ p code, li code, td code {{
     padding: 3px 8px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-light);
-    color: var(--danger);
-    font-weight: 500;
+    color: var(--text);
+    font-weight: 600;
     font-size: 0.85em;
 }}
 
@@ -1614,10 +1973,10 @@ p code, li code, td code {{
     --mermaid-node-border: #1d4ed8;
     --mermaid-line: #1e40af;
     --mermaid-label-bg: #eef2ff;
-    --mermaid-legend-direct: #d946ef;
-    --mermaid-legend-dashed-closed: #64748b;
-    --mermaid-legend-contract: #2563eb;
-    --mermaid-legend-solid-open: #059669;
+    --mermaid-legend-direct: #cbd5e1;
+    --mermaid-legend-dashed-closed: #cbd5e1;
+    --mermaid-legend-contract: #cbd5e1;
+    --mermaid-legend-solid-open: #cbd5e1;
 }}
 
 .sma-mermaid-block {{
@@ -1677,13 +2036,13 @@ p code, li code, td code {{
 }}
 
 .sma-legend-arrow.dashed-closed line,
-.sma-legend-arrow.contract-closed line {{
+.sma-legend-arrow.contract-open line {{
     stroke-dasharray: 6 4;
 }}
 
 .sma-legend-arrow.direct-closed {{ color: var(--mermaid-legend-direct); }}
 .sma-legend-arrow.dashed-closed {{ color: var(--mermaid-legend-dashed-closed); }}
-.sma-legend-arrow.contract-closed {{ color: var(--mermaid-legend-contract); }}
+.sma-legend-arrow.contract-open {{ color: var(--mermaid-legend-contract); }}
 .sma-legend-arrow.solid-open {{ color: var(--mermaid-legend-solid-open); }}
 
 .sma-architecture-block {{
@@ -1702,8 +2061,21 @@ p code, li code, td code {{
 .sma-architecture-svg {{
     display: block;
     width: 100%;
-    min-width: 960px;
+    min-width: 0;
+    max-width: 100%;
     height: auto;
+}}
+
+.d2-architecture-svg {{
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+}}
+
+.d2-architecture-svg .d2-svg {{
+    width: 100% !important;
+    height: auto !important;
 }}
 
 .sma-arch-board {{
@@ -1736,11 +2108,25 @@ p code, li code, td code {{
     stroke: #d8b4fe;
 }}
 
-.sma-arch-layer-label {{
-    font-family: var(--font-display);
-    font-size: 21px;
+.sma-arch-shell {{
+    fill: rgba(30, 41, 59, 0.38);
+    stroke: #fbbf24;
+    stroke-width: 1.8;
+}}
+
+.sma-arch-shell-label {{
+    font-family: var(--font-sans);
+    font-size: 17px;
     font-weight: 700;
     letter-spacing: 0.02em;
+    fill: #fde68a;
+}}
+
+.sma-arch-layer-label {{
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
     fill: #e2e8f0;
 }}
 
@@ -1753,18 +2139,21 @@ p code, li code, td code {{
 .sma-arch-node-core {{ stroke: #67e8f9; }}
 .sma-arch-node-app {{ stroke: #fb923c; }}
 .sma-arch-node-infra {{ stroke: #d8b4fe; }}
+.sma-arch-node-boot {{ stroke: #fbbf24; }}
 
 .sma-arch-node-label {{
-    font-family: var(--font-body);
-    font-size: 17px;
+    font-family: var(--font-sans);
+    font-size: 18px;
     font-weight: 600;
     fill: #f8fafc;
 }}
 
 .sma-arch-edge {{
     fill: none;
-    stroke-width: 3;
+    stroke-width: 2.8;
     stroke-linecap: round;
+    stroke-linejoin: round;
+    shape-rendering: geometricPrecision;
 }}
 
 .sma-arch-edge-direct {{ stroke: #f472b6; }}
@@ -1787,7 +2176,7 @@ p code, li code, td code {{
 .sma-arch-head-open {{
     fill: none;
     stroke: #86efac;
-    stroke-width: 2.2;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
 }}

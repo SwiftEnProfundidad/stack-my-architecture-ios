@@ -1,6 +1,5 @@
 # Composition Root: donde se ensambla todo
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -347,8 +346,6 @@ El Composition Root parece un archivo sencillo: "solo crea objetos y los conecta
 Un buen Composition Root no se nota. Un mal Composition Root (o su ausencia) se nota en cada PR, en cada test roto, y en cada refactor que se convierte en pesadilla.
 
 ---
-
-**Anterior:** [Integration Tests ←](05-integration-tests.md) · **Siguiente:** [SwiftUI Enterprise: Patrones Imprescindibles →](07-swiftui-enterprise.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

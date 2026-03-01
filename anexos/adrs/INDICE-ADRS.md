@@ -77,4 +77,3 @@ Contexto: normalizacion automatica para `anexos/adrs/INDICE-ADRS.md`.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Hallazgos y correcciones pedagógicas ←](../hallazgos-y-correcciones.md) · **Siguiente:** [ADR-003: Composition Root único para ensamblaje →](ADR-003-composition-root-unico.md)
