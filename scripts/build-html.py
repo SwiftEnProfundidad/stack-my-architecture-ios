@@ -1323,6 +1323,9 @@ def build_html():
 <link rel="stylesheet" href="assets/course-switcher.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/assistant-panel.css?v=__ASSET_VERSION__">
 <script>window.__SMA_ASSISTANT_PANEL_SRC = "assets/assistant-panel.js?v=__ASSET_VERSION__";</script>
+<script>window.__SMA_MERMAID_SRC = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";</script>
+<script>window.__SMA_HLJS_CORE_SRC = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js";</script>
+<script>window.__SMA_HLJS_SWIFT_SRC = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js";</script>
 <script defer src="assets/study-ux.js?v=__ASSET_VERSION__"></script>
 <script defer src="assets/course-switcher.js?v=__ASSET_VERSION__"></script>
 <script defer src="assets/theme-controls.js?v=__ASSET_VERSION__"></script>
@@ -1332,13 +1335,6 @@ def build_html():
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Mermaid.js para diagramas -->
-<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-
-<!-- Highlight.js para syntax highlighting -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
 
 <style>
 /* ============================================
@@ -2754,11 +2750,74 @@ function applyCodeTheme(theme) {{
     }}
     
     const highlightedBlocks = document.querySelectorAll('pre code[data-highlighted]');
-    highlightedBlocks.forEach(block => {{
-        block.removeAttribute('data-highlighted');
-        hljs.highlightElement(block);
-    }});
+    if (typeof hljs !== 'undefined') {{
+        highlightedBlocks.forEach(block => {{
+            block.removeAttribute('data-highlighted');
+            hljs.highlightElement(block);
+        }});
+    }}
     enhanceCodeBlocksFrom(highlightedBlocks);
+}}
+
+let mermaidLoadPromise = null;
+let highlightLoadPromise = null;
+
+function loadExternalScript(src) {{
+    return new Promise((resolve, reject) => {{
+        if (!src) {{
+            reject(new Error('missing-script-src'));
+            return;
+        }}
+
+        const selector = `script[data-sma-src="${{src}}"]`;
+        const existing = document.querySelector(selector);
+        if (existing) {{
+            if (existing.dataset.loaded === '1') {{
+                resolve();
+                return;
+            }}
+            existing.addEventListener('load', () => resolve(), {{ once: true }});
+            existing.addEventListener('error', () => reject(new Error(`script-load-failed:${{src}}`)), {{ once: true }});
+            return;
+        }}
+
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.dataset.smaSrc = src;
+        script.addEventListener('load', () => {{
+            script.dataset.loaded = '1';
+            resolve();
+        }}, {{ once: true }});
+        script.addEventListener('error', () => reject(new Error(`script-load-failed:${{src}}`)), {{ once: true }});
+        document.head.appendChild(script);
+    }});
+}}
+
+function ensureMermaidLoaded() {{
+    if (typeof mermaid !== 'undefined') return Promise.resolve();
+    if (!mermaidLoadPromise) {{
+        mermaidLoadPromise = loadExternalScript(window.__SMA_MERMAID_SRC).then(() => {{
+            if (typeof mermaid === 'undefined') {{
+                throw new Error('mermaid-unavailable');
+            }}
+        }});
+    }}
+    return mermaidLoadPromise;
+}}
+
+function ensureHighlightLoaded() {{
+    if (typeof hljs !== 'undefined') return Promise.resolve();
+    if (!highlightLoadPromise) {{
+        highlightLoadPromise = loadExternalScript(window.__SMA_HLJS_CORE_SRC)
+            .then(() => loadExternalScript(window.__SMA_HLJS_SWIFT_SRC))
+            .then(() => {{
+                if (typeof hljs === 'undefined') {{
+                    throw new Error('hljs-unavailable');
+                }}
+            }});
+    }}
+    return highlightLoadPromise;
 }}
 
 function detectSnippetLang(codeEl) {{
@@ -2866,14 +2925,26 @@ function enhanceCodeBlocksFrom(codes) {{
 
 function highlightCodeBlock(block) {{
     if (!block || block.dataset.highlighted === '1') return;
+    if (typeof hljs === 'undefined') {{
+        enhanceCodeBlocksFrom([block]);
+        return;
+    }}
     hljs.highlightElement(block);
     block.dataset.highlighted = '1';
     enhanceCodeBlocksFrom([block]);
 }}
 
-function initCodeHighlighting() {{
+async function initCodeHighlighting() {{
     const blocks = Array.from(document.querySelectorAll('pre code'));
     if (!blocks.length) return;
+
+    try {{
+        await ensureHighlightLoaded();
+    }} catch (error) {{
+        console.warn('Highlight.js no cargado.', error);
+        enhanceCodeBlocksFrom(blocks);
+        return;
+    }}
 
     const warmup = blocks.slice(0, 16);
     warmup.forEach(highlightCodeBlock);
@@ -2931,9 +3002,11 @@ function currentMermaidTheme() {{
     return theme === 'dark' ? 'dark' : 'default';
 }}
 
-function renderMermaid() {{
-    if (typeof mermaid === 'undefined') {{
-        console.warn('Mermaid no cargado. Revisa conexión a internet/CDN.');
+async function renderMermaid() {{
+    try {{
+        await ensureMermaidLoaded();
+    }} catch (error) {{
+        console.warn('Mermaid no cargado. Revisa conexión a internet/CDN.', error);
         return;
     }}
 
