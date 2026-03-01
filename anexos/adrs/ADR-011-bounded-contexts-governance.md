@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-011-bounded-contexts-go
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-010: Firebase como backend principal encapsulado ←](ADR-010-firebase-backend-principal.md) · **Siguiente:** [ADR-012: Reglas de dependencia progresivas →](ADR-012-reglas-dependencia-progresivas.md)

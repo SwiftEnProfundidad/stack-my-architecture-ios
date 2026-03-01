@@ -443,8 +443,6 @@ Un gate que podría añadirse es verificación de strict concurrency (`-strict-c
 
 ---
 
-**Anterior:** [Guía de arquitectura del repositorio ←](05-guia-arquitectura.md) · **Siguiente:** [Entregables — Etapa 4: Arquitecto →](entregables-etapa-4.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

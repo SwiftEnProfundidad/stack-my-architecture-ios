@@ -50,66 +50,21 @@ Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Siguiente:** [Marco de decisiones arquitectónicas →](01-marco-de-decisiones.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
+![Diagrama de arquitectura por capas (Core Mobile)](assets/architecture-ios-core-mobile.png)
 
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
+La leyenda visual superior define la semántica por tipo de trazo y punta de flecha; el color de cada flecha indica el módulo de origen.
 
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
+### Zoom de detalle por feature
 
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
+Para evitar sobrecarga visual en el mapa global, aquí tienes dos vistas de detalle separadas:
 
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
+#### Login (detalle)
 
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
+![Diagrama de arquitectura Login (detalle)](assets/architecture-ios-login-detail-v3.png)
 
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
+#### Catalog (detalle)
 
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+![Diagrama de arquitectura Catalog (detalle)](assets/architecture-ios-catalog-detail-v4.png)

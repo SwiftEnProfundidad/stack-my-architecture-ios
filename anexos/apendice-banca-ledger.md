@@ -418,4 +418,3 @@ Contexto: normalizacion automatica para `anexos/apendice-banca-ledger.md`.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-NNN: [Título de la decisión] ←](adrs/TEMPLATE-ADR.md) · **Siguiente:** [Glosario →](glosario.md)

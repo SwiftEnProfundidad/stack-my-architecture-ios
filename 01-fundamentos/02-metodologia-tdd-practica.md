@@ -453,8 +453,6 @@ Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-tdd-pract
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Metodología BDD: especificación y descubrimiento ←](02-metodologia-bdd-tdd.md) · **Siguiente:** [Stack tecnológico →](03-stack-tecnologico.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

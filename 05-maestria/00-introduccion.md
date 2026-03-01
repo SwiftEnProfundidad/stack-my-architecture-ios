@@ -1,6 +1,5 @@
 # Etapa 5 — Maestría: Concurrency, SwiftUI moderno y patrones de composición
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -315,8 +314,6 @@ Ahora sí: pasa a `01-isolation-domains.md` y estúdialo con el contrato anterio
 > **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](10-rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
 
 ---
-
-**Anterior:** [Consolidación: Etapa 4 - Arquitecto ←](../anexos/consolidacion-etapa-4-arquitecto.md) · **Siguiente:** [Isolation domains y Sendable →](01-isolation-domains.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

@@ -377,4 +377,3 @@ flowchart TD
 
 ---
 
-**Anterior:** [Atlas visual de arquitectura ←](diagramas/atlas-arquitectura.md) · **Siguiente:** [Git Workflow para el Curso →](git-workflow-curso.md)

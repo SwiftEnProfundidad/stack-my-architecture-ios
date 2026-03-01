@@ -1,6 +1,5 @@
 # Contratos entre features
 
-
 ## Ruta scaffold relacionada
 
 - `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
@@ -423,8 +422,6 @@ Cuando un contrato está bien definido, los equipos dejan de negociar detalles i
 Además, un buen contrato sirve como herramienta de onboarding: un junior puede entender cómo conectar una feature sin leer implementaciones internas de otras. Ese efecto acumulativo reduce dependencia de “personas clave” y fortalece la continuidad del equipo.
 
 ---
-
-**Anterior:** [Navegación por eventos: el AppCoordinator ←](02-navegacion-eventos.md) · **Siguiente:** [Infraestructura real: URLSessionHTTPClient →](04-infra-real-network.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

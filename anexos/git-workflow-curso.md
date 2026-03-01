@@ -350,4 +350,3 @@ Contexto: normalizacion automatica para `anexos/git-workflow-curso.md`.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Como anadir una feature nueva ←](guia-nueva-feature.md) · **Siguiente:** [Xcode Cheat Sheet: Atajos Esenciales para Productividad →](xcode-cheat-sheet.md)

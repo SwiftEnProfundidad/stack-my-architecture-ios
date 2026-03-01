@@ -44,8 +44,6 @@ Contexto: normalizacion automatica para `00-core-mobile/11-crosswalk-ios-android
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Plantillas operativas (con ejemplos reales) ←](10-plantillas.md) · **Siguiente:** [1) Purpose of This Document →](12-mobile-architect-parity-ios-android.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

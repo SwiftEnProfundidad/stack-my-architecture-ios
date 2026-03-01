@@ -52,8 +52,6 @@ Regla central: evidence over opinion.
 
 ---
 
-**Anterior:** [Variabilidad y evolución sin caos ←](03-variabilidad-y-evolucion.md) · **Siguiente:** [Observabilidad y operación →](05-observabilidad-operacion.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

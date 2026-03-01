@@ -629,8 +629,6 @@ La clave es que `CachedProductRepository` depende de protocolos (`ProductRemote`
 
 ---
 
-**Anterior:** [Etapa 3: Evolución — Resiliencia y calidad de producción ←](00-introduccion.md) · **Siguiente:** [Consistencia e invalidación →](02-consistencia.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

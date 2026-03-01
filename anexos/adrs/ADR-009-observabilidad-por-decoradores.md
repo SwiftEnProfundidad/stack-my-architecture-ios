@@ -107,4 +107,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-009-observabilidad-por-
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-008: Política explícita de consistencia e invalidación ←](ADR-008-consistencia-invalidation-policy.md) · **Siguiente:** [ADR-010: Firebase como backend principal encapsulado →](ADR-010-firebase-backend-principal.md)

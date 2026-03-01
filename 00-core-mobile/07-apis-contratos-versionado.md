@@ -57,8 +57,6 @@ Establece política de deprecación con ventana temporal y comunicación anticip
 
 ---
 
-**Anterior:** [Release, rollback y feature flags ←](06-release-rollback-flags.md) · **Siguiente:** [Seguridad, privacidad y threat modeling →](08-seguridad-privacidad-threat-modeling.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

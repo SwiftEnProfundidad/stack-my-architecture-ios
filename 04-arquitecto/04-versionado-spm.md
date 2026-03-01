@@ -498,8 +498,6 @@ El grafo muestra que las dependencias fluyen de Domain hacia afuera (Data, UI) y
 
 ---
 
-**Anterior:** [Navegación y deep links como plataforma ←](03-navegacion-deeplinks.md) · **Siguiente:** [Guía de arquitectura del repositorio →](05-guia-arquitectura.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

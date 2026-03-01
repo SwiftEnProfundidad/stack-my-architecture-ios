@@ -1,6 +1,5 @@
 # Swift Concurrency Enterprise: Patrones Imprescindibles
 
-
 <!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
@@ -905,8 +904,6 @@ Swift Concurrency no es una feature opcional que se anade al final. Es el sistem
 La Etapa 5 (Maestria) profundiza en estos conceptos con isolation domains, actors como componentes arquitectonicos y testing concurrente avanzado. Lo que has aprendido aquí es la base operativa; lo que viene es el criterio de diseño.
 
 ---
-
-**Anterior:** [SwiftUI Enterprise: Patrones Imprescindibles ←](07-swiftui-enterprise.md) · **Siguiente:** [App Final Etapa 2: Login + Catalog Funcionando Juntos →](09-app-final-etapa-2.md)
 
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura

@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-007-cache-network-first
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-006: Infraestructura real mínima con URLSessionHTTPCl... ←](ADR-006-infra-network-urlsession.md) · **Siguiente:** [ADR-008: Política explícita de consistencia e invalidación →](ADR-008-consistencia-invalidation-policy.md)

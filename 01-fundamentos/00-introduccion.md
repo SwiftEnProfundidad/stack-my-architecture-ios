@@ -340,9 +340,6 @@ El curso está dividido en cinco etapas que progresan en complejidad sin saltos.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-1.md](../01-fundamentos/entregables-etapa-1.md).
 
-
-**Anterior:** [1) Purpose of This Document ←](../00-core-mobile/12-mobile-architect-parity-ios-android.md) · **Siguiente:** [Setup: Preparación del entorno →](00-setup.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

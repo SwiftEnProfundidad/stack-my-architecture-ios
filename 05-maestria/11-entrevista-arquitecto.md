@@ -178,8 +178,6 @@ Practica estas narrativas hasta que fluyan naturalmente, sin sonar memorizadas. 
 
 ---
 
-**Anterior:** [Debugging en Xcode: Encuentra y arregla bugs como un prof... ←](10-debugging-xcode.md) · **Siguiente:** [12. Arquitectura Adaptativa: Más Allá del Patrón →](12-arquitectura-adaptativa.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

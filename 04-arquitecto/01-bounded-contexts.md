@@ -490,8 +490,6 @@ Los dos contextos comparten `CoreDomain` (tipos base compartidos) pero no se con
 
 ---
 
-**Anterior:** [Etapa 4: Arquitecto — Plataforma y gobernanza ←](00-introduccion.md) · **Siguiente:** [Reglas de dependencia y CI →](02-reglas-dependencia-ci.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

@@ -367,8 +367,6 @@ Contexto: normalizacion automatica para `05-maestria/09-migracion-swift6.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Anterior:** [Memory leaks y diagnóstico ←](08-memory-leaks-y-diagnostico.md) · **Siguiente:** [Debugging en Xcode: Encuentra y arregla bugs como un prof... →](10-debugging-xcode.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

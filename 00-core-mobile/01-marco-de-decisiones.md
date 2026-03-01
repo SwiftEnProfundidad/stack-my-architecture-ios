@@ -62,8 +62,6 @@ Contexto: normalizacion automatica para `00-core-mobile/01-marco-de-decisiones.m
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-**Anterior:** [Core Mobile Architecture ←](00-introduccion.md) · **Siguiente:** [Invariantes y contratos →](02-invariantes-y-contratos.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

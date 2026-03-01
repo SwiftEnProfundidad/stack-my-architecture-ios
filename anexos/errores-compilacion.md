@@ -444,4 +444,3 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 
 ---
 
-**Anterior:** [Mental Models: Cómo Pensar en Clean Architecture ←](mental-models.md) · **Siguiente:** [Anexo: Guía SOLID →](guia-solid.md)

@@ -72,4 +72,3 @@ Contexto: normalizacion automatica para `anexos/adrs/TEMPLATE-ADR.md`.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-014: Quality gates conceptuales orientados a arquitec... ←](ADR-014-quality-gates-conceptuales.md) · **Siguiente:** [Apendice: Dominio Banca / Ledger →](../apendice-banca-ledger.md)

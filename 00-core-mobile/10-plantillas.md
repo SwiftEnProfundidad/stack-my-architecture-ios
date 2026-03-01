@@ -229,8 +229,6 @@ Referencia con ejemplo completo:
 
 ---
 
-**Anterior:** [Dependency governance y supply chain ←](09-dependency-governance-supply-chain.md) · **Siguiente:** [Crosswalk iOS ↔ Android →](11-crosswalk-ios-android.md)
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

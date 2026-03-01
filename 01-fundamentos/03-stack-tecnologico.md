@@ -327,8 +327,6 @@ Contexto: normalizacion automatica para `01-fundamentos/03-stack-tecnologico.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [Metodología TDD: práctica Red-Green-Refactor ←](02-metodologia-tdd-practica.md) · **Siguiente:** [Estructura Feature-First: paso a paso en Xcode →](04-estructura-feature-first.md)
-
 <!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 

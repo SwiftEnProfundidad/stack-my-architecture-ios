@@ -182,4 +182,3 @@ Antes de pasar a la Etapa 3, verifica:
 
 ---
 
-**Anterior:** [Entregables — Etapa 2: Integración ←](../02-integracion/entregables-etapa-2.md) · **Siguiente:** [Etapa 3: Evolución — Resiliencia y calidad de producción →](../03-evolucion/00-introduccion.md)

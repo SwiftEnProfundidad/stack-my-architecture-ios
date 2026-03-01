@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-006-infra-network-urlse
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-005: Contratos entre features por eventos/modelos mín... ←](ADR-005-contratos-features.md) · **Siguiente:** [ADR-007: Estrategia de cache network-first + TTL + fallback →](ADR-007-cache-network-first-ttl.md)

@@ -110,4 +110,3 @@ Contexto: normalizacion automatica para `anexos/adrs/ADR-005-contratos-features.
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-**Anterior:** [ADR-004: Navegación event-driven desacoplada ←](ADR-004-navegacion-event-driven.md) · **Siguiente:** [ADR-006: Infraestructura real mínima con URLSessionHTTPCl... →](ADR-006-infra-network-urlsession.md)

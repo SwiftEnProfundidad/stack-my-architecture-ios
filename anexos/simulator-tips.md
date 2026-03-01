@@ -337,4 +337,3 @@ xcrun simctl location "iPhone 15 Pro" set 37.7749,-122.4194
 
 ---
 
-**Anterior:** [Cómo Leer Documentación de Apple Efectivamente ←](como-leer-documentacion.md) · **Siguiente:** [Mental Models: Cómo Pensar en Clean Architecture →](mental-models.md)
