@@ -15,6 +15,8 @@ body.with-global-topbar {
   background: var(--bg-elevated, #0f172a);
   border-bottom: 1px solid var(--border, #334155);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.18));
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .global-topbar > * {
@@ -186,26 +188,34 @@ main hr {
 
 @media (max-width: 900px) {
   body.with-global-topbar {
-    padding-top: 122px;
+    padding-top: 76px;
   }
 
   .global-topbar {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
+    padding: 8px 10px 8px 56px;
+    align-items: center;
   }
 
   #study-ux-controls,
   #theme-controls {
     margin-left: 0;
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
     justify-content: flex-start;
-    overflow-x: auto;
+    overflow-x: visible;
+  }
+
+  #study-ux-controls {
+    padding: 6px;
+    gap: 6px;
   }
 }
 
 @media (max-width: 768px) {
   body.with-global-topbar {
-    padding-top: 132px;
+    padding-top: 74px;
   }
 
   #study-ux-controls button,
@@ -228,5 +238,11 @@ main hr {
 
   .study-progress {
     font-size: 11.2px;
+  }
+
+  #study-ux-controls,
+  #theme-controls {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
