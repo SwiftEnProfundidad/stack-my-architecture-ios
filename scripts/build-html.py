@@ -251,6 +251,12 @@ LAYERED_SVG_ASSET_BY_FILE = {
     "00-core-mobile/00-introduccion.md": "assets/architecture-ios-core-mobile.png",
 }
 
+ARCHITECTURE_WEBP_ASSET_BY_PNG = {
+    "assets/architecture-ios-core-mobile.png": "assets/architecture-ios-core-mobile.webp",
+    "assets/architecture-ios-login-detail-v3.png": "assets/architecture-ios-login-detail-v3.webp",
+    "assets/architecture-ios-catalog-detail-v4.png": "assets/architecture-ios-catalog-detail-v4.webp",
+}
+
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
@@ -883,11 +889,16 @@ def render_mermaid_block(raw_code_content: str, file_path: str) -> str:
         svg_asset_path = LAYERED_SVG_ASSET_BY_FILE.get(file_path)
         if svg_asset_path:
             legend_html = render_mermaid_arrow_legend()
+            image_markup = render_responsive_image_tag(
+                alt="Diagrama de arquitectura por capas del curso",
+                src=svg_asset_path,
+                css_class="sma-architecture-svg",
+            )
             return (
                 '<div class="sma-mermaid-block sma-architecture-block">\n'
                 f"{legend_html}"
                 '<div class="sma-architecture-svg-wrap" role="img" aria-label="Diagrama de arquitectura por capas del curso">'
-                f'<img src="{html.escape(svg_asset_path)}" class="sma-architecture-svg" alt="Diagrama de arquitectura por capas del curso"/>'
+                f"{image_markup}"
                 "</div>\n"
                 "</div>\n"
             )
@@ -1185,13 +1196,7 @@ def inline_format(text, current_file_path, current_file_id, file_id_by_path):
     # Italic
     text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
     # Images
-    text = re.sub(
-        r"!\[([^\]]*)\]\(([^)]+)\)",
-        r'<img alt="\1" src="\2" loading="lazy" decoding="async">',
-        text,
-    )
-    # Normalize markdown-relative asset paths to dist-local asset paths.
-    text = re.sub(r'src="(?:\.\./)+assets/', 'src="assets/', text)
+    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", lambda m: render_responsive_image_tag(m.group(1), m.group(2)), text)
     # Links
     def _link_repl(match):
         label = match.group(1)
@@ -1201,6 +1206,29 @@ def inline_format(text, current_file_path, current_file_id, file_id_by_path):
 
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", _link_repl, text)
     return text
+
+
+def normalize_asset_path(asset_path: str) -> str:
+    return re.sub(r"^(?:\.\./)+assets/", "assets/", asset_path.strip())
+
+
+def render_responsive_image_tag(alt: str, src: str, css_class: str = "") -> str:
+    normalized_src = normalize_asset_path(src)
+    escaped_alt = html.escape((alt or "").strip())
+    escaped_src = html.escape(normalized_src)
+    class_attr = f' class="{html.escape(css_class)}"' if css_class else ""
+
+    webp_src = ARCHITECTURE_WEBP_ASSET_BY_PNG.get(normalized_src)
+    if webp_src:
+        escaped_webp_src = html.escape(webp_src)
+        return (
+            "<picture>"
+            f'<source srcset="{escaped_webp_src}" type="image/webp">'
+            f'<img alt="{escaped_alt}" src="{escaped_src}" loading="lazy" decoding="async"{class_attr}>'
+            "</picture>"
+        )
+
+    return f'<img alt="{escaped_alt}" src="{escaped_src}" loading="lazy" decoding="async"{class_attr}>'
 
 
 def build_nav(files_content):
@@ -3198,6 +3226,8 @@ if (sidebarSearchInput) {{
     OUTPUT_DIR.mkdir(exist_ok=True)
     OUTPUT_FILE.write_text(html, encoding="utf-8")
 
+    if ASSETS_DIST_DIR.exists():
+        shutil.rmtree(ASSETS_DIST_DIR)
     ASSETS_DIST_DIR.mkdir(parents=True, exist_ok=True)
     for src in ASSETS_SRC_DIR.iterdir():
         if src.is_file():
