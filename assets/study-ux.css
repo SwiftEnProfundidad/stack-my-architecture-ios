@@ -1,5 +1,5 @@
 body.with-global-topbar {
-  padding-top: 86px;
+  padding-top: var(--global-topbar-offset, 86px);
 }
 
 .global-topbar {
@@ -18,6 +18,13 @@ body.with-global-topbar {
   overflow: visible;
 }
 
+.global-topbar-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
 .global-topbar > *:not(#course-switcher) {
   position: static !important;
 }
@@ -29,6 +36,22 @@ body.with-global-topbar {
 
 #course-switcher-menu {
   z-index: 13100;
+}
+
+#sidebar-toggle-topbar {
+  display: none;
+  border: 1px solid var(--border, #334155);
+  background: var(--bg, #111827);
+  color: var(--text, #e5e7eb);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#menu-toggle {
+  display: none !important;
 }
 
 #study-ux-controls {
@@ -46,6 +69,9 @@ body.with-global-topbar {
 #theme-controls button,
 .study-topic-nav button,
 .study-ux-index-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--border, #334155);
   background: var(--bg-elevated, #0f172a);
   color: var(--text, #e5e7eb);
@@ -53,6 +79,9 @@ body.with-global-topbar {
   padding: 8px 10px;
   font-size: 12.5px;
   font-weight: 600;
+  line-height: 1.15;
+  min-height: 36px;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -140,6 +169,10 @@ body.with-global-topbar {
   border-top: 1px solid var(--border, #334155);
 }
 
+.lesson-path {
+  display: none !important;
+}
+
 .study-topic-nav-complete {
   font-weight: 700;
 }
@@ -195,37 +228,46 @@ main hr {
 }
 
 @media (max-width: 900px) {
-  body.with-global-topbar {
-    padding-top: 76px;
+  .global-topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 10px;
+    align-items: flex-start;
   }
 
-  .global-topbar {
-    flex-wrap: nowrap;
-    gap: 8px;
-    padding: 8px 10px 8px 56px;
-    align-items: center;
+  .global-topbar-left {
+    order: 1;
+    width: 100%;
   }
 
   #study-ux-controls,
   #theme-controls {
+    width: 100%;
     margin-left: 0;
-    width: auto;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     justify-content: flex-start;
-    overflow-x: visible;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   #study-ux-controls {
+    order: 2;
     padding: 6px;
     gap: 6px;
+  }
+
+  #theme-controls {
+    order: 3;
+  }
+
+  #sidebar-toggle-topbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
 @media (max-width: 768px) {
-  body.with-global-topbar {
-    padding-top: 74px;
-  }
-
   #study-ux-controls button,
   #theme-controls button,
   .study-topic-nav button,
@@ -244,6 +286,13 @@ main hr {
     font-size: 12px;
   }
 
+  #study-ux-controls button,
+  #theme-controls button,
+  .study-topic-nav button,
+  .study-ux-index-actions button {
+    min-height: 32px;
+  }
+
   .study-progress {
     font-size: 11.2px;
   }
@@ -252,17 +301,18 @@ main hr {
   #theme-controls {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 }
 
 @media (max-width: 480px) {
-  body.with-global-topbar {
-    padding-top: 68px;
-  }
-
   .global-topbar {
     gap: 6px;
-    padding: 6px 8px 6px 50px;
+    padding: 6px 8px;
+  }
+
+  .global-topbar-left {
+    gap: 6px;
   }
 
   #study-ux-controls {
@@ -298,8 +348,25 @@ main hr {
     font-size: 10.5px;
   }
 
+  #sidebar-toggle-topbar,
+  #course-switcher-toggle {
+    font-size: 10.8px;
+    padding: 6px 8px;
+    min-height: 30px;
+  }
+
   body.study-ux-compact-mobile .study-progress {
     font-weight: 700;
     letter-spacing: 0.01em;
+  }
+}
+
+@media (min-width: 981px) {
+  body.study-ux-zen.sma-assistant-open #content,
+  body.study-ux-zen.sma-assistant-open main {
+    margin-left: 16px !important;
+    margin-right: calc(clamp(320px, 33vw, 520px) + 16px) !important;
+    width: auto !important;
+    max-width: calc(100vw - clamp(320px, 33vw, 520px) - 48px) !important;
   }
 }
