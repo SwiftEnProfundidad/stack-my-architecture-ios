@@ -55,6 +55,7 @@
   let currentTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
   if (!currentTopic) return;
 
+  applyCompactMobileClass();
   renderTopic(currentTopic.id, false);
   markUiHydrated();
   applyZen(localStorage.getItem(keyZen) === '1');
@@ -86,12 +87,28 @@
     renderTopic(next.id, true);
   });
 
+  window.addEventListener('resize', debounce(function () {
+    applyCompactMobileClass();
+    updateCompletionUi();
+    updateReviewUi();
+    updateProgressUi();
+    applyZen(document.body.classList.contains('study-ux-zen'));
+  }, 120));
+
   function ensureStatsShape(raw) {
     return {
       totalTimeMs: Number(raw.totalTimeMs || 0),
       perTopicTimeMs: raw.perTopicTimeMs && typeof raw.perTopicTimeMs === 'object' ? raw.perTopicTimeMs : {},
       lastSessionStart: null
     };
+  }
+
+  function isCompactMobileViewport() {
+    return window.innerWidth <= 480;
+  }
+
+  function applyCompactMobileClass() {
+    document.body.classList.toggle('study-ux-compact-mobile', isCompactMobileViewport());
   }
 
   function persistStats() {
@@ -517,12 +534,22 @@
 
   function updateCompletionUi() {
     if (!completionBtn || !currentTopic) return;
-    completionBtn.textContent = completed[currentTopic.id] ? '↩ Desmarcar' : '✅ Marcar completado';
+    const isDone = !!completed[currentTopic.id];
+    const fullLabel = isDone ? '↩ Desmarcar' : '✅ Marcar completado';
+    const compactLabel = isDone ? '↩ Hecho' : '✅ Hecho';
+    completionBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+    completionBtn.setAttribute('aria-label', fullLabel);
+    completionBtn.title = fullLabel;
   }
 
   function updateReviewUi() {
     if (!reviewBtn || !currentTopic) return;
-    reviewBtn.textContent = review[currentTopic.id] ? '❌ Quitar repaso' : '🔁 Marcar para repaso';
+    const isReview = !!review[currentTopic.id];
+    const fullLabel = isReview ? '❌ Quitar repaso' : '🔁 Marcar para repaso';
+    const compactLabel = isReview ? '❌ Repaso' : '🔁 Repaso';
+    reviewBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+    reviewBtn.setAttribute('aria-label', fullLabel);
+    reviewBtn.title = fullLabel;
   }
 
   function updateProgressUi() {
@@ -530,7 +557,10 @@
     const done = topics.filter((t) => !!completed[t.id]).length;
     const percent = total === 0 ? 0 : Math.round((done / total) * 100);
     if (progressEl) {
-      progressEl.textContent = `Progreso: ${done}/${total} (${percent}%)`;
+      const fullLabel = `Progreso: ${done}/${total} (${percent}%)`;
+      progressEl.textContent = isCompactMobileViewport() ? `${done}/${total}` : fullLabel;
+      progressEl.setAttribute('aria-label', fullLabel);
+      progressEl.title = fullLabel;
     }
   }
 
@@ -771,7 +801,11 @@
   function applyZen(isOn) {
     document.body.classList.toggle('study-ux-zen', isOn);
     if (zenBtn) {
-      zenBtn.textContent = isOn ? '🧘 Salir enfoque' : '🧘 Enfoque';
+      const fullLabel = isOn ? '🧘 Salir enfoque' : '🧘 Enfoque';
+      const compactLabel = isOn ? '🧘 Salir' : '🧘 Zen';
+      zenBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+      zenBtn.setAttribute('aria-label', fullLabel);
+      zenBtn.title = fullLabel;
     }
   }
 
