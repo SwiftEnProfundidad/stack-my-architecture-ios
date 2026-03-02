@@ -33,7 +33,7 @@ graph LR
 
     style Coupled fill:#f8d7da,stroke:#dc3545
     style Decoupled fill:#d4edda,stroke:#28a745
-```text
+```
 
 En el modelo acoplado, cada vista conoce la siguiente. Si quieres cambiar el flujo (por ejemplo, mostrar un onboarding entre Login y Catalog), necesitas modificar LoginView. En el modelo desacoplado, solo cambias el Coordinator. Las features no se tocan.
 
@@ -138,7 +138,7 @@ final class AppCoordinator {
         )
     }
 }
-```text
+```
 
 Vamos a analizar las decisiones de diseño:
 
@@ -367,10 +367,8 @@ Si puedes cambiar destino de un evento sin editar la feature emisora, la navegac
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `02-integracion/02-navegacion-eventos.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -387,7 +385,6 @@ Contexto: normalizacion automatica para `02-integracion/02-navegacion-eventos.md
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -414,7 +411,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

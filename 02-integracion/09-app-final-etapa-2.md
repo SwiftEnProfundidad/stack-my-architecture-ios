@@ -35,7 +35,7 @@ graph TD
     
     style C fill:#e1f5fe
     style B fill:#fff3e0
-```text
+```
 
 El `AppCoordinator` es el centro de todo. Recibe eventos de las features y decide a qué pantalla navegar.
 
@@ -82,7 +82,7 @@ flowchart LR
     LREMOTE --o LGW
     CREMOTE --o CREPO
     CREMOTE --> CSTORE
-```text
+```
 
 Lectura semántica (la clave didáctica):
 
@@ -502,12 +502,8 @@ Pero primero, revisa los entregables de la Etapa 2.
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `02-integracion/09-app-final-etapa-2.md`.
 
 ### Prerrequisitos
 - Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.

@@ -76,7 +76,7 @@ flowchart LR
     CR --> CO
 
     E1 --> E2
-```text
+```
 
 ---
 
@@ -363,7 +363,6 @@ Debe poder explicar y defender el flujo completo Login -> evento -> Coordinator 
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-2.md](../02-integracion/entregables-etapa-2.md).
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -390,7 +389,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

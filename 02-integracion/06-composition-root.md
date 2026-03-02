@@ -44,7 +44,7 @@ flowchart TD
     CR -.-> COORD["Crea AppCoordinator<br/>conecta closures de navegacion"]
 
     style CR fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 ---
 
@@ -260,7 +260,7 @@ sequenceDiagram
     CR->>CR: CatalogViewModel(useCase, closure)
     CR->>CR: CatalogView(viewModel)
     CR-->>APP: CatalogView lista
-```text
+```
 
 ---
 
@@ -347,7 +347,6 @@ Un buen Composition Root no se nota. Un mal Composition Root (o su ausencia) se 
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -374,7 +373,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

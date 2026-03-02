@@ -176,7 +176,7 @@ Con propiedades independientes tendríamos estados imposibles:
 isLoading = true
 products = [product1, product2]  // ¿Loading con productos? ¿Qué muestra la UI?
 errorMessage = "Sin conexión"     // ¿Loading con error? ¿Y con productos?
-```text
+```
 
 Con un enum, cada estado es una variante única. No puedes estar en dos estados a la vez:
 
@@ -506,12 +506,8 @@ Ambas features siguen el mismo patrón arquitectónico (ViewModel con @Observabl
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/04-interface-swiftui.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -528,7 +524,6 @@ Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/04-in
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -555,7 +550,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

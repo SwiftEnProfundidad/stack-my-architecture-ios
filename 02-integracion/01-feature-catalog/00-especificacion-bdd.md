@@ -63,7 +63,7 @@ flowchart TD
     ERR_CONN --> RETRY["Usuario pulsa reintentar"]
     ERR_DATA --> RETRY
     RETRY --> LOAD
-```text
+```
 
 Este diagrama define la lógica observable de negocio de la feature. Cualquier cambio funcional debería reflejarse aquí antes de tocar implementación.
 
@@ -358,7 +358,6 @@ Con esta especificación cerrada, ya se puede implementar con TDD sin improvisar
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -385,7 +384,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
