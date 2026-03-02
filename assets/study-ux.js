@@ -921,6 +921,7 @@
       return;
     }
 
+    const synced = await cloudSync.pushNow({ force: true });
     const url = buildSyncLink(profile, cloudSync.getSyncBaseUrl());
     try {
       if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
@@ -928,7 +929,11 @@
       } else {
         throw new Error('Clipboard API no disponible');
       }
-      alert('Enlace de sincronización copiado al portapapeles.');
+      if (synced) {
+        alert('Enlace de sincronización copiado y progreso sincronizado.');
+      } else {
+        alert('Enlace de sincronización copiado. No se pudo confirmar sincronización cloud en este momento.');
+      }
     } catch (_error) {
       window.prompt('Copia este enlace para usar el mismo progreso en otro dispositivo:', url);
     }
