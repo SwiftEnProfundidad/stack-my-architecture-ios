@@ -73,7 +73,7 @@ graph LR
 
     Mono -->|"Dolor medible"| Local
     Local -->|"Consumidores independientes"| Remote
-```text
+```
 
 ---
 
@@ -227,7 +227,7 @@ flowchart LR
     V1["1.0.0"] --> V2["1.0.1 PATCH"]
     V2 --> V3["1.1.0 MINOR"]
     V3 --> V4["2.0.0 MAJOR"]
-```text
+```
 
 Si no hay disciplina de semver, consumidores pierden confianza y empiezan a pinnear versiones antiguas.
 
@@ -498,7 +498,6 @@ El grafo muestra que las dependencias fluyen de Domain hacia afuera (Data, UI) y
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -525,7 +524,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
