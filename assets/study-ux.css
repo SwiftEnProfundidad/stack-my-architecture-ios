@@ -319,6 +319,8 @@ main hr {
     padding: 4px;
     gap: 4px;
     border-radius: 8px;
+    overflow-x: visible;
+    flex-wrap: wrap;
   }
 
   #study-ux-controls button,
@@ -338,6 +340,16 @@ main hr {
     max-width: 36px;
     padding: 5px 0;
     font-size: 10.5px;
+  }
+
+  #study-progress {
+    flex: 1 1 100%;
+    order: -1;
+  }
+
+  #theme-controls {
+    overflow-x: visible;
+    flex-wrap: wrap;
   }
 
   #theme-controls {
