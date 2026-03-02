@@ -1,16 +1,16 @@
 {
-  "lessons_total": 114,
+  "lessons_total": 115,
   "controls": [
     {
       "control": "Continuidad pedagogica",
       "p1": 0,
-      "p2": 9,
+      "p2": 7,
       "status": "OK"
     },
     {
       "control": "Saltos/prerrequisitos/redundancias",
       "p1": 0,
-      "p2": 10,
+      "p2": 7,
       "status": "OK"
     },
     {
@@ -21,14 +21,14 @@
     },
     {
       "control": "Mermaid semantica",
-      "p1": 0,
-      "p2": 0,
-      "status": "OK"
+      "p1": 61,
+      "p2": 11,
+      "status": "REVISAR"
     },
     {
       "control": "Snippets calidad",
       "p1": 0,
-      "p2": 0,
+      "p2": 1,
       "status": "OK"
     },
     {
@@ -51,7 +51,7 @@
     }
   ],
   "template": {
-    "ok": 52,
+    "ok": 53,
     "p1": 0,
     "p2": 62
   },
@@ -59,5 +59,7 @@
     "status": "pass",
     "fail_rules": []
   },
-  "residual_p1": {}
+  "residual_p1": {
+    "Mermaid semantica": 61
+  }
 }
