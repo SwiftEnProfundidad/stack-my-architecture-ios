@@ -49,7 +49,7 @@ sequenceDiagram
 
     C-->>T1: void (¿o crash?)
     C-->>T2: CachedProducts? (¿datos corruptos?)
-```text
+```
 
 Este segundo diagrama muestra el problema real: sin serialización, dos hilos acceden al mismo `JSONEncoder`/`JSONDecoder` simultáneamente. `JSONEncoder` mantiene estado interno durante la codificación. Si dos hilos lo usan a la vez, el resultado es indeterminado: puede funcionar, puede crashear, puede devolver JSON corrupto. **Lo peor es que funciona el 99% de las veces**, lo que te da falsa confianza.
 
@@ -473,7 +473,7 @@ actor ProductStore {
         products = []
     }
 }
-```text
+```
 
 La solución depende del caso:
 
@@ -511,12 +511,8 @@ actor ProductStore {
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/02-actors-en-arquitectura.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -533,7 +529,6 @@ Contexto: normalizacion automatica para `05-maestria/02-actors-en-arquitectura.m
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -560,7 +555,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

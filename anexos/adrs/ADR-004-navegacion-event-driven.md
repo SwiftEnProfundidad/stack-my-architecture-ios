@@ -195,10 +195,8 @@ class AppCoordinator {
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-004-navegacion-event-driven.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

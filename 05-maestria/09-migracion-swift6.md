@@ -40,7 +40,7 @@ graph BT
     style UI fill:#d4edda,stroke:#28a745
     style MAIN fill:#d4edda,stroke:#28a745
     style TESTS fill:#f8f9fa,stroke:#6c757d
-```text
+```
 
 **¿Por qué este orden?** Porque cada módulo depende del que tiene debajo. Si migras Domain primero, los errores de Sendable en Domain se propagan como soluciones hacia arriba. Si empiezas por UI, tendrás errores confusos porque los tipos de Domain aún no son Sendable.
 
@@ -76,7 +76,7 @@ flowchart TD
     style FIX7 fill:#d4edda,stroke:#28a745
     style FIX8 fill:#d4edda,stroke:#28a745
     style CLOS fill:#d4edda,stroke:#28a745
-```text
+```
 
 Este flowchart es tu **herramienta de triage** durante la migración. Cada error de compilación se resuelve siguiendo una de estas ramas. Después de resolver 50 errores, el flowchart se convierte en instinto: ves el error y sabes la solución en 3 segundos.
 
@@ -351,12 +351,8 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/09-migracion-swift6.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -367,7 +363,6 @@ Contexto: normalizacion automatica para `05-maestria/09-migracion-swift6.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -394,7 +389,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

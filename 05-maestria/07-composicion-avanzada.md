@@ -39,7 +39,7 @@ graph TD
     style Decorator fill:#d4edda,stroke:#28a745
     style Composite fill:#cce5ff,stroke:#007bff
     style Interception fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 Y así es como se combinan en el Composition Root de nuestro proyecto:
 
@@ -57,7 +57,7 @@ graph LR
     style CACHE_SAVE fill:#fff3cd,stroke:#ffc107
     style REMOTE fill:#d4edda,stroke:#28a745
     style LOCAL fill:#d4edda,stroke:#28a745
-```text
+```
 
 El `LoadProductsUseCase` no sabe nada de esta cadena. Solo sabe que habla con algo que conforma `ProductRepository`. Toda la composición es **invisible** para la lógica de negocio.
 
@@ -96,7 +96,7 @@ graph TB
 
     style Sin fill:#f8d7da,stroke:#dc3545
     style Con fill:#d4edda,stroke:#28a745
-```text
+```
 
 Cada tipo tiene **una sola responsabilidad**. Si el logging cambia, solo tocas `LoggingProductRepository`. Si la estrategia de fallback cambia, solo tocas `ProductRepositoryWithFallback`. El resto del sistema no se entera.
 
@@ -434,12 +434,8 @@ La composición avanzada te permite:
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/07-composicion-avanzada.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -456,7 +452,6 @@ Contexto: normalizacion automatica para `05-maestria/07-composicion-avanzada.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -483,7 +478,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

@@ -57,10 +57,8 @@ No crear ADR para cambios locales de bajo impacto y fácil reversión.
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/INDICE-ADRS.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

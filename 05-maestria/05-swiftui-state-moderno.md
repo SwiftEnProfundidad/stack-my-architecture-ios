@@ -87,7 +87,7 @@ graph TB
 
     style Legacy fill:#f8d7da,stroke:#dc3545
     style Modern fill:#d4edda,stroke:#28a745
-```text
+```
 
 En un ViewModel con 10 propiedades y 15 vistas observando, `ObservableObject` causa **150 re-evaluaciones de body** por cada cambio en cualquier propiedad. `@Observable` causa **solo las necesarias**: las vistas que realmente leen la propiedad que cambió. En una app enterprise con pantallas complejas, esta diferencia se traduce en frame drops visibles.
 
@@ -124,7 +124,7 @@ flowchart TD
     style LET fill:#d4edda,stroke:#28a745
     style BINDING fill:#cce5ff,stroke:#007bff
     style BINDABLE fill:#cce5ff,stroke:#007bff
-```text
+```
 
 **Regla de oro del flowchart:** empieza siempre por la rama derecha (`let`). Solo sube de complejidad si la vista necesita más. El 60% de las propiedades de una vista deberían ser `let`. Si tienes más `@State` que `let`, probablemente estás poniendo demasiada responsabilidad en la vista.
 
@@ -452,12 +452,8 @@ En el código del curso, verifica que usamos las APIs modernas:
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/05-swiftui-state-moderno.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -474,7 +470,6 @@ Contexto: normalizacion automatica para `05-maestria/05-swiftui-state-moderno.md
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -501,7 +496,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

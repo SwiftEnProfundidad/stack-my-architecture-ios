@@ -37,7 +37,7 @@ flowchart LR
     style EVAL fill:#f8d7da,stroke:#dc3545
     style RENDER fill:#d4edda,stroke:#28a745
     style SKIP fill:#f8f9fa,stroke:#6c757d
-```text
+```
 
 El coste real está en el paso "Re-evalúa body": aunque SwiftUI no actualice la pantalla, ya gastó CPU evaluando el body y todas sus subvistas. En una lista con 50 `ProductRow`, eso son 51 evaluaciones de body por un solo cambio de `isLoading`.
 
@@ -63,7 +63,7 @@ graph TD
     style PR2 fill:#f8d7da,stroke:#dc3545
     style PR3 fill:#f8d7da,stroke:#dc3545
     style PRN fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Un solo cambio de `isLoading` causó N+4 evaluaciones de body. Si ninguna de esas vistas usa `isLoading`, todas fueron innecesarias. Este es el **invalidation storm** que causa frame drops en apps enterprise con pantallas complejas.
 
@@ -89,7 +89,7 @@ graph LR
 
     style POD fill:#d4edda,stroke:#28a745
     style NonPOD fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 SwiftUI usa dos mecanismos de diffing: `memcmp` (comparación de memoria byte a byte, extremadamente rápido) para vistas POD, y reflexión (introspección de propiedades, más lento) para vistas con property wrappers. En una lista con 1000 items, la diferencia es medible.
 
@@ -455,12 +455,8 @@ Antes de considerar una vista "terminada":
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/06-swiftui-performance.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -471,7 +467,6 @@ Contexto: normalizacion automatica para `05-maestria/06-swiftui-performance.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -498,7 +493,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

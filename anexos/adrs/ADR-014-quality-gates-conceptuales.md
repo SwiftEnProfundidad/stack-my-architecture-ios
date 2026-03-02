@@ -90,10 +90,8 @@ Ver la lección [06-quality-gates](../../04-arquitecto/06-quality-gates.md) para
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-014-quality-gates-conceptuales.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

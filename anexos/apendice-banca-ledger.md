@@ -401,10 +401,8 @@ El dominio cambia (productos → cuentas bancarias), pero la arquitectura no. Va
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/apendice-banca-ledger.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

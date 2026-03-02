@@ -90,10 +90,8 @@ Ver la lección [03-observabilidad](../../03-evolucion/03-observabilidad.md) par
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-009-observabilidad-por-decoradores.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
