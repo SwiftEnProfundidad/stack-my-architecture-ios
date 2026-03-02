@@ -32,6 +32,7 @@ CONTENT_DIRS = [
     "03-evolucion",
     "04-arquitecto",
     "05-maestria",
+    "06-proyecto-final",
     "anexos",
 ]
 
@@ -146,6 +147,8 @@ FILE_ORDER = [
     "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
     "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
     "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
+    "06-proyecto-final/00-proyecto-final-ios.md",
+    "06-proyecto-final/01-rubrica-y-entrega.md",
     "anexos/calentamiento-etapa-5-maestria.md",
     "anexos/quizzes-autoevaluacion.md",
     "anexos/guia-recuperacion-ios.md",
@@ -177,7 +180,6 @@ FILE_ORDER = [
     "anexos/adrs/TEMPLATE-ADR.md",
     "anexos/apendice-banca-ledger.md",
     "anexos/glosario.md",
-    "anexos/proyecto-final.md",
 ]
 
 
@@ -1253,6 +1255,7 @@ def build_nav(files_content):
         "03-evolucion": {"title": "ETAPA 3: SENIOR", "lesson_label": "Leccion", "numbered": True},
         "04-arquitecto": {"title": "ETAPA 4: ARQUITECTO", "lesson_label": "Leccion", "numbered": True},
         "05-maestria": {"title": "ETAPA 5: MAESTRIA", "lesson_label": "Leccion", "numbered": True},
+        "06-proyecto-final": {"title": "ETAPA 6: PROYECTO FINAL", "lesson_label": "Leccion", "numbered": True},
         "anexos": {"title": "Anexos", "lesson_label": "Anexo", "numbered": False},
     }
 
