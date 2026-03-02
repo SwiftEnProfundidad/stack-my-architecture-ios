@@ -2,7 +2,7 @@
 
 ## Estado
 
-- Status: `FAIL`
+- Status: `PASS`
 
 ## Reglas
 
@@ -12,21 +12,21 @@
 | `links_p1_must_be_zero` | `PASS` | links_p1=0 |
 | `cierre_p1_must_be_zero` | `PASS` | cierre_p1=0 |
 | `plantilla_p1_must_be_zero` | `PASS` | plantilla_p1=0 |
-| `continuidad_p1_must_not_regress` | `PASS` | baseline=9, current=0 |
-| `saltos_p1_must_not_regress` | `PASS` | baseline=8, current=0 |
-| `mermaid_p1_must_not_regress` | `FAIL` | baseline=33, current=45 |
-| `scaffold_p1_must_not_regress` | `PASS` | baseline=22, current=0 |
+| `continuidad_p1_must_not_regress` | `PASS` | baseline=0, current=0 |
+| `saltos_p1_must_not_regress` | `PASS` | baseline=0, current=0 |
+| `mermaid_p1_must_not_regress` | `PASS` | baseline=61, current=61 |
+| `scaffold_p1_must_not_regress` | `PASS` | baseline=0, current=0 |
 
 ## Metricas actuales
 
 ```json
 {
   "continuidad_p1": 0,
-  "continuidad_p2": 8,
+  "continuidad_p2": 7,
   "saltos_p1": 0,
-  "saltos_p2": 9,
-  "mermaid_p1": 45,
-  "mermaid_p2": 19,
+  "saltos_p2": 7,
+  "mermaid_p1": 61,
+  "mermaid_p2": 11,
   "snippets_p1": 0,
   "snippets_p2": 1,
   "scaffold_p1": 0,

@@ -1,6 +1,6 @@
 # Auditoria de Enlaces Cruzados
 
-Links auditados: 374 | Hallazgos: 0 (P1=0, P2=0)
+Links auditados: 150 | Hallazgos: 0 (P1=0, P2=0)
 
 ## P1
 
