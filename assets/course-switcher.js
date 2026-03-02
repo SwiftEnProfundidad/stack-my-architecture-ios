@@ -44,6 +44,18 @@
     }
   }
 
+  function appendQueryParam(url, key, value) {
+    if (!url || !key || !value) return url;
+    try {
+      var target = new URL(url, window.location.href);
+      target.searchParams.set(key, value);
+      if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url)) return target.toString();
+      return target.pathname + target.search + target.hash;
+    } catch (_error) {
+      return url;
+    }
+  }
+
   function resolveCourseLink(path, remoteFallback, syncParams) {
     var base = deriveHubBase();
     if (base) return appendSyncParams(base + path, syncParams);
@@ -51,14 +63,76 @@
     return appendSyncParams(path, syncParams);
   }
 
-  function setLinks() {
+  function readJsonStorage(key) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return null;
+      return parsed;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function readStoredAuthUser() {
+    var user = readJsonStorage(AUTH_USER_KEY);
+    if (!user || !user.id) return null;
+    return user;
+  }
+
+  function readStoredAuthSession() {
+    var session = readJsonStorage(AUTH_SESSION_KEY);
+    if (!session || !session.accessToken) return null;
+    return session;
+  }
+
+  function hasValidSession(session) {
+    if (!session || !session.accessToken) return false;
+    if (!session.expiresAt) return true;
+    var expiresAt = Date.parse(String(session.expiresAt));
+    if (!Number.isFinite(expiresAt)) return true;
+    return expiresAt > Date.now();
+  }
+
+  function clearStoredAuth() {
+    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(AUTH_SESSION_KEY);
+  }
+
+  function hasAuthenticatedUser() {
+    var user = readStoredAuthUser();
+    var session = readStoredAuthSession();
+    if (!user || !hasValidSession(session)) {
+      clearStoredAuth();
+      return false;
+    }
+    return true;
+  }
+
+  function resolveCurrentPath() {
+    return window.location.pathname + window.location.search + window.location.hash;
+  }
+
+  function resolveLoginUrl(syncParams, nextPath) {
+    var base = resolveCourseLink('/auth/login.html', REMOTE_LINKS.home + '/auth/login.html', syncParams);
+    return appendQueryParam(base, 'next', nextPath || '/index.html');
+  }
+
+  function enforceAuthenticatedAccess(syncParams) {
+    if (hasAuthenticatedUser()) return true;
+    var loginUrl = resolveLoginUrl(syncParams, resolveCurrentPath());
+    window.location.replace(loginUrl);
+    return false;
+  }
+
+  function setLinks(syncParams) {
     var home = document.getElementById('course-switcher-home');
     var ios = document.getElementById('course-switcher-ios');
     var android = document.getElementById('course-switcher-android');
     var sdd = document.getElementById('course-switcher-sdd');
     if (!home || !ios || !android) return;
 
-    var syncParams = collectSyncParams();
     home.href = resolveCourseLink('/index.html', REMOTE_LINKS.home, syncParams);
     ios.href = resolveCourseLink('/ios/index.html', REMOTE_LINKS.ios, syncParams);
     android.href = resolveCourseLink('/android/index.html', REMOTE_LINKS.android, syncParams);
@@ -89,9 +163,8 @@
     logoutLink.style.display = user && user.id ? '' : 'none';
     logoutLink.onclick = function (event) {
       event.preventDefault();
-      localStorage.removeItem(AUTH_USER_KEY);
-      localStorage.removeItem(AUTH_SESSION_KEY);
-      window.location.href = authUrl;
+      clearStoredAuth();
+      window.location.href = resolveLoginUrl(syncParams, '/index.html');
     };
   }
 
@@ -104,19 +177,6 @@
     li.appendChild(link);
     menu.appendChild(li);
     return link;
-  }
-
-  function readStoredAuthUser() {
-    try {
-      var raw = localStorage.getItem(AUTH_USER_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== 'object') return null;
-      if (!parsed.id) return null;
-      return parsed;
-    } catch (_error) {
-      return null;
-    }
   }
 
   function setupToggle() {
@@ -140,6 +200,8 @@
     }
   }
 
-  setLinks();
+  var syncParams = collectSyncParams();
+  if (!enforceAuthenticatedAccess(syncParams)) return;
+  setLinks(syncParams);
   setupToggle();
 })();
