@@ -12,6 +12,8 @@
   const keyFontSize = `sma:${courseId}:font:size`;
   const keyCloudProfile = 'sma:cloud:profile:v1';
   const keyCloudUpdatedAt = `sma:${courseId}:cloud:updated-at`;
+  const keyCloudEndpoint = 'sma:cloud:endpoint:v1';
+  const DEFAULT_REMOTE_PROGRESS_BASE = 'https://architecture-stack.vercel.app';
 
   const completionBtn = document.getElementById('study-completion-toggle');
   const zenBtn = document.getElementById('study-zen-toggle');
@@ -510,6 +512,7 @@
     rowPrimary.appendChild(createButton('▶ Continuar donde lo dejaste', goResume, 'study-resume-btn'));
     rowPrimary.appendChild(createButton('➡ Ir al primer tema pendiente', goFirstIncomplete));
     rowPrimary.appendChild(createButton('🔁 Mostrar solo temas para repaso', toggleReviewFilter, 'study-filter-review'));
+    rowPrimary.appendChild(createButton('🔗 Copiar enlace de sincronización', copySyncLink, 'study-sync-link'));
 
     const statsBox = document.createElement('div');
     statsBox.id = 'study-stats';
@@ -910,6 +913,26 @@
     return { ok: true };
   }
 
+  async function copySyncLink() {
+    const profile = cloudSync.getProfileKey();
+    if (!profile) {
+      alert('No se pudo resolver profileKey para sincronización.');
+      return;
+    }
+
+    const url = buildSyncLink(profile, cloudSync.getSyncBaseUrl());
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(url);
+      } else {
+        throw new Error('Clipboard API no disponible');
+      }
+      alert('Enlace de sincronización copiado al portapapeles.');
+    } catch (_error) {
+      window.prompt('Copia este enlace para usar el mismo progreso en otro dispositivo:', url);
+    }
+  }
+
   async function resetProgress() {
     if (!window.confirm('Esto borrará tu progreso de este curso. ¿Deseas continuar?')) return;
     const prefix = `sma:${courseId}:`;
@@ -963,7 +986,8 @@
       profileKey: '',
       pendingTimer: null,
       pushing: false,
-      lastSnapshot: ''
+      lastSnapshot: '',
+      syncBaseUrl: ''
     };
 
     async function bootstrap() {
@@ -971,6 +995,7 @@
       state.bootstrapped = true;
       state.profileKey = await resolveProfileKey();
       if (!state.profileKey) return;
+      state.syncBaseUrl = resolveSyncBaseUrl();
 
       const config = await fetchConfig();
       state.enabled = !!(config && config.enabled);
@@ -1122,9 +1147,42 @@
         return String(fromQuery);
       }
 
+      const fromWindow = String(
+        (window.__SMA_PROGRESS_PROFILE || window.__SMA_PROGRESS_SHARED_PROFILE || '')
+      ).trim();
+      if (isValidProfileKey(fromWindow)) {
+        localStorage.setItem(keyCloudProfile, fromWindow);
+        return fromWindow;
+      }
+
       const generated = await fingerprintProfileKey();
       if (generated) localStorage.setItem(keyCloudProfile, generated);
       return generated;
+    }
+
+    function resolveSyncBaseUrl() {
+      const params = new URLSearchParams(location.search);
+      const fromQuery = normalizeBaseUrl(
+        params.get('progressBase') || params.get('progressEndpoint') || ''
+      );
+      if (fromQuery) {
+        localStorage.setItem(keyCloudEndpoint, fromQuery);
+        return fromQuery;
+      }
+
+      const fromWindow = normalizeBaseUrl(
+        String(window.__SMA_PROGRESS_SYNC_BASE_URL || window.__SMA_PROGRESS_BASE_URL || '')
+      );
+      if (fromWindow) {
+        localStorage.setItem(keyCloudEndpoint, fromWindow);
+        return fromWindow;
+      }
+
+      const fromStorage = normalizeBaseUrl(localStorage.getItem(keyCloudEndpoint) || '');
+      if (fromStorage) return fromStorage;
+
+      if (isLocalContext()) return DEFAULT_REMOTE_PROGRESS_BASE;
+      return '';
     }
 
     async function fetchConfig() {
@@ -1140,11 +1198,11 @@
     }
 
     function configUrl() {
-      return '/progress/config';
+      return buildProgressUrl(state.syncBaseUrl, '/progress/config');
     }
 
     function stateUrl() {
-      return '/progress/state';
+      return buildProgressUrl(state.syncBaseUrl, '/progress/state');
     }
 
     function stableSerialize(value) {
@@ -1221,8 +1279,42 @@
     return {
       bootstrap,
       schedulePush,
-      pushNow
+      pushNow,
+      getProfileKey: function () { return state.profileKey; },
+      getSyncBaseUrl: function () { return state.syncBaseUrl; }
     };
+  }
+
+  function buildSyncLink(profileKey, syncBaseUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('progressProfile', profileKey);
+    const normalizedBase = normalizeBaseUrl(syncBaseUrl || '');
+    if (normalizedBase && isLocalContext()) {
+      url.searchParams.set('progressBase', normalizedBase);
+    }
+    return url.toString();
+  }
+
+  function buildProgressUrl(baseUrl, path) {
+    const cleanPath = String(path || '').startsWith('/') ? String(path) : `/${String(path || '')}`;
+    const normalized = normalizeBaseUrl(baseUrl || '');
+    if (!normalized) return cleanPath;
+    return `${normalized}${cleanPath}`;
+  }
+
+  function normalizeBaseUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    try {
+      const parsed = new URL(raw);
+      return `${parsed.protocol}//${parsed.host}`;
+    } catch (_error) {
+      return '';
+    }
+  }
+
+  function isLocalContext() {
+    return location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   }
 
   function readJson(key, fallback) {
