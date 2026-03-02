@@ -97,7 +97,7 @@ sequenceDiagram
         GW-->>UC: throws AuthError.connectivity
         UC-->>Caller: throws AuthError.connectivity
     end
-```text
+```
 
 Fíjate en que el UseCase hace **tres cosas** en orden:
 1. **Valida** los datos de entrada usando los Value Objects del Domain
@@ -120,7 +120,7 @@ graph LR
 
     style Test fill:#d4edda,stroke:#28a745
     style Prod fill:#cce5ff,stroke:#007bff
-```text
+```
 
 El mismo `LoginUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthGateway` (su protocolo/puerto). **Esto es inyección de dependencias en acción.**
 
@@ -207,7 +207,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```text
+```
 
 **Fase ARRANGE (preparar el escenario):**
 
@@ -287,7 +287,7 @@ flowchart TD
     style ERR2 fill:#f8d7da,stroke:#dc3545
     style ERR3 fill:#f8d7da,stroke:#dc3545
     style ERR4 fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Ejecutamos. El test pasa. Fíjate en que la implementación ya hace algo útil: crea los Value Objects (que se validan solos) y delega al gateway. No hemos hecho "lo mínimo tonto" (como devolver una sesión hardcodeada) porque el test pide una sesión que viene del gateway, y la forma natural de satisfacer eso es pasar las credenciales al gateway. TDD no significa hacer trampas; significa no implementar más de lo que los tests piden.
 
@@ -705,12 +705,8 @@ En la siguiente lección implementaremos la capa Infrastructure: la implementaci
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/02-application.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -724,7 +720,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/02-appl
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -751,7 +746,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

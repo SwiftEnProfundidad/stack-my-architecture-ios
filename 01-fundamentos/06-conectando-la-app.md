@@ -307,12 +307,8 @@ Pero primero, asegúrate de completar los entregables de la Etapa 1.
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/06-conectando-la-app.md`.
 
 ### Prerrequisitos
 - Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
@@ -358,7 +354,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC ==> PORT
+  UC -.o PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -385,5 +381,5 @@ flowchart LR
 La lectura del diagrama sigue esta semantica:
 1. `-->` dependencia directa en runtime.
 2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
+3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida o propagacion de resultado.

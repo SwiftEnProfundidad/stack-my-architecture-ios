@@ -142,10 +142,8 @@ Cada decisión está demostrada con código real y tests en las lecciones corres
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/ADR-001-login.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

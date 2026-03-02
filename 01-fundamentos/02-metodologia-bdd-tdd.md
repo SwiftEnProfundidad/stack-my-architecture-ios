@@ -130,7 +130,7 @@ graph TD
 
     style BDD fill:#f8f9fa,stroke:#6c757d
     style TEST fill:#d4edda,stroke:#28a745
-```text
+```
 
 Veamos la traducción completa del escenario del happy path:
 
@@ -212,12 +212,8 @@ En la siguiente lección pasamos al **cómo**: implementar cada comportamiento c
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-bdd-tdd.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -231,7 +227,6 @@ Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-bdd-tdd.m
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -258,7 +253,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
