@@ -52,6 +52,11 @@ Evita introducir SDKs sin justificar valor, riesgo y estrategia de salida.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
 
+### Verificacion
+- ¿Puedes identificar una dependencia crítica y su plan de rollback?
+- ¿Puedes describir qué importaciones deben estar prohibidas por política de módulo?
+- ¿Puedes explicar qué gate impediría un upgrade inseguro antes de mergear?
+
 ## Diagrama de arquitectura por capas
 
 ```mermaid

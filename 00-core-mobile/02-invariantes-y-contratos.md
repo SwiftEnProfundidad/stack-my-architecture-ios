@@ -95,7 +95,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
@@ -103,4 +103,3 @@ Lectura semantica minima de este diagrama:
 2. `-.->` wiring y configuracion de ensamblado.
 3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida/propagacion desde implementacion concreta.
-

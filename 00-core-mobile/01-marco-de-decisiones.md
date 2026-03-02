@@ -60,6 +60,11 @@ Plataforma iOS/Android: migrar navegación de acoplamiento directo a coordinador
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
 
+### Verificacion
+- ¿Puedes diferenciar restricciones duras y blandas en un ejemplo real de tu proyecto?
+- ¿Puedes justificar la alternativa descartada y su trade-off principal?
+- ¿Puedes definir una evidencia objetiva que valide tu decisión en producción?
+
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -86,7 +91,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
@@ -94,4 +99,3 @@ Lectura semantica minima de este diagrama:
 2. `-.->` wiring y configuracion de ensamblado.
 3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida/propagacion desde implementacion concreta.
-

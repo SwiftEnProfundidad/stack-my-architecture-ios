@@ -76,6 +76,11 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
 
+### Verificacion
+- ¿Puedes clasificar qué parte de tu app cambia semanal, mensual y anualmente?
+- ¿Puedes explicar por qué no conviene usar la misma estrategia de cambio para todas las capas?
+- ¿Puedes definir una métrica para saber si una migración incremental está funcionando?
+
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -102,7 +107,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
@@ -110,4 +115,3 @@ Lectura semantica minima de este diagrama:
 2. `-.->` wiring y configuracion de ensamblado.
 3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida/propagacion desde implementacion concreta.
-

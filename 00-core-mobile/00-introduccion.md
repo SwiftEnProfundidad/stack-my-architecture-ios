@@ -18,19 +18,19 @@ Regla operativa: cada vez que en tu track aparezca una decisión crítica (arqui
 
 ## Principios del Core: decidir, validar, operar y evolucionar
 
-### Decide
+### Decidir
 
 No se decide por preferencia personal. Se decide por contexto, restricciones y trade-offs explícitos.
 
-### Validate
+### Validar
 
 No basta “suena bien”. Toda decisión debe tener evidencia verificable: tests, métricas, señales operativas.
 
-### Operate
+### Operar
 
 Lo que no se puede observar ni recuperar en incidente no está listo para producción.
 
-### Evolve
+### Evolucionar
 
 La arquitectura no es foto estática. Debe soportar cambios incrementales sin caos ni reescrituras de alto riesgo.
 
