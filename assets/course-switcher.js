@@ -5,6 +5,8 @@
     android: 'https://architecture-stack-android.vercel.app',
     sdd: 'https://architecture-stack-sdd.vercel.app'
   };
+  var AUTH_USER_KEY = 'sma:auth:user:v1';
+  var AUTH_SESSION_KEY = 'sma:auth:session:v1';
 
   function deriveHubBase() {
     var href = window.location.href;
@@ -66,6 +68,55 @@
     ios.textContent = '📱 Curso iOS';
     android.textContent = '🤖 Curso Android';
     if (sdd) sdd.textContent = '🧠 Curso IA + SDD';
+    setAuthLinks(syncParams);
+  }
+
+  function setAuthLinks(syncParams) {
+    var menu = document.getElementById('course-switcher-menu');
+    if (!menu) return;
+    var user = readStoredAuthUser();
+    var authUrl = resolveCourseLink('/auth/index.html', REMOTE_LINKS.home + '/auth/index.html', syncParams);
+
+    var authLink = ensureMenuLink(menu, 'course-switcher-auth');
+    authLink.href = authUrl;
+    authLink.textContent = user && user.id
+      ? '👤 ' + String(user.email || 'Cuenta')
+      : '🔐 Registro / Login';
+
+    var logoutLink = ensureMenuLink(menu, 'course-switcher-logout');
+    logoutLink.href = '#';
+    logoutLink.textContent = '🚪 Cerrar sesión';
+    logoutLink.style.display = user && user.id ? '' : 'none';
+    logoutLink.onclick = function (event) {
+      event.preventDefault();
+      localStorage.removeItem(AUTH_USER_KEY);
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      window.location.href = authUrl;
+    };
+  }
+
+  function ensureMenuLink(menu, id) {
+    var link = document.getElementById(id);
+    if (link) return link;
+    var li = document.createElement('li');
+    link = document.createElement('a');
+    link.id = id;
+    li.appendChild(link);
+    menu.appendChild(li);
+    return link;
+  }
+
+  function readStoredAuthUser() {
+    try {
+      var raw = localStorage.getItem(AUTH_USER_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (!parsed.id) return null;
+      return parsed;
+    } catch (_error) {
+      return null;
+    }
   }
 
   function setupToggle() {

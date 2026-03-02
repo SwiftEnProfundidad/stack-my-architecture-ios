@@ -14,6 +14,8 @@
   const keyCloudUpdatedAtLegacy = `sma:${courseId}:cloud:updated-at`;
   const keyCloudUpdatedAtByProfilePrefix = `sma:${courseId}:cloud:updated-at:v2:`;
   const keyCloudEndpoint = 'sma:cloud:endpoint:v1';
+  const keyAuthSession = 'sma:auth:session:v1';
+  const keyAuthUser = 'sma:auth:user:v1';
   const DEFAULT_REMOTE_PROGRESS_BASE = 'https://architecture-stack.vercel.app';
 
   const completionBtn = document.getElementById('study-completion-toggle');
@@ -514,6 +516,7 @@
     rowPrimary.appendChild(createButton('➡ Ir al primer tema pendiente', goFirstIncomplete));
     rowPrimary.appendChild(createButton('🔁 Mostrar solo temas para repaso', toggleReviewFilter, 'study-filter-review'));
     rowPrimary.appendChild(createButton('🔗 Copiar enlace de sincronización', copySyncLink, 'study-sync-link'));
+    rowPrimary.appendChild(createButton('🔐 Cuenta', goAuthPortal, 'study-auth-portal'));
 
     const statsBox = document.createElement('div');
     statsBox.id = 'study-stats';
@@ -550,6 +553,11 @@
     btn.textContent = label;
     btn.addEventListener('click', onClick);
     return btn;
+  }
+
+  function goAuthPortal() {
+    const authUrl = buildAuthUrl();
+    window.location.href = authUrl;
   }
 
   function goResume() {
@@ -1034,9 +1042,12 @@
 
       state.pushing = true;
       try {
+        const headers = { 'Content-Type': 'application/json' };
+        const bearer = getAuthAccessToken();
+        if (bearer) headers.Authorization = `Bearer ${bearer}`;
         const response = await fetch(stateUrl(), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({
             courseId,
             profileKey: state.profileKey,
@@ -1064,7 +1075,13 @@
         profileKey: state.profileKey
       });
       try {
-        const response = await fetch(`${stateUrl()}?${query.toString()}`, { method: 'GET' });
+        const headers = {};
+        const bearer = getAuthAccessToken();
+        if (bearer) headers.Authorization = `Bearer ${bearer}`;
+        const response = await fetch(`${stateUrl()}?${query.toString()}`, {
+          method: 'GET',
+          headers: headers
+        });
         if (!response.ok) return false;
         const body = await response.json().catch(function () { return null; });
         if (!body || !body.ok || !body.state || !body.state.data || typeof body.state.data !== 'object') {
@@ -1151,6 +1168,12 @@
     }
 
     async function resolveProfileKey() {
+      const authUserId = getAuthUserId();
+      if (isValidProfileKey(authUserId)) {
+        localStorage.setItem(keyCloudProfile, authUserId);
+        return authUserId;
+      }
+
       const fromQuery = new URLSearchParams(location.search).get('progressProfile');
       if (isValidProfileKey(fromQuery)) {
         localStorage.setItem(keyCloudProfile, String(fromQuery));
@@ -1326,6 +1349,36 @@
       getProfileKey: function () { return state.profileKey; },
       getSyncBaseUrl: function () { return state.syncBaseUrl; }
     };
+  }
+
+  function buildAuthUrl() {
+    const base = deriveHubBase();
+    if (base) return `${base}/auth/index.html`;
+    if (location.protocol === 'http:' || location.protocol === 'https:') return '/auth/index.html';
+    return 'https://architecture-stack.vercel.app/auth/index.html';
+  }
+
+  function deriveHubBase() {
+    const href = String(window.location.href || '');
+    if (href.indexOf('/ios/') !== -1) return href.split('/ios/')[0];
+    if (href.indexOf('/android/') !== -1) return href.split('/android/')[0];
+    if (href.indexOf('/sdd/') !== -1) return href.split('/sdd/')[0];
+    return '';
+  }
+
+  function getAuthUserId() {
+    const user = readJson(keyAuthUser, null);
+    if (!user || typeof user !== 'object') return '';
+    const id = String(user.id || '').trim();
+    return id;
+  }
+
+  function getAuthAccessToken() {
+    const session = readJson(keyAuthSession, null);
+    if (!session || typeof session !== 'object') return '';
+    const token = String(session.accessToken || '').trim();
+    if (!token || token.length > 4096) return '';
+    return token;
   }
 
   function buildSyncLink(profileKey, syncBaseUrl) {
