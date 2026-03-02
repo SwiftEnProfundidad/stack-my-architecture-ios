@@ -1,4 +1,4 @@
-# 1) Purpose of This Document
+# Paridad de Mobile Architect iOS ↔ Android
 
 Este documento define una posición profesional clara y verificable para el rol de Mobile Architect en este programa: profundidad de ejecución en iOS y paridad arquitectónica en Android. Su objetivo es eliminar ambigüedades en evaluación de perfil, contratación y asignación de responsabilidades.
 
@@ -75,7 +75,6 @@ Bajo este marco, el valor del Mobile Architect no se mide por cantidad de códig
 
 ---
 
-<!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
 ```mermaid
@@ -107,7 +106,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC ==> PORT
+  UC -.o PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -131,8 +130,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semantica minima:
 1. `-->` dependencia directa en runtime.
 2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
+3. `-.o` dependencia discontinua contra contrato/abstraccion.
 4. `--o` salida o propagacion de resultado.

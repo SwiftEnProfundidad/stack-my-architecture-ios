@@ -24,19 +24,17 @@ Cada nivel implica que el anterior está consolidado. No se puede "govern" sin s
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/11-crosswalk-ios-android.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Comprende el objetivo tecnico de esta leccion y que decision arquitectonica habilita.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la leccion anterior del bloque y confirma que dominas sus conceptos clave.
 
 ### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+- Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
 
 ### Validacion
 - Checklist rapido:
@@ -44,7 +42,6 @@ Contexto: normalizacion automatica para `00-core-mobile/11-crosswalk-ios-android
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
 ```mermaid
@@ -76,7 +73,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC ==> PORT
+  UC -.o PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -100,8 +97,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semantica minima:
 1. `-->` dependencia directa en runtime.
 2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
+3. `-.o` dependencia discontinua contra contrato/abstraccion.
 4. `--o` salida o propagacion de resultado.

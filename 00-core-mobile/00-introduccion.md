@@ -16,7 +16,7 @@ Si estás en Android, estúdialo en paralelo con Nivel 0, Junior, Mid, Senior y 
 
 Regla operativa: cada vez que en tu track aparezca una decisión crítica (arquitectura, API, release, seguridad, operación), vuelve al Core y aplica las checklists/templates antes de implementar.
 
-## Principios del Core: decide, validate, operate, evolve
+## Principios del Core: decidir, validar, operar y evolucionar
 
 ### Decide
 
@@ -36,26 +36,36 @@ La arquitectura no es foto estática. Debe soportar cambios incrementales sin ca
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Entender para qué existe el Core Mobile y cuándo usarlo como marco de decisión transversal en iOS y Android.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- No hay prerrequisitos técnicos obligatorios. Basta con conocer la estructura general del curso que vas a seguir (iOS o Android).
 
 ### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+- Elige una decisión real de tu app (por ejemplo, navegación, contrato API o estrategia de release).
+- Escríbela en 4 líneas usando este formato: `decidir -> validar -> operar -> evolucionar`.
+- Define una evidencia concreta para validar esa decisión (test, métrica o checklist).
 
-<!-- auto-gapfix:layered-mermaid -->
+### Verificacion rapida
+- ¿Puedes explicar con tus palabras por qué “funcionar en local” no equivale a “estar lista para producción”?
+- ¿Puedes nombrar una decisión que deba ser común entre iOS y Android en tu proyecto?
+- ¿Puedes indicar qué evidencia usarás para validar esa decisión?
+
 ## Diagrama de arquitectura por capas
 
 ![Diagrama de arquitectura por capas (Core Mobile)](assets/architecture-ios-core-mobile.png)
 
 La leyenda visual superior define la semántica por tipo de trazo y punta de flecha; el color de cada flecha indica el módulo de origen.
+
+### Convencion de flechas (obligatoria en el curso)
+1. `-->` dependencia directa en runtime (linea continua, punta cerrada).
+2. `--o` relacion continua con punta abierta.
+3. `-.->` wiring/configuracion (linea discontinua, punta cerrada).
+4. `-.o` dependencia discontinua contra contrato/abstraccion (punta abierta).
 
 ### Zoom de detalle por feature
 

@@ -260,7 +260,7 @@ ARCHITECTURE_WEBP_ASSET_BY_PNG = {
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
-    relation_tokens = ("-->", "-.->", "==>", "--o", "<|--", "--|>", "..|>", "..>", "o--", "*--")
+    relation_tokens = ("-->", "-.->", "-.o", "--o", "==>", "<|--", "--|>", "..|>", "..>", "o--", "*--")
     has_relations = any(token in raw_code_content for token in relation_tokens)
     if not has_relations:
         return False
@@ -276,7 +276,6 @@ def normalize_mermaid_source(raw_code_content: str) -> str:
     if is_flowchart:
         normalized = re.sub(r"\.\.\>\|", "-.->|", normalized)
         normalized = re.sub(r"\.\.\>", "-.->", normalized)
-        normalized = normalized.replace("-.o", "-.->")
     return normalized
 
 
@@ -348,7 +347,7 @@ def is_layered_architecture_mermaid(raw_code_content: str) -> bool:
         "subgraph infra",
         "vm --> uc",
         "uc --> ent",
-        "uc ==> port",
+        "uc -.o port",
         "boot -.->",
         "port --o",
     )
@@ -1250,7 +1249,7 @@ def build_nav(files_content):
         "00-informe": {"title": "Informe fundacional", "lesson_label": "Documento", "numbered": False},
         "00-core-mobile": {"title": "ETAPA 0: CORE MOBILE", "lesson_label": "Leccion", "numbered": True},
         "01-fundamentos": {"title": "ETAPA 1: JUNIOR", "lesson_label": "Leccion", "numbered": True},
-        "02-integracion": {"title": "ETAPA 2: MID", "lesson_label": "Leccion", "numbered": True},
+        "02-integracion": {"title": "ETAPA 2: MIDLEVEL", "lesson_label": "Leccion", "numbered": True},
         "03-evolucion": {"title": "ETAPA 3: SENIOR", "lesson_label": "Leccion", "numbered": True},
         "04-arquitecto": {"title": "ETAPA 4: ARQUITECTO", "lesson_label": "Leccion", "numbered": True},
         "05-maestria": {"title": "ETAPA 5: MAESTRIA", "lesson_label": "Leccion", "numbered": True},

@@ -48,21 +48,18 @@ Plataforma iOS/Android: migrar navegación de acoplamiento directo a coordinador
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/01-marco-de-decisiones.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Comprende el objetivo tecnico de esta leccion y que decision arquitectonica habilita.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la leccion anterior del bloque y confirma que dominas sus conceptos clave.
 
 ### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+- Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
