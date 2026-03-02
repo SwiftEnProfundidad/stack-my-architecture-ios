@@ -62,7 +62,7 @@ flowchart LR
     end
 
     E2 --> E3
-```text
+```
 
 Mensaje clave para el alumno:
 - Ya no se trata solo de “añadir código”,
@@ -140,7 +140,7 @@ flowchart TD
     K --> O["Observabilidad"]
     O --> T["Testing avanzado"]
     T --> D["Decisión de trade-offs"]
-```text
+```
 
 El orden no es accidental: cada bloque prepara el siguiente.
 
@@ -381,7 +381,6 @@ El foco es resiliencia útil y sostenible, no complejidad ornamental.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-3.md](../03-evolucion/entregables-etapa-3.md).
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -408,7 +407,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

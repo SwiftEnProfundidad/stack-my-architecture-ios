@@ -53,7 +53,7 @@ graph LR
     style CORE fill:#d4edda,stroke:#28a745
     style INFRA fill:#fff3cd,stroke:#ffc107
     style SDK fill:#fce4ec,stroke:#e91e63
-```text
+```
 
 ---
 
@@ -591,7 +591,6 @@ La clave no es testear Firebase en sí, sino verificar que la arquitectura permi
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -618,7 +617,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

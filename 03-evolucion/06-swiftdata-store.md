@@ -48,7 +48,7 @@ graph LR
     style APP fill:#cce5ff,stroke:#007bff
     style INFRA fill:#fff3cd,stroke:#ffc107
     style FW fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Regla cr√≠tica:** SwiftData solo aparece en Infrastructure. Domain y Application no importan SwiftData. Si ves `import SwiftData` en Domain, hay un error de arquitectura.
 
@@ -485,7 +485,6 @@ El test verifica que SwiftData no corrompe `Decimal` al persistir (un error com√
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -512,7 +511,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

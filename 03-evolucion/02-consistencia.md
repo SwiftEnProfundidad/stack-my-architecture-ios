@@ -39,7 +39,7 @@ flowchart TD
     NET -->|"No"| POLICY{"Politica negocio"}
     POLICY -->|"Permite stale"| SHOW["Mostrar con aviso"]
     POLICY -->|"No permite"| FAIL["Error + retry"]
-```text
+```
 
 ---
 
@@ -477,7 +477,6 @@ La razón de separar invalidación en su propio protocolo es que permite compone
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -504,7 +503,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
