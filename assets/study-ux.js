@@ -1000,12 +1000,14 @@
     async function bootstrap() {
       if (state.bootstrapped) return;
       state.bootstrapped = true;
+      const hasProfileInUrl = hasProgressProfileQuery();
       state.profileKey = await resolveProfileKey();
       if (!state.profileKey) return;
       state.updatedAtKey = resolveCloudUpdatedAtKey(state.profileKey);
-      if (!hasProgressProfileQuery()) {
+      if (!hasProfileInUrl) {
         migrateLegacyUpdatedAt(state.updatedAtKey);
       }
+      ensureProgressProfileQuery(state.profileKey);
       state.syncBaseUrl = resolveSyncBaseUrl();
 
       const config = await fetchConfig();
@@ -1173,6 +1175,18 @@
 
     function hasProgressProfileQuery() {
       return new URLSearchParams(location.search).has('progressProfile');
+    }
+
+    function ensureProgressProfileQuery(profileKey) {
+      if (!isValidProfileKey(profileKey)) return;
+      try {
+        const current = new URL(location.href);
+        if (current.searchParams.get('progressProfile') === profileKey) return;
+        current.searchParams.set('progressProfile', profileKey);
+        history.replaceState(history.state, '', `${current.pathname}${current.search}${current.hash}`);
+      } catch (_error) {
+        return;
+      }
     }
 
     function resolveCloudUpdatedAtKey(profileKey) {
