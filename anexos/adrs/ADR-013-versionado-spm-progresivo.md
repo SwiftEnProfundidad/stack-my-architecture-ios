@@ -90,10 +90,8 @@ Ver la lección [04-versionado-spm](../../04-arquitecto/04-versionado-spm.md) pa
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-013-versionado-spm-progresivo.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

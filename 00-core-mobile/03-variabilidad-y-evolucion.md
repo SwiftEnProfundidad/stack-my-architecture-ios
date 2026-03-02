@@ -64,21 +64,23 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/03-variabilidad-y-evolucion.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Comprende el objetivo tecnico de esta leccion y que decision arquitectonica habilita.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la leccion anterior del bloque y confirma que dominas sus conceptos clave.
 
 ### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+- Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
 
-<!-- semantica-flechas:auto -->
+### Verificacion
+- ¿Puedes clasificar qué parte de tu app cambia semanal, mensual y anualmente?
+- ¿Puedes explicar por qué no conviene usar la misma estrategia de cambio para todas las capas?
+- ¿Puedes definir una métrica para saber si una migración incremental está funcionando?
+
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -105,7 +107,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 
@@ -113,4 +115,3 @@ Lectura semantica minima de este diagrama:
 2. `-.->` wiring y configuracion de ensamblado.
 3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida/propagacion desde implementacion concreta.
-

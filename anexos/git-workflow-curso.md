@@ -330,10 +330,8 @@ Git es tu **red de seguridad**. No es solo para compartir código, es para:
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/git-workflow-curso.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

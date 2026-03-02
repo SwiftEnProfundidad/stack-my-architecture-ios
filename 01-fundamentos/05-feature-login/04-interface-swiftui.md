@@ -49,7 +49,7 @@ sequenceDiagram
         VM->>VM: isLoading = false
         Note over View: SwiftUI detecta cambio<br/>muestra error en rojo
     end
-```text
+```
 
 La vista **no sabe nada** de `LoginUseCase`, ni de `AuthGateway`, ni de `Email`, ni de `Password`. Solo conoce strings (`email`, `password`, `errorMessage`) y booleans (`isLoading`). **Esa es la separación de responsabilidades en acción.**
 
@@ -81,7 +81,7 @@ graph TD
     style View fill:#ffe0cc,stroke:#fd7e14
     style ViewModel fill:#cce5ff,stroke:#007bff
     style UseCase fill:#d4edda,stroke:#28a745
-```text
+```
 
 ---
 
@@ -183,7 +183,7 @@ flowchart TD
     style SUCCESS fill:#d4edda,stroke:#28a745
     style KNOWN fill:#f8d7da,stroke:#dc3545
     style UNKNOWN fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 `isLoading = true` — Lo primero que hace submit: pone el loading en true. SwiftUI detecta el cambio y muestra el spinner automáticamente.
 
@@ -318,7 +318,7 @@ graph LR
     style STUB fill:#d4edda,stroke:#28a745
     style UC fill:#fff3cd,stroke:#ffc107
     style VM fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 ```swift
 // StackMyArchitectureTests/Features/Login/Interface/LoginViewModelTests.swift
@@ -688,12 +688,8 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/04-interface-swiftui.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -710,7 +706,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/04-inte
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -737,7 +732,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

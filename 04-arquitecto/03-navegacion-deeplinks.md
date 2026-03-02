@@ -58,7 +58,7 @@ flowchart LR
     POLICY --> ROUTE["AppDestination valida"]
     ROUTE --> COORD["AppCoordinator"]
     COORD --> FEATURE["FeatureRouter propietario"]
-```text
+```
 
 Esto desacopla origen de intención y destino final.
 
@@ -278,7 +278,7 @@ sequenceDiagram
         POL-->>COORD: allow
         COORD->>NAV: route = productDetail(123)
     end
-```text
+```
 
 ---
 
@@ -298,7 +298,7 @@ stateDiagram-v2
 
     ProductDetail --> Catalog: back
     Settings --> Catalog: back
-```text
+```
 
 Esta máquina de estados evita comportamientos “mágicos” difíciles de depurar.
 
@@ -570,7 +570,6 @@ El patrón es: `LoginViewModel` recibe un closure `onLoginSuccess: (Session) -> 
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -597,7 +596,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

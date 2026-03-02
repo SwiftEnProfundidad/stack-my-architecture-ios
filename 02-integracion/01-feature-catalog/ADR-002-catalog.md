@@ -267,10 +267,8 @@ Esta ADR se considera implementada cuando:
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/ADR-002-catalog.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -284,7 +282,6 @@ Contexto: normalizacion automatica para `02-integracion/01-feature-catalog/ADR-0
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -311,7 +308,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

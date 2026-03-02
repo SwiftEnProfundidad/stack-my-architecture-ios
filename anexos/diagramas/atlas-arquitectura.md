@@ -59,7 +59,7 @@ graph TB
     style APP fill:#cce5ff,stroke:#007bff
     style ADAPT fill:#fff3cd,stroke:#ffc107
     style OUTER fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Como leer este diagrama:**
 
@@ -84,7 +84,7 @@ graph LR
     end
 
     style SIN_INV fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Problema: si cambias la implementación de `RemoteAuthGateway` (por ejemplo, migras de URLSession a Firebase), tienes que **tocar LoginUseCase**. Y si tocas LoginUseCase, tienes que re-testear todo el flujo.
 
@@ -100,7 +100,7 @@ graph LR
     end
 
     style CON_INV fill:#d4edda,stroke:#28a745
-```text
+```
 
 **La flecha de dependencia se invierte:** ahora `RemoteAuthGateway` depende de `AuthGateway` (el protocolo que vive en Application), no al revés. LoginUseCase solo conoce el protocolo.
 
@@ -147,7 +147,7 @@ sequenceDiagram
     VM->>VM: state = success
     VM->>VM: onLoginSucceeded(session)
     V-->>U: Navega al Catalogo
-```text
+```
 
 **Que datos viajan en cada tramo:**
 
@@ -203,7 +203,7 @@ sequenceDiagram
     end
 
     V-->>U: Muestra lista o mensaje
-```text
+```
 
 ---
 
@@ -296,7 +296,7 @@ graph TD
     style INFRA fill:#fff3cd,stroke:#ffc107
     style INTERFACE fill:#e2d5f1,stroke:#6f42c1
     style COMPOSITION fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Como leer este grafo:**
 
@@ -437,7 +437,7 @@ graph TD
     style CATALOG fill:#d4edda,stroke:#28a745
     style NAV fill:#e2d5f1,stroke:#6f42c1
     style COMP fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 La semántica clave de este grafo es que `AppComposition` conecta wiring, mientras `SharedKernel` actúa como base común; `Platform` y `BackendFirebase` proveen infraestructura técnica; y las capas `Domain`, `Application`, `Interface` e `Infrastructure` se mantienen separadas por frontera de imports.
 

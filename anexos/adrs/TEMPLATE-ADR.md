@@ -52,10 +52,8 @@
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/TEMPLATE-ADR.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

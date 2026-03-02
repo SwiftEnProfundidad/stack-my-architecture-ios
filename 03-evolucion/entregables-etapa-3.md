@@ -258,10 +258,8 @@ Aunque no cierres todos los entregables:
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `03-evolucion/entregables-etapa-3.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -272,7 +270,6 @@ Contexto: normalizacion automatica para `03-evolucion/entregables-etapa-3.md`.
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -299,7 +296,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

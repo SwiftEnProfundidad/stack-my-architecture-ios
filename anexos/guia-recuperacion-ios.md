@@ -526,10 +526,8 @@ Cada error que resuelves ahora es uno que no cometerás en producción. ¡Sigue 
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/guia-recuperacion-ios.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

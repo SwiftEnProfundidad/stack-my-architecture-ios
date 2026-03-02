@@ -50,7 +50,7 @@ graph TD
     style Composed fill:#cce5ff,stroke:#007bff
     style Errors fill:#f8d7da,stroke:#dc3545
     style Events fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 Cada tipo en este diagrama es algo que vas a construir con TDD. Los Value Objects (verde) son lo primero, porque todo lo demás depende de ellos.
 
@@ -74,7 +74,7 @@ graph LR
 
     style Raw fill:#f8d7da,stroke:#dc3545
     style VO fill:#d4edda,stroke:#28a745
-```text
+```
 
 ---
 
@@ -577,12 +577,8 @@ En la siguiente lección vamos a subir una capa: la Application. Allí construir
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/01-domain.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -593,7 +589,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/01-doma
 ### Practica guiada
 - Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -620,7 +615,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

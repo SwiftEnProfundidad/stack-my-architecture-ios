@@ -49,7 +49,7 @@ graph LR
     style Clean fill:#d4edda,stroke:#28a745
     style Adapter fill:#fff3cd,stroke:#ffc107
     style Dirty fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 El adaptador es el **traductor** entre dos idiomas: el idioma limpio del Domain (`Credentials`, `Session`) y el idioma del servidor (JSON, HTTP status codes, URLs). Si el servidor cambia su JSON, solo cambias el adaptador. El UseCase ni se entera.
 
@@ -231,7 +231,7 @@ flowchart TD
     style MAP2 fill:#d4edda,stroke:#28a745
     style ERR1 fill:#f8d7da,stroke:#dc3545
     style ERR2 fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 ---
 
@@ -532,12 +532,8 @@ En la siguiente lección llegaremos a la última capa: Interface. Allí construi
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/03-infrastructure.md`.
 
 ### Prerrequisitos
 - Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
@@ -551,7 +547,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/03-infr
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -578,7 +573,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

@@ -42,7 +42,7 @@ flowchart TD
     R -->|"No"| CACHE{"Cache válido?"}
     CACHE -->|"Sí"| SHOW_CACHE["Mostrar cache"]
     CACHE -->|"No"| SHOW_ERR["Mostrar error"]
-```text
+```
 
 ---
 
@@ -158,7 +158,7 @@ flowchart LR
     CACHED --> STORE["FileProductStore"]
     REMOTE --> HTTP["HTTPClient chain"]
     HTTP --> NET["API"]
-```text
+```
 
 Punto crítico de diseño:
 - el UseCase no cambia al introducir cache.
@@ -474,7 +474,7 @@ stateDiagram-v2
     LoadedFresh --> Loading: refresh manual
     LoadedCached --> Loading: refresh manual
     Error --> Loading: retry
-```text
+```
 
 Esta máquina evita frases ambiguas como “está cargando pero también mostrando error”.
 
@@ -629,7 +629,6 @@ La clave es que `CachedProductRepository` depende de protocolos (`ProductRemote`
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -656,7 +655,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

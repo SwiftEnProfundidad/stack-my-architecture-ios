@@ -283,7 +283,6 @@ El mejor código que escribiste en la Etapa 5 es mejor que el mejor código que 
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -310,7 +309,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

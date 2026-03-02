@@ -719,7 +719,7 @@ flowchart LR
         COM2["ViewModifier<br/>Estilos custom"]
         COM3["Form + Section<br/>Ajustes"]
     end
-```text
+```
 
 ---
 
@@ -1285,7 +1285,7 @@ flowchart LR
         COM2["Form + Section"]
         COM3["containerRelativeFrame"]
     end
-```text
+```
 
 ### Checklist COMPLETO para un junior
 
@@ -1391,7 +1391,6 @@ La siguiente lección complementa esta: si SwiftUI define como se ve la app, Swi
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -1418,7 +1417,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

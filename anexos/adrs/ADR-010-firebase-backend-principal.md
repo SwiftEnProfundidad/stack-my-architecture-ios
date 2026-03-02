@@ -90,10 +90,8 @@ Ver la lección [07-backend-firebase](../../03-evolucion/07-backend-firebase.md)
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-010-firebase-backend-principal.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

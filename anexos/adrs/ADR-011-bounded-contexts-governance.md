@@ -90,10 +90,8 @@ Ver la lección [01-bounded-contexts](../../04-arquitecto/01-bounded-contexts.md
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-011-bounded-contexts-governance.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

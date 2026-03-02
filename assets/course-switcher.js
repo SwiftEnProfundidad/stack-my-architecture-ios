@@ -7,6 +7,7 @@
   };
   var AUTH_USER_KEY = 'sma:auth:user:v1';
   var AUTH_SESSION_KEY = 'sma:auth:session:v1';
+  var CLOUD_PROFILE_KEY = 'sma:cloud:profile:v1';
 
   function deriveHubBase() {
     var href = window.location.href;
@@ -98,6 +99,7 @@
   function clearStoredAuth() {
     localStorage.removeItem(AUTH_USER_KEY);
     localStorage.removeItem(AUTH_SESSION_KEY);
+    localStorage.removeItem(CLOUD_PROFILE_KEY);
   }
 
   function hasAuthenticatedUser() {
@@ -114,6 +116,18 @@
     return window.location.pathname + window.location.search + window.location.hash;
   }
 
+  function sanitizeNextPath(path) {
+    try {
+      var target = new URL(path || resolveCurrentPath(), window.location.origin);
+      ['progressProfile', 'progressBase', 'progressEndpoint'].forEach(function (key) {
+        target.searchParams.delete(key);
+      });
+      return target.pathname + target.search + target.hash;
+    } catch (_error) {
+      return '/index.html';
+    }
+  }
+
   function resolveLoginUrl(syncParams, nextPath) {
     var base = resolveCourseLink('/auth/login.html', REMOTE_LINKS.home + '/auth/login.html', syncParams);
     return appendQueryParam(base, 'next', nextPath || '/index.html');
@@ -121,7 +135,7 @@
 
   function enforceAuthenticatedAccess(syncParams) {
     if (hasAuthenticatedUser()) return true;
-    var loginUrl = resolveLoginUrl(syncParams, resolveCurrentPath());
+    var loginUrl = resolveLoginUrl(new URLSearchParams(), sanitizeNextPath(resolveCurrentPath()));
     window.location.replace(loginUrl);
     return false;
   }
@@ -164,7 +178,7 @@
     logoutLink.onclick = function (event) {
       event.preventDefault();
       clearStoredAuth();
-      window.location.href = resolveLoginUrl(syncParams, '/index.html');
+      window.location.href = resolveLoginUrl(new URLSearchParams(), '/index.html');
     };
   }
 

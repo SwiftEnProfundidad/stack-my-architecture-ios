@@ -174,10 +174,8 @@ struct AppCompositionRoot {
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-003-composition-root-unico.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

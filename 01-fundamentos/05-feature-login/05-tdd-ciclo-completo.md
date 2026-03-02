@@ -38,7 +38,7 @@ graph TD
     style Application fill:#cce5ff,stroke:#007bff
     style Infrastructure fill:#fff3cd,stroke:#ffc107
     style Interface fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
 
@@ -156,7 +156,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```text
+```
 
 Veamos un ejemplo real anotado para que quede cristalino:
 
@@ -357,12 +357,8 @@ Esta es la primera feature completa del curso. Es pequeña (un formulario de log
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -376,7 +372,6 @@ Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/05-tdd-
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -403,7 +398,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

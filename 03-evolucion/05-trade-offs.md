@@ -36,7 +36,7 @@ flowchart TD
     EVA --> DEC["Decision actual"]
     DEC --> TRG["Trigger de reevaluacion"]
     TRG --> REV["Revision periodica o por incidente"]
-```text
+```
 
 ---
 
@@ -451,7 +451,6 @@ La decisión de network-first prioriza frescura de datos sobre velocidad percibi
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -478,7 +477,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

@@ -38,7 +38,7 @@ flowchart LR
     EV --> SINK["Sink de logs/metricas"]
     SINK --> TRACE["Correlacion por traceId"]
     TRACE --> DIAG["Diagnostico reproducible"]
-```text
+```
 
 Sin estructura, todo queda en ruido difícil de filtrar.
 
@@ -227,7 +227,7 @@ sequenceDiagram
     REM-->>LR: products o CatalogError
     LR-->>UC: products o CatalogError
     UC-->>UI: state update
-```text
+```
 
 Con un `traceId` estable, cada salto deja rastro conectado.
 
@@ -539,7 +539,6 @@ El patrón decorador permite componer logging, métricas y tracing sin tocar el 
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -566,7 +565,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

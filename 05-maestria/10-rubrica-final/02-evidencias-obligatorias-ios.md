@@ -112,10 +112,8 @@ Se considera paquete completo cuando el 100% de ítems obligatorios están prese
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -158,7 +156,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC ==> PORT
+  UC -.o PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -185,5 +183,5 @@ flowchart LR
 La lectura del diagrama sigue esta semantica:
 1. `-->` dependencia directa en runtime.
 2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
+3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida o propagacion de resultado.

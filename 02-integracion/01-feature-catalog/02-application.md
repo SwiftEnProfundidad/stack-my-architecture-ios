@@ -55,7 +55,7 @@ flowchart LR
     ERRT --> SEM["CatalogError"]
     SEM --> UC
     UC --> UI
-```text
+```
 
 Application no hace parseo ni renderizado, pero sí mantiene contrato semántico estable para toda la feature.
 
@@ -345,7 +345,7 @@ sequenceDiagram
     VM->>UC: execute()
     UC-->>VM: [Product] | CatalogError
     VM->>CO: event(.catalogLoaded) o event(.catalogFailed)
-```text
+```
 
 Regla:
 
@@ -501,7 +501,6 @@ Una capa Application buena no se juzga por cuántas líneas tiene, sino por cuá
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -528,7 +527,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

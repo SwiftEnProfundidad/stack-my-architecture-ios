@@ -90,10 +90,8 @@ Ver la lección [01-caching-offline](../../03-evolucion/01-caching-offline.md) p
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-007-cache-network-first-ttl.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

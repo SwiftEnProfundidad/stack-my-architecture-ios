@@ -50,10 +50,8 @@ Términos clave del curso ordenados alfabéticamente.
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/glosario.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

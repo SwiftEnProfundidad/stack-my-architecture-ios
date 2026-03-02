@@ -35,7 +35,7 @@ flowchart LR
     AUTH --> LOG["Logging decorator"]
     LOG --> BASE["URLSessionHTTPClient"]
     BASE --> API["Remote API"]
-```text
+```
 
 Esto permite escalar capacidades sin reescribir repositorios.
 
@@ -137,7 +137,7 @@ flowchart TD
     TECH["URLError / status / decode"] --> MAP["Repository error mapping"]
     MAP --> SEM["CatalogError"]
     SEM --> APP["UseCase + ViewModel"]
-```text
+```
 
 Ejemplo de criterio de etapa:
 
@@ -455,7 +455,6 @@ Si un cambio de proveedor HTTP obliga a tocar UseCases o Domain, no cambiaste in
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -482,7 +481,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

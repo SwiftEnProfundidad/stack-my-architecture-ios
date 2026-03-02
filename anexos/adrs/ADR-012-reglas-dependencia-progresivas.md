@@ -90,10 +90,8 @@ Ver la lección [02-reglas-dependencia-ci](../../04-arquitecto/02-reglas-depende
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-012-reglas-dependencia-progresivas.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

@@ -41,7 +41,7 @@ flowchart LR
     APP ..>|"Contrato"| CATALOG["Feature Catalog"]
 
     LOGIN -. "NO import directo" .-> CATALOG
-```text
+```
 
 La comunicación ocurre por contrato y coordinación, no por acceso lateral al código interno.
 
@@ -131,7 +131,7 @@ sequenceDiagram
     C->>G: crea Catalog con dependencias
     G-->>C: onProductSelected(ProductID)
     C->>C: decide siguiente ruta
-```text
+```
 
 Cada flecha usa contrato explícito. Ninguna feature entra a internals de otra.
 
@@ -423,7 +423,6 @@ Además, un buen contrato sirve como herramienta de onboarding: un junior puede 
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -450,7 +449,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

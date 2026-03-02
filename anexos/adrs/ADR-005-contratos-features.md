@@ -90,10 +90,8 @@ Ver la lección [03-contratos-features](../../02-integracion/03-contratos-featur
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-005-contratos-features.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

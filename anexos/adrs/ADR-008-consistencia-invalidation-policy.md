@@ -90,10 +90,8 @@ Ver la lección [02-consistencia](../../03-evolucion/02-consistencia.md) para el
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-008-consistencia-invalidation-policy.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.

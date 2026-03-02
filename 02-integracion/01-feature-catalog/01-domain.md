@@ -48,7 +48,7 @@ flowchart LR
     INFRA --> DOMAIN["Domain\nsemantica de negocio"]
     DOMAIN --> APP["Application\norquesta casos"]
     APP ..> UI["Interface\npresenta estados"]
-```text
+```
 
 Si Domain acepta cualquier cosa sin criterio, todo lo demás hereda ruido.
 
@@ -363,7 +363,6 @@ Si puedes cambiar proveedor de datos o presentación sin renombrar conceptos de 
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -390,7 +389,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

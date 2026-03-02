@@ -64,7 +64,7 @@ flowchart LR
     RES --> ERRTECH["Transport/Decode Errors"]
     ERRTECH --> ERRT["Error Translator"]
     ERRT --> DOMERR["CatalogError"]
-```text
+```
 
 Si falla el mapping y dejas pasar basura, rompes el dominio.
 
@@ -467,7 +467,6 @@ Si Application es el director de orquesta, Infrastructure es el técnico de soni
 
 ---
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -494,7 +493,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

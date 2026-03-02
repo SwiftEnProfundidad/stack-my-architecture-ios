@@ -117,7 +117,7 @@ graph LR
 
     style LayerFirst fill:#f8d7da,stroke:#dc3545
     style FeatureFirst fill:#d4edda,stroke:#28a745
-```text
+```
 
 En la organización por capas, trabajar en Login te obliga a abrir 4 carpetas diferentes. En la organización por features, todo lo de Login está junto. **Si quieres borrar una feature, borras una carpeta. Si quieres mover una feature a otro módulo, mueves una carpeta.** Eso no es posible con la organización por capas.
 
@@ -308,12 +308,8 @@ Cada pieza tiene su razón de ser. Si quitas una, las demás se debilitan. Por e
 
 ---
 
----
-
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/03-stack-tecnologico.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
@@ -327,7 +323,6 @@ Contexto: normalizacion automatica para `01-fundamentos/03-stack-tecnologico.md`
   - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
 ## Semantica de flechas aplicada a esta arquitectura
 
 ```mermaid
@@ -354,7 +349,7 @@ flowchart LR
     UC -.o PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+```
 
 Lectura semantica minima de este diagrama:
 

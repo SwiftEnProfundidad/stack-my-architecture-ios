@@ -90,10 +90,8 @@ Ver la lección [04-infra-real-network](../../02-integracion/04-infra-real-netwo
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
 
 ## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-006-infra-network-urlsession.md`.
 
 ### Objetivo
 - Define el resultado concreto esperado al finalizar esta leccion.
