@@ -11,7 +11,8 @@
   const keyStats = `sma:${courseId}:stats`;
   const keyFontSize = `sma:${courseId}:font:size`;
   const keyCloudProfile = 'sma:cloud:profile:v1';
-  const keyCloudUpdatedAt = `sma:${courseId}:cloud:updated-at`;
+  const keyCloudUpdatedAtLegacy = `sma:${courseId}:cloud:updated-at`;
+  const keyCloudUpdatedAtByProfilePrefix = `sma:${courseId}:cloud:updated-at:v2:`;
   const keyCloudEndpoint = 'sma:cloud:endpoint:v1';
   const DEFAULT_REMOTE_PROGRESS_BASE = 'https://architecture-stack.vercel.app';
 
@@ -984,6 +985,7 @@
       bootstrapped: false,
       enabled: false,
       profileKey: '',
+      updatedAtKey: keyCloudUpdatedAtLegacy,
       pendingTimer: null,
       pushing: false,
       lastSnapshot: '',
@@ -995,6 +997,10 @@
       state.bootstrapped = true;
       state.profileKey = await resolveProfileKey();
       if (!state.profileKey) return;
+      state.updatedAtKey = resolveCloudUpdatedAtKey(state.profileKey);
+      if (!hasProgressProfileQuery()) {
+        migrateLegacyUpdatedAt(state.updatedAtKey);
+      }
       state.syncBaseUrl = resolveSyncBaseUrl();
 
       const config = await fetchConfig();
@@ -1035,7 +1041,7 @@
         if (!response.ok) return false;
         const body = await response.json().catch(function () { return null; });
         const updatedAt = body && body.state && body.state.updatedAt ? String(body.state.updatedAt) : '';
-        if (updatedAt) localStorage.setItem(keyCloudUpdatedAt, updatedAt);
+        if (updatedAt) localStorage.setItem(state.updatedAtKey, updatedAt);
         state.lastSnapshot = snapshot;
         return true;
       } catch (_error) {
@@ -1060,7 +1066,7 @@
 
         const remoteData = body.state.data;
         const remoteUpdatedAt = toTimestamp(body.state.updatedAt);
-        const localUpdatedAt = toTimestamp(localStorage.getItem(keyCloudUpdatedAt));
+        const localUpdatedAt = toTimestamp(localStorage.getItem(state.updatedAtKey));
         const shouldApply = remoteUpdatedAt > localUpdatedAt || isLocalPayloadEmpty();
         if (!shouldApply) {
           state.lastSnapshot = stableSerialize(collectCloudPayload());
@@ -1068,7 +1074,7 @@
         }
 
         applyCloudPayload(remoteData);
-        if (body.state.updatedAt) localStorage.setItem(keyCloudUpdatedAt, String(body.state.updatedAt));
+        if (body.state.updatedAt) localStorage.setItem(state.updatedAtKey, String(body.state.updatedAt));
         state.lastSnapshot = stableSerialize(collectCloudPayload());
         return true;
       } catch (_error) {
@@ -1138,9 +1144,6 @@
     }
 
     async function resolveProfileKey() {
-      const stored = localStorage.getItem(keyCloudProfile);
-      if (isValidProfileKey(stored)) return stored;
-
       const fromQuery = new URLSearchParams(location.search).get('progressProfile');
       if (isValidProfileKey(fromQuery)) {
         localStorage.setItem(keyCloudProfile, String(fromQuery));
@@ -1155,9 +1158,30 @@
         return fromWindow;
       }
 
+      const stored = localStorage.getItem(keyCloudProfile);
+      if (isValidProfileKey(stored)) return stored;
+
       const generated = await fingerprintProfileKey();
       if (generated) localStorage.setItem(keyCloudProfile, generated);
       return generated;
+    }
+
+    function hasProgressProfileQuery() {
+      return new URLSearchParams(location.search).has('progressProfile');
+    }
+
+    function resolveCloudUpdatedAtKey(profileKey) {
+      const normalized = String(profileKey || '').trim().replace(/[^A-Za-z0-9._:-]/g, '_');
+      if (!normalized) return keyCloudUpdatedAtLegacy;
+      return `${keyCloudUpdatedAtByProfilePrefix}${normalized}`;
+    }
+
+    function migrateLegacyUpdatedAt(targetKey) {
+      if (!targetKey || targetKey === keyCloudUpdatedAtLegacy) return;
+      if (localStorage.getItem(targetKey)) return;
+      const legacyValue = localStorage.getItem(keyCloudUpdatedAtLegacy);
+      if (!legacyValue) return;
+      localStorage.setItem(targetKey, legacyValue);
     }
 
     function resolveSyncBaseUrl() {
