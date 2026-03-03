@@ -21,6 +21,22 @@
     return window.location.protocol === 'http:' || window.location.protocol === 'https:';
   }
 
+  function isLocalContext() {
+    var host = String(window.location.hostname || '').toLowerCase();
+    if (window.location.protocol === 'file:') return true;
+    if (!host) return false;
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0') return true;
+    if (host.endsWith('.local')) return true;
+    if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
+    if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
+    var private172 = host.match(/^172\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/);
+    if (private172) {
+      var secondOctet = Number(private172[1]);
+      if (Number.isFinite(secondOctet) && secondOctet >= 16 && secondOctet <= 31) return true;
+    }
+    return false;
+  }
+
   function collectSyncParams() {
     var source = new URLSearchParams(window.location.search || '');
     var keep = new URLSearchParams();
@@ -134,6 +150,7 @@
   }
 
   function enforceAuthenticatedAccess(syncParams) {
+    if (isLocalContext()) return true;
     if (hasAuthenticatedUser()) return true;
     var loginUrl = resolveLoginUrl(new URLSearchParams(), sanitizeNextPath(resolveCurrentPath()));
     window.location.replace(loginUrl);
@@ -178,6 +195,10 @@
     logoutLink.onclick = function (event) {
       event.preventDefault();
       clearStoredAuth();
+      if (isLocalContext()) {
+        window.location.href = resolveCourseLink('/index.html', REMOTE_LINKS.home, new URLSearchParams());
+        return;
+      }
       window.location.href = resolveLoginUrl(new URLSearchParams(), '/index.html');
     };
   }
