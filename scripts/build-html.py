@@ -1349,6 +1349,41 @@ def build_html():
 <meta name="darkreader-lock">
 <meta name="course-id" content="stack-my-architecture-ios">
 <title>Stack: My Architecture iOS</title>
+<script>
+(function () {{
+  try {{
+    var host = String(window.location.hostname || '').toLowerCase();
+    var local172 = host.match(/^172\\.(\\d{{1,3}})\\.\\d{{1,3}}\\.\\d{{1,3}}$/);
+    var isLocal = window.location.protocol === 'file:' ||
+      host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0' ||
+      host.endsWith('.local') ||
+      /^10\\.\\d{{1,3}}\\.\\d{{1,3}}\\.\\d{{1,3}}$/.test(host) ||
+      /^192\\.168\\.\\d{{1,3}}\\.\\d{{1,3}}$/.test(host) ||
+      (local172 && Number(local172[1]) >= 16 && Number(local172[1]) <= 31);
+    if (isLocal) return;
+
+    var user = JSON.parse(localStorage.getItem('sma:auth:user:v1') || 'null');
+    var session = JSON.parse(localStorage.getItem('sma:auth:session:v1') || 'null');
+    var isValid = !!(user && user.id && session && session.accessToken);
+    if (isValid && session.expiresAt) {{
+      var expiresAt = Date.parse(String(session.expiresAt));
+      if (Number.isFinite(expiresAt) && expiresAt <= Date.now()) isValid = false;
+    }}
+    if (isValid) return;
+
+    localStorage.removeItem('sma:auth:user:v1');
+    localStorage.removeItem('sma:auth:session:v1');
+    localStorage.removeItem('sma:cloud:profile:v1');
+    var next = window.location.pathname + window.location.search + window.location.hash;
+    var login = new URL('/auth/login.html', window.location.origin);
+    login.searchParams.set('next', next);
+    window.location.replace(login.pathname + login.search + login.hash);
+  }} catch (_error) {{
+    var next = window.location.pathname + window.location.search + window.location.hash;
+    window.location.replace('/auth/login.html?next=' + encodeURIComponent(next));
+  }}
+}})();
+</script>
 <link rel="stylesheet" href="assets/study-ux.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/course-switcher.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/assistant-panel.css?v=__ASSET_VERSION__">
