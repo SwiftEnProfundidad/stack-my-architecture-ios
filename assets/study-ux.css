@@ -9,7 +9,8 @@ body.with-global-topbar {
   right: 0;
   z-index: 12000;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 10px 12px;
   background: var(--bg-elevated, #0f172a);
@@ -23,12 +24,16 @@ body.with-global-topbar {
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+  min-height: 52px;
+  order: 1;
 }
 
 .study-current-lesson {
-  flex: 1 1 auto;
-  min-width: clamp(260px, 24vw, 420px);
-  max-width: min(52vw, 860px);
+  flex: 1 1 320px;
+  min-width: clamp(220px, 20vw, 360px);
+  max-width: min(42vw, 680px);
+  min-height: 52px;
+  order: 2;
   border: 1px solid var(--border, #334155);
   border-radius: 10px;
   background: var(--bg, #111827);
@@ -78,8 +83,16 @@ body.with-global-topbar {
 #study-ux-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 52px;
+  align-content: center;
+  order: 4;
+  overflow-x: visible;
   gap: 8px;
-  margin-left: auto;
+  margin-left: 0;
   padding: 8px;
   border-radius: 10px;
   border: 1px solid var(--border, #334155);
@@ -146,6 +159,15 @@ body.with-global-topbar {
 #theme-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 52px;
+  align-content: center;
+  order: 3;
+  overflow-x: visible;
+  margin-left: auto;
   gap: 8px;
 }
 
@@ -286,9 +308,9 @@ main hr {
     width: 100%;
     margin-left: 0;
     flex: 1 1 auto;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
   }
 
   #study-ux-controls {
@@ -344,9 +366,7 @@ main hr {
 
   #study-ux-controls,
   #theme-controls {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    overflow-x: visible;
   }
 }
 
