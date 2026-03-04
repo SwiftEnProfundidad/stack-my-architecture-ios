@@ -25,6 +25,27 @@ body.with-global-topbar {
   flex: 0 0 auto;
 }
 
+.study-current-lesson {
+  flex: 1 1 auto;
+  min-width: clamp(260px, 24vw, 420px);
+  max-width: min(52vw, 860px);
+  border: 1px solid var(--border, #334155);
+  border-radius: 10px;
+  background: var(--bg, #111827);
+  color: var(--text, #e5e7eb);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
 .global-topbar > *:not(#course-switcher) {
   position: static !important;
 }
@@ -169,6 +190,19 @@ body.with-global-topbar {
   border-top: 1px solid var(--border, #334155);
 }
 
+.study-lesson-inline-title {
+  margin: 4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #334155);
+  border-left: 3px solid var(--accent, #f59e0b);
+  border-radius: 10px;
+  background: var(--bg-surface, #0f172a);
+  color: var(--text, #e5e7eb);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
 .lesson-path {
   display: none !important;
 }
@@ -240,6 +274,13 @@ main hr {
     width: 100%;
   }
 
+  #study-current-lesson {
+    order: 2;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
   #study-ux-controls,
   #theme-controls {
     width: 100%;
@@ -251,13 +292,13 @@ main hr {
   }
 
   #study-ux-controls {
-    order: 2;
+    order: 3;
     padding: 6px;
     gap: 6px;
   }
 
   #theme-controls {
-    order: 3;
+    order: 4;
   }
 
   #sidebar-toggle-topbar {
@@ -268,6 +309,10 @@ main hr {
 }
 
 @media (max-width: 768px) {
+  #study-current-lesson {
+    display: none !important;
+  }
+
   #study-ux-controls button,
   #theme-controls button,
   .study-topic-nav button,
