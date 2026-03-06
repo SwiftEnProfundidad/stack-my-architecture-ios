@@ -107,13 +107,13 @@ Button("Cargar") {
 
 `Task { ... }` — Crea un nuevo contexto async desde código sincrono. Lo necesitas porque el action de un `Button` no es `async`. El `Task` "envuelve" el código async para que pueda ejecutarse.
 
-**Peligro:** Si la vista desaparece, este `Task` sigue ejecutandose. Por eso en SwiftUI preferimos `.task { }` (que se cancela automaticamente).
+**Peligro:** Si la vista desaparece, este `Task` sigue ejecutandose. Por eso en SwiftUI preferimos `.task { }` (que se cancela automáticamente).
 
 ### .task vs Task { }
 
 | `.task { }` (structured) | `Task { }` (unstructured) |
 |---|---|
-| Se cancela automaticamente cuando la vista desaparece | Vive independientemente — puede causar memory leaks |
+| Se cancela automáticamente cuando la vista desaparece | Vive independientemente — puede causar memory leaks |
 | No necesitas guardarlo ni cancelarlo manualmente | Necesitas guardar la referencia para cancelar |
 | Preferido en SwiftUI | Solo cuando no hay alternativa |
 
@@ -203,7 +203,7 @@ func loadProfile() async throws -> ProfileData {
 
 `async let user = fetchUser()` — Lanza `fetchUser()` inmediatamente en background, pero NO espera el resultado. Es como pedir tres pizzas a la vez en vez de pedir una, esperar, pedir otra, esperar, pedir otra.
 
-`try await ProfileData(user: user, posts: posts, photos: photos)` — Aquí es donde esperas los tres resultados. Si alguno falla, los demas se **cancelan automaticamente** (structured concurrency).
+`try await ProfileData(user: user, posts: posts, photos: photos)` — Aquí es donde esperas los tres resultados. Si alguno falla, los demas se **cancelan automáticamente** (structured concurrency).
 
 ```mermaid
 gantt
@@ -226,7 +226,7 @@ gantt
 
 - Sabes **cuantas** operaciones son en compilacion (2, 3, 5...).
 - Las operaciones son **independientes** (no dependen del resultado de otra).
-- Quieres que si una falla, las demas se **cancelen automaticamente**.
+- Quieres que si una falla, las demas se **cancelen automáticamente**.
 
 ---
 
@@ -325,7 +325,7 @@ await imageCache.set(url, data: imageData)
 
 **Explicacion:**
 
-`actor ImageCache` — Igual que `class`, pero con serializacion automatica. Cuando el Hilo 1 esta ejecutando `get()`, el Hilo 2 que quiere ejecutar `set()` espera automaticamente hasta que el Hilo 1 termine. No necesitas `DispatchQueue`, `NSLock`, ni `@synchronized`. El compilador lo garantiza.
+`actor ImageCache` — Igual que `class`, pero con serializacion automática. Cuando el Hilo 1 esta ejecutando `get()`, el Hilo 2 que quiere ejecutar `set()` espera automáticamente hasta que el Hilo 1 termine. No necesitas `DispatchQueue`, `NSLock`, ni `@synchronized`. El compilador lo garantiza.
 
 `await imageCache.get(url)` — **Todo** acceso a un actor desde fuera requiere `await`, porque puede que el actor este ocupado atendiendo otra peticion y tengas que esperar.
 
@@ -366,7 +366,7 @@ flowchart TD
 
 `Sendable` es un protocolo que dice: "este tipo es seguro para enviarse entre hilos". Ya lo usamos en todos los modelos de dominio. Aquí profundizamos en POR QUE y CUANDO.
 
-### Que tipos son Sendable automaticamente
+### Que tipos son Sendable automáticamente
 
 | Tipo | Sendable? | Por que |
 |---|---|---|
@@ -396,7 +396,7 @@ group.addTask {
 }
 ```text
 
-### @unchecked Sendable — Deuda tecnica
+### @unchecked Sendable — Deuda técnica
 
 A veces necesitas marcar un tipo como Sendable cuando el compilador no puede verificarlo:
 
@@ -680,7 +680,7 @@ Task {
 
 1. En Xcode: Build Settings → **Strict Concurrency Checking** = **Complete**
 2. Corrige los warnings uno por uno (son los futuros errores de Swift 6)
-3. Convierte `class` a `struct` donde sea posible (los structs son Sendable automaticamente)
+3. Convierte `class` a `struct` donde sea posible (los structs son Sendable automáticamente)
 4. Usa `actor` para estado mutable compartido
 5. Marca `@MainActor` solo lo que genuinamente necesita el hilo principal
 
@@ -792,7 +792,7 @@ flowchart LR
 
 **Básico (usa a diario):**
 - [ ] `async/await` para operaciones asincronas
-- [ ] `.task { }` en SwiftUI para carga automatica con cancelación
+- [ ] `.task { }` en SwiftUI para carga automática con cancelación
 - [ ] `Task { }` solo cuando no puedas usar `.task`
 - [ ] `try/catch` para manejar errores async
 
@@ -895,6 +895,58 @@ func test_load_cancels_previous_load() async {
 
 La cancelación no es un detalle de implementación: es un requisito de UX. Sin ella, el usuario puede ver datos de una carga que ya no es relevante (por ejemplo, resultados de una busqueda anterior).
 
+<details>
+<summary>Solución de referencia</summary>
+
+```swift
+@MainActor
+final class CatalogViewModel: ObservableObject {
+    @Published private(set) var products: [Product] = []
+
+    private let repository: ProductRepository
+    private var loadTask: Task<Void, Never>?
+
+    init(repository: ProductRepository) {
+        self.repository = repository
+    }
+
+    func load() {
+        loadTask?.cancel()
+        loadTask = Task {
+            do {
+                let loaded = try await repository.loadProducts()
+                try Task.checkCancellation()
+                products = loaded
+            } catch is CancellationError {
+                return
+            } catch {
+                products = []
+            }
+        }
+    }
+}
+
+func test_load_cancels_previous_load() async {
+    let repository = SlowStubRepository(
+        results: [
+            .delayed(.seconds(2), [Product(id: "old", name: "Old", price: 1)]),
+            .delayed(.milliseconds(50), [Product(id: "new", name: "New", price: 2)])
+        ]
+    )
+    let sut = await CatalogViewModel(repository: repository)
+
+    await sut.load()
+    await sut.load()
+    try? await Task.sleep(for: .milliseconds(120))
+
+    let products = await sut.products
+    XCTAssertEqual(products.map(\.id), ["new"])
+}
+```
+
+La garantia clave es doble: la tarea anterior se cancela antes de lanzar la nueva y, justo antes de publicar resultado, se vuelve a comprobar cancelacion. Eso evita que una respuesta lenta y obsoleta sobreescriba estado mas reciente.
+</details>
+
 ---
 
 ## Cierre
@@ -905,8 +957,8 @@ La Etapa 5 (Maestria) profundiza en estos conceptos con isolation domains, actor
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -934,10 +986,9 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.

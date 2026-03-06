@@ -2,7 +2,7 @@
 
 **Estado:** Aceptado  
 **Fecha:** 2026-02-07  
-**Contexto:** Etapa 2 - Integración / Lección: [Composition Root](../../02-integracion/06-composition-root.md)
+**Contexto:** Etapa 2 - Integración / Lección: [Composition Root](../../02-integración/06-composition-root.md)
 
 ---
 
@@ -47,7 +47,7 @@ let repository = ServiceLocator.shared.resolve(AuthRepository.self)
 - **Contras:** 
   - Oculta dependencias (no sabes qué necesita una clase sin leer su implementación)
   - Difícil de testear (estado global compartido)
-  - Violación de Dependency Inversion (las clases dependen del locator, no de abstracciones)
+  - Violación de Dependency Inversion (las clases dependen del locator, no de abstracciónes)
 
 ### Opción B: Inyección manual en cada View
 
@@ -167,30 +167,30 @@ struct AppCompositionRoot {
 
 ## Referencias
 
-- [Lección: Composition Root](../../02-integracion/06-composition-root.md)
+- [Lección: Composition Root](../../02-integración/06-composition-root.md)
 - [Lección: Feature Login - Infrastructure](../../01-fundamentos/05-feature-login/03-infrastructure.md)
 - [Código: AppCompositionRoot en ArchitectureKit](../../apps/ios/ArchitectureKit/Sources/AppComposition/AppCompositionRoot.swift)
 - [Patrón: Composition Root (Martin Fowler)](https://martinfowler.com/bliki/CompositionRoot.html)
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-003-composition-root-unico.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/adrs/ADR-003-composition-root-unico.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 

@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Objetivo de aprendizaje
 
@@ -378,6 +378,46 @@ Para interiorizar esta lección, ejecuta este mini-laboratorio:
 
 Si puedes completar este flujo sin crear dependencia lateral entre features, ya estás aplicando contratos de forma madura.
 
+<details>
+<summary>Solución de referencia</summary>
+
+```swift
+enum AppEvent: Sendable, Equatable {
+    case loginSucceeded(Session)
+    case sessionExpired
+    case productSelected(Product.ID)
+}
+
+@MainActor
+final class AppCoordinator {
+    private(set) var route: AppRoute = .login
+
+    func handle(_ event: AppEvent) {
+        switch event {
+        case .loginSucceeded:
+            route = .catalog
+        case .sessionExpired:
+            route = .login
+        case let .productSelected(id):
+            route = .productDetail(id)
+        }
+    }
+}
+
+@MainActor
+func test_sessionExpired_routes_back_to_login() {
+    let sut = AppCoordinator()
+    sut.handle(.loginSucceeded(.authenticated(userID: "u-1")))
+
+    sut.handle(.sessionExpired)
+
+    XCTAssertEqual(sut.route, .login)
+}
+```
+
+La pieza importante no es el `switch`, sino el limite. La feature emisora publica un `AppEvent` tipado y el coordinator decide la ruta. No aparece ningun `import` cruzado entre `Login` y `Catalog`, y el contrato compartido sigue reducido a eventos y tipos minimos.
+</details>
+
 ---
 
 ## Señales de que el alumno ya domina esta skill
@@ -423,8 +463,8 @@ Además, un buen contrato sirve como herramienta de onboarding: un junior puede 
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -452,10 +492,9 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.

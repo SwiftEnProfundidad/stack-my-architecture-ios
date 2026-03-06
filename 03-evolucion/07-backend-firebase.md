@@ -4,13 +4,13 @@
 
 Al terminar esta lección vas a saber integrar Firebase (Auth + Firestore) en una arquitectura Clean sin contaminar Domain ni Application. Sabras encapsular los SDKs de Firebase detrás de protocolos, testear la integración con emuladores, y gestionar entornos (dev/prod) de forma segura.
 
-En palabras simples: Firebase es un proveedor de servicios. Tu arquitectura no debe depender de el. Si mañana cambias a Supabase o a un backend propio, solo cambias un modulo.
+En palabras simples: Firebase es un proveedor de servicios. Tu arquitectura no debe depender de el. Si mañana cambias a Supabase o a un backend propio, solo cambias un módulo.
 
 ---
 
-## Definicion simple
+## Definición simple
 
-Firebase es una plataforma de Google que ofrece autenticacion, base de datos en tiempo real (Firestore), storage, y más. En este curso usamos dos servicios:
+Firebase es una plataforma de Google que ofrece autenticación, base de datos en tiempo real (Firestore), storage, y más. En este curso usamos dos servicios:
 
 - **Firebase Auth** — para autenticar usuarios (email/password).
 - **Cloud Firestore** — para almacenar y consultar datos (productos del catálogo).
@@ -161,7 +161,7 @@ struct FirebaseAuthGateway: AuthGateway, Sendable {
 - `struct FirebaseAuthGateway: AuthGateway, Sendable` — Implementa el mismo protocolo `AuthGateway` que usaba `RemoteAuthGateway`. El UseCase no sabe la diferencia.
 - `Auth.auth().signIn(withEmail:password:)` — Llama al SDK de Firebase Auth. Es `async` nativo en versiones recientes del SDK.
 - `credentials.email.value` — Usamos los Value Objects de Domain. Firebase recibe strings, pero nosotros ya validamos en el UseCase.
-- `mapAuthError` — Traduce errores tecnicos de Firebase a errores semanticos de Domain (`LoginError`). El UseCase nunca ve `AuthErrorCode`; solo ve `LoginError`.
+- `mapAuthError` — Traduce errores técnicos de Firebase a errores semánticos de Domain (`LoginError`). El UseCase nunca ve `AuthErrorCode`; solo ve `LoginError`.
 - `result.user.getIDToken()` — Obtiene el token JWT del usuario autenticado. Este token es el que se usa para autenticar peticiones a Firestore.
 
 **Principio clave:** El SDK de Firebase (`import FirebaseAuth`) SOLO aparece en este archivo. Ningun otro archivo del proyecto importa FirebaseAuth. Si quisieras migrar a otro proveedor de auth, solo reescribes este archivo.
@@ -336,7 +336,7 @@ struct FirebaseConfig {
 }
 ```text
 
-**`#if DEBUG`** — Solo activa emuladores en builds de debug. En producción, Firebase conecta con la nube automaticamente. Esto previene que un build de release accidentalmente use emuladores.
+**`#if DEBUG`** — Solo activa emuladores en builds de debug. En producción, Firebase conecta con la nube automáticamente. Esto previene que un build de release accidentalmente use emuladores.
 
 ---
 
@@ -571,28 +571,60 @@ Firebase es una herramienta poderosa para arrancar rápido. Pero su valor real e
 - `grep -r "import Firebase" Sources/FeatureCatalogDomain Sources/FeatureLoginDomain` devuelve 0 resultados.
 - El test de composición demuestra que el wiring es intercambiable.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# 1. Verificar que no hay imports de Firebase en Domain/Application
+./scripts/check-dependencies.sh
+# Salida esperada: "Domain imports OK"
+
+grep -r "import Firebase" \
+  apps/ios/ArchitectureKit/Sources/FeatureCatalogDomain \
+  apps/ios/ArchitectureKit/Sources/FeatureLoginDomain 2>/dev/null
+# Salida esperada: 0 líneas (sin resultados)
+```
 
 ```swift
-// En AppCompositionTests
-func test_composition_worksWithStubRepository() async throws {
-    let stub = StubProductRepository(result: .success([
-        Product(name: "Test", price: Decimal(1.00))
-    ]))
-    // Si AppComposition acepta un ProductRepository genérico,
-    // este test compila y pasa sin Firebase en el grafo de dependencias.
-    let viewModel = CatalogViewModel(repository: stub)
-    await viewModel.load()
-    XCTAssertEqual(viewModel.products.count, 1)
+// Tests/AppCompositionTests/CompositionFirebaseEncapsulationTests.swift
+
+import XCTest
+@testable import AppComposition
+@testable import FeatureCatalogDomain
+
+final class CompositionFirebaseEncapsulationTests: XCTestCase {
+
+    // Verifica que AppComposition puede usar un stub en lugar de Firebase
+    func test_composition_worksWithStubRepository() async throws {
+        let expectedProduct = Product(
+            id: "p-1",
+            name: "Producto de prueba",
+            price: Price(amount: Decimal(string: "15.00")!, currency: "EUR"),
+            imageURL: URL(string: "https://example.com/p1.png")!
+        )
+        let stub = StubProductRepository(result: .success([expectedProduct]))
+
+        // Si AppComposition acepta un ProductRepository genérico (protocolo),
+        // este test compila y pasa SIN Firebase en el grafo de dependencias.
+        let useCase = LoadProductsUseCase(repository: stub)
+        let products = try await useCase.execute()
+
+        XCTAssertEqual(products.count, 1)
+        XCTAssertEqual(products.first?.name, "Producto de prueba")
+    }
 }
 ```
 
-La clave no es testear Firebase en sí, sino verificar que la arquitectura permite sustituirlo. Si este test compila y pasa, Firebase está correctamente encapsulado detrás de un protocolo.
+La clave no es testear Firebase en sí, sino verificar que la arquitectura permite sustituirlo. Si `LoadProductsUseCase` depende del protocolo `ProductRepository` y no de `FirestoreProductRepository` directamente, este test compila sin necesidad de emuladores ni conexión. Firebase solo aparece en Infrastructure; Domain y Application no saben que existe.
+
+**Resultado esperado**: el script de dependencias pasa sin errores, el grep devuelve 0 líneas, y el test de composición compila y pasa con el repositorio stub (sin Firebase).
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -620,10 +652,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 > Cómo pensar como arquitecto senior cuando no hay "una respuesta correcta" en el libro
 
@@ -681,7 +681,7 @@ HIPAA audit trail ────────────┘
 
 ## Entregable de esta Lección
 
-Tu **"Architecture Decision Portfolio"** personal:
+Tu **"Architecture Decisión Portfolio"** personal:
 
 1. **3 problemas reales** que hayas enfrentado (o simulado)
 2. **Análisis de fuerzas** para cada uno
@@ -764,8 +764,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

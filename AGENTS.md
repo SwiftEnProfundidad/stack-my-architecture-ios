@@ -8,7 +8,7 @@
   - La aplicacion obligatoria se decide por ambito de tarea segun el contrato hard de skills.
 
 ## Obligatorio (en cada iteracion)
-Antes de realizar cualquier accion:
+Antes de realizar cualquier acción:
 1) Confirmar workspace:
    - `pwd`
    - `git rev-parse --show-toplevel`
@@ -46,12 +46,12 @@ Antes de realizar cualquier accion:
     - `windsurf-rules-android`
 - Si una tarea toca multiples ambitos, aplicar TODAS las skills relevantes en conjunto.
 - No se permite aplicar solo una parte de esas skills ni hacer cherry-picking de reglas.
-- Si una regla de skill entra en conflicto con codigo existente, se corrige el codigo para cumplir la regla (no al reves), salvo instruccion explicita del usuario.
+- Si una regla de skill entra en conflicto con código existente, se corrige el código para cumplir la regla (no al reves), salvo instruccion explicita del usuario.
 - Si una regla no se puede cumplir tecnicamente en ese momento:
-  - detener implementacion,
+  - detener implementación,
   - declarar `STATUS: BLOCKED`,
   - explicar la regla exacta bloqueante, y
-  - pedir decision explicita del usuario antes de continuar.
+  - pedir decisión explicita del usuario antes de continuar.
 
 ## Contrato hard de GitFlow y ramas (no negociable)
 - El ciclo GitFlow del proyecto es obligatorio.
@@ -75,32 +75,32 @@ Antes de realizar cualquier accion:
   - `hotfix/*`: debe salir de `main` para fixes urgentes de produccion.
 - Esta prohibido commitear en `main` y `develop` sin instruccion explicita del usuario.
 - Si la rama actual no cumple naming o flujo:
-  - detener implementacion,
+  - detener implementación,
   - declarar `STATUS: BLOCKED`,
   - explicar el conflicto de rama/flujo, y
   - pedir al usuario el cambio o confirmacion de rama antes de continuar.
 
-## Gate operativo obligatorio (antes de editar codigo)
+## Gate operativo obligatorio (antes de editar código)
 - Declarar internamente las skills aplicables y tratarlas como activas durante TODO el turno.
 - Verificar cumplimiento minimo previo:
   - BDD/TDD requerido por la skill correspondiente.
-  - Concurrencia y aislamiento segun `swift-concurrency` cuando haya codigo Swift.
+  - Concurrencia y aislamiento segun `swift-concurrency` cuando haya código Swift.
   - Estado/arquitectura/UI segun `swiftui-expert-skill` y `windsurf-rules-ios` cuando aplique iOS/SwiftUI.
   - Reglas frontend segun `windsurf-rules-frontend` cuando aplique web.
   - Reglas backend segun `windsurf-rules-backend` cuando aplique backend.
   - Reglas Android segun `windsurf-rules-android` cuando aplique Android.
   - Rama actual alineada con GitFlow y convencion de naming.
-- Si no se puede garantizar este gate, no se permite editar codigo.
+- Si no se puede garantizar este gate, no se permite editar código.
 
 ## Prohibiciones explicitas
-- Prohibido avanzar con implementacion funcional si incumple cualquier regla hard de skill.
+- Prohibido avanzar con implementación funcional si incumple cualquier regla hard de skill.
 - Prohibido cerrar una tarea si hay violaciones conocidas de skills pendientes de corregir.
 - Prohibido asumir permiso implicito del usuario para saltar reglas.
 - Prohibido ejecutar `merge`, `rebase`, `cherry-pick` o `push --force` sin instruccion explicita del usuario.
 
 ## Contrato hard de higiene documental y artefactos (enterprise clean)
 - Objetivo no negociable: mantener el repositorio limpio, trazable y sin acumulacion de basura operativa.
-- Prohibido crear un `.md` nuevo por cada micro-paso si la informacion cabe en un documento existente.
+- Prohibido crear un `.md` nuevo por cada micro-paso si la información cabe en un documento existente.
 - Antes de crear cualquier archivo en `docs/**`, verificar y priorizar actualizacion de:
   - `docs/ENTERPRISE_EXECUTION_CYCLE_*.md`
   - `docs/REFRACTOR_PROGRESS.md`
@@ -121,8 +121,8 @@ Antes de realizar cualquier accion:
   - eliminar directorios vacios huerfanos,
   - verificar que `git status` no muestra basura no trackeada fuera del alcance de la tarea.
 - Criterio de bloqueo hard:
-  - si un archivo no aporta valor profesional claro (producto, arquitectura, operacion estable o compliance), no se mantiene.
-  - si hay duda razonable, declarar `STATUS: BLOCKED` y pedir decision explicita del usuario para conservar o eliminar.
+  - si un archivo no aporta valor profesional claro (producto, arquitectura, operación estable o compliance), no se mantiene.
+  - si hay duda razonable, declarar `STATUS: BLOCKED` y pedir decisión explicita del usuario para conservar o eliminar.
   
 ## Seguridad del repositorio
 - Hacer cambios SOLO dentro de este repositorio.
@@ -184,5 +184,5 @@ Al finalizar cualquier tarea, siempre reportar:
     - Local: `/Users/juancarlosmerlosalbarracin/.codex/skills/swiftui-expert-skill/SKILL.md`
     - Vendorizado: `docs/codex-skills/swiftui-expert-skill.md`
 
-- Comando de sincronizacion: `./scripts/sync-codex-skills.sh`
+- Comando de sincronización: `./scripts/sync-codex-skills.sh`
 <!-- END CODEX SKILLS -->

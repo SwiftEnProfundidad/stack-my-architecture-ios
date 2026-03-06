@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Objetivo de aprendizaje
 
@@ -447,38 +447,86 @@ Cuando puedes hacer esto de forma sistemática, tus refactors dejan de ser apues
 - El caso de uso usa `try Task.checkCancellation()` o `withTaskCancellationHandler` internamente.
 - No se usa `Task.sleep` en el test para esperar resultados (usa `Task.value` con expectativa de error).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-func test_loadProducts_respectsCancellation() async throws {
-    let slowRemote = SlowStubRemote(delay: .seconds(2), result: .success([Product(name: "A", price: 1)]))
-    let store = InMemoryProductStore()
-    let sut = CachedProductRepository(remote: slowRemote, store: store, ttlSeconds: 300)
+// Tests/FeatureCatalogDataIntegrationTests/CancellationTests.swift
 
-    let task = Task { try await sut.loadProducts() }
+import XCTest
+@testable import FeatureCatalogData
 
-    // Cancelar rápido
-    try await Task.sleep(for: .milliseconds(100))
-    task.cancel()
+final class LoadProductsUseCaseCancellationTests: XCTestCase {
 
-    do {
-        _ = try await task.value
-        XCTFail("Debería haber lanzado CancellationError")
-    } catch is CancellationError {
-        // Esperado
+    func test_loadProducts_respectsCancellation_andDoesNotUpdateCache() async throws {
+        // Arrange: repositorio lento (2 segundos) + store espía
+        let slowRemote = SlowStubProductRepository(
+            delay: .seconds(2),
+            result: .success([
+                Product(
+                    id: "p-1",
+                    name: "Slow Product",
+                    price: Price(amount: Decimal(string: "9.99")!, currency: "EUR"),
+                    imageURL: URL(string: "https://example.com/p1.png")!
+                )
+            ])
+        )
+        let store = InMemoryProductStore()
+        let sut = CachedProductRepository(
+            remote: slowRemote,
+            store: store,
+            maxAge: 300,
+            now: { Date() }
+        )
+
+        // Act: lanzar carga y cancelar rápido
+        let task = Task { try await sut.loadAll() }
+
+        try await Task.sleep(for: .milliseconds(100))
+        task.cancel()
+
+        // Assert: debe terminar con CancellationError
+        do {
+            _ = try await task.value
+            XCTFail("Debería haber lanzado CancellationError")
+        } catch is CancellationError {
+            // Correcto: cancelación propagada
+        }
+
+        // Assert: el store NO debe haberse actualizado
+        let cached = try await store.load()
+        XCTAssertNil(cached, "Cache no debe actualizarse tras cancelación")
+    }
+}
+
+// Stub de repositorio lento para tests de cancelación
+final class SlowStubProductRepository: ProductRepository, @unchecked Sendable {
+    private let delay: Duration
+    private let result: Result<[Product], Error>
+
+    init(delay: Duration, result: Result<[Product], Error>) {
+        self.delay = delay
+        self.result = result
     }
 
-    let cached = try await store.load()
-    XCTAssertNil(cached, "Cache no debe actualizarse tras cancelación")
+    func loadAll() async throws -> [Product] {
+        try await Task.sleep(for: delay)
+        try Task.checkCancellation()
+        return try result.get()
+    }
 }
 ```
 
-La cancelación es un caso funcional, no una excepción ignorable. Si el caso de uso no la respeta, el usuario puede ver datos de una operación que ya descartó.
+La cancelación en Swift es cooperativa: el sistema no mata el `Task` automáticamente; lo marca como cancelado. El stub llama a `Task.checkCancellation()` después del `sleep`, lo que lanza `CancellationError` y permite que el `CachedProductRepository` no llegue a guardar nada en el store. El test verifica dos contratos: (1) la cancelación se propaga hacia arriba, (2) no hay efectos secundarios parciales (el store queda en `nil`).
+
+**Resultado esperado**: el test pasa de forma determinista en 10 ejecuciones consecutivas, el `task.value` lanza `CancellationError`, y el store permanece vacío.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -506,10 +554,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

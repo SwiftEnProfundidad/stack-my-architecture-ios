@@ -363,7 +363,7 @@ func test_loadAll_cacheExactlyAtTTL_isStillValid() async throws {
 }
 ```text
 
-**Que verifica:** Un edge case critico: el cache tiene exactamente la edad del TTL (300s). La decision de diseño es que `< maxAge` es valido, asi que exactamente 300 esta **en el limite**. Si la condicion fuera `<=`, este test pasaria. Si fuera `<`, fallaria. El test documenta explicitamente que decision tomamos.
+**Que verifica:** Un edge case critico: el cache tiene exactamente la edad del TTL (300s). La decisión de diseño es que `< maxAge` es valido, asi que exactamente 300 esta **en el limite**. Si la condicion fuera `<=`, este test pasaria. Si fuera `<`, fallaria. El test documenta explicitamente que decisión tomamos.
 
 **Clave de los tests de cache:**
 
@@ -587,50 +587,99 @@ Si se sirve cache, la interfaz nunca debe dar impresión de “dato en tiempo re
 - El `CachedProductRepository` no importa SwiftData ni ningún detalle de persistencia concreto.
 - El test usa stubs/fakes para red y store, no implementaciones reales.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-// Test 1: fallback a cache cuando la red falla
-func test_loadProducts_returnsCache_whenRemoteFails() async throws {
-    let remoteProducts = [Product(name: "Widget", price: Decimal(9.99))]
-    let stubRemote = StubProductRemote(result: .success(remoteProducts))
-    let memoryStore = InMemoryProductStore()
-    let sut = CachedProductRepository(remote: stubRemote, store: memoryStore, ttlSeconds: 300)
+// Tests/FeatureCatalogDataIntegrationTests/CachedProductRepositoryPolicyTests.swift
 
-    // Primera carga: red OK → guarda en cache
-    let first = try await sut.loadProducts()
-    XCTAssertEqual(first, remoteProducts)
+import XCTest
+@testable import FeatureCatalogData
 
-    // Red falla
-    stubRemote.result = .failure(NSError(domain: "net", code: -1))
+final class CachedProductRepositoryPolicyTests: XCTestCase {
 
-    // Segunda carga: cache sirve
-    let second = try await sut.loadProducts()
-    XCTAssertEqual(second, remoteProducts)
-}
+    // Test 1: fallback a cache cuando la red falla
+    func test_loadAll_returnsCache_whenRemoteFails() async throws {
+        let remoteProducts = [
+            Product(
+                id: "p-1",
+                name: "Widget",
+                price: Price(amount: Decimal(string: "9.99")!, currency: "EUR"),
+                imageURL: URL(string: "https://example.com/widget.png")!
+            )
+        ]
+        let fixedNow = Date(timeIntervalSince1970: 1_000)
+        let stubRemote = StubProductRepository(result: .success(remoteProducts))
+        let memoryStore = InMemoryProductStore()
+        let sut = CachedProductRepository(
+            remote: stubRemote,
+            store: memoryStore,
+            maxAge: 300,
+            now: { fixedNow }
+        )
 
-// Test 2: cache expirado fuerza recarga remota
-func test_loadProducts_ignoresExpiredCache() async throws {
-    let staleProducts = [Product(name: "Old", price: Decimal(1.00))]
-    let freshProducts = [Product(name: "New", price: Decimal(2.00))]
-    let memoryStore = InMemoryProductStore()
-    // Simular cache guardado hace 10 min
-    try await memoryStore.save(staleProducts, timestamp: Date().addingTimeInterval(-600))
+        // Primera carga: red OK → guarda en cache
+        let first = try await sut.loadAll()
+        XCTAssertEqual(first.map(\.id), ["p-1"])
 
-    let stubRemote = StubProductRemote(result: .success(freshProducts))
-    let sut = CachedProductRepository(remote: stubRemote, store: memoryStore, ttlSeconds: 300)
+        // Red falla
+        stubRemote.stubbedResult = .failure(CatalogError.connectivity)
 
-    let result = try await sut.loadProducts()
-    XCTAssertEqual(result, freshProducts, "Cache expirado: debe ir a red")
+        // Segunda carga: cache dentro del TTL → sirve cache
+        let second = try await sut.loadAll()
+        XCTAssertEqual(second.map(\.id), ["p-1"])
+    }
+
+    // Test 2: cache expirado fuerza recarga remota
+    func test_loadAll_ignoresExpiredCache_andGoesToRemote() async throws {
+        let staleProducts = [
+            Product(
+                id: "old",
+                name: "Producto viejo",
+                price: Price(amount: Decimal(string: "1.00")!, currency: "EUR"),
+                imageURL: URL(string: "https://example.com/old.png")!
+            )
+        ]
+        let freshProducts = [
+            Product(
+                id: "new",
+                name: "Producto nuevo",
+                price: Price(amount: Decimal(string: "2.00")!, currency: "EUR"),
+                imageURL: URL(string: "https://example.com/new.png")!
+            )
+        ]
+        let memoryStore = InMemoryProductStore()
+        // Simular cache guardado hace 10 min (> TTL de 5 min)
+        let staleTimestamp = Date(timeIntervalSince1970: 0)
+        try await memoryStore.save(
+            CachedProducts(products: staleProducts, timestamp: staleTimestamp)
+        )
+
+        let now = Date(timeIntervalSince1970: 601) // 10 min y 1 s después
+        let stubRemote = StubProductRepository(result: .success(freshProducts))
+        let sut = CachedProductRepository(
+            remote: stubRemote,
+            store: memoryStore,
+            maxAge: 300,
+            now: { now }
+        )
+
+        let result = try await sut.loadAll()
+        XCTAssertEqual(result.map(\.id), ["new"], "Cache expirado: debe ir a red")
+    }
 }
 ```
 
-La clave es que `CachedProductRepository` depende de protocolos (`ProductRemote`, `ProductStore`), no de implementaciones concretas. Esto permite testear la política de cache sin red real ni SwiftData.
+La clave es que `CachedProductRepository` depende de los protocolos `ProductRepository` (remote) y `ProductStore` (local), no de implementaciones concretas. El reloj se inyecta como closure `now: () -> Date`, lo que hace los tests de TTL completamente deterministas: no hay `Date()` real ni `Task.sleep` en los tests.
+
+**Resultado esperado**: ambos tests pasan con `swift test --filter CachedProductRepository`, y el repositorio no contiene `import SwiftData` ni `import FirebaseFirestore`.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -658,10 +707,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

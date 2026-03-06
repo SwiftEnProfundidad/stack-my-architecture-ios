@@ -445,14 +445,35 @@ Decidir también es renunciar. Documentar explícitamente a qué renuncias hoy e
 - El trigger de revisión es medible y accionable (no "cuando haya problemas").
 - La ficha es coherente con lo que dice el ADR existente.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
-La decisión de network-first prioriza frescura de datos sobre velocidad percibida. El coste es que la primera carga siempre paga latencia de red. La alternativa (cache-first) habría dado velocidad inmediata pero con riesgo de mostrar datos obsoletos sin que el usuario lo sepa. El trigger de revisión ("P95 > 2s") convierte una opinión ("es lento") en un dato accionable. Si se alcanza ese umbral, se evalúa cambiar a stale-while-revalidate o cache-first con indicador de frescura.
+**Ficha de trade-off completada:**
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+**Problema:** ¿Sirvo siempre desde cache (velocidad) o siempre desde red (frescura)?
+
+**Opción elegida:** Network-first con fallback a cache cuando la red falla y el cache está dentro del TTL.
+
+**Coste aceptado:** La primera carga de catálogo siempre paga latencia de red, aunque exista cache válido. En conexiones lentas (3G, metro), el usuario espera más que con cache-first.
+
+**Riesgo asumido:** Si la red es lenta pero disponible (responde en 3-5 segundos), el usuario espera más que si mostráramos el cache inmediatamente con refresco en background.
+
+**Trigger de revisión:** Métricas de latencia P95 en carga de catálogo > 2 s durante 2 sprints consecutivos. Si se alcanza ese umbral, evaluar paso a stale-while-revalidate o cache-first con indicador visible de frescura.
+
+---
+
+La razón de priorizar frescura sobre velocidad en esta etapa es que el catálogo incluye precios: mostrar un precio incorrecto —aunque sea por 5 minutos— tiene mayor impacto negativo que un tiempo de carga ligeramente mayor. El trigger cuantitativo ("P95 > 2s durante 2 sprints") convierte una opinión subjetiva en una señal objetiva que cualquier miembro del equipo puede medir.
+
+**Resultado esperado**: la ficha completada coincide en las 5 dimensiones con el ADR-007, y el trigger es una métrica que ya se recoge en el dashboard de observabilidad del proyecto.
+
+</details>
+
+---
+
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -480,10 +501,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

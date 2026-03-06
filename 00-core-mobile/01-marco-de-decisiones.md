@@ -29,7 +29,7 @@ Usa este marco cuando la decisión afecta a más de un módulo, tiene coste de r
 
 En `ArchitectureKit`, la decisión de usar navegación por eventos en lugar de `NavigationLink` directo se documentó en `ADR-001-login.md`. Las fuerzas eran: testabilidad del flujo de navegación (dura) vs simplicidad de `NavigationLink` (blanda). La alternativa descartada fue acoplar Login a Catalog vía import directo. La evidencia de validación fue que `LoginViewModelTests` verifica navegación sin instanciar SwiftUI. Consulta la Etapa 2 (`02-integracion/02-navegacion-eventos.md`) para ver la implementación completa.
 
-## Checklist 1 página: Architecture Decision Loop
+## Checklist 1 página: Architecture Decisión Loop
 
 - [ ] Problema formulado en una frase verificable.
 - [ ] Restricciones duras identificadas y validadas.
@@ -48,22 +48,22 @@ Plataforma iOS/Android: migrar navegación de acoplamiento directo a coordinador
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/01-marco-de-decisiones.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `00-core-mobile/01-marco-de-decisiones.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -91,10 +91,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

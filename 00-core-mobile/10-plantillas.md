@@ -6,7 +6,7 @@ La regla de uso es simple: cada plantilla debe producir un artefacto que otra pe
 
 ---
 
-## 1) ADR template (Architecture Decision Record)
+## 1) ADR template (Architecture Decisión Record)
 
 ### Plantilla
 
@@ -285,8 +285,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

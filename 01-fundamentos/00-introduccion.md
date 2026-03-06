@@ -91,7 +91,7 @@ Al completar la Etapa 1, habrás construido tu primera feature completa (un Logi
 
 **Cuarto, implementar capa por capa.** Empiezas por el dominio (las reglas de negocio puras), luego la aplicación (los casos de uso), luego la infraestructura (la conexión con el servidor), y finalmente la interfaz (la vista SwiftUI). Cada capa tiene una responsabilidad clara y no se mezcla con las demás.
 
-**Quinto, documentar las decisiones.** Cada vez que tomas una decisión de diseño ("¿por qué usé un struct en vez de una clase?", "¿por qué el ViewModel recibe un closure en vez de navegar directamente?"), la escribes en un ADR (Architecture Decision Record). No porque sea burocracia, sino porque dentro de tres meses, cuando vuelvas a ese código, vas a agradecer tener escrito el "por qué".
+**Quinto, documentar las decisiones.** Cada vez que tomas una decisión de diseño ("¿por qué usé un struct en vez de una clase?", "¿por qué el ViewModel recibe un closure en vez de navegar directamente?"), la escribes en un ADR (Architecture Decisión Record). No porque sea burocracia, sino porque dentro de tres meses, cuando vuelvas a ese código, vas a agradecer tener escrito el "por qué".
 
 ---
 
@@ -314,7 +314,7 @@ flowchart TD
 
 **Paso 1:** Empieza por la caja de arriba: "Usuario escribe email". Eso es lo que pasa primero.
 
-**Paso 2:** Sigue la flecha hacia abajo. Llegas a un rombo: "Email tiene @?". Es una pregunta/decision. Tiene dos flechas saliendo.
+**Paso 2:** Sigue la flecha hacia abajo. Llegas a un rombo: "Email tiene @?". Es una pregunta/decisión. Tiene dos flechas saliendo.
 
 **Paso 3:** Si la respuesta es "SI" (flecha de la izquierda), llegas a una caja verde: "Email valido". Verde = positivo, correcto.
 
@@ -340,8 +340,8 @@ El curso está dividido en cinco etapas que progresan en complejidad sin saltos.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-1.md](../01-fundamentos/entregables-etapa-1.md).
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -369,10 +369,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

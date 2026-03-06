@@ -75,7 +75,7 @@ flowchart TD
     style ERR_NET fill:#f8d7da,stroke:#dc3545
 ```text
 
-Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el codigo.
+Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el código.
 
 ---
 
@@ -291,8 +291,8 @@ En la siguiente lección empezaremos a implementar, empezando por la capa Domain
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -320,10 +320,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

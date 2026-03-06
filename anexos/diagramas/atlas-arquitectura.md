@@ -357,7 +357,7 @@ graph TD
 
 **Donde se necesita Sendable:** Cada vez que un dato **cruza** de una zona a otra (las flechas del diagrama), ese dato debe ser `Sendable`. Por eso todos nuestros modelos (Email, Product, Session, etc.) son structs conformando `Sendable`.
 
-**Cancelacion:** Cuando el usuario sale de una pantalla, la `Task` que lanzó el `.task` de SwiftUI se cancela automaticamente. Esa cancelacion se propaga por toda la cadena: ViewModel → UseCase → Gateway → URLSession. Si URLSession recibe la cancelacion, deja de esperar la respuesta del servidor.
+**Cancelacion:** Cuando el usuario sale de una pantalla, la `Task` que lanzó el `.task` de SwiftUI se cancela automáticamente. Esa cancelacion se propaga por toda la cadena: ViewModel → UseCase → Gateway → URLSession. Si URLSession recibe la cancelacion, deja de esperar la respuesta del servidor.
 
 ---
 
@@ -506,12 +506,12 @@ Si mañana migras de Firebase a Supabase, solo cambias `BackendFirebase` por `Ba
 
 ## Como usar este atlas
 
-- **Antes de empezar una leccion:** mira el diagrama 1 (capas) para ubicar donde estas trabajando.
+- **Antes de empezar una lección:** mira el diagrama 1 (capas) para ubicar donde estas trabajando.
 - **Si no entiendes por que existe un protocolo:** mira el diagrama 2 (Dependency Inversion).
 - **Si no entiendes el flujo de datos:** mira los diagramas 3 o 4 (secuencias end-to-end).
 - **Si no sabes quien depende de quien:** mira el diagrama 5 (grafo de dependencias).
 - **Si no entiendes `Sendable` o `@MainActor`:** mira el diagrama 6 (concurrencia).
-- **Si quieres ver la estructura de modulos futura:** mira el diagrama 7 (SPM).
+- **Si quieres ver la estructura de módulos futura:** mira el diagrama 7 (SPM).
 - **Si quieres saber como encaja Firebase:** mira el diagrama 8 (backend).
 
 ---

@@ -36,8 +36,13 @@ Sobremodularizar temprano penaliza productividad.
 
 ### Opción B: 10+ módulos desde el inicio (overhead de gestión)
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Los límites de compilación entre módulos son forzados por Swift desde el principio: no es posible que un módulo de Domain importe uno de Infrastructure sin que el `Package.swift` lo declare explícitamente
+  - Tiempos de compilación paralelos en CI mejoran desde el inicio; cada módulo se puede cachear y reconstruir de forma independiente con herramientas como `xcodebuild` o Tuist
+- **Contras:**
+  - El `Package.swift` con 10+ targets y sus dependencias cruzadas se convierte en una fuente de conflictos de merge frecuentes y errores de configuración difíciles de depurar para un alumno que aún está aprendiendo la arquitectura
+  - El modificador de acceso `public` debe aplicarse a todo símbolo que cruce fronteras de módulo; el alumno dedica tiempo a ajustar visibilidades en lugar de centrarse en la lógica de dominio y los patrones arquitectónicos
+  - Si los límites del módulo se definen mal al inicio (por ejemplo, agrupando por tipo técnico en lugar de por dominio), refactorizarlos más adelante es muy costoso: implica mover ficheros, actualizar imports en decenas de sitios y reconfigurar el `Package.swift`
 
 ### Opción C: Modularización/versionado SPM progresivos (elegida)
 
@@ -90,23 +95,22 @@ Ver la lección [04-versionado-spm](../../04-arquitecto/04-versionado-spm.md) pa
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-013-versionado-spm-progresivo.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/adrs/ADR-013-versionado-spm-progresivo.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-

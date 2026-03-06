@@ -290,7 +290,7 @@ struct LoginView: View {
 
 Vamos a repasar cada parte:
 
-**Los TextFields.** El `TextField` del email tiene configuraciones que mejoran la experiencia del usuario: `textContentType(.emailAddress)` activa el autocompletado del teclado, `textInputAutocapitalization(.never)` desactiva la mayúscula inicial (los emails no empiezan por mayúscula), y `keyboardType(.emailAddress)` muestra el teclado con arroba. El `SecureField` oculta los caracteres del password. Estos son detalles de UX que no afectan a la lógica, pero que hacen la diferencia entre una app amateur y una profesional.
+**Los TextFields.** El `TextField` del email tiene configuraciónes que mejoran la experiencia del usuario: `textContentType(.emailAddress)` activa el autocompletado del teclado, `textInputAutocapitalization(.never)` desactiva la mayúscula inicial (los emails no empiezan por mayúscula), y `keyboardType(.emailAddress)` muestra el teclado con arroba. El `SecureField` oculta los caracteres del password. Estos son detalles de UX que no afectan a la lógica, pero que hacen la diferencia entre una app amateur y una profesional.
 
 **El binding.** `$viewModel.email` y `$viewModel.password` son bindings bidireccionales: cuando el usuario escribe, el ViewModel se actualiza automáticamente, y cuando el ViewModel cambia (por ejemplo, al limpiar un error), la vista se actualiza también. Esto es la magia de SwiftUI + `@Observable`: el flujo de datos es declarativo y automático.
 
@@ -690,28 +690,28 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/04-interface-swiftui.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `01-fundamentos/05-feature-login/04-interface-swiftui.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -739,10 +739,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

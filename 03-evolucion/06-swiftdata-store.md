@@ -462,31 +462,84 @@ SwiftData es una herramienta, no una arquitectura. Lo que importa no es que uses
 - Los tests usan `isStoredInMemoryOnly: true` para no contaminar disco.
 - El precio `Decimal` se preserva sin pérdida de precisión (no `Double`).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-func test_roundTrip_preservesDecimalAndSpecialChars() async throws {
-    let store = SwiftDataCatalogCacheStore(inMemory: true)
-    let products = [Product(name: "Café ☕", price: Decimal(19.99))]
-    let now = Date()
+// Tests/FeatureCatalogPersistenceSwiftDataTests/SwiftDataCatalogCacheStoreTests.swift
 
-    try await store.save(products, timestamp: now)
-    let result = try await store.load()
+import XCTest
+import SwiftData
+@testable import FeatureCatalogPersistenceSwiftData
 
-    XCTAssertNotNil(result)
-    XCTAssertEqual(result?.products.first?.name, "Café ☕")
-    XCTAssertEqual(result?.products.first?.price, Decimal(19.99))
-    XCTAssertEqual(result?.timestamp.timeIntervalSince1970,
-                   now.timeIntervalSince1970, accuracy: 1.0)
+final class SwiftDataCatalogCacheStoreRoundTripTests: XCTestCase {
+
+    private func makeStore() throws -> SwiftDataCatalogCacheStore {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(
+            for: CatalogProductEntity.self,
+            configurations: config
+        )
+        return SwiftDataCatalogCacheStore(container: container)
+    }
+
+    // Test 1: round-trip con Decimal y caracteres especiales
+    func test_roundTrip_preservesDecimalAndSpecialChars() async throws {
+        let store = try makeStore()
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let products = [
+            Product(
+                id: "p-1",
+                name: "Café ☕",
+                price: Price(amount: Decimal(string: "19.99")!, currency: "EUR"),
+                imageURL: URL(string: "https://example.com/cafe.png")!
+            )
+        ]
+
+        try await store.save(products, timestamp: now)
+        let result = try await store.load()
+
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.products.first?.name, "Café ☕")
+        XCTAssertEqual(result?.products.first?.price.amount, Decimal(string: "19.99")!)
+        XCTAssertEqual(
+            result?.timestamp.timeIntervalSince1970,
+            now.timeIntervalSince1970,
+            accuracy: 1.0
+        )
+    }
+
+    // Test 2: clear() vacía el store
+    func test_clear_makesLoadReturnNil() async throws {
+        let store = try makeStore()
+        let products = [
+            Product(
+                id: "p-2",
+                name: "Widget",
+                price: Price(amount: Decimal(string: "9.99")!, currency: "USD"),
+                imageURL: URL(string: "https://example.com/widget.png")!
+            )
+        ]
+        try await store.save(products, timestamp: Date())
+
+        await store.clear()
+
+        let result = try await store.load()
+        XCTAssertNil(result, "Tras clear(), load() debe devolver nil")
+    }
 }
 ```
 
-El test verifica que SwiftData no corrompe `Decimal` al persistir (un error común si se usa `Double` internamente). Si el mapper `ProductEntity → Product` pierde precisión, este test lo detecta.
+El test de `Decimal` es crítico porque SwiftData podría serializar internamente como `Double` y perder precisión (p.ej. `19.99` → `19.990000000000002`). Si el mapper usa `priceAmount: Decimal` y el `@Model` lo convierte a `Double` bajo el capó, el test lo detectaría con `XCTAssertEqual`. La solución correcta es almacenar el precio como `String` en el `CatalogProductEntity` y reconvertirlo a `Decimal` en el mapper.
+
+**Resultado esperado**: ambos tests pasan en verde con `swift test --filter SwiftDataCatalog`, sin tocar disco (gracias a `isStoredInMemoryOnly: true`), y la precisión de `Decimal` se preserva al 100%.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -514,10 +567,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

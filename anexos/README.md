@@ -29,7 +29,7 @@ Este directorio centraliza material de apoyo para estudio, recuperación y prepa
 - [adrs/INDICE-ADRS.md](adrs/INDICE-ADRS.md)
 
 5. Consolidación por etapas y cierre:
-- [consolidacion-etapa-2-integracion.md](consolidacion-etapa-2-integracion.md)
+- [consolidacion-etapa-2-integración.md](consolidacion-etapa-2-integración.md)
 - [consolidacion-etapa-4-arquitecto.md](consolidacion-etapa-4-arquitecto.md)
 - [calentamiento-etapa-3-evolucion.md](calentamiento-etapa-3-evolucion.md)
 - [calentamiento-etapa-5-maestria.md](calentamiento-etapa-5-maestria.md)

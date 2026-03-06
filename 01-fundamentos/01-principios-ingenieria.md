@@ -20,7 +20,7 @@ Este es el principio más simple de todos, y paradójicamente el que más gente 
 
 Probablemente estás pensando: "esto es obvio, yo ya lo hago mentalmente". Y es posible que sea verdad. Pero hay una diferencia enorme entre hacerlo mentalmente y hacerlo de forma explícita. Cuando lo haces mentalmente, es fácil que los límites se difuminen conforme avanzas. Empiezas implementando el caso de uso de login y, sin darte cuenta, acabas metiendo lógica de navegación dentro del caso de uso porque "es más fácil aquí". Cuando lo haces de forma explícita (escribiéndolo, aunque sea en un comentario o en un escenario BDD), los límites quedan claros y es mucho más difícil cruzarlos por accidente.
 
-En este curso, esta práctica se materializa en dos cosas concretas. Primero, en los **escenarios BDD** que escribiremos antes de cada feature: son la respuesta explícita a "¿qué tiene que hacer esto?". Segundo, en los **ADRs** (Architecture Decision Records) que escribiremos para decisiones no obvias: son la respuesta explícita a "¿por qué se hizo así y no de otra forma?".
+En este curso, esta práctica se materializa en dos cosas concretas. Primero, en los **escenarios BDD** que escribiremos antes de cada feature: son la respuesta explícita a "¿qué tiene que hacer esto?". Segundo, en los **ADRs** (Architecture Decisión Records) que escribiremos para decisiones no obvias: son la respuesta explícita a "¿por qué se hizo así y no de otra forma?".
 
 ### Un ejemplo real para que quede claro
 
@@ -191,25 +191,25 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/01-principios-ingenieria.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `01-fundamentos/01-principios-ingenieria.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -237,10 +237,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

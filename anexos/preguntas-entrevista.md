@@ -132,7 +132,7 @@ Este documento organiza preguntas por nivel (Junior → Mid → Senior → Archi
 
 **P: ¿Cómo testeas código que depende del tiempo?**
 
-> **R:** Inyección de abstracciones. En lugar de llamar Date() o Task.sleep directamente, dependo de un protocolo Clock. En producción inyecto ContinuousClock(); en tests, InstantClock que avanza manualmente. Esto permite testear timeouts, debounces, y lógica time-sensitive de forma determinística y instantánea.
+> **R:** Inyección de abstracciónes. En lugar de llamar Date() o Task.sleep directamente, dependo de un protocolo Clock. En producción inyecto ContinuousClock(); en tests, InstantClock que avanza manualmente. Esto permite testear timeouts, debounces, y lógica time-sensitive de forma determinística y instantánea.
 
 **P: ¿Qué son los Contract Tests y por qué importan?**
 
@@ -212,7 +212,7 @@ Este documento organiza preguntas por nivel (Junior → Mid → Senior → Archi
 
 ❌ **Mal:** "No, todo salió bien"
 
-✅ **Bien:** "Sí. En [proyecto] sobre-ingenierizé abstracciones anticipando requisitos que nunca llegaron. Costó velocidad inicial y complejidad innecesaria. Aprendí a diseñar para el problema actual con hooks de extensión, no para hipotéticos futuros. Ahora aplico YAGNI con cuidado."
+✅ **Bien:** "Sí. En [proyecto] sobre-ingenierizé abstracciónes anticipando requisitos que nunca llegaron. Costó velocidad inicial y complejidad innecesaria. Aprendí a diseñar para el problema actual con hooks de extensión, no para hipotéticos futuros. Ahora aplico YAGNI con cuidado."
 
 ---
 
@@ -246,7 +246,7 @@ Este documento organiza preguntas por nivel (Junior → Mid → Senior → Archi
 >
 > Decidí: modularización por bounded contexts (trading, portfolio, user), comunicación vía eventos tipados, y contratos claros con protocols.
 >
-> Trade-off: overhead inicial de abstracciones vs velocidad futura. Acepté el coste porque las métricas mostraban que el 40% de los bugs eran por acoplamiento accidental.
+> Trade-off: overhead inicial de abstracciónes vs velocidad futura. Acepté el coste porque las métricas mostraban que el 40% de los bugs eran por acoplamiento accidental.
 >
 > Implementé en 2 meses con migración gradual (feature flags). Resultados: reducción del 60% en bugs de integración, tiempo de build de 8 a 3 minutos, y 3 equipos pudieron trabajar en paralelo sin conflictos de merge.
 >

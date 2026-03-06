@@ -109,14 +109,14 @@ protocol ProductRepository: Sendable {
 }
 ```swift
 
-**Por que `Sendable` en un protocolo:** Cuando escribes `protocol ProductRepository: Sendable`, le dices a Swift: "cualquier tipo que implemente este protocolo debe ser seguro para concurrencia". Esto es necesario porque el `LoadProductsUseCase` guarda una referencia al repositorio (`any ProductRepository`) y lo llama desde una funcion `async`. Si el protocolo no fuera `Sendable`, Swift 6 no te dejaria guardar esa referencia ni llamar al repositorio desde un contexto concurrente.
+**Por que `Sendable` en un protocolo:** Cuando escribes `protocol ProductRepository: Sendable`, le dices a Swift: "cualquier tipo que implemente este protocolo debe ser seguro para concurrencia". Esto es necesario porque el `LoadProductsUseCase` guarda una referencia al repositorio (`any ProductRepository`) y lo llama desde una función `async`. Si el protocolo no fuera `Sendable`, Swift 6 no te dejaria guardar esa referencia ni llamar al repositorio desde un contexto concurrente.
 
-**Por que `async throws`:** `async` porque cargar productos implica una operacion lenta (red o disco) que no debe bloquear la interfaz. `throws` porque esa operacion puede fallar (sin internet, datos corruptos). El tipo de retorno `[Product]` devuelve modelos de dominio, no DTOs — el repositorio traduce internamente.
+**Por que `async throws`:** `async` porque cargar productos implica una operación lenta (red o disco) que no debe bloquear la interfaz. `throws` porque esa operación puede fallar (sin internet, datos corruptos). El tipo de retorno `[Product]` devuelve modelos de dominio, no DTOs — el repositorio traduce internamente.
 
 Por que este puerto/protocolo esta bien disenado para etapa 2:
 
 - expresa intencion de negocio ("cargar todos los productos");
-- no filtra detalles tecnicos;
+- no filtra detalles técnicos;
 - es facil de stubear en TDD;
 - permite implementaciones multiples (remote, cached, hibrida).
 
@@ -142,9 +142,9 @@ struct LoadProductsUseCase: Sendable {
 }
 ```text
 
-**Por que `Sendable` en el UseCase:** El ViewModel (que vive en `@MainActor`) guarda una referencia al `LoadProductsUseCase` y lo llama con `await`. Eso significa que el UseCase cruza la frontera entre el hilo principal y el contexto `async`. Swift 6 exige que sea `Sendable`. Como es un `struct` con una sola propiedad `let` (el repositorio, que tambien es `Sendable` por protocolo), Swift verifica automaticamente que es seguro.
+**Por que `Sendable` en el UseCase:** El ViewModel (que vive en `@MainActor`) guarda una referencia al `LoadProductsUseCase` y lo llama con `await`. Eso significa que el UseCase cruza la frontera entre el hilo principal y el contexto `async`. Swift 6 exige que sea `Sendable`. Como es un `struct` con una sola propiedad `let` (el repositorio, que tambien es `Sendable` por protocolo), Swift verifica automáticamente que es seguro.
 
-**Por que `any ProductRepository`:** La palabra `any` le dice a Swift: "no se cual es el tipo concreto, solo se que conforma `ProductRepository`". Esto es inyeccion de dependencias — en produccion sera un `RemoteProductRepository`, en tests sera un `ProductRepositoryStub`, en previews sera un `StubProductRepository`. El UseCase no sabe ni le importa cual es.
+**Por que `any ProductRepository`:** La palabra `any` le dice a Swift: "no se cual es el tipo concreto, solo se que conforma `ProductRepository`". Esto es inyección de dependencias — en produccion sera un `RemoteProductRepository`, en tests sera un `ProductRepositoryStub`, en previews sera un `StubProductRepository`. El UseCase no sabe ni le importa cual es.
 
 Parece simple, y es correcto que lo sea en esta etapa.
 
@@ -479,7 +479,7 @@ Trigger para pasar de A a diseño más complejo:
 
 ---
 
-## Manos a Xcode: checkpoint de la leccion
+## Manos a Xcode: checkpoint de la lección
 
 1. Pulsa **Cmd + B**. Deberia decir **"Build Succeeded"**.
 2. Pulsa **Cmd + U**. Deberia decir **"Test Succeeded"** con los tests de E1 + Catalog Domain + Catalog Application pasando.
@@ -489,7 +489,7 @@ Trigger para pasar de A a diseño más complejo:
 - [ ] 2 archivos de produccion creados (ProductRepository, LoadProductsUseCase).
 - [ ] 2 archivos de test creados (LoadProductsUseCaseTests, ProductRepositoryStub).
 - [ ] Todos los tests pasando en verde (Cmd + U).
-- [ ] Application define puertos/protocolos y casos de uso sin detalles tecnicos.
+- [ ] Application define puertos/protocolos y casos de uso sin detalles técnicos.
 - [ ] Tipos/puertos de Application son `Sendable`.
 - [ ] UseCase sigue siendo punto de entrada único para UI.
 
@@ -501,8 +501,8 @@ Una capa Application buena no se juzga por cuántas líneas tiene, sino por cuá
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -530,10 +530,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Objetivo de aprendizaje
 
@@ -45,7 +45,7 @@ Imagina que Infrastructure trae cajas desde fuera y UI muestra escaparates. Doma
 ```mermaid
 flowchart LR
     EXT["Mundo externo\nHTTP/JSON"] --> INFRA["Infrastructure\ntraduce formato"]
-    INFRA --> DOMAIN["Domain\nsemantica de negocio"]
+    INFRA --> DOMAIN["Domain\nsemántica de negocio"]
     DOMAIN --> APP["Application\norquesta casos"]
     APP -.-> UI["Interface\npresenta estados"]
 ```text
@@ -363,8 +363,8 @@ Si puedes cambiar proveedor de datos o presentación sin renombrar conceptos de 
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -392,10 +392,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

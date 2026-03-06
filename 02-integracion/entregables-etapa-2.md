@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Para qué sirve este documento
 
@@ -241,7 +241,7 @@ La integración es compleja. Muchos developers se atascan aquí. Es normal.
 
 | Síntoma | Probable causa | Solución rápida |
 |---------|----------------|-----------------|
-| Login no navega a Catalog | Evento no emitido o coordinator no conectado | Revisa [Navegación por eventos](02-navegacion-eventos.md) |
+| Login no navega a Catalog | Evento no emitido o coordinator no conectado | Revisa [Navegación por eventos](02-navegación-eventos.md) |
 | Tests de integración lentos | Están tocando red real | Usa `HTTPClientStub` como en la lección |
 | "Cannot find type" entre features | Import directo de otra feature | Usa contratos en `AppContracts`, no importes la feature |
 | Composition Root enorme | Todas las dependencias en un solo método | Divide en `makeLoginDependencies()`, `makeCatalogDependencies()` |
@@ -288,22 +288,22 @@ Aunque no cierres todos los entregables:
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `02-integracion/entregables-etapa-2.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `02-integracion/entregables-etapa-2.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -331,10 +331,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

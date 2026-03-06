@@ -417,6 +417,51 @@ Propón y aplica una mejora incremental:
 
 Si puedes hacerlo sin contaminar capas y sin romper contratos, ya dominas la mecánica de infraestructura evolutiva.
 
+<details>
+<summary>Solución de referencia</summary>
+
+```swift
+struct RetryHTTPClient: HTTPClient {
+    let decoratee: any HTTPClient
+    let maxRetries: Int
+
+    func execute(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        var attempt = 0
+
+        while true {
+            do {
+                return try await decoratee.execute(request)
+            } catch {
+                guard attempt < maxRetries, error.isTransientConnectivityError else {
+                    throw error
+                }
+                attempt += 1
+            }
+        }
+    }
+}
+
+func makeHTTPClient() -> any HTTPClient {
+    let base = URLSessionHTTPClient(session: .shared)
+    return RetryHTTPClient(decoratee: base, maxRetries: 1)
+}
+
+func test_retry_client_retries_once_on_transient_error() async throws {
+    let transport = HTTPClientSpy(results: [
+        .failure(HTTPClientError.connectivity),
+        .success((Data("{}".utf8), HTTPURLResponse.ok))
+    ])
+    let sut = RetryHTTPClient(decoratee: transport, maxRetries: 1)
+
+    _ = try await sut.execute(URLRequest(url: URL(string: "https://example.com")!))
+
+    XCTAssertEqual(transport.executedRequests.count, 2)
+}
+```
+
+La mejora entra por composición en `CompositionRoot`, no tocando `UseCase`, `Domain` ni el repositorio. Eso demuestra que la infraestructura sigue siendo sustituible y que el comportamiento transversal vive donde corresponde.
+</details>
+
 ---
 
 ## Señales de madurez técnica en esta lección
@@ -455,8 +500,8 @@ Si un cambio de proveedor HTTP obliga a tocar UseCases o Domain, no cambiaste in
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -484,10 +529,9 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.

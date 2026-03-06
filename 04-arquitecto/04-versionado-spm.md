@@ -476,7 +476,21 @@ Versionar no es publicar rápido; es publicar cambios que otro equipo puede adop
 - `CoreDomain` es la única dependencia compartida entre features de Domain.
 - `AppComposition` es el único target que depende de todos los demás (es el "techo" del grafo).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# Desde apps/ios/ArchitectureKit/
+swift package show-dependencies --format json | python3 -m json.tool | grep '"name"'
+# Salida esperada: lista de targets sin ciclos
+
+# Contar cuántos targets dependen de CoreDomain
+swift package show-dependencies --format json \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); \
+    [print(p['name']) for p in d.get('dependencies',[]) if 'CoreDomain' in str(p)]"
+```
+
+Grafo simplificado esperado:
 
 ```mermaid
 graph BT
@@ -494,12 +508,16 @@ graph BT
     FeatureCatalogPersistenceSwiftData --> AppComposition
 ```
 
-El grafo muestra que las dependencias fluyen de Domain hacia afuera (Data, UI) y convergen en `AppComposition`. Ninguna flecha va de Data/UI hacia Domain de otra feature. Esta estructura es la que `check-dependencies.sh` protege automáticamente.
+Las dependencias fluyen de Domain hacia afuera (Data, UI) y convergen en `AppComposition`. Ninguna flecha va de Data/UI hacia Domain de otra feature. Esta estructura es exactamente la que `check-dependencies.sh` protege automáticamente: si una flecha ilegal apareciera, el script fallaría en CI antes del merge.
+
+**Resultado esperado**: el grafo JSON no contiene ciclos, `CoreDomain` aparece como dependencia en exactamente los targets de Domain, y `AppComposition` lista todos los demás como sus dependencias.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -527,10 +545,10 @@ flowchart LR
     ADAPTER --> STORE
 ```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

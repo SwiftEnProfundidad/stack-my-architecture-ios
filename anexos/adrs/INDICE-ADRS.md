@@ -1,4 +1,4 @@
-# Indice de ADRs (Architecture Decision Records)
+# Indice de ADRs (Architecture Decisión Records)
 
 Este documento centraliza todas las decisiones arquitectónicas de la edición vigente del curso.
 
@@ -20,9 +20,9 @@ Este documento centraliza todas las decisiones arquitectónicas de la edición v
 | ADR | Titulo | Estado | Etapa | Ubicacion |
 |---|---|---|---|---|
 | ADR-001 | Login con Value Objects + validación en construcción | Aprobado | E1 | [ADR-001-login](../../01-fundamentos/05-feature-login/ADR-001-login.md) |
-| ADR-002 | Catalog con Domain semántico y errores tipados | Aprobado | E2 | [ADR-002-catalog](../../02-integracion/01-feature-catalog/ADR-002-catalog.md) |
+| ADR-002 | Catalog con Domain semántico y errores tipados | Aprobado | E2 | [ADR-002-catalog](../../02-integración/01-feature-catalog/ADR-002-catalog.md) |
 | ADR-003 | Composition Root único para ensamblaje | Aprobado | E2 | [ADR-003-composition-root-unico](ADR-003-composition-root-unico.md) |
-| ADR-004 | Navegación event-driven desacoplada | Aprobado | E2 | [ADR-004-navegacion-event-driven](ADR-004-navegacion-event-driven.md) |
+| ADR-004 | Navegación event-driven desacoplada | Aprobado | E2 | [ADR-004-navegación-event-driven](ADR-004-navegación-event-driven.md) |
 | ADR-005 | Contratos entre features vía eventos/modelos compartidos mínimos | Aprobado | E2 | [ADR-005-contratos-features](ADR-005-contratos-features.md) |
 | ADR-006 | Infra de red mínima real con `URLSessionHTTPClient` | Aprobado | E2 | [ADR-006-infra-network-urlsession](ADR-006-infra-network-urlsession.md) |
 | ADR-007 | Cache `network-first` + TTL + fallback controlado | Aprobado | E3 | [ADR-007-cache-network-first-ttl](ADR-007-cache-network-first-ttl.md) |
@@ -57,23 +57,23 @@ No crear ADR para cambios locales de bajo impacto y fácil reversión.
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/INDICE-ADRS.md`.
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/adrs/INDICE-ADRS.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 

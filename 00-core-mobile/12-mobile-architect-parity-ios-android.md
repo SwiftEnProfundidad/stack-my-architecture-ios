@@ -41,9 +41,9 @@ Lo específico de plataforma incluye lenguaje, frameworks, tooling, pipelines y 
 
 La especialización no contradice la arquitectura común. Al contrario, permite que cada plataforma optimice su ejecución sin romper invariantes compartidos ni degradar la coherencia del sistema móvil.
 
-# 7) Decision Authority vs Execution Authority
+# 7) Decisión Authority vs Execution Authority
 
-Decision Authority (Mobile Architect):
+Decisión Authority (Mobile Architect):
 
 - Definir invariantes, contratos y quality gates transversales.
 - Aceptar o rechazar trade-offs con impacto en riesgo sistémico.
@@ -131,8 +131,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.
