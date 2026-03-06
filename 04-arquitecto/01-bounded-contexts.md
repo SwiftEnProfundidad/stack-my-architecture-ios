@@ -405,7 +405,7 @@ Regla práctica:
 
 ```mermaid
 flowchart TD
-    NEED["Contexto A necesita datos de B"] ..> STABLE{"Contrato de B es estable\ny compartido por ambos?"}
+    NEED["Contexto A necesita datos de B"] -.-> STABLE{"Contrato de B es estable\ny compartido por ambos?"}
     STABLE -->|"Si"| SHARED["Shared Kernel minimo"]
     STABLE -->|"No"| DEP{"A puede aceptar\nsemantica de B?"}
     DEP -->|"Si"| CS["Customer/Supplier"]

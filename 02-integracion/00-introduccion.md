@@ -179,7 +179,7 @@ La etapa se ejecuta con un ciclo fijo:
 
 ```mermaid
 flowchart TD
-    B["BDD"] ..> C["Contratos"]
+    B["BDD"] -.-> C["Contratos"]
     C --> T["TDD Core"]
     T --> I["Implementación"]
     I --> IT["Integration Tests"]

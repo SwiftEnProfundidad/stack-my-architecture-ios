@@ -172,7 +172,7 @@ Etapa 2 se considera cerrada cuando pasan todos:
 
 ```mermaid
 flowchart LR
-    L["Límites"] ..> C["Contratos"]
+    L["Límites"] -.-> C["Contratos"]
     C --> I["Infra"]
     I --> T["Tests"]
     T --> L

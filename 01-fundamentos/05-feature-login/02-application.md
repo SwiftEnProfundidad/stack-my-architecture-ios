@@ -111,11 +111,11 @@ No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. E
 ```mermaid
 graph LR
     subgraph Test["En TESTS - rapido, determinista"]
-        UC1["LoginUseCase"] ..>|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
+        UC1["LoginUseCase"] -.->|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
     end
 
     subgraph Prod["En PRODUCCION - real"]
-        UC2["LoginUseCase"] ..>|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
+        UC2["LoginUseCase"] -.->|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
     end
 
     style Test fill:#d4edda,stroke:#28a745

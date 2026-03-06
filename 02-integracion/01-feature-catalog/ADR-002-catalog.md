@@ -184,7 +184,7 @@ Trigger de revisión:
 flowchart TD
     D["Necesitamos integrar Login y Catalog"] --> C1{"Acoplar features directamente?"}
     C1 -->|"Sí"| BAD["Rápido hoy, deuda mañana"]
-    C1 ..>|"No"| C2["Contratos + eventos + coordinador"]
+    C1 -.->|"No"| C2["Contratos + eventos + coordinador"]
 
     C2 --> C3{"Modelo de estado UI"}
     C3 -->|"Banderas sueltas"| BAD2["Estados imposibles"]

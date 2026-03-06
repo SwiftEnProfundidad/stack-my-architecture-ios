@@ -46,7 +46,7 @@ Lenguaje ubicuo en esta lección:
 
 ```mermaid
 flowchart LR
-    UI["Interface\nViewModel/View"] ..> UC["LoadProductsUseCase"]
+    UI["Interface\nViewModel/View"] -.-> UC["LoadProductsUseCase"]
     UC --> PORT["ProductRepository (port)"]
     PORT --> INFRA["Remote/Cached Repository"]
     INFRA --> API["API / Storage"]

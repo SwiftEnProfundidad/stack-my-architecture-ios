@@ -60,12 +60,12 @@ flowchart TD
     LOGIN --> LDOM["Domain"]
     LOGIN --> LAPP["Application"]
     LOGIN --> LINF["Infrastructure"]
-    LOGIN ..> LUI["Interface"]
+    LOGIN -.-> LUI["Interface"]
 
     CATALOG --> CDOM["Domain"]
     CATALOG --> CAPP["Application"]
     CATALOG --> CINF["Infrastructure"]
-    CATALOG ..> CUI["Interface"]
+    CATALOG -.-> CUI["Interface"]
 ```text
 
 Ownership sugerido por contexto:
@@ -158,7 +158,7 @@ Regla canónica Clean por feature:
 
 ```mermaid
 graph LR
-    UI["Interface"] ..> APP["Application"]
+    UI["Interface"] -.-> APP["Application"]
     APP --> DOM["Domain"]
     INF["Infrastructure"] --> DOM
 ```text
@@ -175,10 +175,10 @@ Regla cross-feature:
 ```mermaid
 flowchart TD
     RQ["Requisito"] --> BDD["Especificacion BDD"]
-    BDD ..> CT["Contratos Domain/Application"]
+    BDD -.-> CT["Contratos Domain/Application"]
     CT --> TDD["TDD core"]
     TDD --> INFRA["Infra + contract tests"]
-    INFRA ..> UI["Interface + estado"]
+    INFRA -.-> UI["Interface + estado"]
     UI --> ADR["ADR si afecta arquitectura"]
     ADR --> PR["PR + quality gates"]
 ```text

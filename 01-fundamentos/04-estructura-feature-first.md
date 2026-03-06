@@ -139,7 +139,7 @@ Ahora que tienes la estructura, es importante que entiendas las reglas de depend
 
 ```mermaid
 graph TD
-    CR["Composition Root<br/>App/<br/>Importa TODO"] ..> UI["Interface<br/>import SwiftUI<br/>import Application"]
+    CR["Composition Root<br/>App/<br/>Importa TODO"] -.-> UI["Interface<br/>import SwiftUI<br/>import Application"]
     CR --> INFRA["Infrastructure<br/>import Foundation<br/>import Application"]
     CR --> APP["Application<br/>import Domain<br/>NADA MAS"]
     

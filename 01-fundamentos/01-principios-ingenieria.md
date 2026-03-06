@@ -117,7 +117,7 @@ graph LR
 
     subgraph Bajo["Bajo acoplamiento - enchufado"]
         direction TB
-        VM2["LoginViewModel"] ..>|"protocolo"| AUTH["any AuthGateway"]
+        VM2["LoginViewModel"] -.->|"protocolo"| AUTH["any AuthGateway"]
         VM2 -->|"closure"| ONLOGIN["onLoginSuccess closure"]
         AUTH -.->|"impl. A"| REMOTE["RemoteAuthGateway<br/>URLSession"]
         AUTH -.->|"impl. B"| STUB["StubAuthGateway<br/>datos falsos"]

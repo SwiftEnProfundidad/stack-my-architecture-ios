@@ -93,7 +93,7 @@ Con inversión de dependencias, Application define un protocolo y no sabe quién
 ```mermaid
 graph LR
     subgraph CON_INV["CON inversion: desacoplamiento por protocolo"]
-        UC2["LoginUseCase"] ..> PROTO["AuthGateway<br/>(protocolo)"]
+        UC2["LoginUseCase"] -.-> PROTO["AuthGateway<br/>(protocolo)"]
         PROTO -.->|"implementa"| RG2["RemoteAuthGateway"]
         PROTO -.->|"implementa"| STUB["AuthGatewayStub<br/>(tests)"]
         RG2 --> URL2["URLSession"]

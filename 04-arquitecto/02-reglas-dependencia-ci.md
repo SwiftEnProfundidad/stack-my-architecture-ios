@@ -70,7 +70,7 @@ Sin barandilla, dependes de que nadie se equivoque. Eso no escala.
 ```mermaid
 graph TD
     subgraph FeatureX["Feature X"]
-        UI["Interface"] ..> APP["Application"]
+        UI["Interface"] -.-> APP["Application"]
         APP --> DOM["Domain"]
         INF["Infrastructure"] --> DOM
         INF --> APP

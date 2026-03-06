@@ -37,8 +37,8 @@ Piensa cada feature como un mini-producto con su API pública.
 
 ```mermaid
 flowchart LR
-    LOGIN["Feature Login"] ..>|"Contrato"| APP["AppCoordinator / Composition Root"]
-    APP ..>|"Contrato"| CATALOG["Feature Catalog"]
+    LOGIN["Feature Login"] -.->|"Contrato"| APP["AppCoordinator / Composition Root"]
+    APP -.->|"Contrato"| CATALOG["Feature Catalog"]
 
     LOGIN -. "NO import directo" .-> CATALOG
 ```text
