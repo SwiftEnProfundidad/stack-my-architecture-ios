@@ -2,6 +2,11 @@ body.with-global-topbar {
   padding-top: var(--global-topbar-offset, 86px);
 }
 
+:root {
+  --study-topbar-box-height: 46px;
+  --study-topbar-button-height: 40px;
+}
+
 .global-topbar {
   position: fixed;
   top: 0;
@@ -24,7 +29,7 @@ body.with-global-topbar {
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
-  min-height: 52px;
+  min-height: var(--study-topbar-box-height);
   order: 1;
 }
 
@@ -32,7 +37,7 @@ body.with-global-topbar {
   flex: 1 1 320px;
   min-width: clamp(220px, 20vw, 360px);
   max-width: min(42vw, 680px);
-  min-height: 52px;
+  min-height: var(--study-topbar-box-height);
   order: 2;
   border: 1px solid var(--border, #334155);
   border-radius: 10px;
@@ -73,6 +78,7 @@ body.with-global-topbar {
   padding: 8px 10px;
   font-size: 12.5px;
   font-weight: 700;
+  min-height: var(--study-topbar-button-height);
   cursor: pointer;
 }
 
@@ -87,13 +93,13 @@ body.with-global-topbar {
   flex: 1 1 100%;
   min-width: 0;
   max-width: 100%;
-  min-height: 52px;
+  min-height: var(--study-topbar-box-height);
   align-content: center;
   order: 4;
   overflow-x: visible;
   gap: 8px;
   margin-left: 0;
-  padding: 8px;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 1px solid var(--border, #334155);
   background: var(--bg, #111827);
@@ -101,6 +107,7 @@ body.with-global-topbar {
 
 #study-ux-controls button,
 #theme-controls button,
+#course-switcher button,
 .study-topic-nav button,
 .study-ux-index-actions button {
   display: inline-flex;
@@ -114,7 +121,7 @@ body.with-global-topbar {
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.15;
-  min-height: 36px;
+  min-height: var(--study-topbar-button-height);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -163,7 +170,7 @@ body.with-global-topbar {
   flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
-  min-height: 52px;
+  min-height: var(--study-topbar-box-height);
   align-content: center;
   order: 3;
   overflow-x: visible;
@@ -331,6 +338,11 @@ main hr {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --study-topbar-box-height: auto;
+    --study-topbar-button-height: 32px;
+  }
+
   #study-current-lesson {
     display: none !important;
   }
@@ -371,6 +383,10 @@ main hr {
 }
 
 @media (max-width: 480px) {
+  :root {
+    --study-topbar-button-height: 30px;
+  }
+
   .global-topbar {
     gap: 6px;
     padding: 6px 8px;
