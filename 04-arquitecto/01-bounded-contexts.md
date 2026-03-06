@@ -45,7 +45,7 @@ graph TD
     Identity --> Shared
     Catalog --> Shared
     Identity -. "sin import directo interno" .- Catalog
-```text
+```
 
 ---
 
@@ -116,7 +116,7 @@ Con ACL:
 flowchart LR
     B["Contexto B\nmodelo interno"] --> ACL["ACL / Mapper"]
     ACL --> A["Contexto A\nmodelo propio"]
-```text
+```
 
 ---
 
@@ -410,7 +410,7 @@ flowchart TD
     STABLE -->|"No"| DEP{"A puede aceptar\nsemántica de B?"}
     DEP -->|"Si"| CS["Customer/Supplier"]
     DEP -->|"No"| ACL["Anti-Corruption Layer"]
-```text
+```
 
 ---
 

@@ -39,7 +39,7 @@ flowchart TD
     NET -->|"No"| POLICY{"Politica negocio"}
     POLICY -->|"Permite stale"| SHOW["Mostrar con aviso"]
     POLICY -->|"No permite"| FAIL["Error + retry"]
-```text
+```
 
 ---
 

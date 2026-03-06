@@ -33,7 +33,7 @@ graph LR
 
     style Coupled fill:#f8d7da,stroke:#dc3545
     style Decoupled fill:#d4edda,stroke:#28a745
-```text
+```
 
 En el modelo acoplado, cada vista conoce la siguiente. Si quieres cambiar el flujo (por ejemplo, mostrar un onboarding entre Login y Catalog), necesitas modificar LoginView. En el modelo desacoplado, solo cambias el Coordinator. Las features no se tocan.
 
@@ -138,7 +138,7 @@ final class AppCoordinator {
         )
     }
 }
-```text
+```
 
 Vamos a analizar las decisiones de diseño:
 

@@ -8,7 +8,7 @@ Snippets auditados: 658 | Hallazgos: 0 (P1=0, P2=0)
 
 ## Hallazgos P2
 
-- Sin P2 detectados.
+- `01-fundamentos/06-conectando-la-app.md` bloque #6: Snippet sin lenguaje declarado (```lang).
 
 ## Recomendacion
 

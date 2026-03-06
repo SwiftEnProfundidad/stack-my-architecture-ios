@@ -68,7 +68,7 @@ flowchart LR
     M --> S["Senior\nEvoluciona"]
     S --> A["Arquitecto\nGobierna"]
     A --> X["Maestría\nOpera bajo presión real"]
-```text
+```
 
 ---
 
@@ -137,7 +137,7 @@ flowchart TD
     C --> E["Evidencia verificable"]
     E --> R["Ritual diario enterprise"]
     R --> L
-```text
+```
 
 Este ciclo se repite hasta que el comportamiento técnico correcto deja de ser esfuerzo consciente y se vuelve segunda naturaleza.
 
@@ -185,7 +185,7 @@ graph TD
     style COMPOSITION fill:#fff3cd,stroke:#ffc107
     style DIAGNOSTICS fill:#f8d7da,stroke:#dc3545
     style MIGRATION fill:#e2d5f1,stroke:#6f42c1
-```text
+```
 
 ### Qué problema enterprise resuelve cada bloque
 
@@ -217,7 +217,7 @@ graph LR
 
     style Problems fill:#f8d7da,stroke:#dc3545
     style Solutions fill:#d4edda,stroke:#28a745
-```text
+```
 
 ```text
 05-maestria/

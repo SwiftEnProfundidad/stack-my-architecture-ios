@@ -50,7 +50,7 @@ graph TD
     style Composed fill:#cce5ff,stroke:#007bff
     style Errors fill:#f8d7da,stroke:#dc3545
     style Events fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 Cada tipo en este diagrama es algo que vas a construir con TDD. Los Value Objects (verde) son lo primero, porque todo lo demás depende de ellos.
 
@@ -74,7 +74,7 @@ graph LR
 
     style Raw fill:#f8d7da,stroke:#dc3545
     style VO fill:#d4edda,stroke:#28a745
-```text
+```
 
 ---
 

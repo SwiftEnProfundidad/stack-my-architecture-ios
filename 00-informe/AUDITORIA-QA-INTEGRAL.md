@@ -2,12 +2,12 @@
 
 ## Resumen ejecutivo
 
-Lecciones auditadas: 114
+Lecciones auditadas: 115
 
 | Control | P1 | P2 | Estado |
 |---|---:|---:|---|
-| Continuidad pedagogica | 0 | 9 | OK |
-| Saltos/prerrequisitos/redundancias | 0 | 10 | OK |
+| Continuidad pedagogica | 0 | 7 | OK |
+| Saltos/prerrequisitos/redundancias | 0 | 7 | OK |
 | Plantilla pedagogica | 0 | 62 | OK |
 | Mermaid semántica | 0 | 0 | OK |
 | Snippets calidad | 0 | 0 | OK |
@@ -17,7 +17,7 @@ Lecciones auditadas: 114
 
 ## Cobertura de plantilla
 
-- OK: 52
+- OK: 53
 - P1: 0
 - P2: 62
 
@@ -28,9 +28,9 @@ Lecciones auditadas: 114
 
 ## Backlog residual (P1)
 
-- Sin pendientes P1.
+- Mermaid semantica: 61 pendientes
 
 ## Resultado
 
 - QA tecnico base estable en snippets, enlaces, plantilla y artefactos de cierre.
-- No se detectan pendientes P1 en controles priorizados.
+- Persisten pendientes de contenido/semantica/trazabilidad: mantener ola de correccion por etapas.

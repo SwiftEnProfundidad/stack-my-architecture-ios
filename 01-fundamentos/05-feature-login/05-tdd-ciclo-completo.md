@@ -38,7 +38,7 @@ graph TD
     style Application fill:#cce5ff,stroke:#007bff
     style Infrastructure fill:#fff3cd,stroke:#ffc107
     style Interface fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
 
@@ -156,7 +156,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```text
+```
 
 Veamos un ejemplo real anotado para que quede cristalino:
 

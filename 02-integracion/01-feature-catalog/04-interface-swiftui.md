@@ -176,7 +176,7 @@ Con propiedades independientes tendríamos estados imposibles:
 isLoading = true
 products = [product1, product2]  // ¿Loading con productos? ¿Qué muestra la UI?
 errorMessage = "Sin conexión"     // ¿Loading con error? ¿Y con productos?
-```text
+```
 
 Con un enum, cada estado es una variante única. No puedes estar en dos estados a la vez:
 

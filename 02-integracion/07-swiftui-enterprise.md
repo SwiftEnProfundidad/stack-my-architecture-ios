@@ -719,7 +719,7 @@ flowchart LR
         COM2["ViewModifier<br/>Estilos custom"]
         COM3["Form + Section<br/>Ajustes"]
     end
-```text
+```
 
 ---
 
@@ -1285,7 +1285,7 @@ flowchart LR
         COM2["Form + Section"]
         COM3["containerRelativeFrame"]
     end
-```text
+```
 
 ### Checklist COMPLETO para un junior
 

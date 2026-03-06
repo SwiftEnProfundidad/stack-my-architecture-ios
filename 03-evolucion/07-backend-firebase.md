@@ -53,7 +53,7 @@ graph LR
     style CORE fill:#d4edda,stroke:#28a745
     style INFRA fill:#fff3cd,stroke:#ffc107
     style SDK fill:#fce4ec,stroke:#e91e63
-```text
+```
 
 ---
 

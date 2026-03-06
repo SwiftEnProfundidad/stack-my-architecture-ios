@@ -35,7 +35,7 @@ flowchart LR
     AUTH --> LOG["Logging decorator"]
     LOG --> BASE["URLSessionHTTPClient"]
     BASE --> API["Remote API"]
-```text
+```
 
 Esto permite escalar capacidades sin reescribir repositorios.
 
@@ -137,7 +137,7 @@ flowchart TD
     TECH["URLError / status / decode"] --> MAP["Repository error mapping"]
     MAP --> SEM["CatalogError"]
     SEM --> APP["UseCase + ViewModel"]
-```text
+```
 
 Ejemplo de criterio de etapa:
 

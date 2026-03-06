@@ -32,7 +32,7 @@ graph LR
 
     style RetainCycle fill:#f8d7da,stroke:#dc3545
     style Normal fill:#d4edda,stroke:#28a745
-```text
+```
 
 En el ciclo de retención (arriba), el ViewModel retiene el closure y el closure retiene el ViewModel. Ninguno de los dos puede desalocarse porque cada uno mantiene al otro vivo. El resultado: la memoria crece con cada navegación, y después de 50 veces de entrar y salir de la pantalla, la app consume 500MB de RAM.
 
@@ -64,7 +64,7 @@ sequenceDiagram
         Note over SUT: viewModel.retainCount → 1<br/>❌ Closure lo retiene
         Teardown->>Teardown: viewModel != nil<br/>💥 XCTAssertNil FALLA<br/>"Potential memory leak"
     end
-```text
+```
 
 Este diagrama muestra exactamente por qué `trackForMemoryLeaks` funciona: el teardown se ejecuta **después** de que las variables locales del test se han destruido. Si el objeto sigue vivo, es porque algo lo retiene indebidamente.
 
@@ -249,7 +249,7 @@ sequenceDiagram
     
     TSan-->>T1: Stack trace del WRITE
     TSan-->>T2: Stack trace del READ
-```text
+```
 
 TSan instrumenta **cada acceso a memoria** durante la ejecución. Por eso ralentiza 2-10x: está registrando y comparando millones de accesos. Pero cuando detecta un data race, te da las dos ubicaciones exactas del problema. Eso vale más que días de debugging manual.
 
@@ -272,7 +272,7 @@ flowchart LR
     style STRICT fill:#cce5ff,stroke:#007bff
     style OK fill:#d4edda,stroke:#28a745
     style BLOCK fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **En enterprise:** este pipeline se ejecuta automáticamente en cada PR. Ningún código llega a `main` sin pasar las 4 puertas. El paso 3 (TSan) es el más lento pero el más valioso: detecta bugs que ningún test unitario puede encontrar. El paso 4 (strict concurrency) garantiza que el código está preparado para Swift 6.
 
@@ -448,7 +448,40 @@ Antes de mergear cualquier PR:
 
 ---
 
----
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
 
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura

@@ -87,7 +87,7 @@ graph TB
 
     style Legacy fill:#f8d7da,stroke:#dc3545
     style Modern fill:#d4edda,stroke:#28a745
-```text
+```
 
 En un ViewModel con 10 propiedades y 15 vistas observando, `ObservableObject` causa **150 re-evaluaciones de body** por cada cambio en cualquier propiedad. `@Observable` causa **solo las necesarias**: las vistas que realmente leen la propiedad que cambió. En una app enterprise con pantallas complejas, esta diferencia se traduce en frame drops visibles.
 
@@ -124,7 +124,7 @@ flowchart TD
     style LET fill:#d4edda,stroke:#28a745
     style BINDING fill:#cce5ff,stroke:#007bff
     style BINDABLE fill:#cce5ff,stroke:#007bff
-```text
+```
 
 **Regla de oro del flowchart:** empieza siempre por la rama derecha (`let`). Solo sube de complejidad si la vista necesita más. El 60% de las propiedades de una vista deberían ser `let`. Si tienes más `@State` que `let`, probablemente estás poniendo demasiada responsabilidad en la vista.
 

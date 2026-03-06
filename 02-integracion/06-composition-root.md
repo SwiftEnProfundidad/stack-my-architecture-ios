@@ -44,7 +44,7 @@ flowchart TD
     CR -.-> COORD["Crea AppCoordinator<br/>conecta closures de navegacion"]
 
     style CR fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 ---
 
@@ -260,7 +260,7 @@ sequenceDiagram
     CR->>CR: CatalogViewModel(useCase, closure)
     CR->>CR: CatalogView(viewModel)
     CR-->>APP: CatalogView lista
-```text
+```
 
 ---
 

@@ -63,7 +63,7 @@ flowchart TD
     ERR_CONN --> RETRY["Usuario pulsa reintentar"]
     ERR_DATA --> RETRY
     RETRY --> LOAD
-```text
+```
 
 Este diagrama define la lógica observable de negocio de la feature. Cualquier cambio funcional debería reflejarse aquí antes de tocar implementación.
 

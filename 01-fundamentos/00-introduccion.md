@@ -73,7 +73,7 @@ graph TD
     style E3 fill:#fff3cd,stroke:#ffc107
     style E4 fill:#ffe0cc,stroke:#fd7e14
     style E5 fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Estás aquí: Etapa 1.** Todo lo que aprendas aquí es la base de todo lo demás. Si interiorizas bien los fundamentos, las etapas posteriores encajarán naturalmente. Si los saltas o los lees por encima, cada etapa siguiente será más confusa.
 
@@ -160,7 +160,7 @@ graph TD
     style INFRASTRUCTURE fill:#fff3cd,stroke:#ffc107
     style INTERFACE fill:#ffe0cc,stroke:#fd7e14
     style ADR fill:#f8f9fa,stroke:#6c757d
-```text
+```
 
 Cada caja del diagrama es algo que vas a construir con tus manos. Cuando termines, entenderás no solo qué hace cada pieza, sino **por qué existe** y **qué pasaría si no existiera**. Eso es lo que separa a alguien que copia un tutorial de alguien que entiende la arquitectura.
 
@@ -233,7 +233,7 @@ graph LR
     A["Rectangulo: una ACCION o COMPONENTE<br/>Ejemplo: LoginUseCase, CatalogView"]
     B{"Rombo: una DECISION<br/>Ejemplo: Es valido el email?"}
     C(("Circulo: un punto de INICIO o FIN"))
-```text
+```
 
 - **Rectángulo**: representa **componentes**, **acciones** o **datos**. Es la forma más común. Cuando ves una caja rectangular que dice “LoginUseCase”, significa que hay un componente con esa responsabilidad.
 - **Rombo**: representa **decisiones** o **preguntas**. Siempre tiene dos o más flechas saliendo, una por cada resultado posible. Por ejemplo: “¿Usuario autenticado?” con salida “sí” y salida “no”.
@@ -264,7 +264,7 @@ graph TD
         A["Elemento 1"]
         B["Elemento 2"]
     end
-```text
+```
 
 Los **subgraphs** (cajas grandes que contienen otras cajas) representan **agrupaciones logicas**. Todo lo que esta dentro de una caja grande pertenece al mismo concepto. Por ejemplo:
 
@@ -294,7 +294,7 @@ sequenceDiagram
 
     A->>B: llama a metodo
     B-->>A: devuelve resultado
-```text
+```
 
 Leelos de **arriba hacia abajo**: el tiempo avanza hacia abajo. Cada linea horizontal es un **mensaje** (una llamada a un metodo o una respuesta). Las flechas solidas (`->>`) son llamadas. Las flechas punteadas (`-->>`) son respuestas. Los recuadros grises (`Note over`) son comentarios que explican lo que esta pasando en ese momento.
 

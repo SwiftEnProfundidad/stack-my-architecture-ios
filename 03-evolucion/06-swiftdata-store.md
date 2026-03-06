@@ -48,7 +48,7 @@ graph LR
     style APP fill:#cce5ff,stroke:#007bff
     style INFRA fill:#fff3cd,stroke:#ffc107
     style FW fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Regla crítica:** SwiftData solo aparece en Infrastructure. Domain y Application no importan SwiftData. Si ves `import SwiftData` en Domain, hay un error de arquitectura.
 

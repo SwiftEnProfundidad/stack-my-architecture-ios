@@ -76,7 +76,7 @@ flowchart LR
     CR --> CO
 
     E1 --> E2
-```text
+```
 
 ---
 

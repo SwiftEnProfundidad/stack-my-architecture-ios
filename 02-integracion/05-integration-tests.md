@@ -30,7 +30,7 @@ Piensa cada capa como un aparato eléctrico y su puerto como un enchufe. El unit
 ```mermaid
 flowchart LR
     U["Unit tests\ncomponente aislado"] --> I["Integration tests\nencaje real entre capas"] --> E["E2E/UI\nflujo completo"]
-```text
+```
 
 La estrategia madura no elimina ninguna capa de la pirámide; define para cada una su misión y su coste.
 
@@ -93,7 +93,7 @@ flowchart TD
     REPO --> HTTP["HTTPClientStub frontera"]
     HTTP --> RESP["Data + status o error"]
     RESP --> ASSERT["Asserts sobre resultado de colaboración"]
-```text
+```
 
 Lo que no hacemos:
 

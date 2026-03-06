@@ -7,12 +7,12 @@
 | Etapa 0 - Core Mobile | 13 | 100 | 1 | 1 | 0 |
 | Etapa 1 - Junior | 16 | 97 | 1 | 0 | 1 |
 | Etapa 2 - Mid | 16 | 94 | 2 | 0 | 2 |
-| Etapa 3 - Senior | 9 | 97 | 1 | 0 | 1 |
+| Etapa 3 - Senior | 9 | 100 | 1 | 0 | 0 |
 | Etapa 4 - Arquitecto | 8 | 100 | 1 | 0 | 0 |
 | Etapa 5 - Maestria | 17 | 97 | 4 | 0 | 1 |
 | Anexos | 35 | 88 | 5 | 2 | 4 |
 
-Hallazgos: P1=0, P2=9
+Hallazgos: P1=0, P2=8
 
 ## Hallazgos P1 (prioridad)
 

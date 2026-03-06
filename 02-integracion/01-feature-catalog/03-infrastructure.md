@@ -64,7 +64,7 @@ flowchart LR
     RES --> ERRTECH["Transport/Decode Errors"]
     ERRTECH --> ERRT["Error Translator"]
     ERRT --> DOMERR["CatalogError"]
-```text
+```
 
 Si falla el mapping y dejas pasar basura, rompes el dominio.
 

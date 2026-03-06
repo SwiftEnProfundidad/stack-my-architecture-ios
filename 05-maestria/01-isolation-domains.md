@@ -94,7 +94,7 @@ graph TB
     style MainActor fill:#d4edda,stroke:#28a745
     style ActorDomain fill:#cce5ff,stroke:#007bff
     style Nonisolated fill:#f8f9fa,stroke:#6c757d
-```text
+```
 
 Este diagrama muestra cómo se distribuye nuestro proyecto entre los tres dominios. Observa que:
 
@@ -129,7 +129,7 @@ sequenceDiagram
     Note over UC,UI: ⬆️ Cruce de dominio 3<br/>[Product] debe ser Sendable
 
     UI->>UI: products = result<br/>(actualiza UI en Main Thread)
-```text
+```
 
 Cada vez que un dato cruza una línea punteada entre dominios diferentes, el compilador verifica que ese dato es `Sendable`. Si no lo es, obtienes un error de compilación. Esto es lo que hace que Swift Concurrency sea un **sistema de tipos para concurrencia**, no solo una librería de async/await.
 
@@ -449,7 +449,7 @@ init(
 ) {
     // ...
 }
-```text
+```
 
 Un closure `@Sendable` no puede capturar variables mutables del contexto que lo rodea:
 

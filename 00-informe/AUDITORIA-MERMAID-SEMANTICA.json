@@ -3,6 +3,20 @@
   "blocks_total": 228,
   "findings": [
     {
+      "path": "00-core-mobile/00-introduccion.md",
+      "block_index": 1,
+      "severity": "OK",
+      "overlap_ratio": 0.2,
+      "mermaid_tokens": 15,
+      "context_tokens": 128,
+      "overlap_tokens": [
+        "core",
+        "port",
+        "usecase"
+      ],
+      "message": "Coherencia aceptable."
+    },
+    {
       "path": "00-core-mobile/01-marco-de-decisiones.md",
       "block_index": 1,
       "severity": "OK",

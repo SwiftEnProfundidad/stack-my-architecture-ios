@@ -23,7 +23,7 @@ graph LR
     style RED fill:#f8d7da,stroke:#dc3545
     style GREEN fill:#d4edda,stroke:#28a745
     style REFACTOR fill:#cce5ff,stroke:#007bff
-```text
+```
 
 Cada vuelta al ciclo dura entre 2 y 10 minutos. Si llevas más de 10 minutos sin ejecutar tests, tu paso es demasiado grande. Pártelo.
 
@@ -159,7 +159,7 @@ graph TD
     style SPY fill:#cce5ff,stroke:#007bff
     style MOCK fill:#fff3cd,stroke:#ffc107
     style FAKE fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 #### 1. Dummy (el maniquí)
 
@@ -319,7 +319,7 @@ graph TD
     style STUB fill:#d4edda,stroke:#28a745
     style SPY fill:#cce5ff,stroke:#007bff
     style FAKE fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 **Regla práctica para este curso:** el 90% de las veces usarás un **spy** (que incluye la funcionalidad de stub). El 10% restante será un **fake** para tests de integración. Los dummies los usarás ocasionalmente. Los mocks automáticos, nunca.
 
@@ -362,7 +362,7 @@ flowchart TD
     style S5 fill:#cce5ff,stroke:#007bff
     style S6 fill:#fff3cd,stroke:#ffc107
     style S7 fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 Fíjate en la dirección: **del centro hacia fuera**. Domain primero (las reglas puras), luego Application (la orquestación), luego Infrastructure (la conexión con el mundo real), y finalmente Interface (lo que ve el usuario). Esta dirección no es arbitraria — es lo que garantiza que cada capa sea testeable de forma independiente.
 

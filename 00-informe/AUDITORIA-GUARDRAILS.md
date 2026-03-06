@@ -22,13 +22,13 @@
 ```json
 {
   "continuidad_p1": 0,
-  "continuidad_p2": 9,
+  "continuidad_p2": 7,
   "saltos_p1": 0,
   "saltos_p2": 9,
   "mermaid_p1": 60,
   "mermaid_p2": 13,
   "snippets_p1": 0,
-  "snippets_p2": 0,
+  "snippets_p2": 1,
   "scaffold_p1": 0,
   "scaffold_p2": 0,
   "links_p1": 0,

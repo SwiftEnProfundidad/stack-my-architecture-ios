@@ -37,7 +37,7 @@ graph TD
     style UNSTRUCT fill:#fff3cd,stroke:#ffc107
     style SAFE fill:#d4edda,stroke:#28a745
     style RISK fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Regla enterprise:** siempre empieza con structured concurrency (`.task`, `async let`, `TaskGroup`). Solo usa `Task {}` cuando necesites lanzar trabajo desde un contexto síncrono (como un `Button` action) y no puedes usar `.task`. Nunca uses `Task.detached` salvo que tengas una razón documentada.
 
@@ -75,7 +75,7 @@ sequenceDiagram
     Note over T: ⚠️ Task SIGUE ejecutando<br/>Nadie lo canceló<br/>self retenido → memory leak
     T->>T: loadProducts() termina
     Note over T: Resultado descartado<br/>o asignado a vista muerta
-```text
+```
 
 ```mermaid
 sequenceDiagram
@@ -91,7 +91,7 @@ sequenceDiagram
     V->>T: ✅ SwiftUI cancela automáticamente
     Note over T: Task.isCancelled = true<br/>Operación se detiene limpiamente
     Note over T: Sin memory leak<br/>Sin trabajo innecesario
-```text
+```
 
 La diferencia es fundamental para el trabajo diario: con `.task`, no necesitas pensar en cancelación. SwiftUI lo hace por ti. Con `Task {}`, eres responsable de cancelar manualmente, y **la mayoría de los desarrolladores olvidan hacerlo**.
 
@@ -130,7 +130,7 @@ flowchart LR
     end
 
     ST -.->|"Ahorro con async let"| PT
-```text
+```
 
 ```swift
 // ❌ Secuencial: config espera a que products termine
@@ -167,7 +167,7 @@ sequenceDiagram
     
     F->>F: throws CatalogError.connectivity
     Note over F: Ambas tareas terminaron<br/>Error propagado al caller
-```text
+```
 
 Cuando una de las operaciones `async let` falla, Swift **cancela automáticamente las demás**. No hay trabajo innecesario, no hay resultados parciales que gestionar. Es todo-o-nada por defecto.
 
@@ -241,7 +241,7 @@ sequenceDiagram
     
     Note over R: Resultado: { "A": data, "B": data }
     Note over G: Los resultados llegan en ORDEN DE FINALIZACIÓN<br/>no en orden de lanzamiento
-```text
+```
 
 **Detalle enterprise crucial:** los resultados no llegan en el orden en que lanzaste las tareas, sino en el orden en que terminan. Si necesitas mantener el orden original, usa el índice del array como clave o reconstruye el orden después.
 

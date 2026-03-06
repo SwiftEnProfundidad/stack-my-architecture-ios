@@ -404,7 +404,8 @@ Fix: Normalizar el email en el init.
 
 ---
 
----
+<!-- auto-gapfix:layered-mermaid -->
+## Diagrama de arquitectura por capas
 
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas

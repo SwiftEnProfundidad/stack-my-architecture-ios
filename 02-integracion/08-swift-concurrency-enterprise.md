@@ -82,7 +82,7 @@ sequenceDiagram
     Note over VM: REANUDADO<br/>Continua donde se pausó
     VM->>VM: state = .loaded(products)
     VM-->>V: SwiftUI detecta cambio → redibuja
-```text
+```
 
 **Clave:** Mientras `ViewModel.load()` espera la respuesta de red, el hilo **no esta bloqueado**. Puede ejecutar otras tareas. Esto es radicalmente diferente a `DispatchQueue.sync` que bloquea el hilo hasta que termina.
 
@@ -220,7 +220,7 @@ gantt
     fetchUser     :0, 2
     fetchPosts    :0, 1
     fetchPhotos   :0, 1
-```text
+```
 
 ### Cuando usar async let
 
@@ -356,7 +356,7 @@ flowchart TD
     style SENDABLE fill:#d4edda,stroke:#28a745
     style MAINACTOR fill:#cce5ff,stroke:#007bff
     style ACTOR fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 ---
 
@@ -786,7 +786,7 @@ flowchart LR
         C1["Cancelacion<br/>Task.isCancelled"]
         C2["Retry + Timeout<br/>Patrones enterprise"]
     end
-```text
+```
 
 ### Checklist de concurrencia para un junior
 

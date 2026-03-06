@@ -38,7 +38,7 @@ flowchart LR
     RISK --> TEST["Test determinista"]
     TEST --> FEED["Feedback de diseño"]
     FEED --> HARDEN["Arquitectura mas robusta"]
-```text
+```
 
 Sin este túnel, validas estética de código, no robustez real.
 
@@ -210,7 +210,7 @@ flowchart TD
     C --> R["Estado estable"]
     S --> R
     D --> R
-```text
+```
 
 ### Test de última petición gana
 
@@ -268,7 +268,7 @@ flowchart LR
     G --> FIX2["SUT aislado por test"]
     N --> FIX3["Dobles de frontera"]
     O --> FIX4["Controladores de completion"]
-```text
+```
 
 ---
 

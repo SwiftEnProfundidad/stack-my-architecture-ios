@@ -30,7 +30,7 @@ flowchart LR
     E1["Etapa 1\nFeature correcta"] --> E2["Etapa 2\nIntegracion entre features"]
     E2 --> E3["Etapa 3\nResiliencia operativa"]
     E3 --> E4["Etapa 4\nPlataforma y gobernanza"]
-```text
+```
 
 Pregunta de etapa 3:
 
@@ -71,7 +71,7 @@ flowchart TD
     NAV --> PKG["Versionado y paquetizacion"]
     PKG --> GUIDE["Guia arquitectura viva"]
     GUIDE --> GATES["Quality gates CI"]
-```text
+```
 
 ---
 

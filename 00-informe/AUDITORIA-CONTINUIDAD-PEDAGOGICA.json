@@ -51,7 +51,7 @@
     {
       "stage": "Etapa 3 - Senior",
       "lessons": 9,
-      "score": 97,
+      "score": 100,
       "no_practice": 1,
       "no_validation": 0,
       "findings": [
@@ -126,7 +126,7 @@
       ]
     }
   ],
-  "findings_total": 9,
+  "findings_total": 8,
   "findings": [
     {
       "severity": "P2",

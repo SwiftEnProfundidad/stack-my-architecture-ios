@@ -37,7 +37,7 @@ graph TD
     style ROOT fill:#cce5ff,stroke:#007bff
     style RESULT fill:#d4edda,stroke:#28a745
     style CI fill:#d4edda,stroke:#28a745
-```text
+```
 
 **En el trabajo enterprise:** un CI con tests flaky es un CI en el que nadie confía. Cuando un desarrollador dice "ese test falla a veces, dale a re-run", ya has perdido. Cada re-run es tiempo desperdiciado y confianza erosionada. Estos 5 principios eliminan esa categoría de problemas.
 
@@ -87,7 +87,7 @@ sequenceDiagram
         Test->>VM: XCTAssertEqual 💥<br/>products aún vacío!
         Note over Main: Actualización llega<br/>en 150ms... tarde
     end
-```text
+```
 
 Este test tiene dos problemas: el `Thread.sleep` es arbitrario (¿por qué 0.1 y no 0.5?) y bloquea el hilo (desperdicia tiempo de CI). Si el CI está bajo carga, 0.1 segundos puede no ser suficiente y el test falla. Si aumentas a 1 segundo, tu suite de 200 tests tarda 200 segundos extra.
 
@@ -200,7 +200,7 @@ sequenceDiagram
     Test->>VM: XCTAssertFalse(isLoading)
     Test->>VM: XCTAssertEqual(products.count, 3)
     Note over Test: ✅ Test DETERMINISTA<br/>Sin sleeps, sin timings
-```text
+```
 
 Este patrón es **la técnica más importante de esta lección**. Te permite verificar estados intermedios (como `isLoading = true` durante la carga) de forma determinista. Sin `SuspendingStub`, tendrías que usar `Thread.sleep` y rezar para que el timing sea correcto.
 
@@ -452,7 +452,40 @@ Antes de dar por terminado un test de código async, verifica:
 
 ---
 
----
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
 
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura

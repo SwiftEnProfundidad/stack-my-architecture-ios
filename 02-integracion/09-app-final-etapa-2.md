@@ -35,7 +35,7 @@ graph TD
     
     style C fill:#e1f5fe
     style B fill:#fff3e0
-```text
+```
 
 El `AppCoordinator` es el centro de todo. Recibe eventos de las features y decide a qué pantalla navegar.
 

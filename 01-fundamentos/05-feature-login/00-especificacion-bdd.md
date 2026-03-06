@@ -73,7 +73,7 @@ flowchart TD
     style ERR_PASS fill:#f8d7da,stroke:#dc3545
     style ERR_CREDS fill:#f8d7da,stroke:#dc3545
     style ERR_NET fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el código.
 
@@ -289,7 +289,40 @@ En la siguiente lección empezaremos a implementar, empezando por la capa Domain
 
 ---
 
----
+## Semantica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC -.o PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```
+
+Lectura semantica minima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuracion de ensamblado.
+3. `-.o` dependencia contra contrato/abstraccion.
+4. `--o` salida/propagacion desde implementacion concreta.
 
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura

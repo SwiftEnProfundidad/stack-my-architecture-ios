@@ -117,7 +117,7 @@ graph LR
 
     style LayerFirst fill:#f8d7da,stroke:#dc3545
     style FeatureFirst fill:#d4edda,stroke:#28a745
-```text
+```
 
 En la organización por capas, trabajar en Login te obliga a abrir 4 carpetas diferentes. En la organización por features, todo lo de Login está junto. **Si quieres borrar una feature, borras una carpeta. Si quieres mover una feature a otro módulo, mueves una carpeta.** Eso no es posible con la organización por capas.
 

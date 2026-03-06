@@ -62,7 +62,7 @@ flowchart LR
     end
 
     E2 --> E3
-```text
+```
 
 Mensaje clave para el alumno:
 - Ya no se trata solo de “añadir código”,
@@ -140,7 +140,7 @@ flowchart TD
     K --> O["Observabilidad"]
     O --> T["Testing avanzado"]
     T --> D["Decisión de trade-offs"]
-```text
+```
 
 El orden no es accidental: cada bloque prepara el siguiente.
 

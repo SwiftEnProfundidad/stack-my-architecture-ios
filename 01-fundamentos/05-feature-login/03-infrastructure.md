@@ -49,7 +49,7 @@ graph LR
     style Clean fill:#d4edda,stroke:#28a745
     style Adapter fill:#fff3cd,stroke:#ffc107
     style Dirty fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 El adaptador es el **traductor** entre dos idiomas: el idioma limpio del Domain (`Credentials`, `Session`) y el idioma del servidor (JSON, HTTP status codes, URLs). Si el servidor cambia su JSON, solo cambias el adaptador. El UseCase ni se entera.
 
@@ -231,7 +231,7 @@ flowchart TD
     style MAP2 fill:#d4edda,stroke:#28a745
     style ERR1 fill:#f8d7da,stroke:#dc3545
     style ERR2 fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 ---
 

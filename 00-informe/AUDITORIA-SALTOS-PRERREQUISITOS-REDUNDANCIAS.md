@@ -7,7 +7,7 @@
 | Etapa 0 - Core Mobile | 13 | 0 | 0 |
 | Etapa 1 - Junior | 16 | 0 | 1 |
 | Etapa 2 - Mid | 16 | 0 | 2 |
-| Etapa 3 - Senior | 9 | 0 | 1 |
+| Etapa 3 - Senior | 9 | 0 | 0 |
 | Etapa 4 - Arquitecto | 8 | 0 | 0 |
 | Etapa 5 - Maestria | 17 | 0 | 0 |
 | Anexos | 35 | 0 | 5 |

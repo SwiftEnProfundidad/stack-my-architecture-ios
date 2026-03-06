@@ -55,7 +55,7 @@ flowchart LR
     ERRT --> SEM["CatalogError"]
     SEM --> UC
     UC --> UI
-```text
+```
 
 Application no hace parseo ni renderizado, pero sí mantiene contrato semántico estable para toda la feature.
 
@@ -345,7 +345,7 @@ sequenceDiagram
     VM->>UC: execute()
     UC-->>VM: [Product] | CatalogError
     VM->>CO: event(.catalogLoaded) o event(.catalogFailed)
-```text
+```
 
 Regla:
 

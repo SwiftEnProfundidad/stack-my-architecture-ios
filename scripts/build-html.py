@@ -32,6 +32,7 @@ CONTENT_DIRS = [
     "03-evolucion",
     "04-arquitecto",
     "05-maestria",
+    "06-proyecto-final",
     "anexos",
 ]
 
@@ -146,6 +147,8 @@ FILE_ORDER = [
     "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
     "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
     "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
+    "06-proyecto-final/00-proyecto-final-ios.md",
+    "06-proyecto-final/01-rubrica-y-entrega.md",
     "anexos/calentamiento-etapa-5-maestria.md",
     "anexos/quizzes-autoevaluacion.md",
     "anexos/guia-recuperacion-ios.md",
@@ -177,7 +180,6 @@ FILE_ORDER = [
     "anexos/adrs/TEMPLATE-ADR.md",
     "anexos/apendice-banca-ledger.md",
     "anexos/glosario.md",
-    "anexos/proyecto-final.md",
 ]
 
 
@@ -1384,10 +1386,11 @@ def build_nav(files_content):
         "00-informe": {"title": "Informe fundacional", "lesson_label": "Documento", "numbered": False},
         "00-core-mobile": {"title": "ETAPA 0: CORE MOBILE", "lesson_label": "Leccion", "numbered": True},
         "01-fundamentos": {"title": "ETAPA 1: JUNIOR", "lesson_label": "Leccion", "numbered": True},
-        "02-integracion": {"title": "ETAPA 2: MID", "lesson_label": "Leccion", "numbered": True},
+        "02-integracion": {"title": "ETAPA 2: MIDLEVEL", "lesson_label": "Leccion", "numbered": True},
         "03-evolucion": {"title": "ETAPA 3: SENIOR", "lesson_label": "Leccion", "numbered": True},
         "04-arquitecto": {"title": "ETAPA 4: ARQUITECTO", "lesson_label": "Leccion", "numbered": True},
         "05-maestria": {"title": "ETAPA 5: MAESTRIA", "lesson_label": "Leccion", "numbered": True},
+        "06-proyecto-final": {"title": "ETAPA 6: PROYECTO FINAL", "lesson_label": "Leccion", "numbered": True},
         "anexos": {"title": "Anexos", "lesson_label": "Anexo", "numbered": False},
     }
 
@@ -1481,6 +1484,41 @@ def build_html():
 <meta name="darkreader-lock">
 <meta name="course-id" content="stack-my-architecture-ios">
 <title>Stack: My Architecture iOS</title>
+<script>
+(function () {{
+  try {{
+    var host = String(window.location.hostname || '').toLowerCase();
+    var local172 = host.match(/^172\\.(\\d{{1,3}})\\.\\d{{1,3}}\\.\\d{{1,3}}$/);
+    var isLocal = window.location.protocol === 'file:' ||
+      host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0' ||
+      host.endsWith('.local') ||
+      /^10\\.\\d{{1,3}}\\.\\d{{1,3}}\\.\\d{{1,3}}$/.test(host) ||
+      /^192\\.168\\.\\d{{1,3}}\\.\\d{{1,3}}$/.test(host) ||
+      (local172 && Number(local172[1]) >= 16 && Number(local172[1]) <= 31);
+    if (isLocal) return;
+
+    var user = JSON.parse(localStorage.getItem('sma:auth:user:v1') || 'null');
+    var session = JSON.parse(localStorage.getItem('sma:auth:session:v1') || 'null');
+    var isValid = !!(user && user.id && session && session.accessToken);
+    if (isValid && session.expiresAt) {{
+      var expiresAt = Date.parse(String(session.expiresAt));
+      if (Number.isFinite(expiresAt) && expiresAt <= Date.now()) isValid = false;
+    }}
+    if (isValid) return;
+
+    localStorage.removeItem('sma:auth:user:v1');
+    localStorage.removeItem('sma:auth:session:v1');
+    localStorage.removeItem('sma:cloud:profile:v1');
+    var next = window.location.pathname + window.location.search + window.location.hash;
+    var login = new URL('/auth/login.html', window.location.origin);
+    login.searchParams.set('next', next);
+    window.location.replace(login.pathname + login.search + login.hash);
+  }} catch (_error) {{
+    var next = window.location.pathname + window.location.search + window.location.hash;
+    window.location.replace('/auth/login.html?next=' + encodeURIComponent(next));
+  }}
+}})();
+</script>
 <link rel="stylesheet" href="assets/study-ux.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/course-switcher.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/assistant-panel.css?v=__ASSET_VERSION__">

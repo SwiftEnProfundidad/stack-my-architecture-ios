@@ -34,7 +34,7 @@ flowchart LR
     DOC --> CHECK["Script/Lint/Build rule"]
     CHECK --> CI["Pipeline PR"]
     CI --> FEEDBACK["Fallo temprano"]
-```text
+```
 
 Sin barandilla, dependes de que nadie se equivoque. Eso no escala.
 
@@ -82,7 +82,7 @@ graph TD
     INF --> SK
 
     FX["Feature X"] -. "NO" .-> FY["Feature Y"]
-```text
+```
 
 ---
 
@@ -178,7 +178,7 @@ flowchart TD
     CHECK4 --> MERGE{"Todo OK?"}
     MERGE -->|"Si"| DONE["Merge"]
     MERGE -->|"No"| FIX["Corregir"]
-```text
+```
 
 Orden recomendado:
 

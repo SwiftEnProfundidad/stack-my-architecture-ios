@@ -130,7 +130,7 @@ graph TD
 
     style BDD fill:#f8f9fa,stroke:#6c757d
     style TEST fill:#d4edda,stroke:#28a745
-```text
+```
 
 Veamos la traducción completa del escenario del happy path:
 
