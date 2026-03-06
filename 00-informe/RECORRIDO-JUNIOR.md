@@ -200,7 +200,7 @@ Estas 6 lecciones definen disciplinas operativas enterprise que aplican transver
    - **Tests guían diseño:** si necesitas mockear 5 cosas para testear un componente, ese componente tiene demasiadas responsabilidades. Divide.
    - **Composición centralizada:** solo el Composition Root conoce las implementaciones concretas. Es el "director de orquesta".
    - **Test mental del acoplamiento:** "¿si cambio A, necesito tocar B?" → Sí = acoplamiento alto.
-3. **Duda junior:** ¿Qué diferencia hay entre "bajo acoplamiento" y "sin acoplamiento"? → No existe "sin acoplamiento". Siempre hay dependencia; la clave es que sea a través de abstracciones (protocolos), no de implementaciones concretas.
+3. **Duda junior:** ¿Qué diferencia hay entre "bajo acoplamiento" y "sin acoplamiento"? → No existe "sin acoplamiento". Siempre hay dependencia; la clave es que sea a través de abstracciónes (protocolos), no de implementaciones concretas.
 4. **Mini-ejercicio:** Un ViewModel que importa `Foundation`, `SwiftUI`, `URLSession` y `CoreData` — ¿cuántas responsabilidades tiene? → Al menos 4 (UI, red, persistencia, lógica). Debería tener 1 (presentación) y delegar el resto vía protocolos.
 
 #### B) CANAL EVIDENCIA

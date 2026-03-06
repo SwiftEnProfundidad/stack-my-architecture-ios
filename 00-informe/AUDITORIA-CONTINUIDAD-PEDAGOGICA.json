@@ -21,7 +21,7 @@
           "type": "jump_complexity_transition",
           "from": "01-fundamentos/06-conectando-la-app.md",
           "to": "01-fundamentos/entregables-etapa-1.md",
-          "message": "Salto de carga en transicion esperada entre `01-fundamentos/06-conectando-la-app.md` (1570 palabras) y `01-fundamentos/entregables-etapa-1.md` (567 palabras)."
+          "message": "Salto de carga en transicion esperada entre `01-fundamentos/06-conectando-la-app.md` (1688 palabras) y `01-fundamentos/entregables-etapa-1.md` (681 palabras)."
         }
       ]
     },
@@ -37,14 +37,14 @@
           "type": "jump_complexity_transition",
           "from": "02-integracion/06-composition-root.md",
           "to": "02-integracion/07-swiftui-enterprise.md",
-          "message": "Salto de carga en transicion esperada entre `02-integracion/06-composition-root.md` (1948 palabras) y `02-integracion/07-swiftui-enterprise.md` (6251 palabras)."
+          "message": "Salto de carga en transicion esperada entre `02-integracion/06-composition-root.md` (1930 palabras) y `02-integracion/07-swiftui-enterprise.md` (6227 palabras)."
         },
         {
           "severity": "P2",
           "type": "jump_complexity_transition",
           "from": "02-integracion/08-swift-concurrency-enterprise.md",
           "to": "02-integracion/09-app-final-etapa-2.md",
-          "message": "Salto de carga en transicion esperada entre `02-integracion/08-swift-concurrency-enterprise.md` (4012 palabras) y `02-integracion/09-app-final-etapa-2.md` (1747 palabras)."
+          "message": "Salto de carga en transicion esperada entre `02-integracion/08-swift-concurrency-enterprise.md` (3986 palabras) y `02-integracion/09-app-final-etapa-2.md` (1723 palabras)."
         }
       ]
     },
@@ -54,7 +54,15 @@
       "score": 100,
       "no_practice": 1,
       "no_validation": 0,
-      "findings": []
+      "findings": [
+        {
+          "severity": "P2",
+          "type": "jump_complexity_transition",
+          "from": "03-evolucion/07-backend-firebase.md",
+          "to": "03-evolucion/entregables-etapa-3.md",
+          "message": "Salto de carga en transicion esperada entre `03-evolucion/07-backend-firebase.md` (2600 palabras) y `03-evolucion/entregables-etapa-3.md` (1180 palabras)."
+        }
+      ]
     },
     {
       "stage": "Etapa 4 - Arquitecto",
@@ -92,28 +100,28 @@
           "type": "jump_complexity_transition",
           "from": "anexos/calentamiento-etapa-5-maestria.md",
           "to": "anexos/quizzes-autoevaluacion.md",
-          "message": "Salto de carga en transicion esperada entre `anexos/calentamiento-etapa-5-maestria.md` (941 palabras) y `anexos/quizzes-autoevaluacion.md` (2761 palabras)."
+          "message": "Salto de carga en transicion esperada entre `anexos/calentamiento-etapa-5-maestria.md` (899 palabras) y `anexos/quizzes-autoevaluacion.md` (2738 palabras)."
         },
         {
           "severity": "P2",
           "type": "jump_complexity_transition",
           "from": "anexos/preguntas-entrevista.md",
           "to": "anexos/hallazgos-y-correcciones.md",
-          "message": "Salto de carga en transicion esperada entre `anexos/preguntas-entrevista.md` (2874 palabras) y `anexos/hallazgos-y-correcciones.md` (743 palabras)."
+          "message": "Salto de carga en transicion esperada entre `anexos/preguntas-entrevista.md` (2853 palabras) y `anexos/hallazgos-y-correcciones.md` (719 palabras)."
         },
         {
           "severity": "P2",
           "type": "jump_complexity_transition",
           "from": "anexos/adrs/TEMPLATE-ADR.md",
           "to": "anexos/apendice-banca-ledger.md",
-          "message": "Salto de carga en transicion esperada entre `anexos/adrs/TEMPLATE-ADR.md` (200 palabras) y `anexos/apendice-banca-ledger.md` (1263 palabras)."
+          "message": "Salto de carga en transicion esperada entre `anexos/adrs/TEMPLATE-ADR.md` (176 palabras) y `anexos/apendice-banca-ledger.md` (1246 palabras)."
         },
         {
           "severity": "P2",
           "type": "jump_complexity_transition",
           "from": "anexos/glosario.md",
           "to": "anexos/proyecto-final.md",
-          "message": "Salto de carga en transicion esperada entre `anexos/glosario.md` (747 palabras) y `anexos/proyecto-final.md` (1877 palabras)."
+          "message": "Salto de carga en transicion esperada entre `anexos/glosario.md` (727 palabras) y `anexos/proyecto-final.md` (1873 palabras)."
         }
       ]
     }
@@ -125,21 +133,28 @@
       "type": "jump_complexity_transition",
       "from": "01-fundamentos/06-conectando-la-app.md",
       "to": "01-fundamentos/entregables-etapa-1.md",
-      "message": "Salto de carga en transicion esperada entre `01-fundamentos/06-conectando-la-app.md` (1570 palabras) y `01-fundamentos/entregables-etapa-1.md` (567 palabras)."
+      "message": "Salto de carga en transicion esperada entre `01-fundamentos/06-conectando-la-app.md` (1688 palabras) y `01-fundamentos/entregables-etapa-1.md` (681 palabras)."
     },
     {
       "severity": "P2",
       "type": "jump_complexity_transition",
       "from": "02-integracion/06-composition-root.md",
       "to": "02-integracion/07-swiftui-enterprise.md",
-      "message": "Salto de carga en transicion esperada entre `02-integracion/06-composition-root.md` (1948 palabras) y `02-integracion/07-swiftui-enterprise.md` (6251 palabras)."
+      "message": "Salto de carga en transicion esperada entre `02-integracion/06-composition-root.md` (1930 palabras) y `02-integracion/07-swiftui-enterprise.md` (6227 palabras)."
     },
     {
       "severity": "P2",
       "type": "jump_complexity_transition",
       "from": "02-integracion/08-swift-concurrency-enterprise.md",
       "to": "02-integracion/09-app-final-etapa-2.md",
-      "message": "Salto de carga en transicion esperada entre `02-integracion/08-swift-concurrency-enterprise.md` (4012 palabras) y `02-integracion/09-app-final-etapa-2.md` (1747 palabras)."
+      "message": "Salto de carga en transicion esperada entre `02-integracion/08-swift-concurrency-enterprise.md` (3986 palabras) y `02-integracion/09-app-final-etapa-2.md` (1723 palabras)."
+    },
+    {
+      "severity": "P2",
+      "type": "jump_complexity_transition",
+      "from": "03-evolucion/07-backend-firebase.md",
+      "to": "03-evolucion/entregables-etapa-3.md",
+      "message": "Salto de carga en transicion esperada entre `03-evolucion/07-backend-firebase.md` (2600 palabras) y `03-evolucion/entregables-etapa-3.md` (1180 palabras)."
     },
     {
       "severity": "P2",
@@ -153,28 +168,28 @@
       "type": "jump_complexity_transition",
       "from": "anexos/calentamiento-etapa-5-maestria.md",
       "to": "anexos/quizzes-autoevaluacion.md",
-      "message": "Salto de carga en transicion esperada entre `anexos/calentamiento-etapa-5-maestria.md` (941 palabras) y `anexos/quizzes-autoevaluacion.md` (2761 palabras)."
+      "message": "Salto de carga en transicion esperada entre `anexos/calentamiento-etapa-5-maestria.md` (899 palabras) y `anexos/quizzes-autoevaluacion.md` (2738 palabras)."
     },
     {
       "severity": "P2",
       "type": "jump_complexity_transition",
       "from": "anexos/preguntas-entrevista.md",
       "to": "anexos/hallazgos-y-correcciones.md",
-      "message": "Salto de carga en transicion esperada entre `anexos/preguntas-entrevista.md` (2874 palabras) y `anexos/hallazgos-y-correcciones.md` (743 palabras)."
+      "message": "Salto de carga en transicion esperada entre `anexos/preguntas-entrevista.md` (2853 palabras) y `anexos/hallazgos-y-correcciones.md` (719 palabras)."
     },
     {
       "severity": "P2",
       "type": "jump_complexity_transition",
       "from": "anexos/adrs/TEMPLATE-ADR.md",
       "to": "anexos/apendice-banca-ledger.md",
-      "message": "Salto de carga en transicion esperada entre `anexos/adrs/TEMPLATE-ADR.md` (200 palabras) y `anexos/apendice-banca-ledger.md` (1263 palabras)."
+      "message": "Salto de carga en transicion esperada entre `anexos/adrs/TEMPLATE-ADR.md` (176 palabras) y `anexos/apendice-banca-ledger.md` (1246 palabras)."
     },
     {
       "severity": "P2",
       "type": "jump_complexity_transition",
       "from": "anexos/glosario.md",
       "to": "anexos/proyecto-final.md",
-      "message": "Salto de carga en transicion esperada entre `anexos/glosario.md` (747 palabras) y `anexos/proyecto-final.md` (1877 palabras)."
+      "message": "Salto de carga en transicion esperada entre `anexos/glosario.md` (727 palabras) y `anexos/proyecto-final.md` (1873 palabras)."
     }
   ]
 }

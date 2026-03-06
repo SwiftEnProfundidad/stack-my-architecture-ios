@@ -1,6 +1,6 @@
 # Auditoria de Calidad de Snippets
 
-Snippets auditados: 672 | Hallazgos: 1 (P1=0, P2=1)
+Snippets auditados: 658 | Hallazgos: 0 (P1=0, P2=0)
 
 ## Hallazgos P1
 

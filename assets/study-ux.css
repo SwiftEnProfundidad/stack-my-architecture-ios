@@ -2,6 +2,11 @@ body.with-global-topbar {
   padding-top: var(--global-topbar-offset, 86px);
 }
 
+:root {
+  --study-topbar-box-height: 46px;
+  --study-topbar-button-height: 40px;
+}
+
 .global-topbar {
   position: fixed;
   top: 0;
@@ -9,7 +14,8 @@ body.with-global-topbar {
   right: 0;
   z-index: 12000;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 10px 12px;
   background: var(--bg-elevated, #0f172a);
@@ -23,6 +29,31 @@ body.with-global-topbar {
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+  min-height: var(--study-topbar-box-height);
+  order: 1;
+}
+
+.study-current-lesson {
+  flex: 1 1 320px;
+  min-width: clamp(220px, 20vw, 360px);
+  max-width: min(42vw, 680px);
+  min-height: var(--study-topbar-box-height);
+  order: 2;
+  border: 1px solid var(--border, #334155);
+  border-radius: 10px;
+  background: var(--bg, #111827);
+  color: var(--text, #e5e7eb);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .global-topbar > *:not(#course-switcher) {
@@ -47,6 +78,7 @@ body.with-global-topbar {
   padding: 8px 10px;
   font-size: 12.5px;
   font-weight: 700;
+  min-height: var(--study-topbar-button-height);
   cursor: pointer;
 }
 
@@ -57,9 +89,17 @@ body.with-global-topbar {
 #study-ux-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--study-topbar-box-height);
+  align-content: center;
+  order: 4;
+  overflow-x: visible;
   gap: 8px;
-  margin-left: auto;
-  padding: 8px;
+  margin-left: 0;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 1px solid var(--border, #334155);
   background: var(--bg, #111827);
@@ -67,6 +107,7 @@ body.with-global-topbar {
 
 #study-ux-controls button,
 #theme-controls button,
+#course-switcher button,
 .study-topic-nav button,
 .study-ux-index-actions button {
   display: inline-flex;
@@ -80,7 +121,7 @@ body.with-global-topbar {
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.15;
-  min-height: 36px;
+  min-height: var(--study-topbar-button-height);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -125,6 +166,15 @@ body.with-global-topbar {
 #theme-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--study-topbar-box-height);
+  align-content: center;
+  order: 3;
+  overflow-x: visible;
+  margin-left: auto;
   gap: 8px;
 }
 
@@ -167,6 +217,19 @@ body.with-global-topbar {
   margin-top: 18px;
   padding-top: 14px;
   border-top: 1px solid var(--border, #334155);
+}
+
+.study-lesson-inline-title {
+  margin: 4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #334155);
+  border-left: 3px solid var(--accent, #f59e0b);
+  border-radius: 10px;
+  background: var(--bg-surface, #0f172a);
+  color: var(--text, #e5e7eb);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
 .lesson-path {
@@ -240,24 +303,31 @@ main hr {
     width: 100%;
   }
 
+  #study-current-lesson {
+    order: 2;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
   #study-ux-controls,
   #theme-controls {
     width: 100%;
     margin-left: 0;
     flex: 1 1 auto;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
   }
 
   #study-ux-controls {
-    order: 2;
+    order: 3;
     padding: 6px;
     gap: 6px;
   }
 
   #theme-controls {
-    order: 3;
+    order: 4;
   }
 
   #sidebar-toggle-topbar {
@@ -268,6 +338,15 @@ main hr {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --study-topbar-box-height: auto;
+    --study-topbar-button-height: 32px;
+  }
+
+  #study-current-lesson {
+    display: none !important;
+  }
+
   #study-ux-controls button,
   #theme-controls button,
   .study-topic-nav button,
@@ -299,13 +378,15 @@ main hr {
 
   #study-ux-controls,
   #theme-controls {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    overflow-x: visible;
   }
 }
 
 @media (max-width: 480px) {
+  :root {
+    --study-topbar-button-height: 30px;
+  }
+
   .global-topbar {
     gap: 6px;
     padding: 6px 8px;
@@ -319,8 +400,6 @@ main hr {
     padding: 4px;
     gap: 4px;
     border-radius: 8px;
-    overflow-x: visible;
-    flex-wrap: wrap;
   }
 
   #study-ux-controls button,
@@ -340,16 +419,6 @@ main hr {
     max-width: 36px;
     padding: 5px 0;
     font-size: 10.5px;
-  }
-
-  #study-progress {
-    flex: 1 1 100%;
-    order: -1;
-  }
-
-  #theme-controls {
-    overflow-x: visible;
-    flex-wrap: wrap;
   }
 
   #theme-controls {

@@ -67,7 +67,7 @@ Cobertura: OK=52/114, P1=0, P2=62
 - `05-maestria/entregables-etapa-5.md`: falta prerrequisitos, practica
 - `05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md`: falta prerrequisitos, practica
 - `05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md`: falta prerrequisitos, practica
-- `anexos/calentamiento-etapa-5-maestria.md`: falta objetivo
+- `anexos/calentamiento-etapa-5-maestria.md`: falta objetivo, validacion
 - `anexos/quizzes-autoevaluacion.md`: falta objetivo, prerrequisitos
 - `anexos/diagramas/atlas-arquitectura.md`: falta validacion
 - `anexos/guia-nueva-feature.md`: falta objetivo, practica

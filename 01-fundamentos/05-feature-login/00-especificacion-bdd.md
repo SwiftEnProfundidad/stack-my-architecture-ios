@@ -75,7 +75,7 @@ flowchart TD
     style ERR_NET fill:#f8d7da,stroke:#dc3545
 ```
 
-Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el codigo.
+Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el código.
 
 ---
 
@@ -323,4 +323,40 @@ Lectura semantica minima de este diagrama:
 2. `-.->` wiring y configuracion de ensamblado.
 3. `-.o` dependencia contra contrato/abstraccion.
 4. `--o` salida/propagacion desde implementacion concreta.
+
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
+
+```mermaid
+flowchart LR
+    subgraph APP["App / Composition module"]
+        CR["CompositionRoot"]
+        COORD["AppCoordinator"]
+    end
+
+    subgraph FEATURE["Feature module"]
+        VM["FeatureViewModel"]
+        UC["UseCase"]
+        PORT["Repository protocol"]
+    end
+
+    subgraph INFRA["Infrastructure module"]
+        ADAPTER["RemoteRepository adapter"]
+        STORE["LocalStore"]
+    end
+
+    CR -.-> COORD
+    CR -.-> ADAPTER
+    VM --> UC
+    UC ==> PORT
+    ADAPTER --o PORT
+    ADAPTER --> STORE
+```text
+
+Lectura semántica mínima de este diagrama:
+
+1. `-->` dependencia directa en runtime.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

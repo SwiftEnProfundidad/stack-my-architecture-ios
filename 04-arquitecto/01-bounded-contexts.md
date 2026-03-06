@@ -405,9 +405,9 @@ Regla práctica:
 
 ```mermaid
 flowchart TD
-    NEED["Contexto A necesita datos de B"] ..> STABLE{"Contrato de B es estable\ny compartido por ambos?"}
+    NEED["Contexto A necesita datos de B"] -.-> STABLE{"Contrato de B es estable\ny compartido por ambos?"}
     STABLE -->|"Si"| SHARED["Shared Kernel minimo"]
-    STABLE -->|"No"| DEP{"A puede aceptar\nsemantica de B?"}
+    STABLE -->|"No"| DEP{"A puede aceptar\nsemántica de B?"}
     DEP -->|"Si"| CS["Customer/Supplier"]
     DEP -->|"No"| ACL["Anti-Corruption Layer"]
 ```
@@ -476,7 +476,32 @@ Bounded context no es un dibujo de workshop. Es la unidad real de responsabilida
 - El diagrama muestra que `FeatureLoginDomain` y `FeatureCatalogDomain` solo dependen de `CoreDomain`, nunca entre sí.
 - `check-dependencies.sh` pasa sin errores.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# 1. Listar targets de Domain en Package.swift
+grep -A2 '\.target(name:' apps/ios/ArchitectureKit/Package.swift \
+  | grep -E '"Feature.*Domain"'
+# Salida esperada:
+# "FeatureLoginDomain"
+# "FeatureCatalogDomain"
+
+# 2. Verificar que no existe import cruzado entre contextos de Domain
+./scripts/check-dependencies.sh
+# Salida esperada: "Domain imports OK" + "Feature cross-imports OK"
+
+# 3. Verificar manualmente
+grep -r "import FeatureCatalogDomain" \
+  apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/
+# Salida esperada: sin resultados (0 líneas)
+
+grep -r "import FeatureLoginDomain" \
+  apps/ios/ArchitectureKit/Sources/FeatureCatalogDomain/
+# Salida esperada: sin resultados (0 líneas)
+```
+
+Diagrama resultante de los bounded contexts del scaffold:
 
 ```mermaid
 graph TD
@@ -486,11 +511,16 @@ graph TD
     FCD -.->|"NO import"| FLD
 ```
 
-Los dos contextos comparten `CoreDomain` (tipos base compartidos) pero no se conocen entre sí. La comunicación entre ellos pasa por `AppContracts` y `AppComposition`, nunca por import directo. Esto garantiza que un cambio en Login no rompe Catalog y viceversa.
+Los dos contextos comparten `CoreDomain` (tipos base compartidos mínimos) pero no se conocen entre sí. La comunicación entre ellos pasa por `AppContracts` y `AppComposition`, nunca por import directo. Esto garantiza que un cambio en Login —como añadir `MFAChallenge`— no rompe Catalog y viceversa.
+
+**Resultado esperado**: el script de dependencias pasa en verde, los dos greps devuelven 0 resultados, y el diagrama que has dibujado coincide con el grafo generado por `swift package show-dependencies`.
+
+</details>
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -513,15 +543,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

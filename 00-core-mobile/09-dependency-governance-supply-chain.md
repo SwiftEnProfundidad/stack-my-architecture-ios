@@ -40,23 +40,21 @@ Evita introducir SDKs sin justificar valor, riesgo y estrategia de salida.
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `00-core-mobile/09-dependency-governance-supply-chain.md`.
 
 ### Objetivo
-- Comprende el objetivo tecnico de esta leccion y que decision arquitectonica habilita.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior del bloque y confirma que dominas sus conceptos clave.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Verificacion
-- ¿Puedes identificar una dependencia crítica y su plan de rollback?
-- ¿Puedes describir qué importaciones deben estar prohibidas por política de módulo?
-- ¿Puedes explicar qué gate impediría un upgrade inseguro antes de mergear?
-
+<!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
 ```mermaid
@@ -88,7 +86,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC -.o PORT
+  UC ==> PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -112,8 +110,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica minima:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `-.o` dependencia discontinua contra contrato/abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

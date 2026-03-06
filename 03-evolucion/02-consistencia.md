@@ -457,27 +457,75 @@ La tabla no sustituye métricas reales, pero ayuda a arrancar con criterio expl�
 - El invalidador no conoce SwiftData ni detalles de persistencia.
 - La invalidación es explícita (no depende de timing ni de TTL expirado).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-func test_invalidate_forcesNextLoadFromRemote() async throws {
-    let products = [Product(name: "Widget", price: Decimal(9.99))]
-    let store = InMemoryProductStore()
-    try await store.save(products, timestamp: Date())
+// Sources/FeatureCatalogData/Cache/CacheInvalidator.swift
 
-    let invalidator = TTLCacheInvalidator(store: store)
-    await invalidator.invalidate()
+import Foundation
 
-    let cached = try await store.load()
-    XCTAssertNil(cached, "Tras invalidar, el store debe estar vacío")
+protocol CacheInvalidator: Sendable {
+    func invalidate() async
+}
+
+// Implementación concreta que borra el store local
+struct TTLCacheInvalidator: CacheInvalidator, Sendable {
+    private let store: any ProductStore
+
+    init(store: any ProductStore) {
+        self.store = store
+    }
+
+    func invalidate() async {
+        try? await store.save([], timestamp: .distantPast)
+        // Alternativa si el protocolo tiene clear():
+        // await store.clear()
+    }
+}
+
+// Tests/FeatureCatalogDataTests/TTLCacheInvalidatorTests.swift
+
+import XCTest
+@testable import FeatureCatalogData
+
+final class TTLCacheInvalidatorTests: XCTestCase {
+
+    func test_invalidate_forcesNextLoadFromRemote() async throws {
+        // Arrange
+        let store = InMemoryProductStore()
+        let products = [
+            Product(
+                id: "p-1",
+                name: "Widget",
+                price: Price(amount: Decimal(string: "9.99")!, currency: "EUR"),
+                imageURL: URL(string: "https://example.com/widget.png")!
+            )
+        ]
+        try await store.save(products, timestamp: Date())
+
+        let invalidator = TTLCacheInvalidator(store: store)
+
+        // Act
+        await invalidator.invalidate()
+
+        // Assert
+        let cached = try await store.load()
+        XCTAssertNil(cached, "Tras invalidar, el store debe estar vacío")
+    }
 }
 ```
 
-La razón de separar invalidación en su propio protocolo es que permite componer distintas estrategias (por TTL, por evento, por push notification) sin modificar el repositorio de cache.
+La razón de separar la invalidación en su propio protocolo `CacheInvalidator` es que permite componer distintas estrategias sin modificar el repositorio de cache: por TTL expirado, por evento push del backend, o por acción explícita del usuario ("actualizar catálogo"). El repositorio delegará la decisión al invalidador inyectado, manteniendo la política de frescura fuera de la lógica de carga.
+
+**Resultado esperado**: el test pasa con `swift test --filter CacheInvalidat`, el store queda con `nil` tras la invalidación, y `TTLCacheInvalidator` no tiene ninguna referencia a SwiftData ni a `ModelContainer`.
+
+</details>
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -500,15 +548,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

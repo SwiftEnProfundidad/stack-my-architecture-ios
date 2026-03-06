@@ -64,24 +64,22 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `00-core-mobile/03-variabilidad-y-evolucion.md`.
 
 ### Objetivo
-- Comprende el objetivo tecnico de esta leccion y que decision arquitectonica habilita.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior del bloque y confirma que dominas sus conceptos clave.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold o en una plantilla operativa relacionada con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Verificacion
-- ¿Puedes clasificar qué parte de tu app cambia semanal, mensual y anualmente?
-- ¿Puedes explicar por qué no conviene usar la misma estrategia de cambio para todas las capas?
-- ¿Puedes definir una métrica para saber si una migración incremental está funcionando?
-
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -104,14 +102,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
+

@@ -262,7 +262,7 @@ ARCHITECTURE_WEBP_ASSET_BY_PNG = {
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
-    relation_tokens = ("-->", "-.->", "-.o", "--o", "==>", "<|--", "--|>", "..|>", "..>", "o--", "*--")
+    relation_tokens = ("-->", "-.->", "==>", "--o", "<|--", "--|>", "..|>", "..>", "o--", "*--")
     has_relations = any(token in raw_code_content for token in relation_tokens)
     if not has_relations:
         return False
@@ -278,6 +278,10 @@ def normalize_mermaid_source(raw_code_content: str) -> str:
     if is_flowchart:
         normalized = re.sub(r"\.\.\>\|", "-.->|", normalized)
         normalized = re.sub(r"\.\.\>", "-.->", normalized)
+        # Mermaid 10.9.x does not parse '-.o/--o' reliably in flowcharts.
+        # Keep the 4-arrow semantic in SVG legends and map diagram syntax to valid arrows.
+        normalized = normalized.replace("-.o", "-.->")
+        normalized = normalized.replace("--o", "-->")
     return normalized
 
 
@@ -349,11 +353,17 @@ def is_layered_architecture_mermaid(raw_code_content: str) -> bool:
         "subgraph infra",
         "vm --> uc",
         "uc --> ent",
-        "uc -.o port",
         "boot -.->",
-        "port --o",
     )
-    return all(token in normalized for token in required_tokens)
+    if not all(token in normalized for token in required_tokens):
+        return False
+    has_contract_edge = (
+        "uc ==> port" in normalized
+        or "uc -.-> port" in normalized
+        or "uc -.o port" in normalized
+    )
+    has_output_edge = "port -->" in normalized or "port --o" in normalized
+    return has_contract_edge and has_output_edge
 
 
 def render_mermaid_arrow_legend() -> str:
@@ -380,6 +390,99 @@ def render_mermaid_arrow_legend() -> str:
         "</div>"
         "</div>\n"
     )
+
+
+ARROW_SEMANTIC_BLOCK_RE = re.compile(
+    r'(<p>[^<]*lectura[^<]*semantica[^<]*diagrama[^<]*:</p>\s*<(?:ol|ul)>\s*)(.*?)(\s*</(?:ol|ul)>)',
+    flags=re.IGNORECASE | re.DOTALL,
+)
+ARROW_SEMANTIC_ITEM_RE = re.compile(
+    r"<li>\s*(?:<code>[^<]*</code>\s*)?(.*?)\s*</li>",
+    flags=re.IGNORECASE | re.DOTALL,
+)
+ARROW_CODE_LIST_ITEM_RE = re.compile(
+    r"<li>\s*<code>\s*(--&gt;|-->|-\.\-&gt;|-.->|==&gt;|==>|--o)\s*</code>\s*(.*?)\s*</li>",
+    flags=re.IGNORECASE | re.DOTALL,
+)
+ARROW_SEMANTIC_FALLBACK_VARIANTS = (
+    "direct-closed",
+    "dashed-closed",
+    "contract-open",
+    "solid-open",
+)
+ARROW_CODE_TOKEN_VARIANT = {
+    "--&gt;": "direct-closed",
+    "-->": "direct-closed",
+    "-.-&gt;": "dashed-closed",
+    "-.->": "dashed-closed",
+    "==&gt;": "contract-open",
+    "==>": "contract-open",
+    "--o": "solid-open",
+}
+
+
+def _arrow_variant_for_semantic_text(raw_text: str, index: int) -> str:
+    normalized = html.unescape(re.sub(r"<[^>]+>", "", raw_text or "")).strip().lower()
+    normalized = re.sub(r"\s+", " ", normalized)
+    if "directa" in normalized or "runtime" in normalized:
+        return "direct-closed"
+    if "wiring" in normalized or "configuracion" in normalized:
+        return "dashed-closed"
+    if "contrato" in normalized or "abstraccion" in normalized:
+        return "contract-open"
+    if "salida" in normalized or "propagacion" in normalized:
+        return "solid-open"
+    safe_index = min(max(index, 0), len(ARROW_SEMANTIC_FALLBACK_VARIANTS) - 1)
+    return ARROW_SEMANTIC_FALLBACK_VARIANTS[safe_index]
+
+
+def _render_semantic_arrow_icon(variant: str) -> str:
+    is_closed = variant in {"direct-closed", "dashed-closed"}
+    head = (
+        '<polygon points="30,2 38,6 30,10"></polygon>'
+        if is_closed
+        else '<polyline points="30,2 38,6 30,10"></polyline>'
+    )
+    return (
+        f'<svg class="sma-legend-arrow {variant} sma-semantic-arrow-icon" viewBox="0 0 40 12" aria-hidden="true">'
+        '<line x1="2" y1="6" x2="30" y2="6"></line>'
+        f"{head}"
+        "</svg>"
+    )
+
+
+def enhance_semantic_arrow_lists(html_fragment: str) -> str:
+    def replace_block(match: re.Match) -> str:
+        item_markup = []
+        for index, raw_item in enumerate(ARROW_SEMANTIC_ITEM_RE.findall(match.group(2))):
+            item_text = (raw_item or "").strip()
+            if not item_text:
+                continue
+            variant = _arrow_variant_for_semantic_text(item_text, index)
+            icon = _render_semantic_arrow_icon(variant)
+            item_markup.append(
+                f'  <li class="sma-semantic-arrow-item">{icon}<span>{item_text}</span></li>'
+            )
+        if not item_markup:
+            return match.group(0)
+        return f'{match.group(1)}\n' + "\n".join(item_markup) + f'\n{match.group(3)}'
+
+    return ARROW_SEMANTIC_BLOCK_RE.sub(replace_block, html_fragment)
+
+
+def enhance_arrow_code_list_items(html_fragment: str) -> str:
+    def replace_item(match: re.Match) -> str:
+        token = (match.group(1) or "").strip().lower()
+        text = (match.group(2) or "").strip()
+        if not text:
+            return match.group(0)
+        variant = ARROW_CODE_TOKEN_VARIANT.get(token)
+        if not variant:
+            return match.group(0)
+        icon = _render_semantic_arrow_icon(variant)
+        return f'<li class="sma-semantic-arrow-item">{icon}<span>{text}</span></li>'
+
+    return ARROW_CODE_LIST_ITEM_RE.sub(replace_item, html_fragment)
 
 
 def _d2_quote(value: str) -> str:
@@ -1119,6 +1222,8 @@ def md_to_html(md_text, file_id, file_path, file_id_by_path):
     if in_raw_html:
         html += "\n".join(raw_html_buffer) + "\n"
 
+    html = enhance_semantic_arrow_lists(html)
+    html = enhance_arrow_code_list_items(html)
     return html
 
 
@@ -1187,6 +1292,36 @@ def inline_format(text, current_file_path, current_file_id, file_id_by_path):
             f'<span class="color-chip" title="{m.group(1).lower()}:{m.group(2).lower()}">'
             f'<span class="color-chip-swatch" style="background:{m.group(2).lower()};"></span>'
             "</span>"
+        ),
+        text,
+    )
+    # Inline architectural arrows: render as SVG chips to avoid ASCII ambiguity.
+    text = re.sub(
+        r"<code>(--&gt;|-.-&gt;|-.o|--o)</code>",
+        lambda m: (
+            '<span class="sma-inline-arrow-chip" role="img" aria-label="Flecha de arquitectura">'
+            + (
+                '<svg class="sma-legend-arrow direct-closed" viewBox="0 0 40 12" aria-hidden="true">'
+                '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
+                "</svg>"
+                if m.group(1) == "--&gt;"
+                else (
+                    '<svg class="sma-legend-arrow dashed-closed" viewBox="0 0 40 12" aria-hidden="true">'
+                    '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
+                    "</svg>"
+                    if m.group(1) == "-.-&gt;"
+                    else (
+                        '<svg class="sma-legend-arrow contract-open" viewBox="0 0 40 12" aria-hidden="true">'
+                        '<line x1="2" y1="6" x2="30" y2="6"></line><polyline points="30,2 38,6 30,10"></polyline>'
+                        "</svg>"
+                        if m.group(1) == "-.o"
+                        else '<svg class="sma-legend-arrow solid-open" viewBox="0 0 40 12" aria-hidden="true">'
+                             '<line x1="2" y1="6" x2="30" y2="6"></line><polyline points="30,2 38,6 30,10"></polyline>'
+                             "</svg>"
+                    )
+                )
+            )
+            + "</span>"
         ),
         text,
     )
@@ -2124,6 +2259,29 @@ p code, li code, td code {{
 .sma-legend-arrow.dashed-closed {{ color: var(--mermaid-legend-dashed-closed); }}
 .sma-legend-arrow.contract-open {{ color: var(--mermaid-legend-contract); }}
 .sma-legend-arrow.solid-open {{ color: var(--mermaid-legend-solid-open); }}
+
+.sma-semantic-arrow-item .sma-semantic-arrow-icon {{
+    width: 42px;
+    height: 12px;
+    margin-right: 8px;
+    vertical-align: middle;
+}}
+
+.sma-semantic-arrow-item > span {{
+    vertical-align: middle;
+}}
+
+.sma-inline-arrow-chip {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 4px;
+    margin: 0 2px;
+    background: var(--bg-elevated);
+}}
 
 .sma-architecture-block {{
     margin-top: var(--space-md);

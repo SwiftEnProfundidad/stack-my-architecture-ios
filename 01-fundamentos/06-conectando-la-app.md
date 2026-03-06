@@ -43,7 +43,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```text
+```
 
 **Paso a paso en Xcode:**
 1. Click derecho en la carpeta `App/` en el navegador
@@ -119,7 +119,7 @@ struct CompositionRoot {
         return LoginView(viewModel: makeLoginViewModel())
     }
 }
-```swift
+```
 
 **¿Por qué struct y no class?**
 
@@ -136,14 +136,14 @@ Abre cada archivo que creaste y verifica que los imports sean correctos:
 import SwiftUI
 // No necesitas importar otros módulos porque
 // CompositionRoot está en el mismo target
-```text
+```
 
 **En `CompositionRoot.swift`:**
 ```swift
 import SwiftUI
 // AuthGateway, LoginUseCase, etc. están en el mismo target,
 // así que no necesitas imports adicionales
-```text
+```
 
 **Si tienes errores de "Cannot find in scope":**
 
@@ -153,10 +153,11 @@ import SwiftUI
    - Verifica que "Target Membership" tenga check en tu app target
 
 2. Verifica que los protocolos y structs tengan visibilidad `internal` o `public`:
-   ```swift
-   // En AuthGateway.swift
-   protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
-   ```text
+
+```swift
+// En AuthGateway.swift
+protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
+```
 
 ---
 
@@ -307,19 +308,23 @@ Pero primero, asegúrate de completar los entregables de la Etapa 1.
 
 ---
 
+---
 
-## Refuerzo pedagogico
+<!-- plantilla-pedagógica:auto -->
+
+## Refuerzo pedagógico
+Contexto: normalización automática para `01-fundamentos/06-conectando-la-app.md`.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
 <!-- auto-gapfix:layered-mermaid -->
@@ -354,7 +359,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC -.o PORT
+  UC ==> PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -378,8 +383,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

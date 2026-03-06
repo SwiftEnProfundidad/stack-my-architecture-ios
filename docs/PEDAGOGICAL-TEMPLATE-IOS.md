@@ -1,7 +1,7 @@
-# Plantilla Pedagogica Minima por Leccion (Curso iOS)
+# Plantilla Pedagogica Minima por Lección (Curso iOS)
 
 ## Objetivo
-- Que aprendera exactamente el alumno en esta leccion.
+- Que aprendera exactamente el alumno en esta lección.
 - Criterio observable de exito al terminar.
 
 ## Prerrequisitos
@@ -10,15 +10,15 @@
 
 ## Practica Guiada
 - Ejercicio concreto y acotado (pasos 1..N).
-- Relacion explicita con el scaffold (`apps/ios/...`) cuando aplique.
+- Relación explicita con el scaffold (`apps/ios/...`) cuando aplique.
 
-## Validacion
+## Validación
 - Checklist de verificacion (3-6 items).
-- Evidencia minima esperada (codigo, test, captura, ADR, etc.).
+- Evidencia minima esperada (código, test, captura, ADR, etc.).
 
 ## Cierre
 - Error frecuente a evitar.
-- Enlace natural a la siguiente leccion.
+- Enlace natural a la siguiente lección.
 
 ---
 
@@ -31,7 +31,7 @@
 ## Prerrequisitos
 ...
 
-## Practica guiada
+## Práctica guiada
 ...
 
 ## Validacion
@@ -39,7 +39,7 @@
 ```
 
 ## Regla de calidad
-- Una leccion se considera "normalizada" cuando contiene al menos los bloques:
+- Una lección se considera "normalizada" cuando contiene al menos los bloques:
   - `Objetivo`
   - `Prerrequisitos`
   - `Practica` (o `Ejercicio`)

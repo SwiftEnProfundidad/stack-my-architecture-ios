@@ -495,22 +495,30 @@ Cuando esas señales aparecen, la observabilidad deja de ser un adorno y se vuel
 - El decorador no modifica el comportamiento del repositorio interno (solo observa).
 - El closure de log es `@Sendable` para ser seguro en concurrencia.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
+// Sources/FeatureCatalogData/Logging/LoggingCatalogRepository.swift
+
+import Foundation
+
 final class LoggingProductRepository: ProductRepository, @unchecked Sendable {
-    private let inner: ProductRepository
+    private let inner: any ProductRepository
     private let log: @Sendable (String) -> Void
 
-    init(inner: ProductRepository, log: @escaping @Sendable (String) -> Void) {
+    init(
+        inner: any ProductRepository,
+        log: @escaping @Sendable (String) -> Void
+    ) {
         self.inner = inner
         self.log = log
     }
 
-    func loadProducts() async throws -> [Product] {
+    func loadAll() async throws -> [Product] {
         log("catalog.load.started")
         do {
-            let products = try await inner.loadProducts()
+            let products = try await inner.loadAll()
             log("catalog.load.succeeded count=\(products.count)")
             return products
         } catch {
@@ -520,26 +528,55 @@ final class LoggingProductRepository: ProductRepository, @unchecked Sendable {
     }
 }
 
-// Test
-func test_loggingDecorator_emitsEventsInOrder() async throws {
-    var logs: [String] = []
-    let stub = StubProductRepository(result: .success([Product(name: "A", price: 1)]))
-    let sut = LoggingProductRepository(inner: stub) { logs.append($0) }
+// Tests/FeatureCatalogDataTests/LoggingProductRepositoryTests.swift
 
-    _ = try await sut.loadProducts()
+import XCTest
+@testable import FeatureCatalogData
 
-    XCTAssertEqual(logs, [
-        "catalog.load.started",
-        "catalog.load.succeeded count=1"
-    ])
+final class LoggingProductRepositoryTests: XCTestCase {
+
+    func test_loggingDecorator_emitsEventsInOrder_onSuccess() async throws {
+        var logs: [String] = []
+        let product = Product(
+            id: "p-1",
+            name: "Laptop",
+            price: Price(amount: Decimal(string: "999.99")!, currency: "EUR"),
+            imageURL: URL(string: "https://example.com/laptop.png")!
+        )
+        let stub = StubProductRepository(result: .success([product]))
+        let sut = LoggingProductRepository(inner: stub) { logs.append($0) }
+
+        _ = try await sut.loadAll()
+
+        XCTAssertEqual(logs, [
+            "catalog.load.started",
+            "catalog.load.succeeded count=1"
+        ])
+    }
+
+    func test_loggingDecorator_emitsFailedEvent_onError() async {
+        var logs: [String] = []
+        let stub = StubProductRepository(result: .failure(CatalogError.connectivity))
+        let sut = LoggingProductRepository(inner: stub) { logs.append($0) }
+
+        _ = try? await sut.loadAll()
+
+        XCTAssertEqual(logs.first, "catalog.load.started")
+        XCTAssertTrue(logs.last?.hasPrefix("catalog.load.failed") == true)
+    }
 }
 ```
 
-El patrón decorador permite componer logging, métricas y tracing sin tocar el repositorio original. En `AppComposition`, se envuelve el repositorio real con tantos decoradores como se necesiten.
+El patrón decorador permite componer logging, métricas y tracing sin tocar el repositorio original. En `AppComposition`, el repositorio real se envuelve con `LoggingProductRepository` antes de pasarlo al `LoadProductsUseCase`: el caso de uso recibe exactamente la misma interfaz `ProductRepository` y no sabe que hay logging alrededor.
+
+**Resultado esperado**: ambos tests pasan con `swift test --filter LoggingProduct`, los logs aparecen en el orden exacto `started → succeeded/failed`, y el comportamiento del repositorio interno (éxito o error) se propaga intacto al llamador.
+
+</details>
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -562,15 +599,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

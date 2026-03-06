@@ -2,7 +2,7 @@
 
 ## Proposito
 
-Este apendice muestra como los principios del curso (Clean Architecture, BDD/TDD, Value Objects, bounded contexts) se aplican a un dominio financiero real. No es una leccion completa — es un ejercicio de transferencia para que veas que la arquitectura no es especifica de un catalogo de productos.
+Este apendice muestra como los principios del curso (Clean Architecture, BDD/TDD, Value Objects, bounded contexts) se aplican a un dominio financiero real. No es una lección completa — es un ejercicio de transferencia para que veas que la arquitectura no es especifica de un catalogo de productos.
 
 ---
 
@@ -13,7 +13,7 @@ Un dominio bancario tiene:
 - **Invariantes estrictas** — un saldo no puede ser negativo (en cuenta corriente estandar).
 - **Value Objects ricos** — `Money`, `IBAN`, `TransactionID`.
 - **Consistencia critica** — un movimiento debe ser atomico.
-- **Auditoria obligatoria** — cada operacion debe ser trazable.
+- **Auditoria obligatoria** — cada operación debe ser trazable.
 - **Bounded contexts claros** — Cuentas, Transferencias, Notificaciones.
 
 Si puedes modelar esto con Clean Architecture, puedes modelar cualquier cosa.
@@ -382,7 +382,7 @@ graph TD
 
 ## Mapping al curso
 
-| Concepto Banca | Equivalente en el curso | Leccion |
+| Concepto Banca | Equivalente en el curso | Lección |
 |---|---|---|
 | `Money` | `Price` | E1: Value Objects |
 | `IBAN` | `Email` | E1: Value Objects |
@@ -401,18 +401,20 @@ El dominio cambia (productos → cuentas bancarias), pero la arquitectura no. Va
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/apendice-banca-ledger.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 

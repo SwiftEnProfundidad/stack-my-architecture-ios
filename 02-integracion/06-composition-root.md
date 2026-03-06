@@ -333,7 +333,7 @@ El Composition Root es el punto de máxima flexibilidad: puedes cambiar toda la 
 - [ ] El Composition Root es el único lugar que importa implementaciones concretas.
 - [ ] Ningún ViewModel, UseCase ni Gateway crea sus propias dependencias.
 - [ ] Cada feature tiene su factory method independiente.
-- [ ] Los closures de navegacion conectan features sin que estas se conozcan.
+- [ ] Los closures de navegación conectan features sin que estas se conozcan.
 - [ ] En tests, cada test monta su propia cadena con stubs (patron makeSUT).
 - [ ] El Composition Root está marcado como `@MainActor`.
 
@@ -347,7 +347,8 @@ Un buen Composition Root no se nota. Un mal Composition Root (o su ausencia) se 
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -370,15 +371,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

@@ -2,7 +2,7 @@
 
 ## Qué es un ADR y por qué lo escribimos
 
-Un Architecture Decision Record (ADR) es un documento corto que registra una decisión arquitectónica importante, junto con su contexto, las alternativas que se consideraron, y las consecuencias esperadas. Los ADRs sirven para que alguien que se incorpore al proyecto dentro de seis meses pueda entender **por qué** el código está como está, no solo **cómo** está.
+Un Architecture Decisión Record (ADR) es un documento corto que registra una decisión arquitectónica importante, junto con su contexto, las alternativas que se consideraron, y las consecuencias esperadas. Los ADRs sirven para que alguien que se incorpore al proyecto dentro de seis meses pueda entender **por qué** el código está como está, no solo **cómo** está.
 
 Este es el primer ADR del curso. Documenta las decisiones que tomamos al diseñar la feature Login. Cada feature importante tendrá su propio ADR.
 
@@ -91,7 +91,7 @@ Implementar Login como una feature vertical completa con cuatro capas (Domain, A
 
 **Coordinator/Router como dependencia del ViewModel.** El ViewModel recibiría un protocolo `Navigator` que define acciones de navegación. Esto es más formal que un closure, pero para una sola acción ("login exitoso") un closure es suficiente. Un protocolo de navegación tiene sentido cuando hay múltiples destinos posibles desde una feature. Lo consideraremos en la Etapa 2 cuando haya navegación más compleja. Descartada por sobreingeniería en esta etapa.
 
-**Justificación:** Un closure es la forma más simple y desacoplada de comunicar un evento sin crear abstracciones innecesarias. Es suficiente para la Etapa 1 y se puede evolucionar a un coordinador formal cuando la complejidad lo requiera.
+**Justificación:** Un closure es la forma más simple y desacoplada de comunicar un evento sin crear abstracciónes innecesarias. Es suficiente para la Etapa 1 y se puede evolucionar a un coordinador formal cuando la complejidad lo requiera.
 
 ### 6. DTOs separados de los modelos de Domain
 
@@ -142,18 +142,20 @@ Cada decisión está demostrada con código real y tests en las lecciones corres
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `01-fundamentos/05-feature-login/ADR-001-login.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 

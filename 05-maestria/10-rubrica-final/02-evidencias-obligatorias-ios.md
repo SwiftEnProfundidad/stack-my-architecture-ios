@@ -38,11 +38,11 @@ Regla de consistencia con rúbrica: debe existir **al menos 1** tabla before/aft
 
 ### Observabilidad y operación
 
-- [ ] **Minimal Observability Spec** completado (basado en [`00-core-mobile/05-observabilidad-operacion.md`](../../00-core-mobile/05-observabilidad-operacion.md)).
-- [ ] **Incident Runbook Skeleton** completado (basado en [`00-core-mobile/05-observabilidad-operacion.md`](../../00-core-mobile/05-observabilidad-operacion.md)).
+- [ ] **Mínimal Observability Spec** completado (basado en [`00-core-mobile/05-observabilidad-operacion.md`](../../00-core-mobile/05-observabilidad-operación.md)).
+- [ ] **Incident Runbook Skeleton** completado (basado en [`00-core-mobile/05-observabilidad-operacion.md`](../../00-core-mobile/05-observabilidad-operación.md)).
 - [ ] SLO y error budget definidos para al menos 1 flujo crítico.
 
-Regla de consistencia con rúbrica: **Minimal Observability Spec** es artefacto obligatorio de hard requirement.
+Regla de consistencia con rúbrica: **Mínimal Observability Spec** es artefacto obligatorio de hard requirement.
 
 ### Release y control de riesgo
 
@@ -112,17 +112,19 @@ Se considera paquete completo cuando el 100% de ítems obligatorios están prese
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
@@ -156,7 +158,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC -.o PORT
+  UC ==> PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -180,8 +182,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

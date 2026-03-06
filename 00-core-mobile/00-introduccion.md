@@ -36,36 +36,26 @@ La arquitectura no es foto estática. Debe soportar cambios incrementales sin ca
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `00-core-mobile/00-introduccion.md`.
 
 ### Objetivo
-- Entender para qué existe el Core Mobile y cuándo usarlo como marco de decisión transversal en iOS y Android.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- No hay prerrequisitos técnicos obligatorios. Basta con conocer la estructura general del curso que vas a seguir (iOS o Android).
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Elige una decisión real de tu app (por ejemplo, navegación, contrato API o estrategia de release).
-- Escríbela en 4 líneas usando este formato: `decidir -> validar -> operar -> evolucionar`.
-- Define una evidencia concreta para validar esa decisión (test, métrica o checklist).
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Verificacion rapida
-- ¿Puedes explicar con tus palabras por qué “funcionar en local” no equivale a “estar lista para producción”?
-- ¿Puedes nombrar una decisión que deba ser común entre iOS y Android en tu proyecto?
-- ¿Puedes indicar qué evidencia usarás para validar esa decisión?
-
+<!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
 ![Diagrama de arquitectura por capas (Core Mobile)](../assets/architecture-ios-core-mobile.png)
 
 La leyenda visual superior define la semántica por tipo de trazo y punta de flecha; el color de cada flecha indica el módulo de origen.
-
-### Convencion de flechas (obligatoria en el curso)
-1. `-->` dependencia directa en runtime (linea continua, punta cerrada).
-2. `--o` relacion continua con punta abierta.
-3. `-.->` wiring/configuracion (linea discontinua, punta cerrada).
-4. `-.o` dependencia discontinua contra contrato/abstraccion (punta abierta).
 
 ### Zoom de detalle por feature
 

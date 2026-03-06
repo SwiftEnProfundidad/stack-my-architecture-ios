@@ -36,8 +36,13 @@ Las reglas arquitectónicas solo en texto no evitan regresiones.
 
 ### Opción B: Modularización estricta desde día 1 (lento, fricción para el alumno)
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Las reglas de dependencia son verificadas por el compilador de Swift desde el primer commit; una importación incorrecta entre módulos produce un error de compilación, no una violación detectada más tarde
+  - El grafo de dependencias queda explicitado en el `Package.swift`, lo que facilita auditorías y onboarding de nuevos desarrolladores
+- **Contras:**
+  - Crear y mantener 5-10 módulos SPM desde el inicio supone un overhead significativo de configuración (targets, productos, dependencias en `Package.swift`) antes de haber escrito una sola línea de lógica de negocio
+  - Los tiempos de compilación incremental aumentan al tener múltiples módulos; Xcode necesita reconstruir módulos afectados en cascada, ralentizando el ciclo de feedback durante el aprendizaje
+  - Mover código entre módulos una vez que las reglas están fijadas es costoso: requiere actualizar imports, resolver accesibilidad (`public`/`internal`) y ajustar el `Package.swift`; el coste de error es alto si los límites iniciales estaban mal definidos
 
 ### Opción C: Reglas de dependencia progresivas (elegida)
 
@@ -90,21 +95,22 @@ Ver la lección [02-reglas-dependencia-ci](../../04-arquitecto/02-reglas-depende
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/adrs/ADR-012-reglas-dependencia-progresivas.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-

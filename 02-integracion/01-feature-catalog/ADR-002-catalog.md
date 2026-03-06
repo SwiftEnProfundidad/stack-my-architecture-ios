@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 - Estado: Aprobado
 - Fecha: 2026-02-07
@@ -184,7 +184,7 @@ Trigger de revisión:
 flowchart TD
     D["Necesitamos integrar Login y Catalog"] --> C1{"Acoplar features directamente?"}
     C1 -->|"Sí"| BAD["Rápido hoy, deuda mañana"]
-    C1 ..>|"No"| C2["Contratos + eventos + coordinador"]
+    C1 -.->|"No"| C2["Contratos + eventos + coordinador"]
 
     C2 --> C3{"Modelo de estado UI"}
     C3 -->|"Banderas sueltas"| BAD2["Estados imposibles"]
@@ -262,27 +262,30 @@ Esta ADR se considera implementada cuando:
 - [02-application.md](02-application.md)
 - [03-infrastructure.md](03-infrastructure.md)
 - [04-interface-swiftui.md](04-interface-swiftui.md)
-- [../02-navegacion-eventos.md](../02-navegacion-eventos.md)
+- [../02-navegación-eventos.md](../02-navegación-eventos.md)
 - [../03-contratos-features.md](../03-contratos-features.md)
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `02-integracion/01-feature-catalog/ADR-002-catalog.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -305,15 +308,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

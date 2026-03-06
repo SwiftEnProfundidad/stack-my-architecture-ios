@@ -76,13 +76,13 @@ flowchart LR
     LVM --> COORD
     CVM --> COORD
 
-    LUC -.o LGW
-    CUC -.o CREPO
+    LUC ==> LGW
+    CUC ==> CREPO
 
     LREMOTE --o LGW
     CREMOTE --o CREPO
     CREMOTE --> CSTORE
-```
+```text
 
 Lectura semántica (la clave didáctica):
 
@@ -90,7 +90,7 @@ Lectura semántica (la clave didáctica):
    `LoginViewModel --> LoginUseCase`, `CatalogViewModel --> LoadProductsUseCase`, `RemoteProductRepository --> LocalProductStore`.
 2. `-.->` wiring/configuración:
    `CompositionRoot` no “ejecuta negocio”; **construye e inyecta** `AppCoordinator` y adapters.
-3. `-.o` contrato/abstracción:
+3. `==>` contrato/abstracción:
    los use cases apuntan a puertos (`AuthGateway`, `ProductRepository`) y no a implementaciones concretas.
 4. `--o` salida/propagación:
    los adapters concretos satisfacen y propagan el contrato hacia el core (`RemoteAuthGateway --o AuthGateway`, `RemoteProductRepository --o ProductRepository`).
@@ -502,18 +502,22 @@ Pero primero, revisa los entregables de la Etapa 2.
 
 ---
 
+---
 
-## Refuerzo pedagogico
+<!-- plantilla-pedagógica:auto -->
+
+## Refuerzo pedagógico
+Contexto: normalización automática para `02-integracion/09-app-final-etapa-2.md`.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 

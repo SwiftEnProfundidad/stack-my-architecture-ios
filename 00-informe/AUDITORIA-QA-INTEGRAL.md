@@ -9,8 +9,8 @@ Lecciones auditadas: 115
 | Continuidad pedagogica | 0 | 7 | OK |
 | Saltos/prerrequisitos/redundancias | 0 | 7 | OK |
 | Plantilla pedagogica | 0 | 62 | OK |
-| Mermaid semantica | 61 | 11 | REVISAR |
-| Snippets calidad | 0 | 1 | OK |
+| Mermaid semántica | 0 | 0 | OK |
+| Snippets calidad | 0 | 0 | OK |
 | Trazabilidad scaffold | 0 | 0 | OK |
 | Enlaces cruzados | 0 | 0 | OK |
 | Artefactos de cierre | 0 | 0 | OK |

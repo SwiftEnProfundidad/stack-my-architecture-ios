@@ -2,7 +2,7 @@
 
 **Estado:** Aceptado  
 **Fecha:** 2026-02-07  
-**Contexto:** Etapa 2 - Integración / Lección: [Navegación por eventos](../../02-integracion/02-navegacion-eventos.md)
+**Contexto:** Etapa 2 - Integración / Lección: [Navegación por eventos](../../02-integración/02-navegación-eventos.md)
 
 ---
 
@@ -189,27 +189,29 @@ class AppCoordinator {
 
 ## Referencias
 
-- [Lección: Navegación por eventos](../../02-integracion/02-navegacion-eventos.md)
-- [Lección: Contratos entre features](../../02-integracion/03-contratos-features.md)
+- [Lección: Navegación por eventos](../../02-integración/02-navegación-eventos.md)
+- [Lección: Contratos entre features](../../02-integración/03-contratos-features.md)
 - [Patrón: Coordinator (Soroush Khanlou)](http://khanlou.com/2015/10/coordinators-redux/)
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/adrs/ADR-004-navegacion-event-driven.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
 

@@ -1,6 +1,6 @@
 {
   "source": "/Users/juancarlosmerlosalbarracin/Developer/Projects/stack-my-architecture/stack-my-architecture-ios/00-informe/AUDITORIA-MATRIZ-EJECUTABLE.json",
-  "blocks_total": 229,
+  "blocks_total": 228,
   "findings": [
     {
       "path": "00-core-mobile/00-introduccion.md",
@@ -40,7 +40,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 109,
+      "context_tokens": 116,
       "overlap_tokens": [
         "feature"
       ],
@@ -70,7 +70,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 108,
+      "context_tokens": 115,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -100,133 +100,124 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 112,
+      "context_tokens": 119,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/04-calidad-pr-ready.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 134,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 112,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/05-observabilidad-operacion.md",
       "block_index": 1,
-      "severity": "OK",
-      "overlap_ratio": 0.2,
-      "mermaid_tokens": 15,
-      "context_tokens": 131,
+      "severity": "P1",
+      "overlap_ratio": 0.048,
+      "mermaid_tokens": 42,
+      "context_tokens": 113,
       "overlap_tokens": [
-        "core",
-        "port",
-        "usecase"
+        "contrato",
+        "core"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/06-release-rollback-flags.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 130,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 112,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/07-apis-contratos-versionado.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 131,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 108,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/08-seguridad-privacidad-threat-modeling.md",
       "block_index": 1,
-      "severity": "OK",
-      "overlap_ratio": 0.2,
-      "mermaid_tokens": 15,
-      "context_tokens": 128,
+      "severity": "P1",
+      "overlap_ratio": 0.048,
+      "mermaid_tokens": 42,
+      "context_tokens": 109,
       "overlap_tokens": [
-        "policy",
-        "port",
-        "usecase"
+        "contrato",
+        "policy"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/09-dependency-governance-supply-chain.md",
       "block_index": 1,
-      "severity": "OK",
-      "overlap_ratio": 0.2,
-      "mermaid_tokens": 15,
-      "context_tokens": 127,
+      "severity": "P1",
+      "overlap_ratio": 0.048,
+      "mermaid_tokens": 42,
+      "context_tokens": 106,
       "overlap_tokens": [
-        "core",
-        "port",
-        "usecase"
+        "contrato",
+        "core"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/10-plantillas.md",
       "block_index": 1,
-      "severity": "OK",
-      "overlap_ratio": 0.333,
-      "mermaid_tokens": 15,
-      "context_tokens": 124,
+      "severity": "P2",
+      "overlap_ratio": 0.095,
+      "mermaid_tokens": 42,
+      "context_tokens": 102,
       "overlap_tokens": [
         "application",
+        "contrato",
         "core",
-        "domain",
-        "port",
-        "usecase"
+        "domain"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Coherencia media-baja; revisar texto puente del diagrama."
     },
     {
       "path": "00-core-mobile/11-crosswalk-ios-android.md",
       "block_index": 1,
-      "severity": "OK",
-      "overlap_ratio": 0.2,
-      "mermaid_tokens": 15,
-      "context_tokens": 129,
+      "severity": "P1",
+      "overlap_ratio": 0.048,
+      "mermaid_tokens": 42,
+      "context_tokens": 99,
       "overlap_tokens": [
-        "core",
-        "port",
-        "usecase"
+        "contrato",
+        "core"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "00-core-mobile/12-mobile-architect-parity-ios-android.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 128,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 104,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "01-fundamentos/00-introduccion.md",
@@ -348,7 +339,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 115,
+      "context_tokens": 114,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -356,10 +347,12 @@
       "path": "01-fundamentos/00-setup.md",
       "block_index": 1,
       "severity": "P1",
-      "overlap_ratio": 0.0,
-      "mermaid_tokens": 15,
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
       "context_tokens": 99,
-      "overlap_tokens": [],
+      "overlap_tokens": [
+        "contrato"
+      ],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
@@ -423,7 +416,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 107,
+      "context_tokens": 111,
       "overlap_tokens": [
         "feature"
       ],
@@ -471,7 +464,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 105,
       "overlap_tokens": [
         "feature"
       ],
@@ -589,7 +582,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 100,
+      "context_tokens": 103,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -618,7 +611,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 111,
+      "context_tokens": 114,
       "overlap_tokens": [
         "feature"
       ],
@@ -655,7 +648,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 102,
+      "context_tokens": 111,
       "overlap_tokens": [
         "feature"
       ],
@@ -691,12 +684,10 @@
       "path": "01-fundamentos/05-feature-login/00-especificacion-bdd.md",
       "block_index": 2,
       "severity": "P1",
-      "overlap_ratio": 0.059,
+      "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 104,
-      "overlap_tokens": [
-        "feature"
-      ],
+      "context_tokens": 100,
+      "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
@@ -765,7 +756,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 103,
+      "context_tokens": 112,
       "overlap_tokens": [
         "feature"
       ],
@@ -857,7 +848,7 @@
       "severity": "P2",
       "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 112,
       "overlap_tokens": [
         "feature",
         "infrastructure"
@@ -937,7 +928,7 @@
       "severity": "P2",
       "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 100,
+      "context_tokens": 109,
       "overlap_tokens": [
         "feature",
         "infrastructure"
@@ -1048,10 +1039,10 @@
       "severity": "P2",
       "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 102,
+      "context_tokens": 114,
       "overlap_tokens": [
-        "feature",
-        "infrastructure"
+        "composition",
+        "feature"
       ],
       "message": "Coherencia media-baja; revisar texto puente del diagrama."
     },
@@ -1098,7 +1089,7 @@
       "severity": "P2",
       "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 103,
+      "context_tokens": 109,
       "overlap_tokens": [
         "feature",
         "infrastructure"
@@ -1109,20 +1100,24 @@
       "path": "01-fundamentos/06-conectando-la-app.md",
       "block_index": 1,
       "severity": "P1",
-      "overlap_ratio": 0.0,
-      "mermaid_tokens": 15,
-      "context_tokens": 98,
-      "overlap_tokens": [],
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 110,
+      "overlap_tokens": [
+        "contrato"
+      ],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "01-fundamentos/entregables-etapa-1.md",
       "block_index": 1,
       "severity": "P1",
-      "overlap_ratio": 0.0,
-      "mermaid_tokens": 15,
-      "context_tokens": 106,
-      "overlap_tokens": [],
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 107,
+      "overlap_tokens": [
+        "contrato"
+      ],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
@@ -1163,7 +1158,7 @@
       "severity": "P2",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 93,
+      "context_tokens": 98,
       "overlap_tokens": [
         "feature"
       ],
@@ -1198,14 +1193,15 @@
     {
       "path": "02-integracion/01-feature-catalog/00-especificacion-bdd.md",
       "block_index": 2,
-      "severity": "P1",
-      "overlap_ratio": 0.059,
+      "severity": "P2",
+      "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 102,
+      "context_tokens": 106,
       "overlap_tokens": [
-        "feature"
+        "feature",
+        "infrastructure"
       ],
-      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
+      "message": "Coherencia media-baja; revisar texto puente del diagrama."
     },
     {
       "path": "02-integracion/01-feature-catalog/01-domain.md",
@@ -1226,12 +1222,10 @@
       "path": "02-integracion/01-feature-catalog/01-domain.md",
       "block_index": 2,
       "severity": "P1",
-      "overlap_ratio": 0.059,
+      "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 100,
-      "overlap_tokens": [
-        "feature"
-      ],
+      "context_tokens": 103,
+      "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
@@ -1267,16 +1261,14 @@
     {
       "path": "02-integracion/01-feature-catalog/02-application.md",
       "block_index": 3,
-      "severity": "OK",
-      "overlap_ratio": 0.176,
+      "severity": "P1",
+      "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 94,
+      "context_tokens": 92,
       "overlap_tokens": [
-        "feature",
-        "infrastructure",
         "usecase"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "02-integracion/01-feature-catalog/03-infrastructure.md",
@@ -1300,7 +1292,7 @@
       "severity": "OK",
       "overlap_ratio": 0.235,
       "mermaid_tokens": 17,
-      "context_tokens": 107,
+      "context_tokens": 116,
       "overlap_tokens": [
         "composition",
         "feature",
@@ -1392,15 +1384,14 @@
     {
       "path": "02-integracion/01-feature-catalog/04-interface-swiftui.md",
       "block_index": 4,
-      "severity": "P2",
-      "overlap_ratio": 0.118,
+      "severity": "P1",
+      "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 106,
       "overlap_tokens": [
-        "feature",
-        "infrastructure"
+        "feature"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "02-integracion/02-navegacion-eventos.md",
@@ -1459,7 +1450,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 106,
+      "context_tokens": 109,
       "overlap_tokens": [
         "feature"
       ],
@@ -1501,16 +1492,14 @@
     {
       "path": "02-integracion/03-contratos-features.md",
       "block_index": 3,
-      "severity": "OK",
-      "overlap_ratio": 0.176,
+      "severity": "P1",
+      "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 107,
+      "context_tokens": 113,
       "overlap_tokens": [
-        "appcoordinator",
-        "feature",
-        "infra"
+        "feature"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "02-integracion/04-infra-real-network.md",
@@ -1548,7 +1537,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 108,
+      "context_tokens": 110,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -1593,16 +1582,15 @@
     {
       "path": "02-integracion/05-integration-tests.md",
       "block_index": 3,
-      "severity": "OK",
-      "overlap_ratio": 0.176,
+      "severity": "P2",
+      "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
       "context_tokens": 109,
       "overlap_tokens": [
-        "composition",
-        "infra",
+        "feature",
         "infrastructure"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Coherencia media-baja; revisar texto puente del diagrama."
     },
     {
       "path": "02-integracion/06-composition-root.md",
@@ -1660,7 +1648,7 @@
       "severity": "OK",
       "overlap_ratio": 0.176,
       "mermaid_tokens": 17,
-      "context_tokens": 100,
+      "context_tokens": 103,
       "overlap_tokens": [
         "composition",
         "feature",
@@ -1738,15 +1726,14 @@
     {
       "path": "02-integracion/07-swiftui-enterprise.md",
       "block_index": 3,
-      "severity": "P2",
-      "overlap_ratio": 0.118,
+      "severity": "P1",
+      "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 98,
+      "context_tokens": 104,
       "overlap_tokens": [
-        "composition",
         "feature"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "02-integracion/08-swift-concurrency-enterprise.md",
@@ -1844,14 +1831,15 @@
     {
       "path": "02-integracion/08-swift-concurrency-enterprise.md",
       "block_index": 5,
-      "severity": "P1",
-      "overlap_ratio": 0.059,
+      "severity": "P2",
+      "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 102,
+      "context_tokens": 108,
       "overlap_tokens": [
-        "feature"
+        "feature",
+        "repository"
       ],
-      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
+      "message": "Coherencia media-baja; revisar texto puente del diagrama."
     },
     {
       "path": "02-integracion/09-app-final-etapa-2.md",
@@ -1921,16 +1909,15 @@
     {
       "path": "02-integracion/01-feature-catalog/ADR-002-catalog.md",
       "block_index": 2,
-      "severity": "OK",
-      "overlap_ratio": 0.176,
+      "severity": "P2",
+      "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 83,
+      "context_tokens": 94,
       "overlap_tokens": [
-        "appcoordinator",
         "feature",
         "infrastructure"
       ],
-      "message": "Coherencia aceptable."
+      "message": "Coherencia media-baja; revisar texto puente del diagrama."
     },
     {
       "path": "02-integracion/entregables-etapa-2.md",
@@ -1953,7 +1940,7 @@
       "severity": "P2",
       "overlap_ratio": 0.118,
       "mermaid_tokens": 17,
-      "context_tokens": 103,
+      "context_tokens": 110,
       "overlap_tokens": [
         "feature",
         "infrastructure"
@@ -2077,7 +2064,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 86,
+      "context_tokens": 84,
       "overlap_tokens": [
         "store"
       ],
@@ -2105,7 +2092,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 95,
+      "context_tokens": 98,
       "overlap_tokens": [
         "store"
       ],
@@ -2145,7 +2132,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 80,
+      "context_tokens": 78,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -2208,7 +2195,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 91,
+      "context_tokens": 88,
       "overlap_tokens": [
         "store"
       ],
@@ -2236,12 +2223,10 @@
       "path": "03-evolucion/05-trade-offs.md",
       "block_index": 2,
       "severity": "P1",
-      "overlap_ratio": 0.059,
+      "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 96,
-      "overlap_tokens": [
-        "store"
-      ],
+      "context_tokens": 94,
+      "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
@@ -2271,7 +2256,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 84,
+      "context_tokens": 83,
       "overlap_tokens": [
         "store"
       ],
@@ -2301,15 +2286,14 @@
     {
       "path": "03-evolucion/07-backend-firebase.md",
       "block_index": 2,
-      "severity": "P2",
-      "overlap_ratio": 0.118,
+      "severity": "P1",
+      "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 93,
+      "context_tokens": 96,
       "overlap_tokens": [
-        "repository",
-        "store"
+        "repository"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "03-evolucion/entregables-etapa-3.md",
@@ -2335,7 +2319,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 104,
+      "context_tokens": 110,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -2345,7 +2329,7 @@
       "severity": "OK",
       "overlap_ratio": 0.154,
       "mermaid_tokens": 13,
-      "context_tokens": 140,
+      "context_tokens": 139,
       "overlap_tokens": [
         "offline",
         "tests"
@@ -2412,7 +2396,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 107,
+      "context_tokens": 110,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -2470,7 +2454,7 @@
       "severity": "OK",
       "overlap_ratio": 0.4,
       "mermaid_tokens": 10,
-      "context_tokens": 136,
+      "context_tokens": 131,
       "overlap_tokens": [
         "coredomain",
         "featurecatalogdomain",
@@ -2485,7 +2469,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 89,
+      "context_tokens": 92,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -2623,7 +2607,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 88,
+      "context_tokens": 91,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -2670,7 +2654,7 @@
       "severity": "OK",
       "overlap_ratio": 0.222,
       "mermaid_tokens": 9,
-      "context_tokens": 132,
+      "context_tokens": 126,
       "overlap_tokens": [
         "appcomposition",
         "coredomain"
@@ -2683,7 +2667,7 @@
       "severity": "P1",
       "overlap_ratio": 0.059,
       "mermaid_tokens": 17,
-      "context_tokens": 72,
+      "context_tokens": 73,
       "overlap_tokens": [
         "feature"
       ],
@@ -2827,7 +2811,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 94,
+      "context_tokens": 95,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -2835,10 +2819,11 @@
       "path": "04-arquitecto/entregables-etapa-4.md",
       "block_index": 1,
       "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 102,
+      "overlap_ratio": 0.071,
+      "mermaid_tokens": 42,
+      "context_tokens": 105,
       "overlap_tokens": [
+        "contrato",
         "domain",
         "infrastructure"
       ],
@@ -2945,7 +2930,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 109,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3028,7 +3013,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 106,
+      "context_tokens": 110,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3174,7 +3159,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 104,
+      "context_tokens": 111,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3342,7 +3327,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 100,
+      "context_tokens": 105,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3436,7 +3421,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 102,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3491,7 +3476,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 101,
+      "context_tokens": 105,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3578,7 +3563,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 105,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3675,7 +3660,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 108,
+      "context_tokens": 109,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3773,7 +3758,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 104,
+      "context_tokens": 100,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3835,7 +3820,7 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 102,
+      "context_tokens": 101,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
@@ -3843,33 +3828,37 @@
       "path": "05-maestria/10-debugging-xcode.md",
       "block_index": 1,
       "severity": "P1",
-      "overlap_ratio": 0.0,
-      "mermaid_tokens": 15,
+      "overlap_ratio": 0.048,
+      "mermaid_tokens": 42,
       "context_tokens": 96,
-      "overlap_tokens": [],
+      "overlap_tokens": [
+        "contrato",
+        "view"
+      ],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "05-maestria/11-entrevista-arquitecto.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 128,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 104,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "05-maestria/12-arquitectura-adaptativa.md",
       "block_index": 1,
       "severity": "P1",
-      "overlap_ratio": 0.0,
-      "mermaid_tokens": 15,
-      "context_tokens": 94,
-      "overlap_tokens": [],
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 98,
+      "overlap_tokens": [
+        "contrato"
+      ],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
@@ -3892,48 +3881,45 @@
       "severity": "P1",
       "overlap_ratio": 0.0,
       "mermaid_tokens": 17,
-      "context_tokens": 99,
+      "context_tokens": 106,
       "overlap_tokens": [],
       "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 131,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 105,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 129,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 110,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
       "block_index": 1,
-      "severity": "P2",
-      "overlap_ratio": 0.133,
-      "mermaid_tokens": 15,
-      "context_tokens": 124,
+      "severity": "P1",
+      "overlap_ratio": 0.024,
+      "mermaid_tokens": 42,
+      "context_tokens": 107,
       "overlap_tokens": [
-        "port",
-        "usecase"
+        "contrato"
       ],
-      "message": "Coherencia media-baja; revisar texto puente del diagrama."
+      "message": "Baja coherencia semantica diagrama<->narrativa cercana."
     },
     {
       "path": "anexos/calentamiento-etapa-5-maestria.md",
@@ -4226,7 +4212,7 @@
       "severity": "OK",
       "overlap_ratio": 0.364,
       "mermaid_tokens": 33,
-      "context_tokens": 108,
+      "context_tokens": 104,
       "overlap_tokens": [
         "application",
         "composition",

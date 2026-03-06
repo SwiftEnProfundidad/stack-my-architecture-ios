@@ -147,7 +147,7 @@ La diferencia entre ambos no es conocimiento, sino **criterio**.
 
 Esta rúbrica define una señal defendible de salida para el curso iOS. Sirve para autoevaluación, preparación de entrevista y defensa de portfolio con evidencia. No evalúa opiniones: evalúa decisiones, implementación, operación y trazabilidad.
 
-Está alineada con el Core Mobile en [`00-core-mobile/04-calidad-pr-ready.md`](../../00-core-mobile/04-calidad-pr-ready.md), [`00-core-mobile/05-observabilidad-operacion.md`](../../00-core-mobile/05-observabilidad-operacion.md), [`00-core-mobile/06-release-rollback-flags.md`](../../00-core-mobile/06-release-rollback-flags.md), [`00-core-mobile/07-apis-contratos-versionado.md`](../../00-core-mobile/07-apis-contratos-versionado.md), [`00-core-mobile/08-seguridad-privacidad-threat-modeling.md`](../../00-core-mobile/08-seguridad-privacidad-threat-modeling.md), [`00-core-mobile/09-dependency-governance-supply-chain.md`](../../00-core-mobile/09-dependency-governance-supply-chain.md) y [`00-core-mobile/10-plantillas.md`](../../00-core-mobile/10-plantillas.md).
+Está alineada con el Core Mobile en [`00-core-mobile/04-calidad-pr-ready.md`](../../00-core-mobile/04-calidad-pr-ready.md), [`00-core-mobile/05-observabilidad-operacion.md`](../../00-core-mobile/05-observabilidad-operación.md), [`00-core-mobile/06-release-rollback-flags.md`](../../00-core-mobile/06-release-rollback-flags.md), [`00-core-mobile/07-apis-contratos-versionado.md`](../../00-core-mobile/07-apis-contratos-versionado.md), [`00-core-mobile/08-seguridad-privacidad-threat-modeling.md`](../../00-core-mobile/08-seguridad-privacidad-threat-modeling.md), [`00-core-mobile/09-dependency-governance-supply-chain.md`](../../00-core-mobile/09-dependency-governance-supply-chain.md) y [`00-core-mobile/10-plantillas.md`](../../00-core-mobile/10-plantillas.md).
 
 ## Reglas de scoring
 
@@ -223,7 +223,7 @@ Sin este set mínimo, aplica hard blocker de trazabilidad:
 - `>= 1` RFC.
 - `>= 1` PR review checklist aplicado.
 - `>= 1` tabla de métricas before/after.
-- Minimal Observability Spec.
+- Mínimal Observability Spec.
 - Release Readiness Checklist.
 - Threat Model Lite.
 - API Contract Checklist.
@@ -245,7 +245,7 @@ Sin este set mínimo, aplica hard blocker de trazabilidad:
 | Release Strategy (flags, phased rollout, rollback) | 10% | Despliegue controlado y mitigación | Release checklist + plan rollback |
 | Security & Privacy (tokens, PII, threat model lite) | 10% | Protección de datos y superficie de ataque | Threat model lite + evidencia de redacción PII |
 | Performance & UX (budget, SwiftUI perf, accessibility baseline) | 5% | Rendimiento y UX medibles | Métricas before/after + baseline accesibilidad |
-| Documentation & Decision Traceability (ADRs/RFCs, DoD, PR review) | 5% | Trazabilidad de decisiones y disciplina de entrega | ADRs + RFC + DoD + PR checklist |
+| Documentation & Decisión Traceability (ADRs/RFCs, DoD, PR review) | 5% | Trazabilidad de decisiones y disciplina de entrega | ADRs + RFC + DoD + PR checklist |
 
 ## Bandas de calidad por categoría
 
@@ -326,7 +326,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC -.o PORT
+  UC ==> PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -350,8 +350,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

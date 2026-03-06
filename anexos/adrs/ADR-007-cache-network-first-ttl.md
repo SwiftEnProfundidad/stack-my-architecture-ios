@@ -36,8 +36,13 @@ Mejorar resiliencia sin mentir con datos obsoletos.
 
 ### Opción B: Siempre remoto (fresco pero lento y frágil)
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Los datos mostrados al usuario son siempre los más recientes; no hay riesgo de mostrar información obsoleta
+  - Implementación trivial: no se necesita ninguna capa de almacenamiento local ni lógica de TTL
+- **Contras:**
+  - Sin conectividad (vuelo, túnel, red inestable) la app muestra errores en lugar de datos útiles; la experiencia offline es inexistente
+  - Cada acción del usuario genera una petición de red; en condiciones de latencia alta el tiempo de respuesta percibido empeora notablemente
+  - No hay resiliencia ante caídas del servidor: un error transitorio del backend se convierte inmediatamente en error visible para el usuario
 
 ### Opción C: Estrategia de cache network-first + TTL + fallback (elegida)
 
@@ -90,21 +95,22 @@ Ver la lección [01-caching-offline](../../03-evolucion/01-caching-offline.md) p
 
 ---
 
+<!-- plantilla-pedagógica:auto -->
 
-## Refuerzo pedagogico
+## Refuerzo pedagógico
+Contexto: normalización automática para `anexos/adrs/ADR-007-cache-network-first-ttl.md`.
 
 ### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+- Define el resultado concreto esperado al finalizar esta lección.
 
 ### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+### Práctica guiada
+- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
+### Validación
+- Checklist rápido:
+  - [ ] Entiendo la decisión técnica principal de la lección.
+  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
   - [ ] Puedo explicar el trade-off clave con mis palabras.
-

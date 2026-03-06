@@ -41,9 +41,9 @@ Lo específico de plataforma incluye lenguaje, frameworks, tooling, pipelines y 
 
 La especialización no contradice la arquitectura común. Al contrario, permite que cada plataforma optimice su ejecución sin romper invariantes compartidos ni degradar la coherencia del sistema móvil.
 
-## 7) Autoridad de decisión vs autoridad de ejecución
+# 7) Decisión Authority vs Execution Authority
 
-Autoridad de decisión (Mobile Architect):
+Decisión Authority (Mobile Architect):
 
 - Definir invariantes, contratos y quality gates transversales.
 - Aceptar o rechazar trade-offs con impacto en riesgo sistémico.
@@ -75,23 +75,7 @@ Bajo este marco, el valor del Mobile Architect no se mide por cantidad de códig
 
 ---
 
-## Refuerzo pedagogico
-
-### Objetivo
-- Definir una postura profesional defendible: profundidad de ejecución en iOS con paridad arquitectónica verificable en Android.
-
-### Prerrequisitos
-- Haber completado las lecciones anteriores de Core Mobile para dominar contratos, calidad, observabilidad, release y gobernanza.
-
-### Practica guiada
-- Redacta tu posicionamiento profesional en 6-8 líneas usando este esquema: foco iOS, paridad Android, decisiones no negociables y evidencia.
-- Asocia ese posicionamiento a un caso real de tu proyecto con 2 ejemplos técnicos verificables.
-
-### Verificacion
-- ¿Puedes explicar la diferencia entre “volumen de código” y “calidad de decisión arquitectónica”?
-- ¿Puedes defender qué decisiones son transversales a iOS/Android y cuáles son específicas de plataforma?
-- ¿Puedes justificar tu autoridad de decisión con evidencia y no solo con opinión?
-
+<!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
 ```mermaid
@@ -123,7 +107,7 @@ flowchart LR
 
   VM --> UC
   UC --> ENT
-  UC -.o PORT
+  UC ==> PORT
   BOOT -.-> PORT
   BOOT -.-> API
   BOOT -.-> STORE
@@ -147,8 +131,8 @@ flowchart LR
   linkStyle 8 stroke:#86efac,stroke-width:2.6px
 ```
 
-La lectura del diagrama sigue esta semantica minima:
+La lectura del diagrama sigue esta semántica:
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `-.o` dependencia discontinua contra contrato/abstraccion.
-4. `--o` salida o propagacion de resultado.
+2. `-.->` wiring o configuración.
+3. `==>` contrato o abstracción.
+4. `--o` salida o propagación de resultado.

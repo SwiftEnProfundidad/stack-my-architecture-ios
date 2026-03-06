@@ -70,7 +70,7 @@ Sin barandilla, dependes de que nadie se equivoque. Eso no escala.
 ```mermaid
 graph TD
     subgraph FeatureX["Feature X"]
-        UI["Interface"] ..> APP["Application"]
+        UI["Interface"] -.-> APP["Application"]
         APP --> DOM["Domain"]
         INF["Infrastructure"] --> DOM
         INF --> APP
@@ -447,13 +447,39 @@ Si una regla no puede explicarse en una frase clara y verificarse automáticamen
 - Tras eliminar el import, el script pasa sin errores.
 - Entiendes que la regla "Domain no importa Infrastructure" se verifica automáticamente, no por revisión manual.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
-El script `check-dependencies.sh` recorre los archivos `.swift` de cada target y verifica que no contengan imports de módulos prohibidos según la dirección de dependencia definida en `Package.swift`. Cuando encuentras un import prohibido, el script reporta archivo y línea. La corrección es siempre eliminar el import y mover la dependencia a la capa correcta (Infrastructure o Composition Root). Este ejercicio demuestra que las reglas de arquitectura son ejecutables, no opiniones.
+```bash
+# 1. Añade un import prohibido en cualquier archivo de Domain
+echo "import InfraHTTP" >> apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/LoginUseCase.swift
+
+# 2. Ejecuta el script de verificación
+./scripts/check-dependencies.sh
+
+# Salida esperada (fallo):
+# [VIOLATION] Domain import prohibido en Sources/FeatureLoginDomain/LoginUseCase.swift
+# Total violations: 1
+
+# 3. Elimina el import añadido
+# (revert del cambio o edición manual)
+
+# 4. Vuelve a ejecutar
+./scripts/check-dependencies.sh
+# Salida esperada:
+# Domain imports OK
+```
+
+El script recorre con `find` todos los archivos `.swift` bajo `*/Domain/*` y aplica `rg` buscando `^import (SwiftUI|UIKit|Combine|InfraHTTP)$`. Si detecta alguna coincidencia, incrementa el contador de violaciones y termina con `exit 1`. La corrección siempre consiste en mover la dependencia a Infrastructure o a la Composition Root, donde ese import sí está permitido.
+
+**Resultado esperado**: el pipeline de CI falla en el paso "Gate 1 – dependency rules" con el mensaje de violación, y pasa limpio tras eliminar el import.
+
+</details>
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -476,15 +502,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

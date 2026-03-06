@@ -55,6 +55,7 @@
   const navLinks = Array.from(document.querySelectorAll('a.doc-nav-link'));
   mapLinksToTopics(navLinks, topics);
   const navLinksByTopicId = indexNavLinksByTopicId(navLinks);
+  hydrateTopicLessonLabels(topics, navLinksByTopicId);
   setupTopBarLayout();
   syncTopbarOffset();
 
@@ -149,6 +150,7 @@
     if (sidebarToggle) left.appendChild(sidebarToggle);
     if (switcher) left.appendChild(switcher);
     if (left.children.length > 0) bar.appendChild(left);
+    bar.appendChild(ensureCurrentLessonContext());
     if (study) bar.appendChild(study);
     if (theme) bar.appendChild(theme);
 
@@ -306,8 +308,46 @@
     return btn;
   }
 
+  function ensureCurrentLessonContext() {
+    let node = document.getElementById('study-current-lesson');
+    if (node) return node;
+    node = document.createElement('div');
+    node.id = 'study-current-lesson';
+    node.className = 'study-current-lesson';
+    node.setAttribute('aria-live', 'polite');
+    return node;
+  }
+
+  function normalizeLessonLabel(rawLabel) {
+    const raw = String(rawLabel || '').replace(/\s+/g, ' ').trim();
+    if (!raw) return '';
+
+    const fullMatch = raw.match(/^Lecci[oó]n\s+(\d+)\s*:\s*(.+)$/i);
+    if (fullMatch) {
+      return `Lección ${fullMatch[1]}: ${fullMatch[2].trim()}`;
+    }
+
+    const numberOnlyMatch = raw.match(/^Lecci[oó]n\s+(\d+)$/i);
+    if (numberOnlyMatch) {
+      return `Lección ${numberOnlyMatch[1]}`;
+    }
+
+    return raw;
+  }
+
+  function extractBaseNavLabel(link) {
+    if (!link) return '';
+    const clone = link.cloneNode(true);
+    clone.querySelectorAll('.study-ux-completed-badge, .study-ux-review-badge').forEach((badge) => badge.remove());
+    return normalizeLessonLabel(clone.textContent || '');
+  }
+
   function mapLinksToTopics(links, topicList) {
     links.forEach((link) => {
+      if (!link.dataset.lessonLabel) {
+        const label = extractBaseNavLabel(link);
+        if (label) link.dataset.lessonLabel = label;
+      }
       const target = (link.getAttribute('href') || '').replace('#', '');
       const topic = topicList.find((t) => t.id === target);
       if (topic) {
@@ -339,6 +379,78 @@
       if (foundStored) return foundStored;
     }
     return topicList[0] || null;
+  }
+
+  function buildFallbackLessonLabel(topic, index) {
+    const heading = topic && topic.section ? topic.section.querySelector('h1, h2, h3') : null;
+    const title = heading ? String(heading.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    if (title) return `Lección ${index + 1}: ${title}`;
+    return `Lección ${index + 1}`;
+  }
+
+  function hydrateTopicLessonLabels(topicList, linksByTopicId) {
+    topicList.forEach((topic, index) => {
+      const links = linksByTopicId.get(topic.id) || [];
+      const fromNav = links
+        .map((link) => normalizeLessonLabel(link.dataset.lessonLabel || ''))
+        .find(Boolean);
+      topic.lessonLabel = fromNav || buildFallbackLessonLabel(topic, index);
+    });
+
+    const doneBtn = document.createElement('button');
+    doneBtn.type = 'button';
+    doneBtn.className = 'study-topic-nav-complete';
+    doneBtn.textContent = completed[topic.id] ? '↩ Desmarcar completado' : '✅ Marcar completado';
+    doneBtn.addEventListener('click', function () {
+      toggleCompletion(topic.id);
+    });
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.textContent = 'Siguiente lección ➡';
+    nextBtn.disabled = index === topics.length - 1;
+    nextBtn.addEventListener('click', function () {
+      if (index < topics.length - 1) renderTopic(topics[index + 1].id, true);
+    });
+
+    nav.appendChild(prevBtn);
+    nav.appendChild(doneBtn);
+    nav.appendChild(nextBtn);
+  }
+
+  function ensureLessonPrimaryHeadingLabel(topic) {
+    if (!topic || !topic.section || !topic.lessonLabel) return;
+
+    const staleInlineHeader = topic.section.querySelector('.study-lesson-inline-title');
+    if (staleInlineHeader) staleInlineHeader.remove();
+
+    const label = String(topic.lessonLabel || '').trim();
+    if (!/^Lecci[oó]n\s+\d+/i.test(label)) return;
+
+    const heading = topic.section.querySelector('h1, h2, h3');
+    if (!heading) return;
+
+    const current = String(heading.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!heading.dataset.smaOriginalHeading) {
+      heading.dataset.smaOriginalHeading = current;
+    }
+
+    if (current !== label) {
+      heading.textContent = label;
+    }
+  }
+
+  function updateCurrentLessonContext(topic) {
+    const node = document.getElementById('study-current-lesson');
+    if (!node) return;
+    const label = topic && topic.lessonLabel ? String(topic.lessonLabel).trim() : '';
+    if (!label) {
+      node.textContent = '';
+      node.style.display = 'none';
+      return;
+    }
+    node.style.display = '';
+    node.textContent = label;
   }
 
   function markUiHydrated() {
@@ -412,6 +524,8 @@
     });
 
     currentTopic = target;
+    ensureLessonPrimaryHeadingLabel(currentTopic);
+    updateCurrentLessonContext(currentTopic);
     localStorage.setItem(keyLastTopic, currentTopic.id);
     cloudSync.schedulePush();
 

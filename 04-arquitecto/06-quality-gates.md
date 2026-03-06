@@ -430,7 +430,28 @@ Trigger para pasar de B a C:
 - Puedes explicar en una frase qué protege cada gate.
 - Identificas al menos un gate que podría añadirse (con justificación de qué riesgo mitiga).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# Desde apps/ios/ArchitectureKit/
+
+# Gate 1: dependencias arquitectónicas
+./scripts/check-dependencies.sh
+# Salida esperada: "Domain imports OK" + "Feature cross-imports OK"
+
+# Gate 2: tests unitarios
+swift test
+# Salida esperada: resumen con todos los test suites en verde
+
+# Gate 3: baseline de rendimiento
+./scripts/check-performance-baseline.sh
+# Salida esperada: tiempos de carga < umbral definido (p.ej. < 200ms)
+
+# Gate 4: cobertura por capa
+./scripts/quality-gates.sh
+# Salida esperada: porcentaje de cobertura por módulo
+```
 
 | Gate | Protege | Riesgo que mitiga |
 |------|---------|-------------------|
@@ -439,11 +460,16 @@ Trigger para pasar de B a C:
 | `check-performance-baseline.sh` | Latencia de carga | Regresiones de rendimiento |
 | `quality-gates.sh` | Cobertura mínima por capa | Código sin protección de tests |
 
-Un gate que podría añadirse es verificación de strict concurrency (`-strict-concurrency=complete`), que protege contra data races. Otro candidato es tamaño de binario, que protege contra dependencias pesadas inadvertidas.
+Un gate que podría añadirse es verificación de strict concurrency (`-strict-concurrency=complete`), que detecta data races en tiempo de compilación. Otro candidato es tamaño de binario (`otool -l` o `bloaty`), que protege contra dependencias pesadas añadidas inadvertidamente.
+
+**Resultado esperado**: los 4 scripts terminan con código de salida 0 y la tabla anterior completa con tus propias frases de justificación.
+
+</details>
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -466,15 +492,15 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
 

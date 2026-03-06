@@ -60,13 +60,13 @@ flowchart TD
     LOGIN --> LDOM["Domain"]
     LOGIN --> LAPP["Application"]
     LOGIN --> LINF["Infrastructure"]
-    LOGIN ..> LUI["Interface"]
+    LOGIN -.-> LUI["Interface"]
 
     CATALOG --> CDOM["Domain"]
     CATALOG --> CAPP["Application"]
     CATALOG --> CINF["Infrastructure"]
-    CATALOG ..> CUI["Interface"]
-```
+    CATALOG -.-> CUI["Interface"]
+```text
 
 Ownership sugerido por contexto:
 
@@ -103,21 +103,21 @@ flowchart TB
 
     LUI --> LAPP
     LAPP --> LDOM
-    LAPP -.o LPORT
+    LAPP ==> LPORT
     LINF --o LPORT
 
     CUI --> CAPP
     CAPP --> CDOM
-    CAPP -.o CPORT
+    CAPP ==> CPORT
     CINF --o CPORT
     CINF --> CSTORE
-```
+```text
 
 Cómo leerlo en revisión técnica:
 
 1. `-->` indica dependencia de ejecución real (flujo operativo).
 2. `-.->` indica solo ensamblaje/configuración (sin ejecutar negocio).
-3. `-.o` indica que el core depende de un contrato, no de una implementación.
+3. `==>` indica que el core depende de un contrato, no de una implementación.
 4. `--o` indica salida/propagación desde una implementación concreta que satisface ese contrato.
 
 Regla práctica de arquitectura:
@@ -158,7 +158,7 @@ Regla canónica Clean por feature:
 
 ```mermaid
 graph LR
-    UI["Interface"] ..> APP["Application"]
+    UI["Interface"] -.-> APP["Application"]
     APP --> DOM["Domain"]
     INF["Infrastructure"] --> DOM
 ```
@@ -175,10 +175,10 @@ Regla cross-feature:
 ```mermaid
 flowchart TD
     RQ["Requisito"] --> BDD["Especificacion BDD"]
-    BDD ..> CT["Contratos Domain/Application"]
+    BDD -.-> CT["Contratos Domain/Application"]
     CT --> TDD["TDD core"]
     TDD --> INFRA["Infra + contract tests"]
-    INFRA ..> UI["Interface + estado"]
+    INFRA -.-> UI["Interface + estado"]
     UI --> ADR["ADR si afecta arquitectura"]
     ADR --> PR["PR + quality gates"]
 ```
@@ -441,9 +441,44 @@ Si alguna señal falla, la guía necesita mantenimiento inmediato.
 - Las direcciones de dependencia de la guía coinciden con el código.
 - Si hay discrepancias, se documentan con archivo y línea exactos.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
-Este ejercicio no tiene código nuevo; es una auditoría. La habilidad que entrena es la de mantener documentación viva: si la guía dice "FeatureLoginDomain no depende de InfraHTTP" pero `Package.swift` dice lo contrario, la guía miente y pierde credibilidad. El arquitecto responsable detecta estas divergencias antes de que el equipo las descubra por un bug.
+```bash
+# 1. Extraer targets declarados en Package.swift
+grep '\.target\|\.testTarget' apps/ios/ArchitectureKit/Package.swift \
+  | sed 's/.*name: "\([^"]*\)".*/\1/' | sort > /tmp/targets-code.txt
+
+# 2. Comparar con lo que dice la guía (manual)
+# La guía afirma estos módulos:
+# - FeatureLoginDomain, FeatureLoginData, FeatureLoginUI
+# - FeatureCatalogDomain, FeatureCatalogData, FeatureCatalogUI
+# - FeatureCatalogPersistenceSwiftData
+# - CoreDomain, AppContracts, AppComposition
+
+# 3. Verificar dirección de dependencias
+swift package show-dependencies --format json \
+  | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+# Comprobar que FeatureLoginDomain no depende de FeatureCatalogDomain
+for dep in data.get('dependencies', []):
+    name = dep.get('name','')
+    transitive = str(dep)
+    if 'LoginDomain' in name and 'CatalogDomain' in transitive:
+        print('VIOLACIÓN: LoginDomain depende de CatalogDomain')
+print('Verificación completa')
+"
+```
+
+**Hallazgo típico a documentar**:
+> Discrepancia: la guía cita `AppContracts` como módulo independiente, pero en `Package.swift` sus tipos están incluidos dentro de `CoreDomain`. Acción: actualizar la sección "Mapa del repositorio" de la guía para reflejar que `CoreDomain` agrupa los contratos base.
+
+Este ejercicio no produce código nuevo; entrena la habilidad de mantener documentación viva. Si la guía dice algo que el código desmiente, la guía miente y pierde credibilidad como herramienta de onboarding.
+
+**Resultado esperado**: lista de discrepancias (o confirmación de coherencia total) con nombre de archivo, sección de guía y línea de `Package.swift` afectada.
+
+</details>
 
 ---
 

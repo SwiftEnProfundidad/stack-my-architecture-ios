@@ -1,12 +1,5 @@
 {
   "source": "/Users/juancarlosmerlosalbarracin/Developer/Projects/stack-my-architecture/stack-my-architecture-ios/00-informe/AUDITORIA-MATRIZ-EJECUTABLE.json",
-  "snippets_total": 672,
-  "findings": [
-    {
-      "severity": "P2",
-      "path": "01-fundamentos/06-conectando-la-app.md",
-      "block_index": 6,
-      "message": "Snippet sin lenguaje declarado (```lang)."
-    }
-  ]
+  "snippets_total": 658,
+  "findings": []
 }

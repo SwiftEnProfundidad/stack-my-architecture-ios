@@ -269,8 +269,8 @@ class HistoryViewModel {
 
 ### Definición
 
-> "Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender de abstracciones."
-> "Las abstracciones no deben depender de detalles. Los detalles deben depender de abstracciones."
+> "Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender de abstracciónes."
+> "Las abstracciónes no deben depender de detalles. Los detalles deben depender de abstracciónes."
 > — Robert C. Martin
 
 ### ¿Por Qué Existe?
@@ -324,8 +324,8 @@ class StubAuthGateway: AuthGateway { ... }   // Devuelve datos fake para tests
 ### Checklist
 
 - [ ] Alto nivel depende de protocols, no de concretos
-- [ ] Las abstracciones están en la capa de alto nivel
-- [ ] Los detalles (infraestructura) implementan las abstracciones
+- [ ] Las abstracciónes están en la capa de alto nivel
+- [ ] Los detalles (infraestructura) implementan las abstracciónes
 - [ ] Composition Root es el único lugar con instanciación
 
 ---
@@ -398,7 +398,7 @@ class PaymentService {
 - [ ] ¿Las interfaces son pequeñas y cohesionadas?
 
 ### DIP
-- [ ] ¿Dependemos de abstracciones, no de concretos?
+- [ ] ¿Dependemos de abstracciónes, no de concretos?
 - [ ] ¿El Composition Root es el único lugar con instanciación?
 
 ---

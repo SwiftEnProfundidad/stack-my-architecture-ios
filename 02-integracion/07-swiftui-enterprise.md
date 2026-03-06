@@ -31,7 +31,7 @@
 En las lecciones anteriores construimos dos pantallas (Login y Catalog) usando SwiftUI. Pero una app profesional necesita mucho más: modales, alertas, pull-to-refresh, busqueda, tabs, barras de herramientas, persistencia de preferencias... En está lección vamos a enriquecer nuestra app con los patrones SwiftUI que encontraras en **cualquier** app enterprise.
 
 Cada patrón se explica con:
-1. **Que es** — Descripcion para un junior.
+1. **Que es** — Descripción para un junior.
 2. **Por que lo necesitas** — Caso de uso real en enterprise.
 3. **Como se integra** — Código aplicado a nuestra arquitectura.
 4. **Donde vive** — En que capa de Clean Architecture encaja.
@@ -238,7 +238,7 @@ struct CatalogView: View {
 
 `showingFilter = true` — Cuando el usuario pulsa "Filtrar", ponemos el booleano en `true`. SwiftUI detecta el cambio y abre el sheet.
 
-`.sheet(isPresented: $showingFilter) { FilterView() }` — Le dice a SwiftUI: "cuando `showingFilter` sea `true`, muestra `FilterView` como modal deslizante desde abajo". El `$` crea un **binding**: SwiftUI puede leer Y escribir el booleano. Cuando el usuario arrastra el sheet hacia abajo para cerrarlo, SwiftUI pone `showingFilter = false` automaticamente.
+`.sheet(isPresented: $showingFilter) { FilterView() }` — Le dice a SwiftUI: "cuando `showingFilter` sea `true`, muestra `FilterView` como modal deslizante desde abajo". El `$` crea un **binding**: SwiftUI puede leer Y escribir el booleano. Cuando el usuario arrastra el sheet hacia abajo para cerrarlo, SwiftUI pone `showingFilter = false` automáticamente.
 
 **`.sheet` vs `.fullScreenCover`:**
 
@@ -417,7 +417,7 @@ struct CatalogView: View {
 
 `@State private var searchText = ""` — El texto que el usuario escribe en la barra de busqueda. Empieza vacio.
 
-`.searchable(text: $searchText, prompt: "Buscar productos...")` — Anade la barra de busqueda. `text:` es un **binding** al texto de busqueda. SwiftUI actualiza `searchText` automaticamente cuando el usuario escribe. `prompt:` es el texto gris que aparece cuando la barra está vacia.
+`.searchable(text: $searchText, prompt: "Buscar productos...")` — Anade la barra de busqueda. `text:` es un **binding** al texto de busqueda. SwiftUI actualiza `searchText` automáticamente cuando el usuario escribe. `prompt:` es el texto gris que aparece cuando la barra está vacia.
 
 `products.filter { product in ... }` — Filtra el array en memoria. `.filter` crea un nuevo array con solo los elementos que cumplen la condición. `localizedCaseInsensitiveContains` busca sin importar mayusculas/minusculas ni acentos: "cafe" encuentra "Cafe" y "Cafe".
 
@@ -471,7 +471,7 @@ El modifier `.searchable` está en la **Interface**. La lógica de filtrado en e
 
 `ToolbarItem(placement:)` — Cada item tiene una posición. SwiftUI adapta la posición segun la plataforma (iPhone vs iPad vs Mac).
 
-`placement: .topBarTrailing` — Arriba a la derecha. En idiomas RTL (arabe, hebreo), SwiftUI lo mueve automaticamente a la izquierda.
+`placement: .topBarTrailing` — Arriba a la derecha. En idiomas RTL (arabe, hebreo), SwiftUI lo mueve automáticamente a la izquierda.
 
 `systemImage: "plus"` — Muestra un icono SF Symbol en vez de (o junto a) texto.
 
@@ -519,7 +519,7 @@ En el padre: `@State private var showOnlyExpensive = false` — El padre **posee
 
 Al pasar: `FilterToggle(isOn: $showOnlyExpensive)` — El `$` crea un binding. Es como dar una **llave de tu casa**: el hijo puede entrar y cambiar cosas.
 
-En el hijo: `@Binding var isOn: Bool` — El hijo **no posee** el dato, solo tiene acceso a el. Cuando el usuario mueve el toggle, `isOn` cambia, y como es un binding, el cambio se propaga al padre automaticamente.
+En el hijo: `@Binding var isOn: Bool` — El hijo **no posee** el dato, solo tiene acceso a el. Cuando el usuario mueve el toggle, `isOn` cambia, y como es un binding, el cambio se propaga al padre automáticamente.
 
 **Regla de oro:**
 - `@State` = "Yo soy el dueno de este dato"
@@ -593,7 +593,7 @@ struct SettingsView: View {
 
 ### @AppStorage — persistencia en UserDefaults
 
-`@AppStorage("notifications_enabled")` — Este property wrapper guarda y lee valores de **UserDefaults** automaticamente. Es como `@State` pero **persistente**: si el usuario cierra y abre la app, el valor se mantiene.
+`@AppStorage("notifications_enabled")` — Este property wrapper guarda y lee valores de **UserDefaults** automáticamente. Es como `@State` pero **persistente**: si el usuario cierra y abre la app, el valor se mantiene.
 
 - `"notifications_enabled"` es la **clave** en UserDefaults (como un nombre de caja donde guardar el valor).
 - `= true` es el valor por defecto si no hay nada guardado.
@@ -687,9 +687,9 @@ Los modifiers personalizados viven en la **capa Interface**, generalmente en una
 
 ## Resumen: mapa de conceptos SwiftUI enterprise
 
-Antes del diagrama, fija los ejes: **Navegacion** (`TabView`, `NavigationLink`, `navigationDestination`, `.toolbar`), **Presentacion modal** (`.sheet`, `.fullScreenCover`, `.alert`, `.confirmationDialog`), **Datos y busqueda** (`.refreshable`, `.searchable`, ``, ``) y **Composicion** (``, `ViewModifier`, `Form`, `Section`).
+Antes del diagrama, fija los ejes: **Navegación** (`TabView`, `NavigationLink`, `navigationDestination`, `.toolbar`), **Presentacion modal** (`.sheet`, `.fullScreenCover`, `.alert`, `.confirmationDialog`), **Datos y busqueda** (`.refreshable`, `.searchable`, ``, ``) y **Composición** (``, `ViewModifier`, `Form`, `Section`).
 
-La lectura correcta es de izquierda a derecha: navegacion y presentacion organizan flujo UI; datos y busqueda conectan estado; composicion estandariza estilos y reutilizacion para mantener coherencia enterprise.
+La lectura correcta es de izquierda a derecha: navegación y presentacion organizan flujo UI; datos y busqueda conectan estado; composición estandariza estilos y reutilizacion para mantener coherencia enterprise.
 
 ```mermaid
 flowchart LR
@@ -723,11 +723,11 @@ flowchart LR
 
 ---
 
-## 12. @Bindable — El companero de @Observable
+## 12. @Bindable — El compañero de @Observable
 
 ### Que es
 
-`@Bindable` es un property wrapper que crea **bindings** a partir de un objeto `@Observable` inyectado. Es el companero moderno de `@Observable` que falta en la explicacion anterior.
+`@Bindable` es un property wrapper que crea **bindings** a partir de un objeto `@Observable` inyectado. Es el compañero moderno de `@Observable` que falta en la explicacion anterior.
 
 ### Cuando usarlo
 
@@ -909,7 +909,7 @@ withAnimation(.easeInOut(duration: 0.3)) {
 
 ### .animation en la vista
 
-Para animar cambios automaticamente cuando una propiedad cambia:
+Para animar cambios automáticamente cuando una propiedad cambia:
 
 ```swift
 Text(product.name)
@@ -998,14 +998,14 @@ Text(product.name)
     .font(.system(size: 16))
 ```text
 
-Las fuentes semanticas (`.headline`, `.body`, `.caption`) escalan automaticamente con Dynamic Type. Las fuentes con tamaño fijo no.
+Las fuentes semánticas (`.headline`, `.body`, `.caption`) escalan automáticamente con Dynamic Type. Las fuentes con tamaño fijo no.
 
 ### Checklist de accesibilidad
 
 - [ ] Todos los botones con icono tienen `.accessibilityLabel`
 - [ ] Las imágenes decorativas tienen `.accessibilityHidden(true)`
 - [ ] Las listas tienen labels descriptivos en cada fila
-- [ ] Usas fuentes semanticas (`.headline`, `.body`), no tamanos fijos
+- [ ] Usas fuentes semánticas (`.headline`, `.body`), no tamanos fijos
 - [ ] Tu app funciona con VoiceOver activado (probalo en el simulador: Settings → Accessibility → VoiceOver)
 
 ---
@@ -1025,7 +1025,7 @@ Tu skill de SwiftUI Expert define estas correcciones que debes aplicar en cualqu
 | `NavigationView` | `NavigationStack` | Moderno, soporta NavigationPath |
 | `onChange(of: x) { value in }` | `onChange(of: x) { old, new in }` | API con 2 parametros o sin parametros |
 | `GeometryReader` | `containerRelativeFrame()` | Más eficiente, sin layout thrash |
-| `String(format: "%.2f", val)` | `Text(val, format: .number.precision(...))` | Localizado automaticamente |
+| `String(format: "%.2f", val)` | `Text(val, format: .number.precision(...))` | Localizado automáticamente |
 | `string.contains(search)` | `string.localizedStandardContains(search)` | Ignora mayusculas, acentos, idioma |
 
 ### onTapGesture vs Button
@@ -1072,7 +1072,7 @@ struct ProductDetailView: View {
 }
 ```text
 
-`.task(id: productId)` — Como `.task` pero se **re-ejecuta** cada vez que `productId` cambia. Si el usuario navega del producto A al producto B, `.task(id:)` cancela la carga del A y empieza la del B automaticamente. Sin `id:`, solo se ejecutaria una vez.
+`.task(id: productId)` — Como `.task` pero se **re-ejecuta** cada vez que `productId` cambia. Si el usuario navega del producto A al producto B, `.task(id:)` cancela la carga del A y empieza la del B automáticamente. Sin `id:`, solo se ejecutaria una vez.
 
 ### .sheet(item:) en vez de .sheet(isPresented:)
 
@@ -1227,7 +1227,7 @@ if #available(iOS 26, *) {
 
 ### Reglas del skill para Liquid Glass
 
-1. **Solo adoptar cuando se pida explicitamente** — No migrar todo a glass automaticamente.
+1. **Solo adoptar cuando se pida explicitamente** — No migrar todo a glass automáticamente.
 2. Aplicar `.glassEffect()` **despues** de modifiers de layout y apariencia (padding, frame, etc.).
 3. Usar `.interactive()` **solo** en elementos tocables/focusables.
 4. Envolver multiples elementos glass en `GlassEffectContainer`.
@@ -1327,7 +1327,7 @@ Antes de entregar tu primera PR en una app enterprise, asegurate de dominar:
 **Accesibilidad (obligatorio):**
 - [ ] `.accessibilityLabel` en todos los botones con icono
 - [ ] `.accessibilityHidden(true)` en imágenes decorativas
-- [ ] Fuentes semanticas (`.headline`, `.body`), no tamanos fijos
+- [ ] Fuentes semánticas (`.headline`, `.body`), no tamanos fijos
 - [ ] `Button` en vez de `onTapGesture` para elementos interactivos
 
 **APIs modernas:**
@@ -1381,6 +1381,49 @@ List {
 
 Estos tres patrones cubren los estados fundamentales de cualquier pantalla de datos: cargando, vacio y con datos. En enterprise, olvidar el empty state o el loading state es una de las causas más frecuentes de mala UX.
 
+<details>
+<summary>Solución de referencia</summary>
+
+```swift
+struct CatalogScreen: View {
+    @State private var viewModel: CatalogViewModel
+
+    var body: some View {
+        List(viewModel.products, id: \.id) { product in
+            VStack(alignment: .leading, spacing: 4) {
+                Text(product.name)
+                    .font(.headline)
+                Text(product.price.formatted())
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .refreshable {
+            await viewModel.load()
+        }
+        .overlay {
+            if viewModel.isLoading {
+                ProgressView("Cargando catálogo")
+            } else if viewModel.products.isEmpty, viewModel.errorMessage == nil {
+                ContentUnavailableView(
+                    "Sin productos",
+                    systemImage: "shippingbox",
+                    description: Text("Desliza hacia abajo para recargar el catálogo.")
+                )
+            }
+        }
+        .task {
+            if viewModel.products.isEmpty {
+                await viewModel.load()
+            }
+        }
+    }
+}
+```
+
+Aquí se ven juntos los tres patrones pedidos: `refreshable` para intención de usuario, `ProgressView` para estado de carga y `ContentUnavailableView` para vacío sin error. La pantalla sigue delegando reglas al `ViewModel`; SwiftUI solo representa estados observables.
+</details>
+
 ---
 
 ## Cierre
@@ -1391,7 +1434,8 @@ La siguiente lección complementa esta: si SwiftUI define como se ve la app, Swi
 
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+<!-- semántica-flechas:auto -->
+## Semántica de flechas aplicada a esta arquitectura
 
 ```mermaid
 flowchart LR
@@ -1414,15 +1458,14 @@ flowchart LR
     CR -.-> COORD
     CR -.-> ADAPTER
     VM --> UC
-    UC -.o PORT
+    UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```
+```text
 
-Lectura semantica minima de este diagrama:
+Lectura semántica mínima de este diagrama:
 
 1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
+2. `-.->` wiring y configuración de ensamblado.
+3. `==>` dependencia contra contrato/abstracción.
+4. `--o` salida/propagación desde implementación concreta.
