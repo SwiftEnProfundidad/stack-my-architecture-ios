@@ -82,8 +82,9 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 ### Informe fundacional
 
 - [Informe completo del curso](00-informe/INFORME-CURSO.md)
-- [Decisiones tomadas](00-informe/DECISIONES-TOMADAS.md)
-- [Backlog técnico del repo (mantenimiento interno)](00-informe/TODO.md)
+- [Matriz de competencias](00-informe/MATRIZ-COMPETENCIAS.md)
+- [Rúbrica de gates por fase](00-informe/RUBRICA-GATES-POR-FASE.md)
+- [Scorecard de empleabilidad](00-informe/SCORECARD-EMPLEABILIDAD.md)
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Marco de decisiones](00-core-mobile/01-marco-de-decisiones.md)
 - [Core Mobile: Invariantes y contratos](00-core-mobile/02-invariantes-y-contratos.md)
@@ -243,21 +244,21 @@ La meta no es “mencionar skills”, sino usarlas para tomar mejores decisiones
 - No es usar `@MainActor` para silenciar warnings sin justificar límites.
 - No es adoptar modas; es construir un sistema coherente guiado por requisitos, tests y límites.
 
-## QA Pedagógico (auditoria automatizada)
+## QA Pedagógico
 
-Para ejecutar la auditoria completa del curso y generar informes consolidados:
+Para ejecutar la QA completa del curso:
 
 ```bash
 ./scripts/run-qa-audit-bundle.sh
 ```
 
-Artefactos principales en `00-informe/`:
+Artefacto versionado que sí se conserva en `00-informe/`:
 
-- `AUDITORIA-QA-INTEGRAL.md` y `AUDITORIA-QA-INTEGRAL.json`
-- `AUDITORIA-GUARDRAILS.md` y `AUDITORIA-GUARDRAILS.json`
 - `AUDITORIA-GUARDRAILS-BASELINE.json` (baseline de no regresión)
 
-Guardrails actuales:
+El resto de informes de auditoría se generan localmente como salida de trabajo y ya no forman parte de la documentación estable versionada del curso.
+
+Guardrails vigentes:
 
 - Bloque técnico base sin P1: snippets, enlaces, cierre y plantilla
 - Bloque pedagógico semántico sin regresión contra baseline: continuidad, saltos, mermaid y trazabilidad

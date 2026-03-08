@@ -77,8 +77,9 @@ def discover_files() -> list[str]:
 # O usa discover_files() para autodiscovery
 FILE_ORDER = [
     "00-informe/INFORME-CURSO.md",
-    "00-informe/DECISIONES-TOMADAS.md",
-    "00-informe/TODO.md",
+    "00-informe/MATRIZ-COMPETENCIAS.md",
+    "00-informe/RUBRICA-GATES-POR-FASE.md",
+    "00-informe/SCORECARD-EMPLEABILIDAD.md",
     "00-core-mobile/00-introduccion.md",
     "00-core-mobile/01-marco-de-decisiones.md",
     "00-core-mobile/02-invariantes-y-contratos.md",
