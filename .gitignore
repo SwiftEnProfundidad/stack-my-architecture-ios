@@ -7,3 +7,9 @@ dist/
 
 # assistant-bridge local secrets
 assistant-bridge/.env
+
+# Local/generated QA reports
+00-informe/AUDITORIA-*.md
+00-informe/AUDITORIA-*.json
+!00-informe/AUDITORIA-GUARDRAILS-BASELINE.json
+PHASE-TRACKER-IOS-AUDIT.md
