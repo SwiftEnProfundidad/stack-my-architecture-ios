@@ -261,9 +261,118 @@ body.with-global-topbar {
 }
 
 .study-notes-panel,
-.study-bookmarks-panel {
+.study-bookmarks-panel,
+.study-interview-panel {
   display: grid;
   gap: 10px;
+}
+
+.study-interview-panel[hidden] {
+  display: none;
+}
+
+.study-interview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.study-interview-eyebrow,
+.study-interview-rubric-title {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent, #60a5fa);
+}
+
+.study-interview-head h4,
+.study-interview-question,
+.study-interview-current {
+  margin: 0;
+}
+
+.study-interview-head p {
+  margin: 8px 0 0;
+  color: var(--text-secondary, #cbd5e1);
+  line-height: 1.5;
+  max-width: 72ch;
+}
+
+.study-interview-actions,
+.study-interview-source-row,
+.study-interview-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-interview-chip {
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: var(--text, #e5e7eb);
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.study-interview-chip.is-active {
+  border-color: rgba(96, 165, 250, 0.42);
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.study-interview-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.82);
+  padding: 14px;
+}
+
+.study-interview-question {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--text, #e5e7eb);
+}
+
+.study-interview-current {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.study-interview-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text, #e5e7eb);
+}
+
+.study-interview-source {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text, #e5e7eb);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.study-interview-empty {
+  margin: 0;
+  color: var(--text-secondary, #cbd5e1);
 }
 
 #study-note-editor {
@@ -592,6 +701,17 @@ main hr {
   }
 
   .study-access-banner-link {
+    flex: 1 1 100%;
+  }
+
+  .study-interview-actions,
+  .study-interview-source-row {
+    width: 100%;
+  }
+
+  .study-interview-actions button,
+  .study-interview-source,
+  .study-interview-chip {
     flex: 1 1 100%;
   }
 }
