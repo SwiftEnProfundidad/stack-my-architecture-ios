@@ -629,7 +629,7 @@
     rowPrimary.appendChild(createButton('▶ Continuar donde lo dejaste', goResume, 'study-resume-btn'));
     rowPrimary.appendChild(createButton('➡ Ir al primer tema pendiente', goFirstIncomplete));
     rowPrimary.appendChild(createButton('🔁 Mostrar solo temas para repaso', toggleReviewFilter, 'study-filter-review'));
-    rowPrimary.appendChild(createButton('🔗 Copiar enlace de sincronización', copySyncLink, 'study-sync-link'));
+    rowPrimary.appendChild(createButton('☁ Sincronización cloud', copySyncLink, 'study-sync-link'));
     rowPrimary.appendChild(createButton('🔐 Cuenta', goAuthPortal, 'study-auth-portal'));
 
     const statsBox = document.createElement('div');
@@ -658,6 +658,7 @@
     updateResumeButtonState();
     renderStats();
     updateProgressUi();
+    updateSyncLinkButton();
   }
 
   function createButton(label, onClick, id) {
@@ -1037,14 +1038,20 @@
   }
 
   async function copySyncLink() {
+    if (!hasAuthenticatedCloudProfile()) {
+      alert('Inicia sesión para activar la sincronización cloud ligada a tu cuenta.');
+      goAuthPortal();
+      return;
+    }
+
     const profile = cloudSync.getProfileKey();
     if (!profile) {
-      alert('No se pudo resolver profileKey para sincronización.');
+      alert('No se pudo resolver el perfil cloud de tu cuenta.');
       return;
     }
 
     const synced = await cloudSync.pushNow({ force: true });
-    const url = buildSyncLink(profile, cloudSync.getSyncBaseUrl());
+    const url = buildSyncLink(profile, cloudSync.getSyncBaseUrl(), true);
     try {
       if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
         await navigator.clipboard.writeText(url);
@@ -1052,13 +1059,25 @@
         throw new Error('Clipboard API no disponible');
       }
       if (synced) {
-        alert('Enlace de sincronización copiado y progreso sincronizado.');
+        alert('Enlace del curso copiado. Tu progreso cloud ya está ligado a tu cuenta.');
       } else {
-        alert('Enlace de sincronización copiado. No se pudo confirmar sincronización cloud en este momento.');
+        alert('Enlace del curso copiado. No se pudo confirmar sincronización cloud en este momento.');
       }
     } catch (_error) {
-      window.prompt('Copia este enlace para usar el mismo progreso en otro dispositivo:', url);
+      window.prompt('Copia este enlace del curso. El progreso cloud se resolverá por tu cuenta al iniciar sesión:', url);
     }
+  }
+
+  function updateSyncLinkButton() {
+    const btn = document.getElementById('study-sync-link');
+    if (!btn) return;
+    if (hasAuthenticatedCloudProfile()) {
+      btn.textContent = '☁ Copiar enlace del curso';
+      btn.title = 'Tu progreso cloud ya está ligado a tu cuenta';
+      return;
+    }
+    btn.textContent = '🔐 Inicia sesión para sincronizar';
+    btn.title = 'La sincronización cloud requiere sesión activa';
   }
 
   async function resetProgress() {
@@ -1111,6 +1130,8 @@
     const state = {
       bootstrapped: false,
       enabled: false,
+      requiresAuth: false,
+      authBoundProfile: false,
       profileKey: '',
       updatedAtKey: keyCloudUpdatedAtLegacy,
       pendingTimer: null,
@@ -1124,20 +1145,38 @@
       state.bootstrapped = true;
       const hasProfileInUrl = hasProgressProfileQuery();
       state.profileKey = await resolveProfileKey();
-      if (!state.profileKey) return;
+      state.authBoundProfile = hasAuthenticatedCloudProfile();
+      if (!state.profileKey) {
+        updateSyncLinkButton();
+        return;
+      }
       state.updatedAtKey = resolveCloudUpdatedAtKey(state.profileKey);
       if (!hasProfileInUrl) {
         migrateLegacyUpdatedAt(state.updatedAtKey);
       }
-      ensureProgressProfileQuery(state.profileKey);
+      if (state.authBoundProfile) {
+        clearProgressProfileQuery();
+      } else {
+        ensureProgressProfileQuery(state.profileKey);
+      }
       state.syncBaseUrl = resolveSyncBaseUrl();
 
       const config = await fetchConfig();
       state.enabled = !!(config && config.enabled);
-      if (!state.enabled) return;
+      state.requiresAuth = !!(config && config.requiresAuth);
+      if (state.requiresAuth && !state.authBoundProfile) {
+        state.enabled = false;
+        updateSyncLinkButton();
+        return;
+      }
+      if (!state.enabled) {
+        updateSyncLinkButton();
+        return;
+      }
 
       await pull();
       schedulePush(1400);
+      updateSyncLinkButton();
     }
 
     function schedulePush(wait = 900) {
@@ -1150,6 +1189,7 @@
 
     async function pushNow(options = {}) {
       if (!state.enabled || !state.profileKey || state.pushing) return false;
+      if (state.requiresAuth && !hasAuthenticatedCloudProfile()) return false;
       const payload = collectCloudPayload();
       const snapshot = stableSerialize(payload);
       if (!options.force && snapshot === state.lastSnapshot) return false;
@@ -1184,6 +1224,7 @@
     }
 
     async function pull() {
+      if (state.requiresAuth && !hasAuthenticatedCloudProfile()) return false;
       const query = new URLSearchParams({
         courseId: courseId,
         profileKey: state.profileKey
@@ -1283,9 +1324,13 @@
 
     async function resolveProfileKey() {
       const authUserId = getAuthUserId();
-      if (isValidProfileKey(authUserId)) {
+      if (hasAuthenticatedCloudProfile() && isValidProfileKey(authUserId)) {
         localStorage.setItem(keyCloudProfile, authUserId);
         return authUserId;
+      }
+
+      if (!isLocalContext()) {
+        return '';
       }
 
       const fromQuery = new URLSearchParams(location.search).get('progressProfile');
@@ -1320,6 +1365,17 @@
         const current = new URL(location.href);
         if (current.searchParams.get('progressProfile') === profileKey) return;
         current.searchParams.set('progressProfile', profileKey);
+        history.replaceState(history.state, '', `${current.pathname}${current.search}${current.hash}`);
+      } catch (_error) {
+        return;
+      }
+    }
+
+    function clearProgressProfileQuery() {
+      try {
+        const current = new URL(location.href);
+        if (!current.searchParams.has('progressProfile')) return;
+        current.searchParams.delete('progressProfile');
         history.replaceState(history.state, '', `${current.pathname}${current.search}${current.hash}`);
       } catch (_error) {
         return;
@@ -1495,12 +1551,23 @@
     return token;
   }
 
-  function buildSyncLink(profileKey, syncBaseUrl) {
+  function hasAuthenticatedCloudProfile() {
+    return Boolean(getAuthUserId() && getAuthAccessToken());
+  }
+
+  function buildSyncLink(profileKey, syncBaseUrl, authBoundProfile) {
     const url = new URL(window.location.href);
-    url.searchParams.set('progressProfile', profileKey);
+    if (authBoundProfile) {
+      url.searchParams.delete('progressProfile');
+    } else if (profileKey) {
+      url.searchParams.set('progressProfile', profileKey);
+    }
     const normalizedBase = normalizeBaseUrl(syncBaseUrl || '');
     if (normalizedBase && isLocalContext()) {
       url.searchParams.set('progressBase', normalizedBase);
+    } else {
+      url.searchParams.delete('progressBase');
+      url.searchParams.delete('progressEndpoint');
     }
     return url.toString();
   }
