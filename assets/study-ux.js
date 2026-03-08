@@ -1659,8 +1659,10 @@
         return;
       }
 
-      await pull();
-      schedulePush(1400);
+      const pulled = await pull();
+      if (!pulled && hasPublishableProgressState()) {
+        schedulePush(1400);
+      }
       updateSyncLinkButton();
     }
 
@@ -1763,6 +1765,13 @@
       const reviewKeys = Object.keys(payload.review || {});
       const lastTopic = String(payload.lastTopic || '').trim();
       return doneKeys.length === 0 && reviewKeys.length === 0 && !lastTopic;
+    }
+
+    function hasPublishableProgressState() {
+      const payload = collectCloudPayload();
+      const doneKeys = Object.keys(payload.completed || {});
+      const reviewKeys = Object.keys(payload.review || {});
+      return doneKeys.length > 0 || reviewKeys.length > 0;
     }
 
     function applyCloudPayload(payload) {
