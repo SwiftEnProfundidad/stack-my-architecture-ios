@@ -178,10 +178,10 @@ Al finalizar cualquier tarea, siempre reportar:
     - Local: `/Users/juancarlosmerlosalbarracin/.codex/skills/public/windsurf-rules-ios/SKILL.md`
     - Vendorizado: `docs/codex-skills/windsurf-rules-ios.md`
   - `swift-concurrency`
-    - Local: `/Users/juancarlosmerlosalbarracin/.codex/skills/swift-concurrency/SKILL.md`
+    - Local: `/Users/juancarlosmerlosalbarracin/.agents/skills/swift-concurrency/SKILL.md`
     - Vendorizado: `docs/codex-skills/swift-concurrency.md`
   - `swiftui-expert-skill`
-    - Local: `/Users/juancarlosmerlosalbarracin/.codex/skills/swiftui-expert-skill/SKILL.md`
+    - Local: `/Users/juancarlosmerlosalbarracin/.agents/skills/swiftui-expert-skill/SKILL.md`
     - Vendorizado: `docs/codex-skills/swiftui-expert-skill.md`
 
 - Comando de sincronización: `./scripts/sync-codex-skills.sh`
