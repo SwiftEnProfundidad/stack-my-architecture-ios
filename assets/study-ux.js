@@ -41,6 +41,7 @@
   let indexActionsPending = false;
   let navDecorPending = false;
   const cloudSync = createCloudSync();
+  const accessControl = createAccessControl();
 
   const topics = Array.from(document.querySelectorAll('section.lesson')).map((section, index) => {
     const topicId = section.getAttribute('data-topic-id') || section.id || `topic-${index + 1}`;
@@ -60,29 +61,16 @@
   syncTopbarOffset();
 
   const reviewBtn = ensureReviewTopButton();
+  const bookmarkBtn = ensureBookmarkTopButton();
+  const studyNotebook = createStudyNotebook();
 
   setupFontControls();
   applySavedFontSize();
   reorderTopControls();
   observeTopControlsOrder();
+  let currentTopic = null;
 
-  let currentTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
-  if (!currentTopic) return;
-
-  applyCompactMobileClass();
-  renderTopic(currentTopic.id, false);
-  markUiHydrated();
-  applyZen(localStorage.getItem(keyZen) === '1');
-  updateCompletionUi();
-  updateReviewUi();
-  updateProgressUi();
-  scheduleDecorateNavStates();
-  setupButtons();
-  setupShortcuts();
-  setupScrollPersistence();
-  scheduleIndexActionsSetup();
-  startTopicTimer(currentTopic.id);
-  cloudSync.bootstrap();
+  void bootstrapStudy();
 
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
@@ -110,6 +98,28 @@
     applyZen(document.body.classList.contains('study-ux-zen'));
     syncTopbarOffset();
   }, 120));
+
+  async function bootstrapStudy() {
+    await accessControl.bootstrap();
+    currentTopic = resolveCurrentTopic(topics, location.hash, localStorage.getItem(keyLastTopic));
+    if (!currentTopic) return;
+
+    applyCompactMobileClass();
+    renderTopic(currentTopic.id, false);
+    markUiHydrated();
+    applyZen(localStorage.getItem(keyZen) === '1');
+    updateCompletionUi();
+    updateReviewUi();
+    updateProgressUi();
+    scheduleDecorateNavStates();
+    setupButtons();
+    setupShortcuts();
+    setupScrollPersistence();
+    scheduleIndexActionsSetup();
+    studyNotebook.bootstrap();
+    startTopicTimer(currentTopic.id);
+    cloudSync.bootstrap();
+  }
 
   function ensureStatsShape(raw) {
     return {
@@ -271,6 +281,7 @@
       fontDownBtn,
       fontUpBtn,
       completionBtn,
+      bookmarkBtn,
       reviewBtn,
       zenBtn,
       assistantBtn
@@ -302,6 +313,19 @@
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'study-review-toggle';
+      btn.type = 'button';
+      controls.appendChild(btn);
+    }
+    return btn;
+  }
+
+  function ensureBookmarkTopButton() {
+    const controls = document.getElementById('study-ux-controls');
+    if (!controls) return null;
+    let btn = document.getElementById('study-bookmark-toggle');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'study-bookmark-toggle';
       btn.type = 'button';
       controls.appendChild(btn);
     }
@@ -515,8 +539,10 @@
 
     ensureTopicNavigation(currentTopic);
     updateCompletionUi();
+    updateBookmarkUi();
     updateReviewUi();
     updateProgressUi();
+    studyNotebook.render();
 
     if (shouldRestoreScroll) {
       restoreScrollForTopic(currentTopic.id);
@@ -531,6 +557,7 @@
 
   function setupButtons() {
     if (completionBtn) completionBtn.addEventListener('click', function () { toggleCompletion(); });
+    if (bookmarkBtn) bookmarkBtn.addEventListener('click', function () { studyNotebook.toggleBookmark(); });
     if (reviewBtn) reviewBtn.addEventListener('click', function () { toggleReview(); });
     if (zenBtn) {
       zenBtn.addEventListener('click', function () {
@@ -631,14 +658,58 @@
     importInput.addEventListener('change', handleImportFileChange);
     actionsBox.appendChild(importInput);
 
+    const notesBox = document.createElement('div');
+    notesBox.className = 'study-ux-panel study-notes-panel';
+    notesBox.id = 'study-notes-panel';
+
+    const notesTitle = document.createElement('h4');
+    notesTitle.textContent = 'Notas privadas por lección';
+    const notesCopy = document.createElement('p');
+    notesCopy.id = 'study-note-helper';
+    notesCopy.textContent = 'Inicia sesión para guardar notas privadas sincronizadas por cuenta.';
+    const noteEditor = document.createElement('textarea');
+    noteEditor.id = 'study-note-editor';
+    noteEditor.placeholder = 'Escribe aquí tus observaciones clave, trade-offs o dudas para volver después con contexto.';
+    const noteActions = document.createElement('div');
+    noteActions.className = 'study-note-actions';
+    const noteSaveBtn = createButton('💾 Guardar nota', function () { studyNotebook.saveCurrentNote(); }, 'study-note-save');
+    const noteClearBtn = createButton('🗑 Limpiar nota', function () { studyNotebook.clearCurrentNote(); }, 'study-note-clear');
+    noteActions.appendChild(noteSaveBtn);
+    noteActions.appendChild(noteClearBtn);
+    const noteStatus = document.createElement('p');
+    noteStatus.id = 'study-note-status';
+    noteStatus.className = 'study-note-status';
+    notesBox.appendChild(notesTitle);
+    notesBox.appendChild(notesCopy);
+    notesBox.appendChild(noteEditor);
+    notesBox.appendChild(noteActions);
+    notesBox.appendChild(noteStatus);
+
+    const bookmarksBox = document.createElement('div');
+    bookmarksBox.className = 'study-ux-panel study-bookmarks-panel';
+    bookmarksBox.id = 'study-bookmarks-panel';
+    const bookmarksTitle = document.createElement('h4');
+    bookmarksTitle.textContent = 'Bookmarks del curso';
+    const bookmarksCopy = document.createElement('p');
+    bookmarksCopy.textContent = 'Tus puntos guardados más recientes para volver rápido a temas importantes.';
+    const bookmarksList = document.createElement('div');
+    bookmarksList.id = 'study-bookmarks-list';
+    bookmarksList.className = 'study-bookmarks-list';
+    bookmarksBox.appendChild(bookmarksTitle);
+    bookmarksBox.appendChild(bookmarksCopy);
+    bookmarksBox.appendChild(bookmarksList);
+
     indexActions.appendChild(rowPrimary);
     indexActions.appendChild(statsBox);
     indexActions.appendChild(actionsBox);
+    indexActions.appendChild(notesBox);
+    indexActions.appendChild(bookmarksBox);
 
     updateResumeButtonState();
     renderStats();
     updateProgressUi();
     updateSyncLinkButton();
+    studyNotebook.render();
   }
 
   function createButton(label, onClick, id) {
@@ -766,6 +837,16 @@
     reviewBtn.title = fullLabel;
   }
 
+  function updateBookmarkUi() {
+    if (!bookmarkBtn || !currentTopic) return;
+    const isBookmarked = studyNotebook.hasBookmark(currentTopic.id);
+    const fullLabel = isBookmarked ? '❌ Quitar bookmark' : '🔖 Guardar bookmark';
+    const compactLabel = isBookmarked ? '❌ Bookmark' : '🔖 Bookmark';
+    bookmarkBtn.textContent = isCompactMobileViewport() ? compactLabel : fullLabel;
+    bookmarkBtn.setAttribute('aria-label', fullLabel);
+    bookmarkBtn.title = fullLabel;
+  }
+
   function updateProgressUi() {
     const total = topics.length;
     const done = topics.filter((t) => !!completed[t.id]).length;
@@ -820,6 +901,18 @@
         }
       } else if (reviewBadge) {
         reviewBadge.remove();
+      }
+
+      let bookmarkBadge = link.querySelector('.study-ux-bookmark-badge');
+      if (studyNotebook.hasBookmark(topicId)) {
+        if (!bookmarkBadge) {
+          bookmarkBadge = document.createElement('span');
+          bookmarkBadge.className = 'study-ux-bookmark-badge';
+          bookmarkBadge.textContent = '🔖';
+          link.appendChild(bookmarkBadge);
+        }
+      } else if (bookmarkBadge) {
+        bookmarkBadge.remove();
       }
     });
   }
@@ -1060,6 +1153,271 @@
     btn.title = 'La sincronización cloud requiere sesión activa';
   }
 
+  function createStudyNotebook() {
+    const state = {
+      bootstrapped: false,
+      notesByTopicId: {},
+      bookmarksByTopicId: {}
+    };
+
+    async function bootstrap() {
+      state.bootstrapped = true;
+      if (!hasAuthenticatedCloudProfile()) {
+        render();
+        return false;
+      }
+      try {
+        const headers = { Authorization: `Bearer ${getAuthAccessToken()}` };
+        const [notesResponse, bookmarksResponse] = await Promise.all([
+          fetch(`/api/student-notes?route=list&courseId=${encodeURIComponent(courseId)}`, {
+            method: 'GET',
+            headers: headers
+          }),
+          fetch(`/api/student-bookmarks?route=list&courseId=${encodeURIComponent(courseId)}`, {
+            method: 'GET',
+            headers: headers
+          })
+        ]);
+
+        if (notesResponse.ok) {
+          const body = await notesResponse.json().catch(function () { return null; });
+          replaceNotebookMap(state.notesByTopicId, (body && body.notes) || [], function (item) {
+            return [String(item.topicId || '').trim(), {
+              content: String(item.content || ''),
+              updatedAt: String(item.updatedAt || '')
+            }];
+          });
+        }
+
+        if (bookmarksResponse.ok) {
+          const body = await bookmarksResponse.json().catch(function () { return null; });
+          replaceNotebookMap(state.bookmarksByTopicId, (body && body.bookmarks) || [], function (item) {
+            return [String(item.topicId || '').trim(), {
+              updatedAt: String(item.updatedAt || '')
+            }];
+          });
+        }
+      } catch (_error) {
+      }
+      render();
+      scheduleDecorateNavStates();
+      return true;
+    }
+
+    function render() {
+      renderNotesPanel();
+      renderBookmarksPanel();
+      updateBookmarkUi();
+    }
+
+    function renderNotesPanel() {
+      const helper = document.getElementById('study-note-helper');
+      const editor = document.getElementById('study-note-editor');
+      const status = document.getElementById('study-note-status');
+      const saveBtn = document.getElementById('study-note-save');
+      const clearBtn = document.getElementById('study-note-clear');
+      if (!helper || !editor || !saveBtn || !clearBtn) return;
+
+      if (!hasAuthenticatedCloudProfile()) {
+        helper.textContent = 'Inicia sesión para guardar notas privadas sincronizadas por cuenta.';
+        editor.value = '';
+        editor.disabled = true;
+        saveBtn.disabled = true;
+        clearBtn.disabled = true;
+        if (status) status.textContent = 'Las notas cloud están disponibles solo con sesión activa.';
+        return;
+      }
+
+      helper.textContent = currentTopic
+        ? `Tema actual: ${currentTopic.lessonLabel || currentTopic.id}`
+        : 'Selecciona una lección para escribir o revisar tu nota privada.';
+      const note = currentTopic ? state.notesByTopicId[currentTopic.id] : null;
+      editor.disabled = !currentTopic;
+      saveBtn.disabled = !currentTopic;
+      clearBtn.disabled = !currentTopic;
+      editor.value = note ? String(note.content || '') : '';
+      if (status) {
+        status.textContent = note && note.updatedAt
+          ? `Última actualización: ${formatNotebookDate(note.updatedAt)}`
+          : 'No hay nota guardada todavía para esta lección.';
+      }
+    }
+
+    function renderBookmarksPanel() {
+      const list = document.getElementById('study-bookmarks-list');
+      if (!list) return;
+
+      if (!hasAuthenticatedCloudProfile()) {
+        list.innerHTML = '<p class=\"study-bookmarks-empty\">Inicia sesión para sincronizar bookmarks privados entre dispositivos.</p>';
+        return;
+      }
+
+      const items = Object.keys(state.bookmarksByTopicId)
+        .map(function (topicId) {
+          return {
+            topicId: topicId,
+            updatedAt: String((state.bookmarksByTopicId[topicId] || {}).updatedAt || '')
+          };
+        })
+        .sort(function (a, b) {
+          return Date.parse(b.updatedAt || '') - Date.parse(a.updatedAt || '');
+        })
+        .slice(0, 6);
+
+      if (!items.length) {
+        list.innerHTML = '<p class=\"study-bookmarks-empty\">Todavía no has guardado ningún bookmark.</p>';
+        return;
+      }
+
+      list.innerHTML = items.map(function (item) {
+        const topic = topics.find(function (entry) { return entry.id === item.topicId; });
+        const label = topic && topic.lessonLabel ? topic.lessonLabel : item.topicId;
+        return [
+          '<article class=\"study-bookmark-item\">',
+          `<button type=\"button\" class=\"study-bookmark-link\" data-bookmark-topic=\"${escapeHtml(item.topicId)}\">${escapeHtml(label)}</button>`,
+          `<p>${escapeHtml(formatNotebookDate(item.updatedAt))}</p>`,
+          '</article>'
+        ].join('');
+      }).join('');
+
+      Array.from(list.querySelectorAll('[data-bookmark-topic]')).forEach(function (button) {
+        button.addEventListener('click', function () {
+          const topicId = button.getAttribute('data-bookmark-topic');
+          if (!topicId) return;
+          renderTopic(topicId, true);
+        });
+      });
+    }
+
+    async function saveCurrentNote() {
+      if (!currentTopic) return;
+      if (!hasAuthenticatedCloudProfile()) {
+        goAuthPortal();
+        return;
+      }
+
+      const editor = document.getElementById('study-note-editor');
+      if (!editor) return;
+      const content = String(editor.value || '').trim();
+      const status = document.getElementById('study-note-status');
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthAccessToken()}`
+        };
+        const response = await fetch('/api/student-notes?route=upsert', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            courseId: courseId,
+            topicId: currentTopic.id,
+            content: content
+          })
+        });
+        const body = await response.json().catch(function () { return null; });
+        if (!response.ok || !body || body.ok === false) {
+          throw new Error(body && body.error ? body.error : `Error ${response.status}`);
+        }
+
+        if (body.note) {
+          state.notesByTopicId[currentTopic.id] = {
+            content: String(body.note.content || ''),
+            updatedAt: String(body.note.updatedAt || new Date().toISOString())
+          };
+        } else {
+          delete state.notesByTopicId[currentTopic.id];
+        }
+        if (status) status.textContent = body.note ? `Última actualización: ${formatNotebookDate(body.note.updatedAt)}` : 'Nota eliminada.';
+        render();
+      } catch (error) {
+        if (status) status.textContent = error && error.message ? error.message : 'No se pudo guardar la nota.';
+      }
+    }
+
+    async function clearCurrentNote() {
+      const editor = document.getElementById('study-note-editor');
+      if (!editor) return;
+      editor.value = '';
+      await saveCurrentNote();
+    }
+
+    async function toggleBookmark() {
+      if (!currentTopic) return;
+      if (!hasAuthenticatedCloudProfile()) {
+        goAuthPortal();
+        return;
+      }
+
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthAccessToken()}`
+        };
+        const response = await fetch('/api/student-bookmarks?route=toggle', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            courseId: courseId,
+            topicId: currentTopic.id
+          })
+        });
+        const body = await response.json().catch(function () { return null; });
+        if (!response.ok || !body || body.ok === false) {
+          throw new Error(body && body.error ? body.error : `Error ${response.status}`);
+        }
+
+        if (body.active) {
+          state.bookmarksByTopicId[currentTopic.id] = {
+            updatedAt: String(body.bookmark && body.bookmark.updatedAt || new Date().toISOString())
+          };
+        } else {
+          delete state.bookmarksByTopicId[currentTopic.id];
+        }
+        render();
+        scheduleDecorateNavStates();
+      } catch (_error) {
+      }
+    }
+
+    function hasBookmark(topicId) {
+      return Boolean(topicId && state.bookmarksByTopicId[topicId]);
+    }
+
+    function replaceNotebookMap(target, rows, mapper) {
+      Object.keys(target).forEach(function (key) {
+        delete target[key];
+      });
+      (rows || []).forEach(function (row) {
+        const pair = mapper(row);
+        const key = pair && pair[0];
+        const value = pair && pair[1];
+        if (!key || !value) return;
+        target[key] = value;
+      });
+    }
+
+    function formatNotebookDate(value) {
+      const date = new Date(String(value || ''));
+      if (!Number.isFinite(date.getTime())) return 'Sin fecha';
+      return date.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    return {
+      bootstrap: function () { void bootstrap(); },
+      render: render,
+      saveCurrentNote: function () { void saveCurrentNote(); },
+      clearCurrentNote: function () { void clearCurrentNote(); },
+      toggleBookmark: function () { void toggleBookmark(); },
+      hasBookmark: hasBookmark
+    };
+  }
+
   async function resetProgress() {
     if (!window.confirm('Esto borrará tu progreso de este curso. ¿Deseas continuar?')) return;
     const prefix = `sma:${courseId}:`;
@@ -1104,6 +1462,153 @@
     p = p.replace(/^\/+/, '');
     p = p.split('?')[0];
     return p;
+  }
+
+  function createAccessControl() {
+    const state = {
+      ready: false,
+      fullAccess: true,
+      mode: 'full',
+      teaserTopicIds: []
+    };
+
+    async function bootstrap() {
+      if (state.ready) return;
+      state.ready = true;
+      if (isLocalContext()) {
+        renderBanner();
+        updateLockedNavigation();
+        return;
+      }
+
+      const access = await fetchCourseAccess();
+      if (!access) {
+        renderBanner();
+        updateLockedNavigation();
+        return;
+      }
+
+      state.mode = String(access.access || 'blocked');
+      state.fullAccess = !!access.fullAccess;
+      state.teaserTopicIds = Array.isArray(access.teaserTopicIds)
+        ? access.teaserTopicIds.map((item) => String(item || '').trim()).filter(Boolean)
+        : [];
+
+      if (!state.fullAccess) {
+        pruneToTeaserTopics();
+      }
+
+      renderBanner();
+      updateLockedNavigation();
+    }
+
+    function pruneToTeaserTopics() {
+      const allowed = new Set(state.teaserTopicIds);
+      const visibleTopics = topics.filter((topic) => allowed.has(topic.id));
+      if (!visibleTopics.length) return;
+
+      topics.splice(0, topics.length, ...visibleTopics);
+      if (!topics.find((topic) => topic.id === localStorage.getItem(keyLastTopic))) {
+        localStorage.removeItem(keyLastTopic);
+      }
+
+      Array.from(document.querySelectorAll('section.lesson')).forEach((section) => {
+        const topicId = section.getAttribute('data-topic-id') || section.id || '';
+        if (!allowed.has(topicId)) {
+          section.style.display = 'none';
+          section.classList.add('study-topic-locked');
+        }
+      });
+    }
+
+    function updateLockedNavigation() {
+      const teaserSet = new Set(state.teaserTopicIds);
+      navLinks.forEach((link) => {
+        const topicId = String(link.dataset.topicId || '').trim();
+        const locked = !state.fullAccess && topicId && !teaserSet.has(topicId);
+        link.classList.toggle('study-nav-locked', locked);
+        if (locked) {
+          link.setAttribute('aria-disabled', 'true');
+          link.dataset.lockedAccess = '1';
+        } else {
+          link.removeAttribute('aria-disabled');
+          delete link.dataset.lockedAccess;
+        }
+        if (link.dataset.lockedBound === '1') return;
+        link.dataset.lockedBound = '1';
+        link.addEventListener('click', function (event) {
+          if (link.dataset.lockedAccess !== '1') return;
+          event.preventDefault();
+          revealGate();
+        });
+      });
+    }
+
+    function revealGate() {
+      renderBanner();
+      const banner = document.getElementById('study-access-banner');
+      if (banner) banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderBanner() {
+      let banner = document.getElementById('study-access-banner');
+      if (!banner) {
+        banner = document.createElement('section');
+        banner.id = 'study-access-banner';
+        banner.className = 'study-access-banner';
+        const firstLesson = document.querySelector('section.lesson');
+        if (firstLesson && firstLesson.parentNode) {
+          firstLesson.parentNode.insertBefore(banner, firstLesson);
+        }
+      }
+      if (!banner) return;
+
+      if (state.fullAccess || isLocalContext()) {
+        banner.hidden = true;
+        banner.innerHTML = '';
+        return;
+      }
+
+      const hubBase = deriveHubBase() || '';
+      const hubHome = hubBase ? `${hubBase}/index.html` : '../index.html';
+      const authHome = buildAuthUrl();
+      const title = state.mode === 'teaser' ? 'Acceso teaser activo' : 'Contenido premium bloqueado';
+      const description = state.mode === 'teaser'
+        ? 'Estás viendo una muestra pública del curso. Inicia sesión con un plan activo para desbloquear el recorrido completo.'
+        : 'Necesitas iniciar sesión con un entitlement activo para abrir este curso completo.';
+
+      banner.hidden = false;
+      banner.innerHTML =
+        `<div class=\"study-access-banner-copy\"><strong>${escapeHtml(title)}</strong><p>${escapeHtml(description)}</p></div>` +
+        `<div class=\"study-access-banner-actions\">` +
+        `<a class=\"study-access-banner-link\" href=\"${escapeHtml(authHome)}\">🔐 Cuenta</a>` +
+        `<a class=\"study-access-banner-link secondary\" href=\"${escapeHtml(hubHome)}\">🏠 Volver al hub</a>` +
+        `</div>`;
+    }
+
+    async function fetchCourseAccess() {
+      try {
+        const headers = {};
+        const bearer = getAuthAccessToken();
+        if (bearer) headers.Authorization = `Bearer ${bearer}`;
+        const response = await fetch(`/api/entitlements?route=access&courseId=${encodeURIComponent(courseId)}`, {
+          method: 'GET',
+          headers: headers
+        });
+        if (!response.ok) return null;
+        const body = await response.json().catch(function () { return null; });
+        if (!body || !body.ok || !body.access || typeof body.access !== 'object') return null;
+        return body.access;
+      } catch (_error) {
+        return null;
+      }
+    }
+
+    return {
+      bootstrap,
+      hasFullAccess: function () { return state.fullAccess; },
+      isTeaserMode: function () { return state.mode === 'teaser' && !state.fullAccess; }
+    };
   }
 
   function createCloudSync() {
@@ -1154,8 +1659,10 @@
         return;
       }
 
-      await pull();
-      schedulePush(1400);
+      const pulled = await pull();
+      if (!pulled && hasPublishableProgressState()) {
+        schedulePush(1400);
+      }
       updateSyncLinkButton();
     }
 
@@ -1258,6 +1765,13 @@
       const reviewKeys = Object.keys(payload.review || {});
       const lastTopic = String(payload.lastTopic || '').trim();
       return doneKeys.length === 0 && reviewKeys.length === 0 && !lastTopic;
+    }
+
+    function hasPublishableProgressState() {
+      const payload = collectCloudPayload();
+      const doneKeys = Object.keys(payload.completed || {});
+      const reviewKeys = Object.keys(payload.review || {});
+      return doneKeys.length > 0 || reviewKeys.length > 0;
     }
 
     function applyCloudPayload(payload) {
@@ -1533,6 +2047,15 @@
 
   function hasAuthenticatedCloudProfile() {
     return Boolean(getAuthUserId() && getAuthAccessToken());
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function buildSyncLink(profileKey, syncBaseUrl, authBoundProfile) {

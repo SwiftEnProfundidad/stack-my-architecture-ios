@@ -241,7 +241,8 @@ body.with-global-topbar {
 }
 
 .study-ux-completed-badge,
-.study-ux-review-badge {
+.study-ux-review-badge,
+.study-ux-bookmark-badge {
   margin-left: 6px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -253,6 +254,70 @@ body.with-global-topbar {
 
 .study-ux-review-badge {
   color: var(--accent, #60a5fa);
+}
+
+.study-ux-bookmark-badge {
+  color: #fbbf24;
+}
+
+.study-notes-panel,
+.study-bookmarks-panel {
+  display: grid;
+  gap: 10px;
+}
+
+#study-note-editor {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--border, #334155);
+  border-radius: 10px;
+  background: var(--bg, #111827);
+  color: var(--text, #e5e7eb);
+  padding: 12px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.45;
+}
+
+#study-note-editor:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.study-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-note-status,
+.study-bookmarks-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.study-bookmarks-list {
+  display: grid;
+  gap: 10px;
+}
+
+.study-bookmark-item {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.82);
+  padding: 10px 12px;
+}
+
+.study-bookmark-item p {
+  margin: 6px 0 0;
+}
+
+.study-bookmark-link {
+  width: 100%;
+  justify-content: flex-start !important;
+  white-space: normal !important;
+  text-align: left;
 }
 
 a.doc-nav-link.study-nav-active {
@@ -449,5 +514,84 @@ main hr {
     margin-right: calc(clamp(320px, 33vw, 520px) + 16px) !important;
     width: auto !important;
     max-width: calc(100vw - clamp(320px, 33vw, 520px) - 48px) !important;
+  }
+}
+
+.study-nav-locked {
+  opacity: 0.58;
+  position: relative;
+}
+
+.study-nav-locked::after {
+  content: " 🔒";
+}
+
+.study-access-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(96, 165, 250, 0.34);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(14, 30, 58, 0.9));
+  box-shadow: 0 20px 32px rgba(2, 6, 23, 0.2);
+}
+
+.study-access-banner-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.study-access-banner-copy strong {
+  color: #eff6ff;
+  font-size: 1rem;
+}
+
+.study-access-banner-copy p {
+  margin: 0;
+  color: #cbd5e1;
+  max-width: 72ch;
+  line-height: 1.5;
+}
+
+.study-access-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-access-banner-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 165, 250, 0.42);
+  background: rgba(59, 130, 246, 0.16);
+  color: #eff6ff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.study-access-banner-link.secondary {
+  background: rgba(15, 23, 42, 0.78);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+@media (max-width: 640px) {
+  .study-access-banner {
+    padding: 14px;
+  }
+
+  .study-access-banner-actions {
+    width: 100%;
+  }
+
+  .study-access-banner-link {
+    flex: 1 1 100%;
   }
 }
