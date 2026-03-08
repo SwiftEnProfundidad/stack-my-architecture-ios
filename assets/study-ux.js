@@ -396,26 +396,6 @@
         .find(Boolean);
       topic.lessonLabel = fromNav || buildFallbackLessonLabel(topic, index);
     });
-
-    const doneBtn = document.createElement('button');
-    doneBtn.type = 'button';
-    doneBtn.className = 'study-topic-nav-complete';
-    doneBtn.textContent = completed[topic.id] ? '↩ Desmarcar completado' : '✅ Marcar completado';
-    doneBtn.addEventListener('click', function () {
-      toggleCompletion(topic.id);
-    });
-
-    const nextBtn = document.createElement('button');
-    nextBtn.type = 'button';
-    nextBtn.textContent = 'Siguiente lección ➡';
-    nextBtn.disabled = index === topics.length - 1;
-    nextBtn.addEventListener('click', function () {
-      if (index < topics.length - 1) renderTopic(topics[index + 1].id, true);
-    });
-
-    nav.appendChild(prevBtn);
-    nav.appendChild(doneBtn);
-    nav.appendChild(nextBtn);
   }
 
   function ensureLessonPrimaryHeadingLabel(topic) {
