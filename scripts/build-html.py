@@ -13,7 +13,6 @@ import shutil
 import subprocess
 import tempfile
 import html
-import time
 import hashlib
 from pathlib import Path, PurePosixPath
 
@@ -35,6 +34,21 @@ CONTENT_DIRS = [
     "06-proyecto-final",
     "anexos",
 ]
+
+
+def compute_asset_version(asset_names: list[str]) -> str:
+    digest = hashlib.sha1()
+    found = False
+    for name in asset_names:
+        asset_path = ASSETS_SRC_DIR / name
+        if not asset_path.exists():
+            continue
+        found = True
+        digest.update(name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(asset_path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()[:12] if found else "0"
 
 def discover_files() -> list[str]:
     """
@@ -1461,12 +1475,7 @@ def build_html():
         "assistant-panel.css",
         "assistant-bridge.js",
     ]
-    version_marks = [
-        int((ASSETS_SRC_DIR / name).stat().st_mtime)
-        for name in version_sources
-        if (ASSETS_SRC_DIR / name).exists()
-    ]
-    asset_version = str(max(version_marks + [int(time.time())]))
+    asset_version = compute_asset_version(version_sources)
 
     body_html = ""
     for filepath, content in files_content:
