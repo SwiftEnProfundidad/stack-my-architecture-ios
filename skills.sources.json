@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "bundles": [
+    {
+      "name": "ios-guidelines",
+      "version": "1.0.0",
+      "template": "ios-guidelines",
+      "sourcePath": "vendor/skills/ios-enterprise-rules/SKILL.md",
+      "enabled": true
+    },
+    {
+      "name": "ios-concurrency-guidelines",
+      "version": "1.0.0",
+      "template": "ios-concurrency-guidelines",
+      "sourcePath": "vendor/skills/swift-concurrency/SKILL.md",
+      "enabled": true
+    },
+    {
+      "name": "ios-swiftui-expert-guidelines",
+      "version": "1.0.0",
+      "template": "ios-swiftui-expert-guidelines",
+      "sourcePath": "vendor/skills/swiftui-expert-skill/SKILL.md",
+      "enabled": true
+    }
+  ]
+}
