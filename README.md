@@ -10,7 +10,6 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
-- [Roadmap V2 (práctico)](docs/management/roadmap-v2.md)
 - [Scaffold ejecutable iOS (SPM)](apps/ios/ArchitectureKit/README.md)
 - [Host App UI smoke (XCUITest)](apps/ios/ArchitectureHostApp/README.md)
 - [ADRs del scaffold](docs/adr)
