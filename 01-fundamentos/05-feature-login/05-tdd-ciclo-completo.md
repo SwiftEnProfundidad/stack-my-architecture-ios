@@ -6,6 +6,8 @@ A lo largo de las últimas cuatro lecciones hemos implementado la feature Login 
 
 Esta lección no tiene código nuevo. Es una lección de reflexión y consolidación. Si te la saltas, los siguientes capítulos funcionarán igual, pero entenderás menos el "por qué" detrás de cada decisión.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres que aparecen a lo largo de esta lección (y de toda la Feature Login) son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`, `AuthGateway` → `AuthRepository`, `LoginUseCase` → `AuthenticateUserUseCase`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ---
 
 ### Diagrama: mapa de tests por capa de la feature Login
@@ -65,7 +67,7 @@ EmailTests
 PasswordTests
 ├── test_init_with_non_empty_string_creates_password_successfully
 └── test_init_with_empty_string_throws_empty
-```text
+```
 
 Siete tests. Se ejecutan en milisegundos. No necesitan simulador, ni red, ni base de datos. Son los tests más rápidos y más estables de todo el proyecto. Si fallan, sabes exactamente dónde está el problema: en la validación de un Value Object.
 
@@ -80,7 +82,7 @@ LoginUseCaseTests
 ├── test_execute_with_invalid_email_does_not_call_gateway
 ├── test_execute_with_rejected_credentials_throws_invalidCredentials
 └── test_execute_without_connectivity_throws_connectivity
-```text
+```
 
 Siete tests. También rápidos (usan un stub, no hacen red real). Verifican que el caso de uso orquesta correctamente: valida con Value Objects, delega al gateway, traduce errores. Si fallan, el problema está en la lógica de orquestación.
 
@@ -94,7 +96,7 @@ RemoteAuthGatewayTests
 ├── test_authenticate_on_network_error_throws_connectivity
 ├── test_authenticate_on_401_throws_invalidCredentials
 └── test_authenticate_on_500_throws_invalidCredentials
-```text
+```
 
 Seis tests. Usan un stub de HTTPClient. Verifican el mapping entre HTTP/JSON y los tipos del Domain. Si fallan, el problema está en la serialización, el parsing, o la traducción de status codes.
 
@@ -110,7 +112,7 @@ LoginViewModelTests
 ├── test_submit_with_connectivity_error_shows_connectivity_message
 ├── test_submit_sets_isLoading_to_false_after_completion
 └── test_submit_clears_previous_error_before_new_attempt
-```text
+```
 
 Ocho tests. Verifican que el ViewModel traduce correctamente el resultado del caso de uso a estado de UI.
 
@@ -187,7 +189,7 @@ func test_execute_with_valid_credentials_returns_session() async throws {
     // Si session != expectedSession, el test falla con un mensaje claro
     XCTAssertEqual(session, expectedSession)
 }
-```text
+```
 
 **¿Por qué siempre en este orden?** Porque cuando un test falla, necesitas entender rápidamente qué pasó. Si todos los tests siguen el mismo orden, sabes exactamente dónde mirar:
 
@@ -214,7 +216,7 @@ func test_1() {
     let (sut, client) = try makeSUT(data: json, statusCode: 200)  // 1 línea
     // ...
 }
-```text
+```
 
 Tres beneficios concretos:
 
@@ -232,7 +234,7 @@ let stub = AuthGatewayStub(result: .success(session))
 
 // Quiero testear un error → configuro fallo
 let stub = AuthGatewayStub(result: .failure(.invalidCredentials))
-```text
+```
 
 Cada test crea su propio stub con su propia configuración. No hay estado compartido entre tests. Esto garantiza que cada test es **independiente**: puedes ejecutarlos en cualquier orden y el resultado es siempre el mismo.
 
@@ -249,7 +251,7 @@ client.receivedRequests      // → los URLRequest que el gateway envió
 client.receivedRequests.first?.url       // → la URL de la petición
 client.receivedRequests.first?.httpMethod // → "POST"
 client.receivedRequests.first?.httpBody   // → el JSON del body
-```text
+```
 
 Esto nos permite verificar no solo **qué resultado** devuelve el SUT, sino **cómo interactúa** con sus dependencias. Por ejemplo, verificar que el UseCase NO llama al gateway cuando el email es inválido:
 
@@ -357,25 +359,6 @@ Esta es la primera feature completa del curso. Es pequeña (un formulario de log
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -403,7 +386,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

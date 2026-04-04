@@ -141,7 +141,7 @@ final class CachedProductRepository: ProductRepository, @unchecked Sendable {
         now().timeIntervalSince(timestamp) < maxAge
     }
 }
-```text
+```
 
 Este código demuestra el patrón central:
 - primero remoto,
@@ -201,7 +201,7 @@ struct CachedProducts: Sendable {
     let products: [Product]
     let timestamp: Date
 }
-```text
+```
 
 **Linea por linea:**
 
@@ -229,7 +229,7 @@ private func makeSUT(
         now: now
     )
 }
-```text
+```
 
 **Por que tantos parametros con valores por defecto:** Cada test solo configura lo que le importa. Si un test verifica el TTL, pasa `maxAge` y `now`. Si verifica el happy path, solo pasa `remoteResult`. Los valores por defecto cubren el caso mas comun (exito, sin cache, 5 minutos de TTL, reloj real).
 
@@ -260,7 +260,7 @@ func test_loadAll_onRemoteSuccess_returnsFreshAndSavesToStore() async throws {
     XCTAssertEqual(store.savedProducts, products)
     XCTAssertEqual(store.savedTimestamp, fixedDate)
 }
-```text
+```
 
 **Que verifica:** Cuando el remoto responde con exito, el `CachedProductRepository` hace dos cosas: (1) devuelve los productos frescos, y (2) los guarda en el store para uso futuro. Si alguien borrara la linea `try? await store.save(...)`, el segundo assert fallaria.
 
@@ -285,7 +285,7 @@ func test_loadAll_onRemoteFailureWithValidCache_returnsCached() async throws {
 
     XCTAssertEqual(result, cachedProducts)
 }
-```text
+```
 
 **Que verifica:** Si el remoto falla pero hay cache guardado hace menos de 300 segundos (el TTL), devuelve el cache. El usuario ve productos "un poco viejos" en vez de una pantalla de error. Esto es el **fallback**.
 
@@ -315,7 +315,7 @@ func test_loadAll_onRemoteFailureWithExpiredCache_throwsError() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 **Que verifica:** Si el remoto falla Y el cache ha expirado (401 > 300), **no** devuelve datos viejos. Propaga el error. Esto protege al usuario de ver datos que ya no son confiables.
 
@@ -339,7 +339,7 @@ func test_loadAll_onRemoteFailureWithNoCache_throwsError() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 **Que verifica:** Si no hay cache guardado (primera vez que se abre la app, o se borro el cache), y el remoto falla, se propaga el error. No hay magia: si no tienes datos ni remotos ni locales, no puedes mostrar nada.
 
@@ -361,7 +361,7 @@ func test_loadAll_cacheExactlyAtTTL_isStillValid() async throws {
     let result = try await sut.loadAll()
     XCTAssertEqual(result, cachedProducts)
 }
-```text
+```
 
 **Que verifica:** Un edge case critico: el cache tiene exactamente la edad del TTL (300s). La decisión de diseño es que `< maxAge` es valido, asi que exactamente 300 esta **en el limite**. Si la condicion fuera `<=`, este test pasaria. Si fuera `<`, fallaria. El test documenta explicitamente que decisión tomamos.
 
@@ -502,7 +502,7 @@ struct CatalogComposer {
         return LoadProductsUseCase(repository: cached)
     }
 }
-```text
+```
 
 Con este patrón puedes reemplazar estrategia de cache sin tocar Domain/Application.
 
@@ -705,7 +705,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

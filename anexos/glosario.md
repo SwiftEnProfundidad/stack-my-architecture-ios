@@ -93,22 +93,3 @@ Términos clave del curso ordenados alfabéticamente. Úsalo como mapa rápido c
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `anexos/glosario.md`.
-
-### Objetivo
-- Consolidar un vocabulario técnico común para todas las etapas del curso.
-
-### Prerrequisitos
-- Haber leído al menos la introducción de la etapa en la que estás trabajando.
-
-### Práctica guiada
-- Elige cinco términos del bloque actual y explica con tus palabras dónde aparecen en el scaffold real.
-
-### Validación
-- Checklist rápido:
-  - [ ] Distingo términos de dominio, aplicación, interfaz e infraestructura.
-  - [ ] Sé volver a la lección donde se introdujo cada término importante.
-  - [ ] Puedo explicar al menos un trade-off asociado a los conceptos nuevos de mi etapa actual.

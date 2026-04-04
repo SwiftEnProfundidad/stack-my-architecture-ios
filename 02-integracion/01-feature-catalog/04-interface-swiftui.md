@@ -27,7 +27,7 @@ flowchart TD
     style Loaded fill:#d4edda,stroke:#28a745
     style Empty fill:#fff3cd,stroke:#ffc107
     style Error fill:#f8d7da,stroke:#dc3545
-```swift
+```
 
 ### Diagrama: enum de estado vs propiedades independientes
 
@@ -52,7 +52,7 @@ graph LR
 
     style Props fill:#fff3cd,stroke:#ffc107
     style EnumState fill:#d4edda,stroke:#28a745
-```swift
+```
 
 El enum de estado es más seguro que las propiedades independientes porque **elimina estados imposibles en tiempo de compilación**. Con propiedades sueltas, podrías tener `isLoading = true` y `errorMessage = "Error"` al mismo tiempo — un estado contradictorio que el compilador no detecta. Con el enum, eso es imposible.
 
@@ -117,7 +117,7 @@ final class CatalogViewModel {
         }
     }
 }
-```swift
+```
 
 **Explicacion linea por linea del CatalogViewModel:**
 
@@ -151,7 +151,7 @@ flowchart TD
     style EMPTY fill:#fff3cd,stroke:#ffc107
     style KNOWN fill:#f8d7da,stroke:#dc3545
     style UNKNOWN fill:#f8d7da,stroke:#dc3545
-```swift
+```
 
 `state = .loading` — Lo primero: poner el estado en loading. SwiftUI detecta el cambio y muestra el spinner.
 
@@ -186,7 +186,7 @@ state = .loading              // Solo loading
 state = .loaded([p1, p2])     // Solo productos
 state = .empty                // Solo vacío
 state = .error("Sin conexión") // Solo error
-```text
+```
 
 ### La lógica de empty vs. loaded
 
@@ -252,7 +252,7 @@ struct CatalogView: View {
         }
     }
 }
-```swift
+```
 
 ### El switch sobre el estado
 
@@ -306,7 +306,7 @@ struct ProductRow: View {
         .padding(.vertical, 4)
     }
 }
-```text
+```
 
 La imagen se carga con `AsyncImage`, el componente de SwiftUI para carga asíncrona de imágenes por URL. Mientras la imagen carga, muestra un placeholder gris. Si la carga falla, también muestra el placeholder.
 
@@ -325,7 +325,7 @@ extension Price {
         return formatter.string(from: amount as NSDecimalNumber) ?? "\(amount) \(currency)"
     }
 }
-```text
+```
 
 Esto formatea el precio según la moneda: `29.99 EUR` se muestra como "29,99 €" en un dispositivo configurado en español. `NumberFormatter` usa la localización del dispositivo automáticamente.
 
@@ -447,7 +447,7 @@ final class CatalogViewModelTests: XCTestCase {
         XCTAssertEqual(receivedProduct, product)
     }
 }
-```swift
+```
 
 **Explicacion de cada test del CatalogViewModel:**
 
@@ -506,28 +506,6 @@ Ambas features siguen el mismo patrón arquitectónico (ViewModel con @Observabl
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `02-integracion/01-feature-catalog/04-interface-swiftui.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -555,7 +533,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

@@ -113,14 +113,14 @@ struct CatalogView: View {
         }
     }
 }
-```text
+```
 
 Output en consola:
 ```text
 CatalogView: _viewModel changed.
 CatalogView: _viewModel changed.
 CatalogView: @self changed.
-```text
+```
 
 Si ves que `_viewModel changed` aparece cuando solo cambió `isLoading` y tu vista no usa `isLoading`, tienes un problema de dependencias demasiado amplias.
 
@@ -156,7 +156,7 @@ struct ProductRow: View {
             .foregroundStyle(viewModel.theme.primaryColor)
     }
 }
-```text
+```
 
 ```swift
 // ✅ Correcto: ProductRow recibe solo lo que necesita
@@ -182,7 +182,7 @@ struct ProductRow: View {
             .foregroundStyle(primaryColor)
     }
 }
-```text
+```
 
 Con `@Observable`, SwiftUI trackea qué propiedades lee cada vista. Pero pasar el objeto completo crea una dependencia implícita que puede sorprenderte cuando añadas nuevas propiedades al ViewModel.
 
@@ -209,7 +209,7 @@ struct ProductRow: View {
         }
     }
 }
-```text
+```
 
 ```swift
 // Non-POD view: tiene @State → diffing más lento (reflexión)
@@ -222,7 +222,7 @@ struct ProductRow: View {
         // ...
     }
 }
-```text
+```
 
 ### Patrón avanzado: wrapper POD + inner con estado
 
@@ -253,7 +253,7 @@ private struct ProductRowContent: View {
         .onTapGesture { isExpanded.toggle() }
     }
 }
-```text
+```
 
 El padre (`ProductRow`) usa `memcmp` para decidir si re-evaluar. Solo si `product` cambió, se re-evalúa `ProductRowContent`.
 
@@ -290,7 +290,7 @@ struct OrderRow: View {
         Text(Self.dateFormatter.string(from: order.date))
     }
 }
-```text
+```
 
 Lo mismo aplica para ordenamientos, filtros, y transformaciones de datos:
 
@@ -319,7 +319,7 @@ var body: some View {
         ProductRow(product: product)
     }
 }
-```text
+```
 
 ---
 
@@ -339,7 +339,7 @@ SwiftUI **no compara valores antes de triggear actualizaciones**. Si asignas el 
         self.currentValue = value
     }
 }
-```text
+```
 
 Esto es especialmente importante en **hot paths**: código que se ejecuta frecuentemente, como scroll handlers o gesture recognizers:
 
@@ -356,7 +356,7 @@ Esto es especialmente importante en **hot paths**: código que se ejecuta frecue
         shouldShowTitle = shouldShow // Solo 2 actualizaciones: al cruzar y al volver
     }
 }
-```text
+```
 
 ---
 
@@ -382,7 +382,7 @@ ScrollView {
         }
     }
 }
-```text
+```
 
 `LazyVStack` solo crea las vistas que son visibles en pantalla (más un pequeño buffer). A medida que el usuario scrollea, crea las nuevas y descarta las que salen de pantalla.
 
@@ -457,20 +457,6 @@ Antes de considerar una vista "terminada":
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `05-maestria/06-swiftui-performance.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -498,7 +484,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

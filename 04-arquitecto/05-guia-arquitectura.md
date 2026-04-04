@@ -66,7 +66,7 @@ flowchart TD
     CATALOG --> CAPP["Application"]
     CATALOG --> CINF["Infrastructure"]
     CATALOG -.-> CUI["Interface"]
-```text
+```
 
 Ownership sugerido por contexto:
 
@@ -111,7 +111,7 @@ flowchart TB
     CAPP ==> CPORT
     CINF --o CPORT
     CINF --> CSTORE
-```text
+```
 
 Cómo leerlo en revisión técnica:
 
@@ -211,7 +211,7 @@ No hace falta ADR para micro-cambios locales reversibles.
 - Consecuencias:
 - Trigger de revision:
 - Fecha:
-```text
+```
 
 La parte más olvidada suele ser `Trigger de revision`. Sin trigger, las decisiones se fosilizan.
 

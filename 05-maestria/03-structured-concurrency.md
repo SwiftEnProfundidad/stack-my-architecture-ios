@@ -57,7 +57,7 @@ func loadData() {
     // Si `self` se desaloca, el Task sigue ejecutándose.
     // `self` podría ser retenido por el closure → memory leak.
 }
-```text
+```
 
 ### Diagrama: Task no estructurado vs .task de SwiftUI
 
@@ -113,7 +113,7 @@ func loadCatalogScreen() async throws -> (products: [Product], config: CatalogCo
     // Aquí esperamos a que ambas terminen.
     return try await (products, config)
 }
-```text
+```
 
 Sin `async let`, las operaciones serían secuenciales. El diagrama de Gantt lo hace evidente:
 
@@ -142,7 +142,7 @@ let config = try await configService.loadCatalogConfig() // 200ms
 async let products = repository.loadAll()            // 500ms ─┐
 async let config = configService.loadCatalogConfig() // 200ms ─┤ en paralelo
 let result = try await (products, config)            //         └─ Total: 500ms
-```text
+```
 
 **Impacto enterprise:** en una pantalla que carga 5 recursos independientes (productos, config, usuario, banners, categorías), la diferencia entre secuencial y paralelo puede ser de 2 segundos vs 0.5 segundos. Esos 1.5 segundos son la diferencia entre un usuario que espera y uno que cierra la app.
 
@@ -205,7 +205,7 @@ func loadImages(for products: [Product]) async -> [String: Data] {
         return images
     }
 }
-```text
+```
 
 ### Cómo funciona
 
@@ -279,7 +279,7 @@ func loadImages(for products: [Product], maxConcurrent: Int = 5) async -> [Strin
         return images
     }
 }
-```text
+```
 
 Este patrón mantiene siempre N tareas activas sin saturar la red o la CPU.
 
@@ -305,7 +305,7 @@ func loadAllImages(for products: [Product]) async throws -> [String: Data] {
     }
 }
 // Si cualquier imagen falla, todo el grupo falla y las demás tareas se cancelan.
-```text
+```
 
 ---
 
@@ -329,7 +329,7 @@ func loadProducts() async throws -> [Product] {
     
     return try parseProducts(from: data)
 }
-```text
+```
 
 ### Dónde verificar la cancelación
 
@@ -349,7 +349,7 @@ func processLargeDataset(_ items: [Item]) async throws -> [ProcessedItem] {
     
     return results
 }
-```text
+```
 
 ### El modifier `.task` de SwiftUI cancela automáticamente
 
@@ -370,7 +370,7 @@ struct CatalogView: View {
         }
     }
 }
-```text
+```
 
 Si el usuario navega fuera de `CatalogView`, SwiftUI cancela la tarea. Si `loadProducts()` verifica `Task.checkCancellation()` internamente, la operación se detiene limpiamente.
 
@@ -388,7 +388,7 @@ Si el usuario navega fuera de `CatalogView`, SwiftUI cancela la tarea. Si `loadP
 .task {
     await viewModel.loadProducts()
 }
-```text
+```
 
 Usa siempre `.task` en lugar de `Task {}` dentro de `onAppear`. Si necesitas reaccionar a cambios en un valor, usa `.task(id:)`:
 
@@ -398,7 +398,7 @@ Usa siempre `.task` en lugar de `Task {}` dentro de `onAppear`. Si necesitas rea
     // La tarea anterior se cancela automáticamente antes de lanzar la nueva.
     await viewModel.loadProducts(category: selectedCategory)
 }
-```text
+```
 
 ---
 
@@ -438,7 +438,7 @@ private func makeCatalogRepository(httpClient: any HTTPClient) -> some ProductRe
     let store = FileProductStore(directory: cacheDirectory)
     return CachedProductRepository(remote: remote, store: store)
 }
-```text
+```
 
 ---
 
@@ -459,7 +459,7 @@ for url in urls {
     let data = try await download(url)
     results.append(data)
 }
-```text
+```
 
 ### Error 2: usar Task {} cuando deberías usar .task
 
@@ -485,7 +485,7 @@ struct MyView: View {
             .task { await viewModel.load() }
     }
 }
-```text
+```
 
 ### Error 3: capturar variables mutables en addTask
 
@@ -525,26 +525,6 @@ await withTaskGroup(of: Product.self) { group in
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `05-maestria/03-structured-concurrency.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -572,7 +552,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

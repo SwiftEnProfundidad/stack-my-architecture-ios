@@ -126,10 +126,11 @@ La etapa está cerrada cuando:
 
 Consulta y completa la rúbrica de entrega:
 
-- [Leccion 2: Rubrica y entrega del Proyecto Final](./01-rubrica-y-entrega.md)
+- [Lección 2: Rúbrica y entrega del Proyecto Final](./01-rubrica-y-entrega.md)
+- [Lección 3: Guía paso a paso — 7 hitos con código y verificación](./02-guia-paso-a-paso.md)
 
 Y usa como soporte:
 
-- [`05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md`](../05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [`05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md`](../05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
-- [`05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md`](../05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md)
+- [`05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md`](../05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [`05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md`](../05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md)
+- [`05-maestria/rubrica-final/03-checklist-entrega-para-entrevista.md`](../05-maestria/rubrica-final/03-checklist-entrega-para-entrevista.md)

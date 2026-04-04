@@ -77,7 +77,7 @@ struct Session: Equatable, Hashable, Sendable {
     let token: String
     let email: String
 }
-```text
+```
 
 Por qué este tipo sí cruza:
 
@@ -107,7 +107,7 @@ enum AppEvent: Sendable, Equatable {
 struct ProductID: Sendable, Equatable, Hashable {
     let rawValue: String
 }
-```text
+```
 
 Con esto:
 
@@ -192,7 +192,7 @@ final class AppCoordinatorContractTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 }
-```text
+```
 
 Este test protege interacción entre features sin acoplarlas.
 
@@ -216,7 +216,7 @@ struct Session: Equatable, Hashable, Sendable {
     let email: String
     let expiresAt: Date?
 }
-```text
+```
 
 Si en lugar de esto renombras campos directamente, rompes a todos los consumidores a la vez.
 
@@ -490,7 +490,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

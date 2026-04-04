@@ -16,8 +16,8 @@ This is a Mobile Architecture framework: iOS depth + Android parity via shared d
 
 ## Final Rubric (iOS)
 
-- [Rúbrica de empleabilidad iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Rúbrica de empleabilidad iOS](05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md)
 
 ## HTML Hub
 
@@ -132,7 +132,10 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Infraestructura real: Network](02-integración/04-infra-real-network.md)
 - [Integration tests](02-integración/05-integration-tests.md)
 - [Composition Root](02-integración/06-composition-root.md)
-- [SwiftUI enterprise](02-integración/07-swiftui-enterprise.md)
+- [SwiftUI enterprise (índice)](02-integracion/07-swiftui-enterprise.md)
+  - [Parte 1: Navegación, Modales e Interacción](02-integracion/07a-swiftui-enterprise-navegacion.md)
+  - [Parte 2: Composición, Rendimiento y APIs](02-integracion/07b-swiftui-enterprise-composicion.md)
+  - [Parte 3: Liquid Glass, Ejercicio y Cierre](02-integracion/07c-swiftui-enterprise-moderno.md)
 - [Swift Concurrency enterprise](02-integración/08-swift-concurrency-enterprise.md)
 - [App final Etapa 2](02-integración/09-app-final-etapa-2.md)
 - [Entregables Etapa 2](02-integración/entregables-etapa-2.md)
@@ -176,9 +179,15 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Entrevista de arquitecto](05-maestria/11-entrevista-arquitecto.md)
 - [Arquitectura adaptativa](05-maestria/12-arquitectura-adaptativa.md)
 - [Entregables Etapa 5](05-maestria/entregables-etapa-5.md)
-- [Rúbrica final iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
-- [Checklist final de entrega](05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md)
+- [Rúbrica final iOS](05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Checklist final de entrega](05-maestria/rubrica-final/03-checklist-entrega-para-entrevista.md)
+
+### Etapa 6 — Proyecto Final
+
+- [Proyecto Final iOS — Delivery Enterprise](06-proyecto-final/00-proyecto-final-ios.md)
+- [Rúbrica y entrega](06-proyecto-final/01-rubrica-y-entrega.md)
+- [Guía paso a paso — 7 hitos con código y verificación](06-proyecto-final/02-guia-paso-a-paso.md)
 
 ### Anexos
 

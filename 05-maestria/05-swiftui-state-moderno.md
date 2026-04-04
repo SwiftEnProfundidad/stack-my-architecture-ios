@@ -33,7 +33,7 @@ class CatalogViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 }
-```text
+```
 
 Problemas:
 - **Cualquier** cambio en **cualquier** `@Published` property invalida **todas** las vistas que observan este objeto. Si `isLoading` cambia, una vista que solo lee `products` se re-renderiza innecesariamente.
@@ -50,7 +50,7 @@ final class CatalogViewModel {
     var isLoading = false
     var errorMessage: String?
 }
-```text
+```
 
 Ventajas:
 - SwiftUI solo re-renderiza las vistas que **leen** la propiedad que cambió. Si `isLoading` cambia, una vista que solo lee `products` no se re-renderiza.
@@ -160,7 +160,7 @@ struct LoginView: View {
         }
     }
 }
-```text
+```
 
 **Reglas:**
 - Siempre `private`. Si no es `private`, es una señal de que debería ser `let`, `@Binding`, o `@Bindable`.
@@ -177,7 +177,7 @@ struct CatalogView: View {
         }
     }
 }
-```text
+```
 
 ### `let` — read-only desde el padre
 
@@ -194,7 +194,7 @@ struct ProductRow: View {
         }
     }
 }
-```text
+```
 
 Es la opción más simple y la que deberías usar por defecto. Solo cambia a `@Binding` o `@Bindable` si la vista **necesita modificar** el dato.
 
@@ -219,7 +219,7 @@ struct SettingsView: View {
         ToggleRow(title: "Notifications", isOn: $notificationsEnabled)
     }
 }
-```text
+```
 
 **Error común:** usar `@Binding` cuando la vista solo lee:
 
@@ -235,7 +235,7 @@ struct DisplayView: View {
     let title: String
     var body: some View { Text(title) }
 }
-```text
+```
 
 ### `@Bindable` — la vista necesita $bindings de un @Observable inyectado
 
@@ -270,7 +270,7 @@ struct ProfileView: View {
         EditProfileView(profile: profile)
     }
 }
-```text
+```
 
 `@Bindable` es el equivalente moderno de `@ObservedObject` para `@Observable`. Lo usas cuando:
 1. El objeto viene de fuera (no lo crea la vista).
@@ -311,7 +311,7 @@ struct ProfileButton: View {
         }
     }
 }
-```text
+```
 
 **No uses `@EnvironmentObject`** (legacy). Usa `.environment()` con `@Observable` directamente.
 
@@ -339,7 +339,7 @@ struct ParentView: View {
         }
     }
 }
-```text
+```
 
 `@State` retiene su valor entre re-renderizados. Cuando el padre pasa un nuevo valor, `@State` lo ignora porque ya tiene su propio valor almacenado. Ese es su propósito: mantener estado local.
 
@@ -354,7 +354,7 @@ struct ChildView: View {
         Text(item.name) // Se actualiza cuando el padre cambia
     }
 }
-```text
+```
 
 **Prevención:** marca siempre `@State` como `private`. Si un `@State` no es `private`, significa que aparece en el initializer generado, lo que invita a pasar valores desde fuera.
 
@@ -375,7 +375,7 @@ final class LoginViewModel {
     var errorMessage: String?
     // ...
 }
-```text
+```
 
 Y en la vista:
 
@@ -392,7 +392,7 @@ struct LoginView: View {
         }
     }
 }
-```text
+```
 
 ### Etapa 2: CatalogView con navegación
 
@@ -454,26 +454,6 @@ En el código del curso, verifica que usamos las APIs modernas:
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `05-maestria/05-swiftui-state-moderno.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -501,7 +481,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

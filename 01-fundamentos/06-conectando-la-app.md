@@ -8,6 +8,8 @@ Pero hasta ahora has estado trabajando **en la oscuridad**. Has visto tests pasa
 
 > **Objetivo de esta lección:** Al terminar, tendrás una app iOS funcional que muestra el login. Será un **milestone visible** que confirma que todo lo construido hasta ahora realmente funciona.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Esta lección usa los nombres pedagógicos: `LoginUseCase`, `AuthGateway`, `StubAuthGateway`, `Session`. En el scaffold `apps/ios/ArchitectureKit` los equivalentes son `AuthenticateUserUseCase`, `AuthRepository`, `StubAuthRepository`, `UserSession`. Consulta la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
+
 ---
 
 ## Paso 1: Crear el archivo de entrada de la app
@@ -194,22 +196,17 @@ class LoginViewModel {
         errorMessage = nil
         
         do {
-            // Creamos value objects (pueden lanzar errores de validación)
-            let emailVO = try Email(value: email)
-            let passwordVO = try Password(value: password)
-            let credentials = Credentials(email: emailVO, password: passwordVO)
-            
-            // Ejecutamos el use case
-            let session = try await loginUseCase.execute(credentials: credentials)
+            // El UseCase valida los inputs internamente y lanza AuthError si son inválidos
+            let session = try await loginUseCase.execute(email: email, password: password)
             
             // Éxito: notificamos al coordinador
             onLoginSucceeded(session)
             
         } catch let error as AuthError {
-            // Error de dominio (email inválido, password corto, etc.)
+            // Error de dominio (email inválido, password corto, credenciales incorrectas)
             errorMessage = error.localizedDescription
         } catch {
-            // Error genérico
+            // Error genérico (red, servidor, etc.)
             errorMessage = "Error desconocido"
         }
         
@@ -310,81 +307,3 @@ Pero primero, asegúrate de completar los entregables de la Etapa 1.
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/06-conectando-la-app.md`.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
-
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semántica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuración.
-3. `==>` contrato o abstracción.
-4. `--o` salida o propagación de resultado.

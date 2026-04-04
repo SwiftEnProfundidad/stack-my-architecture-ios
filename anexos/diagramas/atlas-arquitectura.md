@@ -347,7 +347,7 @@ graph TD
     style MAIN fill:#e2d5f1,stroke:#6f42c1
     style NONISOLATED fill:#d4edda,stroke:#28a745
     style COOPERATIVE fill:#cce5ff,stroke:#007bff
-```swift
+```
 
 **Que significa cada zona:**
 

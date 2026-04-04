@@ -128,7 +128,7 @@ Task Management <-- Collaboration (colaboración necesita saber de tareas)
 Task Management <-- Notifications (notificaciones sobre cambios en tareas)
 Task Management <-- Sync (sync de tareas)
 Collaboration <-- Sync (sync de cambios colaborativos)
-```text
+```
 
 Task Management es el core; los demás son periféricos.
 

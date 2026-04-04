@@ -42,7 +42,7 @@ class UserValidator {         // Solo cambia cuando cambian reglas de negocio
 class UserOnboardingService { // Solo cambia cuando cambia estrategia CRM
     func sendWelcome(_ user: User) async { ... }
 }
-```text
+```
 
 ### ¿Dónde Aparece en el Curso?
 
@@ -114,7 +114,7 @@ struct GooglePayPayment: PaymentMethod {
     func process(amount: Decimal) async throws -> PaymentResult { ... }
 }
 // PaymentService no se entera, no tocamos código existente
-```text
+```
 
 ### ¿Dónde Aparece en el Curso?
 
@@ -175,7 +175,7 @@ protocol Shape {
 
 struct Rectangle: Shape { ... }
 struct Square: Shape { ... }  // Ambos son Shape, sin herencia forzada
-```text
+```
 
 ### ¿Dónde Aparece en el Curso?
 
@@ -242,7 +242,7 @@ class HistoryViewModel {
     private let store: Readable  // Solo puede leer, seguro
     init(store: Readable) { self.store = store }
 }
-```text
+```
 
 ### ¿Dónde Aparece en el Curso?
 
@@ -305,7 +305,7 @@ class LoginViewModel {
 // Implementaciones (detalles dependen de abstracción)
 class RemoteAuthGateway: AuthGateway { ... }  // Usa URLSession internamente
 class StubAuthGateway: AuthGateway { ... }   // Devuelve datos fake para tests
-```text
+```
 
 ### ¿Dónde Aparece en el Curso?
 

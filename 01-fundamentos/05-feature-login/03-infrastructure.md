@@ -12,6 +12,8 @@ El **`RemoteAuthGateway`**, que implementa el protocolo `AuthGateway` llamando a
 
 Todo con tests XCTest.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `AuthGateway` → `AuthRepository`, `RemoteAuthGateway` → `RemoteAuthRepository`, `StubAuthGateway` → `StubAuthRepository`, `Session` → `UserSession`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 En esta capa se ve muy claro el **Principio 4** de [Principios de ingeniería](../01-principios-ingenieria.md): bajo acoplamiento y alta cohesión. Infrastructure adapta el mundo externo sin contaminar Domain ni Application.
@@ -78,7 +80,7 @@ struct AuthRequest: Encodable, Sendable {
     let email: String
     let password: String
 }
-```text
+```
 
 El `AuthRequest` es el cuerpo de la petición HTTP que enviamos al servidor. Es `Encodable` porque lo vamos a serializar a JSON. Fíjate en que usa `String`, no `Email` ni `Password`. ¿Por qué? Porque al servidor le enviamos strings planos en JSON. La validación ya ocurrió en la capa Domain. Para cuando los datos llegan aquí, ya sabemos que son válidos.
 
@@ -91,7 +93,7 @@ struct AuthResponse: Decodable, Sendable {
     let token: String?
     let email: String?
 }
-```text
+```
 
 El `AuthResponse` es el body de la respuesta HTTP del servidor. Es `Decodable` porque lo vamos a deserializar desde JSON. El `token` es opcional porque en caso de error (credenciales rechazadas), el servidor no envía token. El `email` también es opcional por la misma razón.
 
@@ -107,7 +109,7 @@ El `RemoteAuthGateway` necesita hacer peticiones HTTP. Pero si usara `URLSession
 protocol HTTPClient: Sendable {
     func execute(_ request: URLRequest) async throws -> (Data, HTTPURLResponse)
 }
-```text
+```
 
 Este protocolo dice: "dame un URLRequest, te devuelvo los datos y la respuesta HTTP". Es lo mínimo que necesitamos. En producción, la implementación será un wrapper alrededor de `URLSession`. En tests, será un stub que devuelve datos predeterminados.
 
@@ -166,7 +168,7 @@ struct RemoteAuthGateway: AuthGateway, Sendable {
         return Session(token: token, email: credentials.email.value)
     }
 }
-```text
+```
 
 **Explicación línea por línea del RemoteAuthGateway:**
 
@@ -179,7 +181,7 @@ flowchart LR
     style DOMAIN fill:#d4edda,stroke:#28a745
     style GATEWAY fill:#cce5ff,stroke:#007bff
     style HTTP fill:#fff3cd,stroke:#ffc107
-```swift
+```
 
 `struct RemoteAuthGateway: AuthGateway, Sendable` — Conforma el protocolo/puerto `AuthGateway` (definido en Application). Esto significa que implementa el método `authenticate(credentials:)`. Es `Sendable` para poder usarse en funciones `async`.
 
@@ -257,7 +259,7 @@ struct StubAuthGateway: AuthGateway, Sendable {
         )
     }
 }
-```text
+```
 
 El stub tiene un delay configurable que por defecto es 0.5 segundos. ¿Por qué no devolver el resultado inmediatamente? Porque queremos que el desarrollo con el stub sea lo más parecido posible a la producción. En producción, la petición de red tarda un tiempo. Si el stub devuelve instantáneamente, no detectarás problemas de UX: estados de loading que no se muestran, animaciones que se saltan, condiciones de carrera cuando el usuario pulsa dos veces el botón. El delay simulado te obliga a manejar estos casos durante el desarrollo, no en producción cuando ya es tarde.
 
@@ -298,7 +300,7 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
         return try result.get()
     }
 }
-```swift
+```
 
 **Explicación línea por línea del HTTPClientStub:**
 
@@ -352,7 +354,7 @@ final class RemoteAuthGatewayTests: XCTestCase {
         let json = ["token": token, "email": email]
         return try! JSONSerialization.data(withJSONObject: json)
     }
-```text
+```
 
 **¿Qué es `makeSUT` y por qué existe?**
 
@@ -456,7 +458,7 @@ final class RemoteAuthGatewayTests: XCTestCase {
         }
     }
 }
-```text
+```
 
 ### Por qué usamos helpers en los tests
 
@@ -484,7 +486,7 @@ struct Session: Codable {
     let token: String
     let email: String
 }
-```text
+```
 
 Si `Session` es `Codable`, se puede usar directamente para parsear la respuesta del servidor. Parece eficiente: un solo tipo para todo. Pero tiene un problema grave: estás acoplando tu modelo de dominio al formato de datos del servidor.
 
@@ -532,25 +534,6 @@ En la siguiente lección llegaremos a la última capa: Interface. Allí construi
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/05-feature-login/03-infrastructure.md`.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -578,7 +561,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

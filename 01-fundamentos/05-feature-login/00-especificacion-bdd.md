@@ -6,6 +6,8 @@ Esta es la primera lección donde aplicamos BDD en la práctica. Vamos a sentarn
 
 Al terminar esta lección tendrás una especificación completa del Login: todos los casos posibles (éxito, errores, edge cases), los términos del dominio que usaremos en el código, las decisiones de diseño que los escenarios nos obligan a tomar, y una tabla de trazabilidad que conecta cada escenario con el test que lo verificará.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los términos del dominio que definimos aquí (`Email`, `Password`, `Session`, `AuthError`, `Credentials`) son los nombres pedagógicos del curso. En el scaffold `apps/ios/ArchitectureKit` algunos tienen nombres distintos: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 ¿Recuerdas el **Principio 1** de [Principios de ingeniería](../01-principios-ingenieria.md)? "Aclarar la intención antes de codificar". Esta lección es exactamente esa práctica aplicada de forma operativa: primero definimos comportamiento, luego diseñamos, y solo después implementamos.
@@ -101,7 +103,7 @@ Scenario: Login exitoso con credenciales válidas
   And el sistema devuelve la sesión al llamante
   And la sesión contiene un token de acceso
   And la sesión contiene el email del usuario autenticado
-```text
+```
 
 Este escenario es detallado a propósito. Fíjate en que no dice simplemente "el usuario hace login y funciona". Describe el flujo paso a paso: primero se valida localmente, luego se envía al servidor, luego se recibe la respuesta. Esto es importante porque nos dice el **orden** de las operaciones. La validación local ocurre antes de la llamada al servidor. Si la validación falla, el servidor nunca se entera.
 
@@ -120,7 +122,7 @@ Scenario: Login fallido porque el servidor rechaza las credenciales
   And el servidor rechaza las credenciales
   Then el sistema devuelve un error de tipo InvalidCredentials
   And no se crea ninguna sesión
-```text
+```
 
 Este escenario nos dice algo importante: las credenciales pueden ser válidas **localmente** (el email tiene formato correcto, el password no está vacío) pero inválidas **remotamente** (el servidor no las reconoce). Son dos niveles de validación diferentes: local (formato) y remota (autenticidad). El error `InvalidCredentials` viene del servidor, no de la validación local.
 
@@ -136,7 +138,7 @@ Scenario: Login fallido porque no hay conexión a internet
   And la conexión falla porque no hay internet
   Then el sistema devuelve un error de tipo Connectivity
   And no se crea ninguna sesión
-```text
+```
 
 Este escenario nos dice que el error de conectividad es diferente del error de credenciales inválidas. El usuario necesita saber si su password está mal o si simplemente no hay internet, porque la acción que debe tomar es diferente en cada caso. Por eso tenemos errores tipados y no un genérico "algo falló".
 
@@ -153,7 +155,7 @@ Scenario: Login rechazado porque el email no tiene formato válido
   And el sistema devuelve un error de tipo InvalidEmail
   And NO se envía ninguna petición al servidor
   And no se crea ninguna sesión
-```text
+```
 
 Este escenario es crucial porque define una decisión de diseño: la validación del formato del email ocurre **localmente, antes de intentar la autenticación remota**. No enviamos basura al servidor. Si el email no tiene arroba, lo rechazamos inmediatamente, sin gastar una petición de red. Esto mejora la experiencia del usuario (feedback instantáneo) y protege al servidor de peticiones inútiles.
 
@@ -166,7 +168,7 @@ Scenario: Login rechazado porque el password está vacío
   And el sistema devuelve un error de tipo EmptyPassword
   And NO se envía ninguna petición al servidor
   And no se crea ninguna sesión
-```text
+```
 
 Mismo principio que el anterior: no enviamos un password vacío al servidor. Lo rechazamos localmente.
 
@@ -179,7 +181,7 @@ Scenario: Login cancelado por el usuario mientras la autenticación está en pro
   Then el sistema cancela la petición de red en curso
   And no se devuelve ningún resultado (ni éxito ni error)
   And no se crea ninguna sesión
-```text
+```
 
 La cancelación es un caso que muchos tutoriales ignoran pero que en producción es fundamental. Si el usuario navega fuera de la pantalla de login mientras la petición está en vuelo, esa petición debe cancelarse. No tiene sentido procesar una respuesta que nadie va a ver. Y lo que es más importante: si no cancelas la petición, puedes acabar actualizando UI que ya no está en pantalla, lo que en el mejor de los casos desperdicia recursos y en el peor provoca un crash.
 
@@ -351,7 +353,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

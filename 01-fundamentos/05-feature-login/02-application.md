@@ -14,7 +14,7 @@ El **caso de uso** `LoginUseCase`, que orquesta el flujo completo: valida email,
 
 Todo con TDD usando XCTest, un test a la vez.
 
-> **Nota de nomenclatura lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase` como nombres pedagógicos. En el scaffold SPM del repositorio (`apps/ios/ArchitectureKit`), los equivalentes son `AuthRepository` (protocolo en `Sources/FeatureLoginDomain/AuthRepository.swift`) y `AuthenticateUserUseCase` (en `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift`). El patrón es idéntico; solo cambia el nombre.
+> **Nota de nomenclatura lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase` como nombres pedagógicos. En el scaffold SPM del repositorio (`apps/ios/ArchitectureKit`), los equivalentes son `AuthRepository` (protocolo en `Sources/FeatureLoginDomain/AuthRepository.swift`) y `AuthenticateUserUseCase` (en `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift`). El patrón es idéntico; solo cambia el nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -41,7 +41,7 @@ La solución es definir un protocolo/puerto que diga "necesito algo que pueda re
 protocol AuthGateway: Sendable {
     func authenticate(credentials: Credentials) async throws -> Session
 }
-```swift
+```
 
 Vamos a analizar cada aspecto de esta declaración, porque cada palabra está ahí por una razón:
 
@@ -153,7 +153,7 @@ final class AuthGatewayStub: AuthGateway, @unchecked Sendable {
         return try result.get()
     }
 }
-```swift
+```
 
 **Explicación línea por línea (esto es un spy, lee la guía de test doubles si no recuerdas qué es):**
 
@@ -193,7 +193,7 @@ final class LoginUseCaseTests: XCTestCase {
         XCTAssertEqual(session, expectedSession)
     }
 }
-```text
+```
 
 **Explicación línea por línea, siguiendo el patrón Arrange-Act-Assert:**
 
@@ -248,7 +248,7 @@ struct LoginUseCase: Sendable {
         return try await authGateway.authenticate(credentials: credentials)
     }
 }
-```swift
+```
 
 **Explicación línea por línea del LoginUseCase:**
 
@@ -309,7 +309,7 @@ func test_execute_sends_validated_credentials_to_gateway() async throws {
     XCTAssertEqual(gateway.receivedCredentials?.email.value, "user@example.com")
     XCTAssertEqual(gateway.receivedCredentials?.password.value, "pass123")
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios. Las credenciales ya se pasan correctamente. El test tiene valor documental: deja explícito que el caso de uso transforma los strings de entrada en Value Objects validados antes de pasarlos al gateway.
 
@@ -331,7 +331,7 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
         XCTAssertTrue(error is Email.ValidationError)
     }
 }
-```text
+```
 
 Ejecutamos. Pasa, porque `Email("invalid-email")` ya lanza `Email.ValidationError.invalidFormat` y nuestro `execute` propaga el error con `try`. Pero hay un problema: el error que recibe el llamante es `Email.ValidationError.invalidFormat`, que es un tipo interno del Domain. ¿Queremos que la UI tenga que conocer los tipos internos de validación del Domain? No. Queremos que el caso de uso traduzca ese error a un error propio, más limpio.
 
@@ -351,7 +351,7 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Falla porque `LoginUseCase.Error` no existe y el caso de uso no traduce errores.
 
@@ -399,7 +399,7 @@ struct LoginUseCase: Sendable {
         }
     }
 }
-```text
+```
 
 Ejecutamos. Todos los tests pasan (incluido el test del happy path, que sigue funcionando).
 
@@ -423,7 +423,7 @@ func test_execute_with_empty_password_throws_emptyPassword() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios, porque la implementación ya traduce `Password.ValidationError` a `LoginUseCase.Error.emptyPassword`.
 
@@ -442,7 +442,7 @@ func test_execute_with_invalid_email_does_not_call_gateway() async {
     
     XCTAssertNil(gateway.receivedCredentials)
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios, porque el `try Email(email)` falla antes de llegar a `authGateway.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
 
@@ -466,7 +466,7 @@ func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios, porque la implementación ya captura `AuthError.invalidCredentials` y lo traduce a `LoginUseCase.Error.invalidCredentials`.
 
@@ -488,7 +488,7 @@ func test_execute_without_connectivity_throws_connectivity() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Pasa. Todos los escenarios BDD están cubiertos.
 
@@ -542,7 +542,7 @@ struct LoginUseCase: Sendable {
         }
     }
 }
-```text
+```
 
 ### LoginUseCaseTests (tests completos)
 
@@ -705,25 +705,6 @@ En la siguiente lección implementaremos la capa Infrastructure: la implementaci
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/05-feature-login/02-application.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -751,7 +732,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

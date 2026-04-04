@@ -128,7 +128,7 @@ final class CachedProductRepository: ProductRepository, @unchecked Sendable {
         }
     }
 }
-```text
+```
 
 El poder del Decorator es que el `LoadProductsUseCase` no sabe si está hablando con un repositorio real, un repositorio cacheado, o un repositorio con logging. Solo sabe que habla con algo que conforma `ProductRepository`.
 
@@ -160,7 +160,7 @@ final class LoggingProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```text
+```
 
 Y puedes apilar decoradores:
 
@@ -172,7 +172,7 @@ let logged = LoggingProductRepository(decoratee: cached, logger: consoleLogger)
 
 // El use case recibe el decorador más externo
 let useCase = LoadProductsUseCase(repository: logged)
-```text
+```
 
 El flujo es: `logged` → `cached` → `remote`. Cada capa añade comportamiento sin que las otras lo sepan.
 
@@ -200,7 +200,7 @@ final class ProductRepositoryWithFallback: ProductRepository, Sendable {
         }
     }
 }
-```text
+```
 
 ### Uso real: remoto → caché → servidor backup
 
@@ -217,7 +217,7 @@ let repository = ProductRepositoryWithFallback(
         fallback: backup
     )
 )
-```text
+```
 
 El Composite es recursivo: puedes anidar composites dentro de composites. Cada nivel no sabe si su primario/fallback es un repositorio real, un decorador, u otro composite.
 
@@ -290,7 +290,7 @@ final class ProductRepositoryWithFallbackTests: XCTestCase {
         )
     }
 }
-```text
+```
 
 ---
 
@@ -315,7 +315,7 @@ final class CacheSavingInterceptor: ProductRepository, Sendable {
         return products
     }
 }
-```text
+```
 
 La diferencia sutil con el Decorator de caché:
 
@@ -347,7 +347,7 @@ let withFallback = ProductRepositoryWithFallback(
 let withLogging = LoggingProductRepository(decoratee: withFallback, logger: logger)
 
 let useCase = LoadProductsUseCase(repository: withLogging)
-```text
+```
 
 El flujo resultante:
 1. `LoggingProductRepository` registra el inicio.
@@ -381,7 +381,7 @@ final class CompositionRootTests: XCTestCase {
         XCTAssertNotNil(catalogView)
     }
 }
-```text
+```
 
 Para un test más profundo, podemos verificar que la cadena de composición tiene el comportamiento esperado:
 
@@ -436,26 +436,6 @@ La composición avanzada te permite:
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `05-maestria/07-composicion-avanzada.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -483,7 +463,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

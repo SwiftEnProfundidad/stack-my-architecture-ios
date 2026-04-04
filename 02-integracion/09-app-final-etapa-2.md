@@ -82,7 +82,7 @@ flowchart LR
     LREMOTE --o LGW
     CREMOTE --o CREPO
     CREMOTE --> CSTORE
-```text
+```
 
 Lectura semántica (la clave didáctica):
 
@@ -203,7 +203,7 @@ final class AppCoordinator {
         )
     }
 }
-```text
+```
 
 ---
 
@@ -256,7 +256,7 @@ struct StackMyArchitectureApp: App {
         )
     }
 }
-```text
+```
 
 **Cambios clave desde E1:**
 1. Ahora usamos `NavigationStack` con `path: $coordinator.navigationPath`
@@ -335,7 +335,7 @@ actor StubProductRepository: ProductRepository {
         ]
     }
 }
-```text
+```
 
 ---
 
@@ -388,7 +388,7 @@ class LoginViewModel {
         isLoading = false
     }
 }
-```text
+```
 
 ---
 
@@ -452,7 +452,7 @@ Tu app debe verse así:
 │  └───────────────────┘  │
 │                         │
 └─────────────────────────┘
-```text
+```
 
 **Catalog (después de login):**
 ```text
@@ -503,21 +503,4 @@ Pero primero, revisa los entregables de la Etapa 2.
 ---
 
 ---
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `02-integracion/09-app-final-etapa-2.md`.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

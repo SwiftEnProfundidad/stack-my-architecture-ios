@@ -59,7 +59,7 @@ NIVEL 3: Implementación Específica
 ├── ¿Actor o lock?
 ├── ¿In-memory o persisted?
 └── ¿Sync o async?
-```text
+```
 
 **El error común:** Saltar directo al Nivel 2 ("¿MVP o MVVM?") sin entender el Nivel 1 ("¿Qué cambia independientemente de qué?").
 
@@ -82,7 +82,7 @@ FUERZA D: Simplicidad (código mantenible)
 Conflicto: A vs B (offline vs fresh)
          A vs D (sync complejo vs simple)
          B vs C (validación vs velocidad)
-```text
+```
 
 **Herramienta:** Diagrama de fuerzas - dibuja cada fuerza como flecha, identifica tensiones.
 
@@ -107,7 +107,7 @@ Ejemplo: App bancaria
 INV 1: Nunca perdemos una transacción confirmada al usuario
 INV 2: Nunca mostramos saldo inconsistente entre pestañas
 INV 3: Nunca procesamos el mismo pago dos veces (idempotencia)
-```text
+```
 
 Las invariantes son tu brújula: **cualquier solución que las viole está descartada**.
 
@@ -133,7 +133,7 @@ CAMBIA LENTO (años): Entidades core, invariantes
 NO CAMBIA: Principios matemáticos, leyes del negocio
 ├── Encapsula: En domain, documenta como ADR
 └── Asume: Son tu fundamento
-```text
+```
 
 ---
 
@@ -169,7 +169,7 @@ OPCIÓN C: Feature Flags + Gradual Migration
 ├── Configuración en runtime decide cuál usar
 ├── A/B testing implícito: métricas comparativas
 └── Rollback instantáneo si algo falla
-```text
+```
 
 **Decisión:** Depende de tu invariante. Si es "zero downtime", usa C. Si es "minimizar código duplicado", usa A. Si es "equipos paralelos", usa B.
 
@@ -211,7 +211,7 @@ struct ProductView_Vision: View {
 if SupportsApplePencil {
     showPencilInterface()
 }
-```text
+```
 
 **Principio:** "Same brain, different face". La lógica de negocio es idéntica; la presentación se adapta.
 
@@ -232,7 +232,7 @@ class ViewController {
 func convertPaymentResult(_ sdkResult: PaySDK.Result) -> MyResult {
     // ... 50 líneas de mapping
 }
-```text
+```
 
 **Arquitectura Adaptativa - Anti-Corruption Layers (ACL):**
 
@@ -257,7 +257,7 @@ func convertPaymentResult(_ sdkResult: PaySDK.Result) -> MyResult {
 │  - Delegates con estado mutable    │
 │  - Documentación cambiante         │
 └─────────────────────────────────────┘
-```text
+```
 
 **Beneficios del ACL:**
 - Cambiar PaySDK por Stripe solo toca el Adapter
@@ -309,7 +309,7 @@ enum ConflictStrategy {
     case merge             // Ambos cambios: resolución manual
     case rejectBoth        // Transacciones críticas: abortar
 }
-```text
+```
 
 **Invariante protegida:** "Nunca cobramos por algo que no tenemos". El servidor es la única fuente de verdad para stock, pero la UI no espera bloqueando.
 
@@ -351,7 +351,7 @@ class ComplianceEngine {
 // Nuevas regulaciones = nuevas implementaciones de ComplianceRule
 // Tests garantizan que reglas cumplen la ley
 // Documentación vive en ADRs vinculados a cada rule
-```text
+```
 
 ---
 
@@ -395,7 +395,7 @@ extension ImageProcessor {
         // Implementation...
     }
 }
-```text
+```
 
 **Contención:**
 - Aislado en módulo separado
@@ -432,7 +432,7 @@ class BatchSyncUseCase {
     
     // ... implementación optimizada
 }
-```text
+```
 
 ---
 
@@ -461,7 +461,7 @@ Cuando dudas entre alternativas, visualiza:
                             PROTEGIDOS]
                         │
                  [CRITERIO DE ÉXITO]
-```text
+```
 
 ### 5.2 El "Architecture Journal"
 
@@ -490,7 +490,7 @@ manual en casos edge (0.1% estimado).
 intervención del dispatcher.
 
 **Revisar:** Métricas reales en 3 meses.
-```text
+```
 
 ### 5.3 Análisis de Escenarios
 
@@ -529,7 +529,7 @@ Real-time requirements ─────────┘
 Multi-tenancy (hospitales) ───┐
                               ├──► Flexibilidad vs Uniformidad
 HIPAA audit trail ────────────┘
-```text
+```
 
 ### La Arquitectura Resultante
 
@@ -571,7 +571,7 @@ HIPAA audit trail ────────────┘
 │  - Filesystem: Video recordings (large, external refs) │
 │  - Sync: Custom with conflict resolution per entity type │
 └──────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Decisiones No Estándar
 

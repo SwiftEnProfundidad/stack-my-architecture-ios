@@ -8,6 +8,8 @@ Ahora llegamos a la capa más externa: la Interface. Esta es la capa que el usua
 
 La regla fundamental de esta capa es: **no contiene lógica de negocio**. La vista no valida emails. No decide si el login fue exitoso. No traduce errores. Solo muestra lo que el ViewModel le dice y envía las acciones del usuario al ViewModel. Es la capa más "tonta" del sistema, y eso es exactamente lo que queremos.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `LoginUseCase` → `AuthenticateUserUseCase`, `Session` → `UserSession`. `LoginViewModel` y `LoginView` mantienen el mismo nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 Aquí reaparece el **Principio 4** de [Principios de ingeniería](../01-principios-ingenieria.md): la UI se mantiene cohesionada en presentación y desacoplada del core de negocio.
@@ -142,7 +144,7 @@ final class LoginViewModel {
         }
     }
 }
-```swift
+```
 
 **Explicación línea por línea del LoginViewModel completo:**
 
@@ -286,7 +288,7 @@ struct LoginView: View {
         .navigationTitle("Login")
     }
 }
-```text
+```
 
 Vamos a repasar cada parte:
 
@@ -340,7 +342,7 @@ final class LoginViewModelTests: XCTestCase {
         let sut = LoginViewModel(login: useCase, onLoginSucceeded: onLoginSucceeded)
         return (sut, gateway)
     }
-```swift
+```
 
 **Explicación del makeSUT del ViewModel:**
 
@@ -363,7 +365,7 @@ Dentro de makeSUT, se crean los tres componentes en cadena: stub → useCase →
         XCTAssertFalse(sut.isLoading)
         XCTAssertNil(sut.errorMessage)
     }
-```text
+```
 
 **Explicación del test de estado inicial:**
 
@@ -393,7 +395,7 @@ Este test verifica que cuando creas un ViewModel nuevo, su estado es correcto: e
         XCTAssertEqual(receivedSession, expectedSession)
         XCTAssertNil(sut.errorMessage)
     }
-```text
+```
 
 **Explicación del test del happy path (el más interesante):**
 
@@ -425,7 +427,7 @@ Este test verifica que cuando el usuario escribe credenciales válidas y pulsa s
         
         XCTAssertEqual(sut.errorMessage, "El email no tiene un formato válido.")
     }
-```text
+```
 
 **Explicación del test de error de email:**
 
@@ -498,7 +500,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
         XCTAssertEqual(sut.errorMessage, "Email o contraseña incorrectos.")
     }
 }
-```text
+```
 
 Fíjate en que los tests del ViewModel son `@MainActor`. Esto es necesario porque el ViewModel es `@MainActor`, así que todas las interacciones con él deben ocurrir en el main actor. Los tests `async` de XCTest soportan esto correctamente.
 
@@ -529,7 +531,7 @@ Una de las grandes ventajas de nuestra arquitectura es que las previews de Swift
         )
     }
 }
-```text
+```
 
 El stub tiene un delay de 1 segundo para que puedas ver el estado de loading en la preview. Si quieres probar el estado de error, puedes crear un stub que siempre falle:
 
@@ -551,7 +553,7 @@ struct FailingAuthGateway: AuthGateway, Sendable {
         )
     }
 }
-```text
+```
 
 Esto te permite ver cómo se ve la pantalla de login con un mensaje de error sin necesidad de tener un servidor real que rechace credenciales. Las previews son una herramienta de desarrollo, y con nuestra arquitectura, son extremadamente potentes.
 
@@ -583,7 +585,7 @@ struct CompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```text
+```
 
 El Composition Root es el **único lugar** que conoce las implementaciones concretas. Es el único que sabe que `AuthGateway` se implementa con `RemoteAuthGateway`, que `HTTPClient` se implementa con `URLSessionHTTPClient`, y que la URL del servidor es `https://api.example.com`.
 
@@ -592,13 +594,13 @@ Si quieres cambiar a un stub para desarrollo local, cambias una línea:
 ```swift
 // Para desarrollo sin servidor:
 let gateway = StubAuthGateway()
-```text
+```
 
 Si quieres apuntar a staging:
 
 ```swift
 let baseURL = URL(string: "https://staging.example.com")!
-```text
+```
 
 Ningún otro archivo del proyecto cambia. Eso es inversión de dependencias en acción.
 
@@ -688,28 +690,6 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/05-feature-login/04-interface-swiftui.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -737,7 +717,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

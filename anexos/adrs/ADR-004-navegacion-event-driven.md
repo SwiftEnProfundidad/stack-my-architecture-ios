@@ -25,7 +25,7 @@ El enfoque naive es que cada View tenga un `NavigationLink` directo:
 NavigationLink(destination: CatalogView()) {
     Text("Ir al catálogo")
 }
-```text
+```
 
 Esto crea:
 1. **Acoplamiento directo**: Login importa Catalog
@@ -55,7 +55,7 @@ struct LoginView: View {
         NavigationLink("Entrar", destination: CatalogView())
     }
 }
-```text
+```
 
 - **Pros:** Simple, nativo de SwiftUI, poco código
 - **Contras:**
@@ -70,7 +70,7 @@ Cada feature tiene su propio router que conoce las rutas internas.
 ```swift
 // ⚠️ Parcialmente válido pero complejo
 LoginRouter.shared.navigate(to: .catalog)
-```text
+```
 
 - **Pros:** Desacopla Views de destinos específicos
 - **Contras:**
@@ -94,7 +94,7 @@ class AppCoordinator {
         }
     }
 }
-```text
+```
 
 - **Pros:**
   - Features no conocen otras features
@@ -130,7 +130,7 @@ enum NavigationEvent {
     case backToCatalog
     case deepLink(path: String)
 }
-```text
+```
 
 El coordinator implementa la política de navegación:
 
@@ -194,24 +194,4 @@ class AppCoordinator {
 - [Patrón: Coordinator (Soroush Khanlou)](http://khanlou.com/2015/10/coordinators-redux/)
 
 ---
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `anexos/adrs/ADR-004-navegacion-event-driven.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

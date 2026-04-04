@@ -11,6 +11,7 @@ Este directorio centraliza material de apoyo para estudio, recuperación y prepa
 - [como-leer-documentacion.md](como-leer-documentacion.md)
 
 2. Arquitectura y diseño:
+- [equivalencias-scaffold.md](equivalencias-scaffold.md) — Tabla de equivalencias nombres pedagógicos ↔ scaffold real
 - [mental-models.md](mental-models.md)
 - [guia-solid.md](guia-solid.md)
 - [guia-cqs-cqrs.md](guia-cqs-cqrs.md)

@@ -129,7 +129,7 @@ final class LoadProductsIntegrationTests: XCTestCase {
         XCTAssertEqual(products[0].id, "1")
     }
 }
-```text
+```
 
 **Explicación línea por línea de este integration test:**
 
@@ -201,7 +201,7 @@ final class CatalogIntegrationTests: XCTestCase {
         return LoadProductsUseCase(repository: repository)
     }
 }
-```text
+```
 
 ---
 
@@ -268,7 +268,7 @@ func test_loadProducts_callsRepository() async throws {
     _ = try await sut.execute()
     XCTAssertTrue(repo.loadCalled)
 }
-```text
+```
 
 Este test es válido como unit de Application, pero no es integración. No detecta fallos de JSON, status, mapping ni traducción de errores.
 
@@ -360,7 +360,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

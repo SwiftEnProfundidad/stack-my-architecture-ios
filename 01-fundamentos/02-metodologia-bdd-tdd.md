@@ -33,7 +33,7 @@ Scenario: [Descripción breve de lo que se está probando]
   Given [un contexto inicial, un estado del sistema]
   When [ocurre una acción o un evento]
   Then [el resultado esperado, lo que debería pasar]
-```text
+```
 
 **Given** describe el estado inicial del mundo antes de que ocurra la acción. Es el contexto. "Dado que existe un usuario registrado con email user@example.com y un password válido". "Dado que el dispositivo no tiene conexión a internet".
 
@@ -79,7 +79,7 @@ Scenario: Login rechazado por password vacío
   When el usuario intenta construir las credenciales
   Then el sistema rechaza el password antes de intentar la autenticación
   And devuelve un error de tipo password vacío
-```text
+```
 
 ### Cómo se lee un escenario BDD paso a paso
 
@@ -92,7 +92,7 @@ Scenario: Login exitoso con credenciales válidas
   When el usuario envía sus credenciales
   Then el sistema autentica al usuario exitosamente
   And el sistema devuelve una sesión con un token de acceso
-```text
+```
 
 **Línea 1 — `Scenario:`** — Es el título. Describe en una frase corta qué estamos probando. Siempre empieza con `Scenario:`. Es como el título de una película: te dice de qué va sin darte todos los detalles.
 
@@ -147,7 +147,7 @@ When el usuario envía credenciales            let session = try await sut.execu
 
 Then autentica exitosamente                   XCTAssertEqual(session, expectedSession)
   And devuelve sesión con token               XCTAssertEqual(session.token, "valid-token")
-```text
+```
 
 Y la traducción de un sad path:
 
@@ -167,7 +167,7 @@ Then rechaza el email                         } catch {
   And devuelve error email inválido               XCTAssertEqual(error as? LoginUseCase.Error,
                                                       .invalidEmail)
                                               }
-```swift
+```
 
 **Regla de oro:** cada `Scenario` BDD se convierte en exactamente un `func test_...()` en Swift. Si tienes 5 escenarios, tienes 5 tests. El nombre del test describe el escenario: `test_execute_with_invalid_email_throws_invalidEmail`.
 
@@ -212,25 +212,6 @@ En la siguiente lección pasamos al **cómo**: implementar cada comportamiento c
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/02-metodologia-bdd-tdd.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -258,7 +239,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

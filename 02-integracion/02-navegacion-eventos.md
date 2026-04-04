@@ -58,7 +58,7 @@ sequenceDiagram
     Note over COORD: NavigationStack detecta<br/>el cambio en path
     COORD->>CV: Muestra CatalogView
     Note over CV: CatalogView no sabe<br/>que viene de Login
-```swift
+```
 
 Este flujo muestra la cadena completa: el usuario pulsa, el ViewModel ejecuta, emite un evento, el Composition Root lo redirige, el Coordinator navega. En ningún momento Login conoce la existencia de Catalog.
 
@@ -81,7 +81,7 @@ enum AppDestination: Hashable {
     case catalog
     case productDetail(Product)
 }
-```swift
+```
 
 Cada caso del enum representa una pantalla a la que se puede navegar. `catalog` es la pantalla del catálogo después del login. `productDetail(Product)` es la pantalla de detalle de un producto (la implementaremos en una etapa futura, pero la definimos ahora para que la arquitectura esté preparada).
 
@@ -191,7 +191,7 @@ struct CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```text
+```
 
 ### La App principal con el coordinador
 
@@ -225,7 +225,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```text
+```
 
 El flujo completo es:
 
@@ -304,7 +304,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 }
-```text
+```
 
 Los tests verifican el estado del coordinador (autenticación y path) sin necesidad de renderizar UI. Esto es posible porque la lógica de navegación vive en el coordinador, no en las vistas.
 
@@ -365,28 +365,6 @@ Esta matriz evita rutas huérfanas y simplifica soporte de deep links futuros.
 
 Si puedes cambiar destino de un evento sin editar la feature emisora, la navegación está correctamente desacoplada.
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `02-integracion/02-navegacion-eventos.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -414,7 +392,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

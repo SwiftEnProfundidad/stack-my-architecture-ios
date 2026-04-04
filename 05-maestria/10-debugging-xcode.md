@@ -36,21 +36,21 @@ Los breakpoints pausan la ejecución en una línea específica. Puedes inspeccio
 Click en el margen izquierdo de la línea 42
 → Se añade un punto azul
 → La app se pausa al llegar a esa línea
-```text
+```
 
 **Breakpoint condicional:**
 ```text
 Click derecho en el breakpoint → Edit breakpoint
 → Añade condición: `email.isEmpty`
 → Solo se pausa cuando email está vacío
-```text
+```
 
 **Breakpoint con acción:**
 ```text
 Edit breakpoint → Add Action → Log Message
 → Message: "Email value: @email@"
 → Imprime en consola sin pausar la ejecución
-```text
+```
 
 ### Atajos de teclado esenciales
 
@@ -89,7 +89,7 @@ func submit() async {
         print("Error: \(error)")
     }
 }
-```text
+```
 
 **Flujo de debugging:**
 1. Pon breakpoint en línea 2 (isLoading = true)
@@ -129,7 +129,7 @@ false
 (lldb) po error as? AuthError
 ▿ Optional(AuthError.invalidEmail)
   - some: AuthError.invalidEmail
-```text
+```
 
 ### `po` vs `p`
 
@@ -148,7 +148,7 @@ Error Domain=NSURLErrorDomain Code=-1009 "The Internet connection appears to be 
 
 (lldb) po (error as NSError).userInfo
 ["NSLocalizedDescription": "The Internet connection appears to be offline."]
-```text
+```
 
 ---
 
@@ -215,7 +215,7 @@ class LoginViewModel {
         // hay un ciclo: Coordinator ↔ ViewModel
     }
 }
-```text
+```
 
 **Solución:** `[weak self]` en el closure.
 
@@ -253,7 +253,7 @@ Para problemas de rendimiento: CPU, memoria, red, batería.
 │        └─ 85% - URLSession.data()       │
 │             └─ 80% - _CFReadStreamRead │
 └────────────────────────────────────────┘
-```text
+```
 
 **Conclusión:** El 80% del tiempo está esperando red. No es un problema de código, es latencia de red.
 
@@ -310,7 +310,7 @@ Task {
     }
 }
 // Resultado: counter es probablemente < 2000
-```text
+```
 
 **Debug:**
 1. Ejecuta con Thread Sanitizer: Edit Scheme → Run → Diagnostics → Thread Sanitizer
@@ -331,7 +331,7 @@ actor B {
         await a.callB(self)  // Espera a A → Deadlock!
     }
 }
-```text
+```
 
 **Debug:** La app se congela. Pause execution y mira el stack trace: verás `await` en ambos hilos.
 

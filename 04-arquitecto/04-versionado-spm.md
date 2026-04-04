@@ -113,7 +113,7 @@ StackMyArchitecture/
     Catalog/
   SharedKernel/
   Tests/
-```text
+```
 
 ### Siguiente paso (cuando duela): Nivel 2
 
@@ -127,7 +127,7 @@ StackMyArchitecture/
       Package.swift
     CatalogFeature/
       Package.swift
-```text
+```
 
 ---
 
@@ -161,7 +161,7 @@ let package = Package(
         )
     ]
 )
-```text
+```
 
 Punto clave:
 
@@ -185,7 +185,7 @@ public struct Session: Sendable, Equatable, Hashable {
         self.email = email
     }
 }
-```text
+```
 
 Si marcas todo `public`, conviertes detalles internos en contrato difícil de cambiar.
 
@@ -249,7 +249,7 @@ Ejemplo:
 public var token: String { accessToken }
 
 public let accessToken: String
-```text
+```
 
 ---
 
@@ -385,7 +385,7 @@ Trigger para B -> C:
 - Decisión: mantener Nivel 1 inicialmente; migrar a paquetes locales (Nivel 2) ante dolor medible; evaluar Nivel 3 solo con consumidores independientes reales
 - Consecuencias: menor complejidad inicial, migración guiada por señales objetivas
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -543,7 +543,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 
