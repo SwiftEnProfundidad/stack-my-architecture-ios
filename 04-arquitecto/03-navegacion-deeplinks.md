@@ -84,7 +84,7 @@ struct ProductID: Hashable, Sendable {
         self.rawValue = rawValue
     }
 }
-```text
+```
 
 Por qué tipado fuerte:
 
@@ -118,7 +118,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```text
+```
 
 ### Ejemplo realista
 
@@ -150,7 +150,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```text
+```
 
 Parser solo interpreta URL. No decide auth ni navegación final.
 
@@ -184,7 +184,7 @@ struct NavigationPolicy: Sendable {
         }
     }
 }
-```text
+```
 
 Ventaja enterprise:
 
@@ -250,7 +250,7 @@ final class AppCoordinator: ObservableObject {
         }
     }
 }
-```text
+```
 
 ---
 
@@ -342,7 +342,7 @@ struct CatalogRouter: FeatureRouter {
         }
     }
 }
-```text
+```
 
 Supuesto: este patrón se activa cuando el coordinador supere complejidad razonable. En una app muy pequeña puede ser demasiado pronto.
 
@@ -400,7 +400,7 @@ final class AppCoordinatorNavigationTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 }
-```text
+```
 
 Nota: `path` vacío/append puede variar según implementación de root screen; lo importante es mantener contrato verificable.
 
@@ -441,7 +441,7 @@ No definir política produce navegación errática.
 Button("Ir al producto") {
     path.append("product-123")
 }
-```text
+```
 
 Problemas:
 
@@ -638,7 +638,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

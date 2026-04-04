@@ -55,7 +55,7 @@ func loadProducts() async throws -> [Product] {
     let (data, _) = try await httpClient.execute(request)
     return try JSONDecoder().decode([Product].self, from: data)
 }
-```text
+```
 
 **Explicacion:**
 
@@ -103,7 +103,7 @@ Button("Cargar") {
         await viewModel.load()
     }
 }
-```text
+```
 
 `Task { ... }` — Crea un nuevo contexto async desde código sincrono. Lo necesitas porque el action de un `Button` no es `async`. El `Task` "envuelve" el código async para que pueda ejecutarse.
 
@@ -127,7 +127,7 @@ Button("Cargar") {
 Task {
     await viewModel.load()
 }
-```text
+```
 
 ### Cancelación manual de Task
 
@@ -156,7 +156,7 @@ final class SearchViewModel {
         }
     }
 }
-```text
+```
 
 **Explicacion:**
 
@@ -197,7 +197,7 @@ func loadProfile() async throws -> ProfileData {
     )
     // Total: ~2 segundos (el mas lento)
 }
-```text
+```
 
 **Explicacion:**
 
@@ -259,7 +259,7 @@ func loadProductImages(urls: [URL]) async -> [URL: Data] {
         return results
     }
 }
-```text
+```
 
 **Explicacion:**
 
@@ -301,7 +301,7 @@ class ImageCache {
         cache[url] = data  // Hilo 2 escribe AL MISMO TIEMPO → CRASH
     }
 }
-```text
+```
 
 ### La solución con actor
 
@@ -321,7 +321,7 @@ actor ImageCache {
 // Uso: requiere await porque el actor puede estar ocupado
 let data = await imageCache.get(url)
 await imageCache.set(url, data: imageData)
-```swift
+```
 
 **Explicacion:**
 
@@ -336,7 +336,7 @@ await imageCache.set(url, data: imageData)
 ```swift
 @Observable @MainActor
 final class CatalogViewModel { ... }
-```text
+```
 
 **Por que:** Las propiedades del ViewModel son leidas por SwiftUI para renderizar. SwiftUI solo renderiza en el hilo principal. Si cambiaras `state` desde un hilo de background, la app crashearia. `@MainActor` previene eso.
 
@@ -394,7 +394,7 @@ Task {
 group.addTask {
     return processedItem  // processedItem debe ser Sendable
 }
-```text
+```
 
 ### @unchecked Sendable — Deuda técnica
 
@@ -406,7 +406,7 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
     var result: Result<(Data, HTTPURLResponse), Error>
     // ...
 }
-```text
+```
 
 `@unchecked Sendable` — Le dices al compilador: "confio en que esto es thread-safe". Pero si te equivocas, habra data races que el compilador no detectara.
 
@@ -439,7 +439,7 @@ func processLargeDataset(_ items: [Item]) async throws -> [ProcessedItem] {
 
     return results
 }
-```text
+```
 
 **Explicacion:**
 
@@ -451,7 +451,7 @@ Alternativa manual:
 guard !Task.isCancelled else {
     return results  // Devolver lo que tengamos hasta ahora
 }
-```text
+```
 
 ### Por que es importante
 
@@ -475,7 +475,7 @@ let url = URL(fileURLWithPath: "/path/to/large-file.txt")
 for try await line in url.lines {
     process(line)
 }
-```text
+```
 
 `for try await line in url.lines` — Igual que `for line in array`, pero cada linea llega de forma asincrona. El bucle se pausa esperando la siguiente linea, sin bloquear el hilo.
 
@@ -502,7 +502,7 @@ func observeLocationUpdates() -> AsyncStream<CLLocation> {
 for await location in observeLocationUpdates() {
     updateMap(with: location)
 }
-```text
+```
 
 **Explicacion:**
 
@@ -543,7 +543,7 @@ final class ProductListViewModel {
         }
     }
 }
-```text
+```
 
 `defer { isLoading = false }` — Se ejecuta **siempre** al salir de la función, sea por exito o por error. Garantiza que `isLoading` se pone en `false` sin importar que pase. Es como un "al salir, apaga la luz".
 
@@ -570,7 +570,7 @@ func withRetry<T>(
 let products = try await withRetry {
     try await repository.loadAll()
 }
-```text
+```
 
 ### Patrón: Timeout
 
@@ -599,7 +599,7 @@ func withTimeout<T>(
 let products = try await withTimeout(seconds: 10) {
     try await repository.loadAll()
 }
-```text
+```
 
 **Explicacion:** Lanza dos tareas en paralelo: la operación real y un timer. Si el timer termina primero (timeout), cancela la operación. Si la operación termina primero, cancela el timer.
 
@@ -633,7 +633,7 @@ final class MyService: Sendable {
 struct MyService: Sendable {
     func doWork() { }
 }
-```text
+```
 
 **Error 2: "Main actor-isolated property cannot be accessed from nonisolated context"**
 ```swift
@@ -651,7 +651,7 @@ func process(vm: ViewModel) {
 func process(vm: ViewModel) async {
     print(await vm.name)  // OK: await cruza la frontera
 }
-```text
+```
 
 **Error 3: "Capture of non-Sendable in @Sendable closure"**
 ```swift
@@ -674,7 +674,7 @@ let processor = DataProcessor()
 Task {
     await processor.add("nuevo")  // OK: serializado por el actor
 }
-```text
+```
 
 ### Como prepararte
 
@@ -711,7 +711,7 @@ func loadData() async throws -> Data {
     let (data, _) = try await session.data(from: url)
     return data
 }
-```text
+```
 
 `DispatchSemaphore`, `NSLock`, y `pthread_mutex` **nunca** deben usarse en contextos async. Bloquean el hilo del executor, y como el executor tiene un número limitado de hilos, puedes causar un deadlock donde todas las tareas estan esperando un hilo que esta bloqueado.
 
@@ -727,7 +727,7 @@ Task.detached {
 Task {
     await viewModel.load()  // Hereda @MainActor si el padre es @MainActor
 }
-```swift
+```
 
 `Task.detached` NO hereda el contexto del padre (prioridad, actor isolation). Solo usalo si necesitas **explicitamente** ejecutar fuera del contexto actual (raro).
 
@@ -752,7 +752,7 @@ func processItems(_ items: [Item]) async throws -> [Result] {
     }
     return results
 }
-```text
+```
 
 ---
 
@@ -984,7 +984,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

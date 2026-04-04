@@ -49,7 +49,7 @@ import Foundation
 protocol HTTPClient: Sendable {
     func execute(_ request: URLRequest) async throws -> (Data, HTTPURLResponse)
 }
-```text
+```
 
 Por qué este contrato es bueno:
 
@@ -82,7 +82,7 @@ struct URLSessionHTTPClient: HTTPClient, Sendable {
         return (data, httpResponse)
     }
 }
-```text
+```
 
 Decisiones:
 
@@ -119,7 +119,7 @@ struct AuthenticatedHTTPClient: HTTPClient, Sendable {
         return try await wrapped.execute(authenticatedRequest)
     }
 }
-```text
+```
 
 Ventaja:
 
@@ -166,7 +166,7 @@ struct CatalogComposer {
         return RemoteProductRepository(httpClient: authClient, baseURL: baseURL)
     }
 }
-```text
+```
 
 Principio importante del curso:
 
@@ -256,7 +256,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.execute(URLRequest(url: URL(string: "https://example.com")!)))
     }
 }
-```swift
+```
 
 ---
 
@@ -527,7 +527,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

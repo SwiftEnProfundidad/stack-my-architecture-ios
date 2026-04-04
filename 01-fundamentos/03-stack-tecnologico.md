@@ -16,7 +16,7 @@ SwiftUI es el framework declarativo de Apple para construir interfaces de usuari
 Text("Hola mundo")
     .font(.title)
     .foregroundStyle(.blue)
-```text
+```
 
 Y SwiftUI se encarga de crear los elementos nativos necesarios, posicionarlos, y actualizarlos cuando cambia el estado.
 
@@ -61,7 +61,7 @@ func execute(email: String, password: String) async throws -> Session {
     let credentials = try Credentials(email: email, password: password)
     return try await authGateway.authenticate(credentials: credentials)
 }
-```text
+```
 
 Se lee de arriba a abajo: construyo las credenciales, luego espero (`await`) la respuesta del servidor. Si algo falla, lanzo un error (`throws`). Sencillo y legible.
 
@@ -73,7 +73,7 @@ Button("Login") {
         await viewModel.submit()
     }
 }
-```swift
+```
 
 **`actor`** es un tipo de referencia que protege su estado mutable de accesos concurrentes. Solo un hilo puede acceder al estado del actor a la vez. Es la alternativa moderna a los locks y semáforos. En este curso, los usaremos cuando un componente necesite estado mutable compartido entre varios llamantes.
 
@@ -168,7 +168,7 @@ Sources/
 │       └── Interface/
 └── SharedKernel/
     └── (solo tipos verdaderamente compartidos)
-```text
+```
 
 Fíjate en que `SharedKernel/` está vacío o casi vacío. La regla es que solo vive ahí lo que dos o más features necesitan genuinamente compartir. Si solo lo usa una feature, va dentro de esa feature, aunque parezca "genérico". Esto evita que SharedKernel se convierta en un cajón de sastre donde todo termina acoplado a todo.
 
@@ -308,25 +308,6 @@ Cada pieza tiene su razón de ser. Si quitas una, las demás se debilitan. Por e
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/03-stack-tecnologico.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -354,7 +335,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

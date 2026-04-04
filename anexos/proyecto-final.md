@@ -137,7 +137,7 @@ BookShelfTests/
 └── App/
     └── Navigation/
         └── AppCoordinatorTests.swift
-```swift
+```
 
 ### Modelo de dominio
 
@@ -151,7 +151,7 @@ Book
 ├── price: Price        (reutiliza el Price del curso o crea uno nuevo)
 ├── coverURL: URL
 └── description: String
-```swift
+```
 
 **Pregunta para ti:** Que protocolos necesita conformar `Book`? Piensa en: tests (necesitas `==`), navegación (necesitas NavigationPath), concurrencia (es async). Escribe los protocolos ANTES de mirar la respuesta.
 
@@ -173,7 +173,7 @@ enum BooksError: Error, Equatable, Sendable {
     case connectivity
     case invalidData
 }
-```text
+```
 
 **Pregunta para ti:** Por que `Error`, `Equatable` y `Sendable`? Escribe tu respuesta antes de mirar.
 

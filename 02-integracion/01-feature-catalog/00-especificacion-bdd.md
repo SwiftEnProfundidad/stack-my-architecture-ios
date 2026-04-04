@@ -86,7 +86,7 @@ Scenario: Carga exitosa con productos disponibles
   Then el usuario ve la lista de productos
   And cada producto muestra nombre, precio e imagen
   And el estado de carga desaparece
-```text
+```
 
 ### Interpretación técnica
 
@@ -105,7 +105,7 @@ Scenario: Respuesta válida sin productos
   When la pantalla Catalog se carga
   Then el usuario ve un estado vacío amigable
   And NO se muestra error de conectividad
-```text
+```
 
 ### Interpretación técnica
 
@@ -125,7 +125,7 @@ Scenario: No hay conexión de red
   Then el usuario ve mensaje de error de conectividad
   And se ofrece acción de reintentar
   And NO se muestra estado vacío
-```text
+```
 
 ### Interpretación técnica
 
@@ -143,7 +143,7 @@ Scenario: El backend devuelve payload inválido
   When Catalog intenta decodificar la respuesta
   Then el usuario ve un error genérico de carga
   And se ofrece reintentar
-```text
+```
 
 ### Interpretación técnica
 
@@ -161,7 +161,7 @@ Scenario: El usuario reintenta y la carga se recupera
   When el usuario pulsa Reintentar
   Then Catalog vuelve a estado loading
   And finalmente muestra productos cargados
-```text
+```
 
 ### Interpretación técnica
 
@@ -178,7 +178,7 @@ Scenario: Acceso a ruta protegida sin sesión
   When intenta acceder a Catalog por navegación interna o deep link
   Then el sistema redirige a Login
   And conserva intención de navegación cuando aplique
-```text
+```
 
 ### Interpretación técnica
 
@@ -195,7 +195,7 @@ Scenario: Usuario abandona la pantalla durante la carga
   When el usuario navega fuera antes de recibir respuesta
   Then la tarea de carga se cancela
   And no se publica un estado tardío que ensucie la UI
-```text
+```
 
 ### Interpretación técnica
 
@@ -213,7 +213,7 @@ Scenario: El backend devuelve productos duplicados
   When Catalog procesa la respuesta
   Then el sistema aplica política de normalización definida
   And NO rompe la UI por identidad inconsistente
-```text
+```
 
 ### Interpretación técnica
 
@@ -240,7 +240,7 @@ enum CatalogState: Equatable {
     case empty
     case error(CatalogErrorViewData)
 }
-```text
+```
 
 ## 2) Error modelado explícitamente
 
@@ -385,7 +385,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

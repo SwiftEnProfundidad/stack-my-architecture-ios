@@ -86,7 +86,7 @@ En Build Settings del target específico:
 
 ```text
 SWIFT_STRICT_CONCURRENCY = complete
-```text
+```
 
 O en `Package.swift` para un paquete SPM:
 
@@ -97,7 +97,7 @@ O en `Package.swift` para un paquete SPM:
         .enableExperimentalFeature("StrictConcurrency")
     ]
 )
-```text
+```
 
 ### Paso 2: Compilar y analizar los warnings/errores
 
@@ -115,7 +115,7 @@ let obj = MyClass()
 Task {
     print(obj.value) // Error: obj cruza dominios y no es Sendable
 }
-```swift
+```
 
 **Soluciones (en orden de preferencia):**
 
@@ -130,7 +130,7 @@ Task {
 ```swift
 // ❌ Error: variable global mutable
 var sharedConfig = AppConfig()
-```text
+```
 
 **Soluciones:**
 
@@ -150,7 +150,7 @@ actor ConfigStore {
 // Opción 3: nonisolated(unsafe) — válvula de escape temporal
 nonisolated(unsafe) var sharedConfig = AppConfig()
 // ⚠️ Documenta por qué es seguro y crea ticket para migrar
-```text
+```
 
 #### Error 3: "Main actor-isolated property cannot be referenced from non-isolated context"
 
@@ -164,7 +164,7 @@ class ViewModel {
 func process(vm: ViewModel) {
     print(vm.title) // Error
 }
-```text
+```
 
 **Soluciones:**
 
@@ -180,7 +180,7 @@ func process(vm: ViewModel) async {
     let title = await vm.title // ✅
     print(title)
 }
-```text
+```
 
 ### Paso 3: Verificar que los tests pasan
 
@@ -190,7 +190,7 @@ Después de arreglar todos los errores del módulo, ejecuta los tests del módul
 xcodebuild test \
     -scheme LoginFeature \
     -destination 'platform=iOS Simulator,name=iPhone 16'
-```text
+```
 
 ### Paso 4: Repetir para el siguiente módulo
 
@@ -221,7 +221,7 @@ func processData() async {
     }
     // result ya no se usa aquí → no hay data race posible
 }
-```text
+```
 
 Region-based isolation reduce los falsos positivos: casos donde el compilador reporta un error pero no hay data race real. Esto hace la migración a Swift 6 significativamente más fácil.
 
@@ -241,7 +241,7 @@ actor Cache {
 actor Cache {
     func store(_ data: sending Data) { /* ... */ }
 }
-```swift
+```
 
 La diferencia:
 - `Sendable`: el tipo es inherentemente seguro para compartir (puede copiarse o es inmutable).
@@ -261,7 +261,7 @@ Swift 6.2 permite configurar el aislamiento por defecto del módulo:
         .defaultIsolation(MainActor.self)
     ]
 )
-```text
+```
 
 Con `defaultIsolation(MainActor.self)`, todo el código del módulo está aislado al `@MainActor` por defecto. No necesitas añadir `@MainActor` a cada ViewModel o View. El código que necesita ser nonisolated lo marcas explícitamente:
 
@@ -276,7 +276,7 @@ class ViewModel { // Implícitamente @MainActor
 nonisolated func parseJSON(_ data: Data) -> [Product] {
     // Explícitamente nonisolated: puede ejecutarse en cualquier hilo
 }
-```text
+```
 
 ### ¿Es buena idea?
 
@@ -353,20 +353,6 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `05-maestria/09-migracion-swift6.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -394,7 +380,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

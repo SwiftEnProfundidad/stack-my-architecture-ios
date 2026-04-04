@@ -48,7 +48,7 @@ flowchart LR
     INFRA --> DOMAIN["Domain\nsemántica de negocio"]
     DOMAIN --> APP["Application\norquesta casos"]
     APP -.-> UI["Interface\npresenta estados"]
-```text
+```
 
 Si Domain acepta cualquier cosa sin criterio, todo lo demás hereda ruido.
 
@@ -80,7 +80,7 @@ struct Product: Equatable, Sendable {
     let price: Price
     let imageURL: URL
 }
-```text
+```
 
 ### `Price`
 
@@ -91,7 +91,7 @@ struct Price: Equatable, Sendable {
     let amount: Decimal
     let currency: String
 }
-```text
+```
 
 ### `CatalogError`
 
@@ -100,7 +100,7 @@ enum CatalogError: Error, Equatable, Sendable {
     case connectivity
     case invalidData
 }
-```text
+```
 
 Decisiones clave:
 
@@ -203,7 +203,7 @@ final class ProductDomainTests: XCTestCase {
         XCTAssertNotEqual(CatalogError.connectivity, .invalidData)
     }
 }
-```swift
+```
 
 **Explicación de cada test:**
 
@@ -390,7 +390,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

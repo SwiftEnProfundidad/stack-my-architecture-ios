@@ -140,7 +140,7 @@ enum Freshness: Sendable, Equatable {
     case fresh
     case stale(age: TimeInterval)
 }
-```text
+```
 
 La política devuelve estado semántico, no solo booleano. Esto mejora decisiones en Application/UI.
 
@@ -196,7 +196,7 @@ struct CachedProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```text
+```
 
 Aquí se ve un principio clave:
 
@@ -218,7 +218,7 @@ enum CatalogScreenState: Sendable, Equatable {
     case loaded(products: [Product], freshness: Freshness)
     case error(CatalogError)
 }
-```text
+```
 
 No siempre necesitas mostrar “actualizado hace X minutos”, pero el estado debe poder representarlo para casos de producto exigentes.
 
@@ -313,7 +313,7 @@ final class CachedProductRepositoryConsistencyTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.loadAll())
     }
 }
-```text
+```
 
 ---
 
@@ -341,7 +341,7 @@ actor InMemoryProductStore: ProductStore {
         cached
     }
 }
-```text
+```
 
 No metas `@MainActor` en almacenamiento por “silenciar warnings”. Aisla donde corresponde.
 
@@ -397,7 +397,7 @@ Corrección:
 - Decisión: aplicar network-first con fallback a cache solo cuando politica de frescura lo permita
 - Consecuencias: mejor resiliencia sin ocultar stale data expirada
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -551,7 +551,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

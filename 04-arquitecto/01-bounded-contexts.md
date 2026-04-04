@@ -146,7 +146,7 @@ struct CatalogToOrderItemMapper {
         )
     }
 }
-```text
+```
 
 Parece simple, pero evita acoplamiento estructural entre contextos.
 
@@ -203,7 +203,7 @@ final class CatalogToOrderItemMapperTests: XCTestCase {
         XCTAssertEqual(item.unitPrice, 29.99)
     }
 }
-```text
+```
 
 ---
 
@@ -312,7 +312,7 @@ Trigger para revisar A:
 - Decisión: mantener contextos separados por lenguaje y ownership; usar ACL para traducciones y evitar imports directos entre contextos
 - Consecuencias: mayor claridad y escalabilidad; necesidad de disciplina documental y tests de frontera
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -546,7 +546,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

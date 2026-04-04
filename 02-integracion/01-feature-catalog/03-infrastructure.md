@@ -103,7 +103,7 @@ import Foundation
 protocol ProductRepository: Sendable {
     func loadAll() async throws -> [Product]
 }
-```text
+```
 
 Infrastructure debe cumplir este contrato exacto, sin extenderlo con detalles de red.
 
@@ -131,7 +131,7 @@ struct ProductDTO: Decodable, Sendable {
         case imageURL = "image_url"
     }
 }
-```text
+```
 
 Este ejemplo usa `Decimal` y `URL` ya decodificados para fallar pronto cuando el payload venga mal.
 
@@ -172,7 +172,7 @@ struct ProductMapper {
         )
     }
 }
-```text
+```
 
 Diferencia clave:
 
@@ -244,7 +244,7 @@ struct RemoteProductRepository: ProductRepository, Sendable {
         return request
     }
 }
-```text
+```
 
 ### Por qué así
 
@@ -270,7 +270,7 @@ struct CatalogFeatureFactory {
         return LoadProductsUseCase(repository: repository)
     }
 }
-```text
+```
 
 Esto mantiene la regla de curso: composición fuera del core.
 
@@ -348,7 +348,7 @@ final class RemoteProductRepositoryTests: XCTestCase {
         try! JSONSerialization.data(withJSONObject: rows)
     }
 }
-```text
+```
 
 **Explicación de cada test de contrato:**
 
@@ -408,7 +408,7 @@ struct BadRemoteRepository: ProductRepository {
         }
     }
 }
-```text
+```
 
 Qué está mal:
 
@@ -494,7 +494,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

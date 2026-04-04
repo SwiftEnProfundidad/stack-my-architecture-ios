@@ -58,7 +58,7 @@ func test_loadProducts_updates_state() async {
     
     XCTAssertEqual(viewModel.products.count, 3)
 }
-```text
+```
 
 ### Diagrama: por qué Thread.sleep causa flaky tests
 
@@ -108,7 +108,7 @@ func test_loadProducts_on_success_returns_products() async throws {
     
     XCTAssertEqual(result, expectedProducts)
 }
-```text
+```
 
 No hay sleep, no hay timeout, no hay dependencia del timing. La prueba espera exactamente lo necesario y ni un nanosegundo más.
 
@@ -141,7 +141,7 @@ func test_cache_expires_after_maxAge() async {
     
     XCTAssertNil(result)
 }
-```text
+```
 
 Ya lo hacemos en la Etapa 3 con el `currentDate` closure del `CachedProductRepository`. El principio es el mismo para cualquier dependencia temporal: no uses el reloj real, inyecta una función que devuelva la fecha que necesites para el test.
 
@@ -165,7 +165,7 @@ func test_loadProducts_sets_isLoading_to_true_before_request() async {
     // Después de await, sabemos que loadProducts() terminó completamente
     XCTAssertFalse(viewModel.isLoading) // isLoading vuelve a false al terminar
 }
-```text
+```
 
 ### Verificar estados intermedios
 
@@ -249,7 +249,7 @@ func test_loadProducts_sets_isLoading_to_true_while_loading() async {
     // Verificar estado final
     XCTAssertFalse(viewModel.isLoading, "isLoading debería ser false al terminar")
 }
-```text
+```
 
 `Task.yield()` le dice al runtime "ejecuta cualquier trabajo pendiente antes de continuar". No es un sleep: no espera un tiempo fijo, sino que cede el control para que se procesen las tareas encoladas. Es mucho más fiable que un sleep.
 
@@ -283,7 +283,7 @@ func test_loadProducts_on_cancellation_throws_cancellationError() async {
         XCTFail("Expected CancellationError, got \(error)")
     }
 }
-```text
+```
 
 Para que este test pase, el caso de uso debe verificar la cancelación:
 
@@ -296,7 +296,7 @@ struct LoadProductsUseCase {
         return try await repository.loadAll()
     }
 }
-```text
+```
 
 ---
 
@@ -327,7 +327,7 @@ func test_concurrent_access_to_actor_does_not_crash() async {
     
     // Si llegamos aquí, no hubo crash por data race
 }
-```text
+```
 
 ### Cuándo usar este tipo de test
 
@@ -360,7 +360,7 @@ extension XCTestCase {
         }
     }
 }
-```text
+```
 
 ### Cómo funciona
 
@@ -387,7 +387,7 @@ private func makeSUT(
     
     return (sut, client)
 }
-```text
+```
 
 Para clases como ViewModels:
 
@@ -514,7 +514,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

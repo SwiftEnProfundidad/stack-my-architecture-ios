@@ -8,6 +8,8 @@ En esta lección vamos a construir los siguientes tipos, todos con TDD (test pri
 
 El Value Object `Email`, que garantiza que un email tiene formato válido. El Value Object `Password`, que garantiza que una contraseña no está vacía. El tipo `Credentials` que agrupa ambos. El enum `AuthError` con los errores de autenticación. El enum `LoginEvent` con los eventos del dominio. Y el struct `Session` que representa una autenticación exitosa.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los tipos que construyes en esta lección usan nombres pedagógicos. En el scaffold `apps/ios/ArchitectureKit` los equivalentes son: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`. El patrón es idéntico; solo cambia el nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 Aquí aplicamos explícitamente dos principios de [Principios de ingeniería](../01-principios-ingenieria.md):
@@ -118,7 +120,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email.value, "user@example.com")
     }
 }
-```swift
+```
 
 **Explicación línea por línea para que no quede ninguna duda:**
 
@@ -148,7 +150,7 @@ struct Email: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```swift
+```
 
 **Explicación línea por línea:**
 
@@ -178,7 +180,7 @@ func test_init_with_string_without_at_sign_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```swift
+```
 
 **Explicación línea por línea:**
 
@@ -209,7 +211,7 @@ struct Email: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```swift
+```
 
 **Explicación de las líneas nuevas:**
 
@@ -237,7 +239,7 @@ func test_init_with_email_without_domain_dot_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Falla porque "user@domain" contiene arroba y pasa nuestra validación actual.
 
@@ -256,7 +258,7 @@ private static func isValid(_ value: String) -> Bool {
     guard parts.count == 2 else { return false }
     return parts[1].contains(".")
 }
-```text
+```
 
 Ejecutamos. Los tres tests pasan.
 
@@ -270,7 +272,7 @@ func test_init_with_empty_string_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambiar nada porque un string vacío no contiene "@". El test tiene valor documental: deja explícito que un email vacío es inválido.
 
@@ -286,7 +288,7 @@ func test_init_trims_whitespace_from_valid_email() throws {
     
     XCTAssertEqual(email.value, "user@example.com")
 }
-```text
+```
 
 Ejecutamos. Falla porque nuestro `init` guarda el valor tal cual, con espacios.
 
@@ -300,7 +302,7 @@ init(_ rawValue: String) throws {
     }
     self.value = trimmed
 }
-```text
+```
 
 Ejecutamos. Todos los tests pasan.
 
@@ -336,7 +338,7 @@ struct Email: Equatable, Sendable {
         return parts[1].contains(".")
     }
 }
-```text
+```
 
 Y el archivo de tests completo es:
 
@@ -378,7 +380,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email.value, "user@example.com")
     }
 }
-```text
+```
 
 Fíjate en lo que ha pasado: 5 tests, 5 iteraciones de TDD, y el resultado es un tipo de dominio completo, verificado, y con una cobertura que cubre todos los escenarios BDD que definimos. Y el código de producción tiene exactamente lo que necesitamos, nada más. No hay "código por si acaso". Todo lo que hay, lo pidió un test.
 
@@ -406,7 +408,7 @@ final class PasswordTests: XCTestCase {
         XCTAssertEqual(password.value, "securePass123")
     }
 }
-```text
+```
 
 No compila porque `Password` no existe.
 
@@ -422,7 +424,7 @@ struct Password: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Pasa.
 
@@ -436,7 +438,7 @@ func test_init_with_empty_string_throws_empty() {
         XCTAssertEqual(error as? Password.ValidationError, .empty)
     }
 }
-```text
+```
 
 Falla.
 
@@ -457,7 +459,7 @@ struct Password: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Ambos tests pasan. El `Password` está completo.
 
@@ -474,7 +476,7 @@ struct Credentials: Equatable, Sendable {
     let email: Email
     let password: Password
 }
-```swift
+```
 
 No escribimos tests para `Credentials` porque no tiene comportamiento propio. Es un tipo de datos puro, sin lógica. Testear que un struct guarda los valores que le pasas no aporta valor. Los tests de `Email` y `Password` ya cubren la validación de sus componentes.
 
@@ -491,7 +493,7 @@ enum AuthError: Error, Equatable, Sendable {
     case invalidCredentials
     case connectivity
 }
-```text
+```
 
 Estos errores son diferentes de los errores de validación de los Value Objects (`Email.ValidationError.invalidFormat`, `Password.ValidationError.empty`). Los errores de los Value Objects son errores de **formato**: los datos del usuario no pasan la validación local. `AuthError` son errores de **autenticación**: los datos pasaron la validación local pero algo falló en la comunicación con el servidor.
 
@@ -510,7 +512,7 @@ enum LoginEvent: Equatable, Sendable {
     case succeeded(email: String)
     case failed(AuthError)
 }
-```text
+```
 
 ¿Para qué sirven los eventos? Para desacoplar la feature de lo que ocurre después. Cuando el login es exitoso, la feature emite `LoginEvent.succeeded(email: "user@example.com")`. Pero la feature **no sabe** qué pasa después. No sabe que el coordinador va a navegar a la pantalla de Home. No sabe que quizá se va a guardar la sesión en el keychain. Esas son decisiones de otros componentes que escuchan el evento y actúan en consecuencia.
 
@@ -577,22 +579,6 @@ En la siguiente lección vamos a subir una capa: la Application. Allí construir
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/05-feature-login/01-domain.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -620,7 +606,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

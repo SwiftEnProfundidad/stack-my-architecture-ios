@@ -95,22 +95,3 @@ Ver la lección [04-infra-real-network](../../02-integración/04-infra-real-netw
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `anexos/adrs/ADR-006-infra-network-urlsession.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.

@@ -28,7 +28,7 @@ func updateUser(_ user: User) -> User {
 // 1. ¿Qué pasa si save() funciona pero fetch() falla?
 // 2. ¿El return es el usuario guardado o uno nuevo?
 // 3. Difícil de testear: necesito DB real para verificar
-```text
+```
 
 ### ¿Cómo Aplicarlo?
 
@@ -53,7 +53,7 @@ func fetchUser(id: UserID) async throws -> User {
 try await saveUser(newUser)
 // 2. Leer (si necesito confirmar)
 let saved = try await fetchUser(id: newUser.id)
-```text
+```
 
 ### Reglas de CQS
 
@@ -91,7 +91,7 @@ class GetCurrentUserUseCase {
 // UI sabe qué operación hacer:
 // - "Login" → Command (LoginUseCase)
 // - "Ver perfil" → Query (GetCurrentUserUseCase)
-```text
+```
 
 ### ¿Dónde Aparece en el Curso?
 
@@ -141,7 +141,7 @@ Situación 3: Diferentes equipos responsables
 ├── Equipo A: Gestiona inventario (writes de stock)
 ├── Equipo B: Gestiona pricing (reads con reglas complejas)
 └── Solución: Contextos separados, modelos independientes
-```text
+```
 
 ### Arquitectura CQRS Típica
 
@@ -171,7 +171,7 @@ Situación 3: Diferentes equipos responsables
 │  │  - Cache agresivo permitido                         │ │
 │  └─────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Ejemplo Práctico: E-commerce
 
@@ -245,7 +245,7 @@ class CartItemAddedEventHandler {
         )
     }
 }
-```text
+```
 
 ### Consistencia en CQRS
 
@@ -262,7 +262,7 @@ Consistencia Eventual (Asíncrona):
 ├── Pros: Rápido, escalable
 ├── Cons: Read model puede estar desactualizado segundos
 └── Cuándo: Analytics, reportes, vistas no críticas
-```text
+```
 
 ### CQRS en Apps Móviles (iOS)
 
@@ -298,7 +298,7 @@ class CartPricingService {
         return try await pricingApi.getCartCalculation(cartId: cartId)
     }
 }
-```text
+```
 
 ### ¿Cuándo Usar CQS vs CQRS?
 
@@ -340,7 +340,7 @@ func updateUser(command: UpdateUserCommand) async throws {
     // Asume que los datos están validados
     try await repository.update(command.userData)
 }
-```text
+```
 
 ### 2. Muttear en un Query
 
@@ -357,7 +357,7 @@ func getUser(id: UserID) -> User {
 }
 
 // Tracking se hace en capa externa (decorator/interceptor)
-```text
+```
 
 ### 3. Sobre-ingeniería CQRS
 

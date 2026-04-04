@@ -107,7 +107,7 @@ import Foundation
 protocol ProductRepository: Sendable {
     func loadAll() async throws -> [Product]
 }
-```swift
+```
 
 **Por que `Sendable` en un protocolo:** Cuando escribes `protocol ProductRepository: Sendable`, le dices a Swift: "cualquier tipo que implemente este protocolo debe ser seguro para concurrencia". Esto es necesario porque el `LoadProductsUseCase` guarda una referencia al repositorio (`any ProductRepository`) y lo llama desde una función `async`. Si el protocolo no fuera `Sendable`, Swift 6 no te dejaria guardar esa referencia ni llamar al repositorio desde un contexto concurrente.
 
@@ -140,7 +140,7 @@ struct LoadProductsUseCase: Sendable {
         try await repository.loadAll()
     }
 }
-```text
+```
 
 **Por que `Sendable` en el UseCase:** El ViewModel (que vive en `@MainActor`) guarda una referencia al `LoadProductsUseCase` y lo llama con `await`. Eso significa que el UseCase cruza la frontera entre el hilo principal y el contexto `async`. Swift 6 exige que sea `Sendable`. Como es un `struct` con una sola propiedad `let` (el repositorio, que tambien es `Sendable` por protocolo), Swift verifica automáticamente que es seguro.
 
@@ -222,7 +222,7 @@ final class LoadProductsUseCaseTests: XCTestCase {
         )
     }
 }
-```text
+```
 
 ### Cobertura realista de etapa
 
@@ -267,7 +267,7 @@ final class LoadProductsUseCaseContractTests: XCTestCase {
         XCTAssertEqual(calls, 1)
     }
 }
-```text
+```
 
 ---
 
@@ -300,7 +300,7 @@ actor ProductRepositorySpy: ProductRepository {
         return try result.get()
     }
 }
-```text
+```
 
 Uso de `actor` en spy evita data races si cambias a pruebas concurrentes más agresivas en etapas posteriores.
 
@@ -528,7 +528,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

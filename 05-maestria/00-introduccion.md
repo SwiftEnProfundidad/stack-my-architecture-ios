@@ -271,9 +271,9 @@ El objetivo es que las skills no queden asociadas a "leer un capítulo", sino a 
 
 La etapa 5 no se considera cerrada solo por completar lecciones. El cierre formal exige pasar la rúbrica final iOS y presentar el paquete de evidencias.
 
-- [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [Evidencias obligatorias iOS](10-rubrica-final/02-evidencias-obligatorias-ios.md)
-- [Checklist de entrevista (5 minutos)](10-rubrica-final/03-checklist-entrega-para-entrevista.md)
+- [Rúbrica de empleabilidad iOS](rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Checklist de entrevista (5 minutos)](rubrica-final/03-checklist-entrega-para-entrevista.md)
 
 Regla de aprobación: cumplir umbral de puntuación, no activar hard blockers y entregar evidencia verificable para decisiones críticas.
 
@@ -311,7 +311,7 @@ Eso es exactamente lo que diferencia a alguien que "sabe conceptos" de alguien q
 
 Ahora sí: pasa a `01-isolation-domains.md` y estúdialo con el contrato anterior en mano. No lo leas como capítulo aislado; léelo como la primera pieza del sistema operativo mental que necesitas para trabajar a nivel arquitecto.
 
-> **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](10-rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
+> **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
 
 ---
 
@@ -342,7 +342,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

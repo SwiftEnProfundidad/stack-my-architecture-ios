@@ -94,7 +94,7 @@ final class CancellationTests: XCTestCase {
         }
     }
 }
-```text
+```
 
 ### Error típico
 
@@ -121,7 +121,7 @@ struct FixedClock: Clock {
     let value: Date
     func now() -> Date { value }
 }
-```text
+```
 
 ### Test determinista
 
@@ -135,7 +135,7 @@ func test_policy_marksStale_afterMaxAge() {
         return XCTFail("Expected stale")
     }
 }
-```text
+```
 
 Si usas `sleep(300)` en tests, estás construyendo deuda de CI.
 
@@ -156,7 +156,7 @@ final class UnsafeSpy: ProductRepository, @unchecked Sendable {
         return []
     }
 }
-```text
+```
 
 Si hay llamadas concurrentes, este spy introduce carreras.
 
@@ -175,7 +175,7 @@ actor SafeProductRepositorySpy: ProductRepository {
         callCount
     }
 }
-```text
+```
 
 Regla de curso:
 
@@ -228,7 +228,7 @@ func test_viewModel_lastRequestWins_underRapidRefresh() async {
     let state = await sut.state
     XCTAssertEqual(state.products.first?.id, "2")
 }
-```text
+```
 
 Este test protege contra resultados fuera de orden.
 
@@ -337,7 +337,7 @@ final class CatalogAdvancedTestPlan {
         "Last request wins under rapid refresh"
     ]
 }
-```text
+```
 
 La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 
@@ -352,7 +352,7 @@ La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 - Decisión: introducir clocks inyectados, dobles seguros y casos avanzados en rutas criticas
 - Consecuencias: mayor confianza en evoluciones con coste moderado de diseño de tests
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -552,7 +552,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

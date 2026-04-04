@@ -63,7 +63,7 @@ Con Composition Root + constructor injection:
 ```swift
 // Dependencias explícitas: ves todo en el init
 let useCase = LoginUseCase(gateway: authGateway)
-```text
+```
 
 Beneficios:
 
@@ -112,7 +112,7 @@ struct CompositionRoot {
         self.baseURL = URL(string: "https://api.example.com")!
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -147,7 +147,7 @@ extension CompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```text
+```
 
 **Qué pasa aquí:**
 
@@ -183,7 +183,7 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```text
+```
 
 Mismo patrón que Login. Misma estructura. Esa consistencia es intencional: cuando un nuevo desarrollador llega al equipo y ve cómo está montado Login, sabe automáticamente cómo está montado Catalog. Y cuando cree una tercera feature, sabe exactamente qué factory escribir.
 
@@ -219,7 +219,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -272,7 +272,7 @@ En producción, el Composition Root crea implementaciones reales:
 // Producción: red real
 let httpClient = URLSessionHTTPClient()
 let authGateway = RemoteAuthGateway(httpClient: httpClient, baseURL: prodURL)
-```text
+```
 
 En tests, cada test crea su propia cadena con stubs:
 
@@ -281,7 +281,7 @@ En tests, cada test crea su propia cadena con stubs:
 let authGateway = AuthGatewayStub(result: .success(session))
 let useCase = LoginUseCase(gateway: authGateway)
 let viewModel = LoginViewModel(loginUseCase: useCase, onLoginSucceeded: { _ in })
-```text
+```
 
 No hay un "Composition Root de tests". Cada test monta exactamente la cadena que necesita con el helper `makeSUT`. Eso es lo que hemos hecho en todas las lecciones anteriores: el patrón `makeSUT` ES un mini-composition-root local para cada test.
 
@@ -374,7 +374,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

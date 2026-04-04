@@ -116,7 +116,7 @@ final class ProductEntity {
         self.cachedAt = cachedAt
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -166,7 +166,7 @@ struct ProductEntityMapper {
         )
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -223,7 +223,7 @@ final class SwiftDataProductStore: ProductStore, @unchecked Sendable {
         try context.save()
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -280,7 +280,7 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```text
+```
 
 **Punto crítico:** Comparado con el Composition Root de Etapa 2, lo único que cambia es el paso 4: insertamos `CachedProductRepository` como decorador entre el remoto y el UseCase. **El UseCase, el ViewModel y la View no cambian.** Eso demuestra que la arquitectura por capas funciona: puedes añadir cache sin tocar Domain, Application ni Interface.
 
@@ -394,7 +394,7 @@ final class SwiftDataProductStoreTests: XCTestCase {
         XCTAssertEqual(loaded?.timestamp, timestamp)
     }
 }
-```text
+```
 
 **Explicacion de cada test:**
 
@@ -420,7 +420,7 @@ final class SwiftDataProductStoreTests: XCTestCase {
 - Alternativa rechazada: Core Data (mayor complejidad sin beneficio para nuestro volumen de datos)
 - Consecuencias: API simple, migraciones automaticas, menor boilerplate; si necesitamos soporte iOS < 17 o migraciones complejas, reevaluamos
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -565,7 +565,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

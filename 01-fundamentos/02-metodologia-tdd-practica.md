@@ -52,7 +52,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email?.value, "user@example.com")
     }
 }
-```text
+```
 
 Ejecutamos. El test no compila porque `Email` no existe. Eso es el "rojo" en TDD: puede ser un fallo de compilación o un `XCTAssertEqual` que no se cumple. Ambos cuentan como rojo.
 
@@ -66,7 +66,7 @@ struct Email: Equatable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Ejecutamos. El test pasa. ¿Es la implementación completa? No, ni de lejos. No valida nada. Pero el test que tenemos solo pide que se pueda crear un `Email` con un string válido, y eso funciona. Lo mínimo para que pase.
 
@@ -80,7 +80,7 @@ func test_init_with_string_without_at_sign_throws_error() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Falla porque `Email.ValidationError` no existe y porque el `init` actual acepta cualquier string.
 
@@ -101,7 +101,7 @@ struct Email: Equatable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Ejecutamos. Ambos tests pasan.
 
@@ -115,7 +115,7 @@ func test_init_with_empty_string_throws_error() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambiar nada, porque un string vacío no contiene "@" y nuestra validación ya lo cubre. ¿Eso es bueno o malo? Es bueno: significa que la implementación ya cubre este caso. Pero el test tiene valor documental: deja explícito que un email vacío es inválido. Lo dejamos.
 
@@ -176,7 +176,7 @@ struct DummyLogger: Logger {
 // Lo usas así en el test:
 let useCase = LoginUseCase(gateway: stubGateway, logger: DummyLogger())
 // El DummyLogger solo está ahí para que compile. No verificas nada sobre él.
-```swift
+```
 
 **Cuándo usarlo:** Cuando un componente pide una dependencia que no es relevante para lo que estás testeando. Si estás testeando la lógica de login, el logger no importa, así que pasas un dummy.
 
@@ -210,7 +210,7 @@ func test_login_exitoso_devuelve_session() async throws {
     // ASSERT: verifico que me devolvió la sesión del stub
     XCTAssertEqual(resultado, sessionEsperada)
 }
-```text
+```
 
 **Cuándo usarlo:** Cuando necesitas **controlar qué datos recibe** el componente que estás testeando. El stub es el test double más común. Lo usarás en casi todos los tests del curso.
 
@@ -258,7 +258,7 @@ func test_usecase_envia_credenciales_al_gateway() async throws {
     // Y que recibió las credenciales correctas
     XCTAssertEqual(spy.receivedCredentials.first?.email.value, "user@test.com")
 }
-```text
+```
 
 **Cuándo usarlo:** Cuando además de controlar la respuesta, necesitas **verificar que la llamada se hizo correctamente**. Por ejemplo: verificar que el UseCase NO llama al gateway cuando el email es inválido.
 
@@ -275,7 +275,7 @@ mock.expect(.authenticate, calledTimes: 1, withArguments: credentials)
 
 // Después de ejecutar el código...
 mock.verify() // Si no se cumplieron las expectativas, el test falla automáticamente
-```text
+```
 
 **Cuándo usarlo:** En frameworks de mocking como OCMock o Mockito (en Android). En Swift puro con XCTest, **no usamos mocks en este sentido**. Usamos spies + asserts manuales, que es más claro y más fácil de depurar. Si un spy tiene un `assert` manual que verifica la llamada, logra lo mismo que un mock pero de forma más explícita.
 
@@ -298,7 +298,7 @@ struct InMemoryProductStore: ProductStore {
         return products // Lee de memoria, no de disco
     }
 }
-```text
+```
 
 **Cuándo usarlo:** En **tests de integración** donde necesitas que la dependencia realmente funcione pero no quieres la complejidad de la implementación real. Un `InMemoryProductStore` funciona como el `FileProductStore` real pero sin tocar el disco, lo que hace los tests más rápidos y sin efectos secundarios.
 
@@ -434,25 +434,6 @@ Hay muchas confusiones comunes sobre ambas prácticas. Vamos a aclararlas para q
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/02-metodologia-tdd-practica.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -480,7 +461,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

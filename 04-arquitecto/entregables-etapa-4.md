@@ -29,7 +29,7 @@ En palabras simples:
   05-guia-arquitectura.md       ← convenciones operativas del repositorio
   06-quality-gates.md           ← gates 0..6, severidad, pipeline y excepciones
   entregables-etapa-4.md        ← cierre verificable de etapa
-```text
+```
 
 ---
 
@@ -52,7 +52,7 @@ scripts/check-domain-imports.sh
 scripts/check-feature-imports.sh
 scripts/check-architecture-rules.sh
 .github/workflows/quality-gates.yml
-```text
+```
 
 ### 3) Navegación y deep links como plataforma
 
@@ -62,7 +62,7 @@ Artefactos esperados:
 StackMyArchitecture/App/Navigation/DeepLinkParser.swift
 StackMyArchitectureTests/App/Navigation/DeepLinkParserTests.swift
 StackMyArchitectureTests/App/Navigation/DeepLinkCoordinatorTests.swift
-```text
+```
 
 ### 4) Versionado y SPM
 
@@ -72,7 +72,7 @@ Artefactos esperados:
 docs/versioning/semver-policy.md
 docs/versioning/deprecation-policy.md
 Packages/ (cuando se active la separación por trigger)
-```text
+```
 
 ### 5) Guía de arquitectura y quality gates
 
@@ -223,67 +223,3 @@ Aunque no cierres todos los entregables:
 ---
 
 ## Siguiente etapa
-
----
-
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
-
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semántica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuración.
-3. `==>` contrato o abstracción.
-4. `--o` salida o propagación de resultado.

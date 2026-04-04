@@ -97,7 +97,7 @@ extension XCTestCase {
         }
     }
 }
-```text
+```
 
 ### Cómo funciona paso a paso
 
@@ -120,7 +120,7 @@ addTeardownBlock {
 addTeardownBlock { [weak instance] in
     XCTAssertNil(instance) // Solo falla si hay un retain cycle real
 }
-```text
+```
 
 ### Aplicación a todos los makeSUT del proyecto
 
@@ -143,7 +143,7 @@ private func makeSUT(
     
     return (sut, client)
 }
-```text
+```
 
 **Etapa 2 — CatalogViewModelTests:**
 
@@ -163,7 +163,7 @@ private func makeSUT(
     
     return (sut, repository)
 }
-```text
+```
 
 **Etapa 3 — CachedProductRepositoryTests:**
 
@@ -190,7 +190,7 @@ private func makeSUT(
     
     return (sut, remote, store)
 }
-```text
+```
 
 ### Cuándo un memory leak es real
 
@@ -218,7 +218,7 @@ class MyLoader {
         }
     }
 }
-```text
+```
 
 Con `async/await`, los retain cycles son menos comunes porque no hay closures de completion handler. Pero siguen siendo posibles con `Task {}` y closures almacenados.
 
@@ -286,7 +286,7 @@ xcodebuild test \
     -scheme StackMyArchitecture \
     -destination 'platform=iOS Simulator,name=iPhone 16' \
     -enableThreadSanitizer YES
-```text
+```
 
 ### Cuándo activarlo
 
@@ -306,7 +306,7 @@ xcodebuild test \
       -destination 'platform=iOS Simulator,name=iPhone 16' \
       -enableThreadSanitizer YES \
       -resultBundlePath TestResults.xcresult
-```text
+```
 
 ### Qué hacer cuando Thread Sanitizer detecta un data race
 
@@ -336,7 +336,7 @@ func test_get_performs_request_to_url() async throws {
     
     // Si la operación termina, no hay hilos huérfanos
 }
-```text
+```
 
 ---
 
@@ -510,7 +510,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 

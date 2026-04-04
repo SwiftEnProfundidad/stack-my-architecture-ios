@@ -36,20 +36,6 @@ La arquitectura no es foto estática. Debe soportar cambios incrementales sin ca
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `00-core-mobile/00-introduccion.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
 <!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 

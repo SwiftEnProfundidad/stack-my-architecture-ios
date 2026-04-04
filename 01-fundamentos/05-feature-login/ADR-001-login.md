@@ -142,20 +142,3 @@ Cada decisión está demostrada con código real y tests en las lecciones corres
 
 ---
 
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/05-feature-login/ADR-001-login.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-

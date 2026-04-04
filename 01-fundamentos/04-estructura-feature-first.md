@@ -44,7 +44,7 @@ StackMyArchitecture/
 │       ├── Infrastructure/
 │       └── Interface/
 └── SharedKernel/
-```text
+```
 
 Vamos a explicar qué hace cada carpeta y por qué está donde está.
 
@@ -103,7 +103,7 @@ StackMyArchitectureTests/
 │       │   └── RemoteAuthGatewayTests.swift
 │       └── Helpers/
 │           └── AuthGatewayStub.swift
-```text
+```
 
 Fíjate en la carpeta `Helpers/`. Aquí vivirán los dobles de test (stubs, spies) que necesitemos. Un stub es una implementación falsa de un protocolo que devuelve valores predeterminados. Por ejemplo, `AuthGatewayStub` será una implementación de `AuthGateway` que podemos configurar para que devuelva un éxito o un error, sin hacer ninguna petición de red real.
 
@@ -196,28 +196,6 @@ No tienes código de producción todavía. Eso viene en la siguiente lección, d
 
 ---
 
----
-
-<!-- plantilla-pedagógica:auto -->
-
-## Refuerzo pedagógico
-Contexto: normalización automática para `01-fundamentos/04-estructura-feature-first.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta lección.
-
-### Prerrequisitos
-- Revisa la lección anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Práctica guiada
-- Aplica un cambio pequeño y verificable en el scaffold relacionado con esta lección.
-
-### Validación
-- Checklist rápido:
-  - [ ] Entiendo la decisión técnica principal de la lección.
-  - [ ] He ejecutado una comprobación mínima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 
@@ -245,7 +223,12 @@ flowchart LR
     UC ==> PORT
     ADAPTER --o PORT
     ADAPTER --> STORE
-```text
+
+    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 2,5 stroke:#555555,stroke-width:2px
+    linkStyle 3 stroke:#4CAF50,stroke-width:3px
+    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```
 
 Lectura semántica mínima de este diagrama:
 
