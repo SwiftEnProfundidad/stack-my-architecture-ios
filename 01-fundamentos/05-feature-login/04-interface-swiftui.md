@@ -1,4 +1,4 @@
-lea# Feature Login: Capa Interface (SwiftUI)
+# Feature Login: Capa Interface (SwiftUI)
 
 ## La última capa: donde el usuario ve y toca
 
