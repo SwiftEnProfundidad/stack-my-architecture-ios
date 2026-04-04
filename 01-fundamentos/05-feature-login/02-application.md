@@ -705,6 +705,99 @@ En la siguiente lección implementaremos la capa Infrastructure: la implementaci
 
 ---
 
+## Persistencia segura de sesión: Keychain
+
+El `LoginUseCase` devuelve una `Session` al llamante. Pero ¿quién decide dónde se guarda esa sesión? Y más importante: ¿cómo debe guardarse de forma segura?
+
+### No uses UserDefaults para tokens
+
+Es tentador guardar la sesión en `UserDefaults` porque es la forma más rápida. Pero `UserDefaults` tiene problemas de seguridad:
+
+- No está cifrado por defecto. Los datos se almacenan en texto plano en el bundle de la app.
+- Se incluye en backups de iTunes/iCloud si no están cifrados.
+- Cualquiera con acceso al dispositivo puede extraer los tokens fácilmente.
+
+En una app enterprise, los tokens de sesión son secretos sensibles. Exponerlos compromete la seguridad del usuario.
+
+### Keychain: almacenamiento seguro del sistema
+
+Apple proporciona **Keychain Services** como solución oficial para almacenar datos sensibles:
+
+- Cifrado a nivel de sistema con la clave de desbloqueo del dispositivo.
+- Aislado por app: otras apps no pueden acceder.
+- Se excluye de backups no cifrados.
+- Se integra con Face ID / Touch ID para acceder a datos sensibles.
+
+Para una `Session` que contiene `accessToken`, el patrón enterprise es:
+
+```swift
+// Infrastructure/SessionRepositoryKeychain.swift
+final class SessionRepositoryKeychain: SessionRepository {
+    private let keychain: KeychainClient
+    
+    init(keychain: KeychainClient = KeychainClient.default) {
+        self.keychain = keychain
+    }
+    
+    func save(_ session: Session) async throws {
+        try keychain.set(session.accessToken, forKey: "user_session_token")
+    }
+    
+    func load() async throws -> Session? {
+        guard let token = try keychain.get("user_session_token") else {
+            return nil
+        }
+        return Session(accessToken: token, email: "user@example.com")
+    }
+    
+    func clear() async throws {
+        try keychain.delete("user_session_token")
+    }
+}
+```
+
+**Nota:** En este curso básico no implementamos `SessionRepository` como un contrato separado, pero en una app enterprise sí deberías hacerlo. Esto permite cambiar la implementación (por ejemplo, para tests) sin tocar el caso de uso.
+
+### Token refresh: cuando expira la sesión
+
+Los tokens de acceso suelen tener una vida útil limitada (15–60 minutos). Cuando expiran, el servidor responde con `401 Unauthorized`. En este punto, la app tiene dos opciones:
+
+1. **Forzar logout** — borrar sesión y pedir al usuario que se autentique de nuevo.
+2. **Silent refresh** — usar un `refreshToken` para obtener un nuevo `accessToken` sin intervención del usuario.
+
+El patrón enterprise es el silent refresh. El flujo es:
+
+```text
+┌──────────┐     ┌──────────────┐       ┌──────────────┐      ┌────────────┐
+│  Usuario │     │  App Layer   │       │   Keychain   │      │  Servidor  │
+│  (UI)    │     │   (Refresh)  │       │              │      │  (Remoto)  │
+└────┬─────┘     └───────┬──────┘       └──────┬───────┘      └─────┬──────┘
+     │                   │                     │                    │
+     │ 401 en petición   │                     │                    │
+     │──────────────────>│                     │                    │
+     │                   │ lee refreshToken    │                    │
+     │                   │────────────────────>│                    │
+     │                   │ refreshToken        │                    │
+     │                   │<────────────────────│                    │
+     │                   │ POST /auth/refresh  │                    │
+     │                   │─────────────────────────────────────────>│
+     │                   │                     │                    │
+     │                   │ 200 + nuevo token   │                    │
+     │                   │<─────────────────────────────────────────│
+     │                   │ guarda nuevo token  │                    │
+     │                   │────────────────────>│                    │
+     │                   │ reintenta petición  │                    │
+     │                   │--──────────────────>│                    │
+     │ 200 OK (datos)    │                     │                    │
+     │<──────────────────│                     │                    │
+```
+
+Este flujo es transparente para el usuario. La app detecta el 401, intenta refrescar el token silenciosamente, y reintenta la petición original. Si el refresh también falla (por ejemplo, el refreshToken también expiró), entonces sí se fuerza el logout.
+
+**En este curso básico** no implementamos refresh token porque requiere un backend que lo soporte. Pero es importante que sepas que existe este patrón y que en producción deberías implementarlo.
+
+---
+
 <!-- semántica-flechas:auto -->
 ## Semántica de flechas aplicada a esta arquitectura
 

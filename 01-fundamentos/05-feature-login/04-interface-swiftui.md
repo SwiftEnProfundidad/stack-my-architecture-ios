@@ -1,4 +1,4 @@
-# Feature Login: Capa Interface (SwiftUI)
+lea# Feature Login: Capa Interface (SwiftUI)
 
 ## La última capa: donde el usuario ve y toca
 
@@ -687,6 +687,96 @@ Con esta lección hemos completado la implementación de la feature Login de pun
 Todo conectado, todo testeado, todo desacoplado. La feature es una unidad vertical completa que se puede desarrollar, testear, y mantener de forma independiente.
 
 En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos de vivir, consolidando las lecciones aprendidas.
+
+---
+
+## Error copy orientado al usuario
+
+En el `LoginViewModel` que hemos implementado, cuando ocurre un error simplemente mostramos `error.localizedDescription` en la UI. Esto funciona para el curso básico, pero en una app enterprise hay que tener cuidado con lo que mostramos al usuario.
+
+### No expongas detalles técnicos
+
+El servidor puede devolver mensajes de error como:
+
+- "Invalid credentials: user_not_found"
+- "Database connection timeout after 5000ms"
+- "JWT signature verification failed"
+
+Estos mensajes son útiles para desarrolladores, pero confusos o peligrosos para usuarios finales. Un error copy enterprise sigue estas reglas:
+
+1. **No menciona tecnología** — no digas "database timeout", di "no pudimos conectar con el servidor".
+2. **No revela arquitectura** — no digas "JWT verification failed", di "tu sesión ha expirado".
+3. **Sugiere acción** — en lugar de "error 500", di "inténtalo de nuevo en unos minutos".
+4. **Es amigable** — usa lenguaje natural, no código de error.
+
+Ejemplo de traducción de errores en el ViewModel:
+
+```swift
+private func userFacingMessage(for error: AuthError) -> String {
+    switch error {
+    case .invalidCredentials:
+        return "Email o contraseña incorrectos. Comprueba tus datos e inténtalo de nuevo."
+    case .connectivity:
+        return "No hay conexión a internet. Comprueba tu red e inténtalo de nuevo."
+    case .sessionExpired:
+        return "Tu sesión ha expirado. Por favor, inicia sesión de nuevo."
+    case .accountLocked:
+        return "Tu cuenta ha sido bloqueada temporalmente. Contacta con soporte."
+    }
+}
+```
+
+### No muestres mensajes crudos del servidor
+
+Nunca pases directamente el mensaje del servidor a la UI. Si el backend cambia su formato de error, tu app mostrará mensajes extraños o incluso podría exponer información sensible. Traduce siempre a mensajes controlados por la app.
+
+---
+
+## Evolución natural: biometría (Face ID / Touch ID)
+
+Una vez que tienes login con email/contraseña funcionando, la evolución natural en una app enterprise es añadir **biometría** para facilitar el acceso recurrente.
+
+### Patrón de biometría en iOS
+
+El flujo biometrico no reemplaza al login con credenciales — lo complementa:
+
+1. **Primer login** — usuario introduce email/contraseña, sesión se guarda en Keychain.
+2. **Login posterior** — app detecta que hay sesión guardada en Keychain.
+3. **Prompt biometrico** — app muestra "Iniciar sesión con Face ID?".
+4. **Si acepta** — app desbloquea el token de Keychain y usa la sesión directamente.
+5. **Si rechaza** — app muestra login con email/contraseña.
+
+Este patrón requiere:
+
+- Guardar un flag en Keychain indicando que el usuario ha activado biometría.
+- Usar `LocalAuthentication` framework para el prompt.
+- Proteger el token en Keychain con `kSecAttrAccessControl` que requiere biometría.
+
+```swift
+import LocalAuthentication
+
+func attemptBiometricLogin() async throws -> Session? {
+    let context = LAContext()
+    context.localizedReason = "Inicia sesión con Face ID para acceder a tu cuenta"
+    
+    let canEvaluate = try context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
+    guard canEvaluate else { return nil }
+    
+    let success = try context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: context.localizedReason)
+    guard success else { return nil }
+    
+    // Biometría exitosa: desbloquear token de Keychain
+    return try sessionRepository.load()
+}
+```
+
+### Consideraciones UX
+
+- **No forzar biometría** — siempre ofrecer opción de login con contraseña.
+- **Fall-back grácil** — si biometría falla (dedo mojado, Face ID no reconoce), mostrar login normal.
+- **Explicar valor** — el prompt debe decir claramente "para acceder a tu cuenta", no solo "Face ID".
+
+**En este curso básico** no implementamos biometría porque requiere configuración adicional en Keychain y manejo de permisos. Pero es importante que sepas que esta es la evolución natural del login en apps enterprise.
 
 ---
 

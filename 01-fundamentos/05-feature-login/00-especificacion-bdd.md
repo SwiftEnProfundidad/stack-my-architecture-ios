@@ -185,6 +185,57 @@ Scenario: Login cancelado por el usuario mientras la autenticación está en pro
 
 La cancelación es un caso que muchos tutoriales ignoran pero que en producción es fundamental. Si el usuario navega fuera de la pantalla de login mientras la petición está en vuelo, esa petición debe cancelarse. No tiene sentido procesar una respuesta que nadie va a ver. Y lo que es más importante: si no cancelas la petición, puedes acabar actualizando UI que ya no está en pantalla, lo que en el mejor de los casos desperdicia recursos y en el peor provoca un crash.
 
+### Escenarios de seguridad y sesión (Enterprise Edge Cases)
+
+Estos escenarios no aparecen en tutoriales básicos, pero son obligatorios en cualquier app de producción.
+
+```text
+Scenario: La sesión recibida del servidor no contiene token de acceso
+  Given el servidor responde con un payload que no incluye accessToken
+  When el sistema intenta construir una Session
+  Then el sistema devuelve un error de tipo malformedSession
+  And no se crea ninguna sesión
+  And NO se persiste nada en almacenamiento local
+```
+
+Este escenario protege la app de respuestas corruptas o inesperadas del backend. Una `Session` sin token es inválida por construcción — el Value Object no puede existir en ese estado.
+
+```text
+Scenario: El token de sesión expira durante el uso de la app
+  Given un usuario con sesión activa
+  And el accessToken de la sesión ha expirado
+  When el usuario intenta realizar una operación autenticada
+  Then el sistema detecta la expiración antes de enviar la petición
+  And el sistema devuelve un error de tipo sessionExpired
+  And la sesión se elimina del almacenamiento local
+  And se redirige al usuario a la pantalla de Login
+```
+
+La expiración del token es responsabilidad de la infraestructura: el adaptador HTTP debe detectar un 401 post-login y traducirlo a `sessionExpired`, no a `invalidCredentials`. Son errores semánticamente distintos.
+
+```text
+Scenario: El usuario intenta login con una cuenta bloqueada por intentos fallidos
+  Given un usuario cuya cuenta ha sido bloqueada por el servidor
+  When el usuario envía credenciales correctas
+  Then el servidor responde con un código de error de cuenta bloqueada
+  Then el sistema devuelve un error de tipo accountLocked
+  And el mensaje de error NO expone detalles internos del servidor
+  And no se crea ninguna sesión
+```
+
+El error de cuenta bloqueada debe distinguirse de credenciales incorrectas. El copy del mensaje al usuario es diferente: no "contraseña incorrecta" sino "cuenta temporalmente bloqueada, contacta soporte". El sistema nunca debe exponer en UI el mensaje crudo del servidor.
+
+```text
+Scenario: La sesión se almacena de forma segura tras un login exitoso
+  Given un login exitoso con sesión válida
+  When el sistema persiste la sesión
+  Then la sesión se almacena en Keychain (no en UserDefaults ni en fichero)
+  And el accessToken nunca aparece en logs
+  And la sesión persiste entre reinicios de la app
+```
+
+Este escenario documenta un **requisito de seguridad**: los tokens de sesión deben ir al Keychain, no a UserDefaults. UserDefaults no está cifrado y es accesible en backups no cifrados de iTunes.
+
 ---
 
 ## Lo que los escenarios nos revelan sobre el diseño
@@ -231,6 +282,10 @@ Cada escenario debe poder rastrearse hasta un test automatizado. Esta tabla mues
 | Email inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` |
 | Password vacío | `test_init_with_empty_string_throws_empty` | `PasswordTests` |
 | Cancelación | `test_execute_cancellation_does_not_return_result` | `LoginUseCaseTests` |
+| Sesión sin token | `test_session_init_without_token_throws_malformedSession` | `SessionTests` |
+| Token expirado | `test_adapter_on401_after_login_throws_sessionExpired` | `AuthAdapterTests` |
+| Cuenta bloqueada | `test_execute_on_account_locked_returns_accountLocked` | `LoginUseCaseTests` |
+| Persistencia segura | `test_session_is_stored_in_keychain_not_userdefaults` | `SessionRepositoryTests` |
 
 Fíjate en los nombres de los tests. Siguen un patrón: `test_[método]_[condición]_[resultado esperado]`. Este patrón hace que al leer el nombre del test sepas exactamente qué escenario cubre sin necesidad de abrir el código. Es una convención que seguiremos en todo el curso.
 
@@ -241,10 +296,10 @@ Fíjate en los nombres de los tests. Siguen un patrón: `test_[método]_[condici
 Para visualizar el flujo completo, aquí tienes un diagrama de secuencia que muestra cómo interactúan los componentes:
 
 ```text
-┌──────────┐     ┌───────────────┐     ┌──────────────┐     ┌────────────┐
-│  Usuario │     │  LoginUseCase │     │ AuthGateway  │     │  Servidor  │
-│  (UI)    │     │ (Application) │     │   (Puerto)   │     │  (Remoto)  │
-└────┬─────┘     └───────┬───────┘     └──────┬───────┘     └─────┬──────┘
+┌──────────┐     ┌───────────────┐      ┌──────────────┐      ┌────────────┐
+│  Usuario │     │  LoginUseCase │      │ AuthGateway  │      │  Servidor  │
+│  (UI)    │     │ (Application) │      │   (Puerto)   │      │  (Remoto)  │
+└────┬─────┘     └───────┬───────┘      └──────┬───────┘      └─────┬──────┘
      │                   │                     │                    │
      │ envía email+pass  │                     │                    │
      │──────────────────>│                     │                    │
@@ -269,7 +324,7 @@ Para visualizar el flujo completo, aquí tienes un diagrama de secuencia que mue
      │                   │                     │ o timeout/error    │
      │                   │                     │<───────────────────│
      │                   │                     │                    │
-     │                   │ Session o AuthError  │                    │
+     │                   │ Session o AuthError │                    │
      │                   │<────────────────────│                    │
      │                   │                     │                    │
      │ Session o Error   │                     │                    │
