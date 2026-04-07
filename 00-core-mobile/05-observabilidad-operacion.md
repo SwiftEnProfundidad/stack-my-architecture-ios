@@ -6,7 +6,7 @@ Si tu app fuera un avión, la observabilidad sería la caja negra y los instrume
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, la Etapa 3 introduce observabilidad mediante decoradores (`03-evolucion/03-observabilidad.md`). El patrón es envolver un `ProductRepository` real con un `LoggingProductRepository` que registra evento, resultado y duración sin contaminar el core. El `AppComposition` decide qué decoradores aplicar. Esto permite activar o desactivar logging sin tocar Domain ni Application.
+En `ArchitectureKit`, la Etapa 3 introduce observabilidad mediante decoradores. El patrón es envolver un `ProductRepository` real con un `LoggingProductRepository` que registra evento, resultado y duración sin contaminar el core. El `AppComposition` decide qué decoradores aplicar. Esto permite activar o desactivar logging sin tocar Domain ni Application. El patrón completo se practica en [Observabilidad — Etapa 3](../03-evolucion/03-observabilidad.md).
 
 ## Cuándo sí / cuándo no
 
@@ -20,7 +20,7 @@ Nunca loguees PII sin política de redacción. Define redaction por defecto para
 
 ## Metrics
 
-Mide golden signals adaptadas a mobile: éxito/fracaso de flujos críticos, latencia percibida, crash-free sessions, ANR (Android), cold start, consumo de memoria y tasa de retry.
+Mide golden signals adaptadas a mobile: éxito/fracaso de flujos críticos, latencia percibida, crash-free sessions, hangs en main thread (detectables en Xcode Hangs organizer), cold start, consumo de memoria y tasa de retry.
 
 No midas todo. Mide lo que activa decisión.
 
@@ -38,7 +38,9 @@ El error budget convierte fiabilidad en presupuesto gestionable. Si se consume r
 
 Una alerta vale si dispara acción concreta. Elimina alertas sin playbook, con falsos positivos recurrentes o sin dueño.
 
-## Template: Mínimal Observability Spec
+## Template: Minimal Observability Spec
+
+Usa esta plantilla de especificación mínima para definir qué debes instrumentar en cada flujo crítico:
 
 Nombre del flujo:
 
@@ -55,6 +57,8 @@ Dashboard de referencia:
 Owner operativo:
 
 ## Template: Incident Runbook Skeleton
+
+Usa este esqueleto como punto de partida para crear el runbook de cada incidente:
 
 Tipo de incidente:
 
@@ -74,64 +78,7 @@ Acciones preventivas posteriores:
 
 ---
 
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
+## Qué sigue
 
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
+Con observabilidad en operación, el siguiente paso es gestionar cambios en producción con seguridad: cómo hacer releases progresivos y cómo recuperarte rápidamente si algo sale mal.
 
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semántica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuración.
-3. `==>` contrato o abstracción.
-4. `--o` salida o propagación de resultado.

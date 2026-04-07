@@ -239,7 +239,7 @@ Cuando la lección lo requiera, se aplica explícitamente:
 
 - `swift-concurrency`: decisiones de aislamiento, `Sendable`, cancelación y pruebas concurrentes.
 - `swiftui-expert-skill`: estado moderno, composición de vistas y performance medible.
-- `windsurf-rules-ios` (si aplica al repo objetivo): consistencia de estilo y gobernanza técnica del equipo.
+- `ios-enterprise-rules` (si aplica al repo objetivo): consistencia de estilo y gobernanza técnica del equipo.
 
 La meta no es “mencionar skills”, sino usarlas para tomar mejores decisiones y dejar evidencia de impacto.
 

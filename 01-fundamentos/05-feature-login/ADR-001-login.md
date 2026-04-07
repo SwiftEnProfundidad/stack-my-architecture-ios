@@ -119,7 +119,7 @@ La feature tiene separación clara de responsabilidades por capas. Todos los tes
 
 ### Negativas (trade-offs aceptados)
 
-La feature tiene más archivos que un enfoque "ViewModel + View" directo (aproximadamente 12 archivos de producción y 5 de tests, frente a 2-3 archivos en un enfoque simplificado). Este es un trade-off consciente: más archivos a cambio de más claridad, más testeabilidad, y más facilidad de mantenimiento a largo plazo.
+La feature tiene más archivos que un enfoque "ViewModel + View" directo (aproximadamente 15 archivos de producción y 5 de tests, frente a 2-3 archivos en un enfoque simplificado). Este es un trade-off consciente: más archivos a cambio de más claridad, más testeabilidad, y más facilidad de mantenimiento a largo plazo.
 
 El aprendizaje inicial es más empinado. Un junior necesita entender Value Objects, puertos, adaptadores, y el ciclo BDD+TDD antes de poder contribuir. Pero una vez que entiende el patrón con Login, puede aplicarlo a cualquier feature nueva sin reinventar la rueda.
 
@@ -133,12 +133,17 @@ Ninguno para esta escala. La principal preocupación a futuro es que SharedKerne
 
 Cada decisión está demostrada con código real y tests en las lecciones correspondientes:
 
-**Especificación BDD:** [00-especificacion-bdd.md](00-especificacion-bdd.md) — Los escenarios que guían todas las decisiones.
-**Capa Domain:** [01-domain.md](01-domain.md) — Value Objects, errores, eventos.
-**Capa Application:** [02-application.md](02-application.md) — Caso de uso, puertos, traducción de errores.
-**Capa Infrastructure:** [03-infrastructure.md](03-infrastructure.md) — Gateway, DTOs, contract tests.
-**Capa Interface:** [04-interface-swiftui.md](04-interface-swiftui.md) — ViewModel, Vista, Composition Root.
-**Retrospectiva TDD:** [05-tdd-ciclo-completo.md](05-tdd-ciclo-completo.md) — Patrones y lecciones aprendidas.
+**Especificación BDD:** [Especificación BDD del Login](00-especificacion-bdd.md) — Los escenarios que guían todas las decisiones.
+**Capa Domain:** [Feature Login: Capa Domain](01-domain.md) — Value Objects, errores, eventos.
+**Capa Application:** [Feature Login: Capa Application](02-application.md) — Caso de uso, puertos, traducción de errores.
+**Capa Infrastructure:** [Feature Login: Capa Infrastructure](03-infrastructure.md) — Gateway, DTOs, contract tests.
+**Capa Interface:** [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md) — ViewModel, Vista, Composition Root.
+**Retrospectiva TDD:** [TDD: ciclo completo Red-Green-Refactor](05-tdd-ciclo-completo.md) — Patrones y lecciones aprendidas.
 
 ---
 
+## Qué sigue
+
+Con la feature Login completamente especificada, implementada, testeada y documentada, el siguiente paso es conectarla al punto de entrada de la aplicación.
+
+→ [Conectando la App: Tu Primera App Funcional](../06-conectando-la-app.md) — Composition Root y punto de entrada de la app.

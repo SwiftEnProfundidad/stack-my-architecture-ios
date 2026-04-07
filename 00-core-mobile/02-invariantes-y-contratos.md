@@ -6,7 +6,7 @@ Un invariante es un muro de carga en un edificio: si lo quitas, todo se derrumba
 
 ```mermaid
 flowchart TD
-    INV["Invariante: Email válido"] --> VO["Value Object Email"]
+    INV["Invariante: Email válido"] --> VO["Value Object EmailAddress"]
     VO --> DOM["Domain lo exige"]
     DOM --> APP["Application lo propaga"]
     APP --> INFRA["Infrastructure lo respeta"]
@@ -23,7 +23,9 @@ Codifica invariantes en tres capas: modelo de dominio, contratos de entrada/sali
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, el Value Object `Email` (en `FeatureLoginDomain`) es un invariante codificado: solo se puede construir si contiene `@`. Esto garantiza que ninguna capa posterior (Application, Infrastructure, UI) reciba un email malformado. El test `EmailTests.test_invalidEmail_throwsError` verifica esta invariante. Consulta la Etapa 1 (`01-fundamentos/05-feature-login/01-domain.md`) para ver la implementación TDD completa.
+En `ArchitectureKit`, el Value Object `EmailAddress` (en `FeatureLoginDomain`) es un invariante codificado: solo se puede construir si el valor pasa cuatro condiciones: contiene `@`, tiene exactamente dos partes al separar por `@`, ambas partes son no-vacías, y el dominio contiene `.`. Esto garantiza que ninguna capa posterior (Application, Infrastructure, UI) reciba un email malformado.
+
+El test que verifica esta invariante es `AuthenticateUserUseCaseTests.test_execute_throwsInvalidEmail_whenEmailIsMalformed`, que confirma que el UseCase lanza `LoginError.invalidEmail` cuando el email no cumple las condiciones. Consulta la implementación TDD completa en [Etapa 1 — Domain del Login](../01-fundamentos/05-feature-login/01-domain.md).
 
 ## Cuándo sí / cuándo no
 
@@ -49,46 +51,9 @@ Los E2E validan recorrido completo y experiencia de usuario; son más caros y de
 
 Guía pragmática: protege reglas con unit/contract, wiring con integration y valor de negocio crítico con E2E.
 
+
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
-
+Los invariantes y contratos son la base sobre la que se apoya la variabilidad controlada del sistema. La siguiente lección explica cómo evolucionar la arquitectura sin romper esos invariantes.

@@ -394,44 +394,7 @@ Al cerrar Arquitecto, el siguiente salto es optimización fina de concurrencia, 
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+[**Bounded Contexts →**](01-bounded-contexts.md) — La primera lección de esta etapa: cómo delimitar fronteras reales entre features para que Login y Catalog evolucionen sin romperse mutuamente.
 

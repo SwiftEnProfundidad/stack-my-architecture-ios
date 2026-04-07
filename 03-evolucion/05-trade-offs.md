@@ -38,6 +38,20 @@ flowchart TD
     TRG --> REV["Revision periodica o por incidente"]
 ```
 
+Lectura del diagrama:
+
+→ **Contexto y objetivo → Supuestos explícitos**: antes de comparar opciones, hay que explicitar qué crees que es cierto hoy. "El backend no ofrece push invalidation" es un supuesto, no un hecho permanente. Si cambia, la decisión puede cambiar.
+
+→ **Supuestos → Opciones A/B/C**: solo cuando los supuestos son claros se pueden comparar opciones con honestidad. Sin supuestos explícitos, dos ingenieros pueden defender opciones distintas sin posibilidad de conversación racional.
+
+→ **Opciones → Evaluación beneficio/coste/riesgo**: cada opción se evalúa en las mismas tres dimensiones para que la comparación sea justa. El "beneficio" sin "coste" es marketing, no arquitectura.
+
+→ **Evaluación → Decisión actual**: "actual" es clave. No es "decisión final". Es la mejor opción para el contexto de hoy, con los supuestos de hoy.
+
+→ **Decisión → Trigger de reevaluación**: el trigger es la condición objetiva que invalida la decisión. Sin trigger, las decisiones arquitectónicas se vuelven inamovibles por inercia, no por mérito.
+
+→ **Trigger → Revisión**: el ciclo cierra. Arquitectura madura es un proceso de decisión explícito y revisable, no una colección de "así lo hicimos siempre".
+
 ---
 
 ## Marco operativo del curso para decidir
@@ -472,44 +486,39 @@ La razón de priorizar frescura sobre velocidad en esta etapa es que el catálog
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+Esta lección es conceptual y metodológica — no hay código nuevo que añadir al scaffold. Su valor está en el proceso de decisión que documenta.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Aplicación práctica: revisar las decisiones del scaffold
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+El scaffold tiene varias decisiones arquitectónicas implícitas que puedes analizar usando el marco de esta lección:
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+1. **`CachedCatalogRepository` es `struct`, no `class`** — ¿por qué? Trade-off: `struct` es `Sendable` automático, pero no permite herencia. Para un repositorio sin estado mutable propio, `struct` es la elección correcta.
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+2. **`ConnectivityChecking` como dependencia explícita** — ¿por qué no simplemente `try/catch`? Trade-off: la dependencia explícita permite tests deterministas sin simular errores de red. El coste es una dependencia extra en el constructor.
+
+3. **`CatalogError` tiene `offlineNoCache` y `staleCacheUnavailable` separados** — ¿por qué no un único `cacheError`? Trade-off: errores más específicos permiten UI más informativa (el usuario sabe si fue "sin red sin cache" o "cache demasiado vieja"). El coste es más casos en el `switch`.
+
+### Documentar tus propias decisiones
+
+Para cualquier decisión que tomes al adaptar el scaffold, escribe una entrada en `docs/adr/` siguiendo el formato del curso:
+
+```markdown
+## ADR-XXX: [Decisión]
+- Estado: Propuesto/Aprobado
+- Contexto: [por qué surge la necesidad]
+- Supuestos: [qué crees que es cierto hoy]
+- Decisión: [opción elegida y por qué]
+- Consecuencias: [ventajas y costes]
+- Trigger: [condición que obligaría a revisar]
 ```
 
-Lectura semántica mínima de este diagrama:
+Los ADRs existentes en `docs/adr/` del scaffold siguen este formato.
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+---
+
+## Qué sigue
+
+[**Lección 17: SwiftData como store de cache →**](./06-swiftdata-store.md) — Cómo implementar `CatalogCacheStore` con SwiftData, los trade-offs concretos de usar un ORM vs persistencia directa, y los tests de integración con `ModelContainer`.
 

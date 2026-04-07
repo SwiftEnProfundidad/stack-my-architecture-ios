@@ -113,7 +113,7 @@ En la Etapa 1 vas a construir una **feature de Login** completa. "Completa" no s
 
 En esta anatomía, cada subgraph tiene un rol explícito: **Especificacion BDD** define comportamiento, **Domain** define reglas puras, **Application** orquesta, **Infrastructure** conecta con el mundo real, **Interface** presenta estado en SwiftUI y **ADR** captura decisiones de arquitectura.
 
-Fíjate en nombres concretos del diagrama porque aparecerán en toda la etapa: `Email`, `Password`, `AuthGateway`, `LoginUseCase`, `RemoteAuthGateway`, `StubAuthGateway`, `LoginViewModel` y `LoginView`.
+Fíjate en nombres concretos del diagrama porque aparecerán en toda la etapa: `Email`, `Password`, `AuthGateway`, `LoginUseCase`, `RemoteAuthGateway`, `StubAuthGateway`, `LoginViewModel` y `LoginView`. Estos son nombres **pedagógicos**; en el scaffold real (`apps/ios/ArchitectureKit`) algunos difieren (por ejemplo, `AuthGateway` → `AuthRepository`, `Email` → `EmailAddress`). Cada lección indica la correspondencia exacta, y puedes consultar la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
 
 ```mermaid
 graph TD
@@ -196,7 +196,7 @@ Hay cuatro reglas que vamos a seguir durante todo el curso sin excepción. No so
 
 Para seguir el curso necesitas tener instalado:
 
-**Xcode 16 o superior** con **Swift 6.2**. El curso usa características de Swift moderno, incluyendo strict concurrency, que es una de las novedades más importantes del lenguaje y que vamos a trabajar en profundidad. Necesitas una versión de Xcode que soporte Swift 6.2 para que todo compile correctamente.
+**Xcode 16.3 o superior** con **Swift 6.2**. El curso usa características de Swift moderno, incluyendo strict concurrency, que es una de las novedades más importantes del lenguaje y que vamos a trabajar en profundidad. Necesitas una versión de Xcode que soporte Swift 6.2 para que todo compile correctamente.
 
 **macOS Sequoia o superior.** Xcode 16 requiere una versión reciente de macOS. Asegúrate de tener tu sistema actualizado.
 
@@ -217,6 +217,8 @@ Cada lección de este curso sigue un formato pensado para que puedas estudiar de
 **Diagramas en texto** (Mermaid) que visualizan las relaciones entre componentes, el flujo de datos, y las dependencias entre capas. Si nunca has leído un diagrama de flujo, no te preocupes: justo abajo te explicamos cómo leerlos.
 
 **Decisiones documentadas** (ADRs) que explican el razonamiento detrás de cada decisión de diseño importante, incluyendo las alternativas que se descartaron y por qué.
+
+**Reflexiones de diseño** al final de cada lección que te ayudan a interiorizar cuándo aplicar lo que has aprendido y cuándo no. Porque tan importante como saber usar un patrón es saber cuándo **no** usarlo.
 
 ---
 
@@ -322,8 +324,6 @@ flowchart TD
 
 **Eso es todo.** Asi se leen todos los diagramas del curso. Siempre de arriba a abajo (o de izquierda a derecha), siguiendo las flechas, tomando decisiones en los rombos, y leyendo los textos de las flechas para saber que pasa entre un paso y otro.
 
-**Reflexiones de diseño** al final de cada lección que te ayudan a interiorizar cuándo aplicar lo que has aprendido y cuándo no. Porque tan importante como saber usar un patrón es saber cuándo **no** usarlo.
-
 ---
 
 ## Cómo avanzar por el curso
@@ -338,46 +338,11 @@ El curso está dividido en cinco etapas que progresan en complejidad sin saltos.
 
 ## Entregables de cierre de etapa
 
-- Revisa y completa los entregables oficiales aqui: [entregables-etapa-1.md](../01-fundamentos/entregables-etapa-1.md).
+- Revisa y completa los [entregables de la Etapa 1](entregables-etapa-1.md).
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Qué sigue
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+[**Setup: Preparación del entorno →**](00-setup.md) — Instalar Xcode, configurar Terminal, Git, y crear el proyecto base donde construirás la feature Login paso a paso.
 

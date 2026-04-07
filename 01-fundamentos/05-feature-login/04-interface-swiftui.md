@@ -692,47 +692,24 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ## Error copy orientado al usuario
 
-En el `LoginViewModel` que hemos implementado, cuando ocurre un error simplemente mostramos `error.localizedDescription` en la UI. Esto funciona para el curso básico, pero en una app enterprise hay que tener cuidado con lo que mostramos al usuario.
+El `LoginViewModel` ya implementa la traducción correcta: el método `message(for:)` convierte cada caso de `LoginUseCase.Error` a un string legible en español, sin exponer detalles técnicos al usuario.
 
-### No expongas detalles técnicos
+Esta separación es importante por principio: **nunca pases directamente el mensaje del servidor a la UI**. Si el backend cambia su formato de error, tu app mostraría mensajes extraños o incluso podría exponer información sensible.
 
-El servidor puede devolver mensajes de error como:
-
-- "Invalid credentials: user_not_found"
-- "Database connection timeout after 5000ms"
-- "JWT signature verification failed"
-
-Estos mensajes son útiles para desarrolladores, pero confusos o peligrosos para usuarios finales. Un error copy enterprise sigue estas reglas:
+Un error copy enterprise sigue estas reglas:
 
 1. **No menciona tecnología** — no digas "database timeout", di "no pudimos conectar con el servidor".
 2. **No revela arquitectura** — no digas "JWT verification failed", di "tu sesión ha expirado".
 3. **Sugiere acción** — en lugar de "error 500", di "inténtalo de nuevo en unos minutos".
 4. **Es amigable** — usa lenguaje natural, no código de error.
 
-Ejemplo de traducción de errores en el ViewModel:
-
-```swift
-private func userFacingMessage(for error: AuthError) -> String {
-    switch error {
-    case .invalidCredentials:
-        return "Email o contraseña incorrectos. Comprueba tus datos e inténtalo de nuevo."
-    case .connectivity:
-        return "No hay conexión a internet. Comprueba tu red e inténtalo de nuevo."
-    case .sessionExpired:
-        return "Tu sesión ha expirado. Por favor, inicia sesión de nuevo."
-    case .accountLocked:
-        return "Tu cuenta ha sido bloqueada temporalmente. Contacta con soporte."
-    }
-}
-```
-
-### No muestres mensajes crudos del servidor
-
-Nunca pases directamente el mensaje del servidor a la UI. Si el backend cambia su formato de error, tu app mostrará mensajes extraños o incluso podría exponer información sensible. Traduce siempre a mensajes controlados por la app.
+Nuestro `message(for:)` ya sigue estas reglas para los cuatro errores de Etapa 1. Cuando en Etapa 2 se añadan casos como `sessionExpired` o `accountLocked`, simplemente se añaden nuevas ramas al `switch` — sin tocar nada más.
 
 ---
 
 ## Evolución natural: biometría (Face ID / Touch ID)
+
+> **Enterprise (Etapa 2+):** Esta sección describe un patrón que **no se implementa en Etapa 1**. Requiere `SessionRepository` y Keychain, que se abordan más adelante.
 
 Una vez que tienes login con email/contraseña funcionando, la evolución natural en una app enterprise es añadir **biometría** para facilitar el acceso recurrente.
 
@@ -757,16 +734,19 @@ import LocalAuthentication
 
 func attemptBiometricLogin() async throws -> Session? {
     let context = LAContext()
-    context.localizedReason = "Inicia sesión con Face ID para acceder a tu cuenta"
+    var authError: NSError?
     
-    let canEvaluate = try context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
-    guard canEvaluate else { return nil }
+    guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) else {
+        return nil  // Biometría no disponible en este dispositivo
+    }
     
-    let success = try context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: context.localizedReason)
+    let localizedReason = "Inicia sesión con Face ID para acceder a tu cuenta"
+    let success = try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
+                                                  localizedReason: localizedReason)
     guard success else { return nil }
     
-    // Biometría exitosa: desbloquear token de Keychain
-    return try sessionRepository.load()
+    // Biometría exitosa: desbloquear token de Keychain (Etapa 2+)
+    return try await sessionRepository.load()
 }
 ```
 
@@ -778,46 +758,10 @@ func attemptBiometricLogin() async throws -> Session? {
 
 **En este curso básico** no implementamos biometría porque requiere configuración adicional en Keychain y manejo de permisos. Pero es importante que sepas que esta es la evolución natural del login en apps enterprise.
 
+
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [TDD: ciclo completo Red-Green-Refactor](05-tdd-ciclo-completo.md), consolida todo lo que hemos construido trazando el ciclo TDD completo de punta a punta sobre la feature Login.
 

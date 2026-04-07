@@ -97,7 +97,7 @@ Este mapa traduce teoría en práctica diaria. Es obligatorio usarlo como checkl
 | --- | --- | --- |
 | `swift-concurrency` | Lecciones 01, 02, 03, 04, 09 | Fronteras de aislamiento justificadas, cancelación correcta, seguridad de sendability |
 | `swiftui-expert-skill` | Lecciones 05 y 06 | Selección correcta de wrappers, composición de vistas, mejora de performance con evidencia |
-| `windsurf-rules-ios` (si aplica) | Todas las lecciones con código de iOS | Alineación con estándares del repositorio y decisiones consistentes de equipo |
+| `ios-enterprise-rules` (si aplica) | Todas las lecciones con código de iOS | Alineación con estándares del repositorio y decisiones consistentes de equipo |
 
 El criterio de evaluación no es "menciona la skill". Es "la skill cambia decisiones y resultados".
 
@@ -283,44 +283,7 @@ El mejor código que escribiste en la Etapa 5 es mejor que el mejor código que 
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+Consulta la [Rúbrica de empleabilidad iOS](rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio profesional.
 

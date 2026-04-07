@@ -1,9 +1,5 @@
 # Swift Concurrency Enterprise: Patrones Imprescindibles
 
-<!-- snippet-mapping-note:auto -->
-> **Nota de nomenclatura pedagógica**
-> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
-> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Mapa de lectura (~35 min)
 
 | # | Sección | Línea | Tiempo |
@@ -357,6 +353,16 @@ flowchart TD
     style MAINACTOR fill:#cce5ff,stroke:#007bff
     style ACTOR fill:#fff3cd,stroke:#ffc107
 ```
+
+Lectura del diagrama:
+
+→ La primera pregunta es: **¿necesitas proteger estado mutable compartido?** Si no — porque tu tipo es un `struct` inmutable o no hay concurrencia — marca `Sendable` y listo. El compilador lo verificará en tiempo de compilación.
+
+→ Si sí necesitas protección, la segunda pregunta es: **¿es código de UI?** Si es UI (ViewModel, coordinador, cualquier cosa que SwiftUI lee), la herramienta es `@MainActor`. Garantiza que todas las mutaciones ocurren en el hilo principal, donde SwiftUI espera encontrarlas.
+
+→ Si no es código de UI (una cache de imágenes, un store de sesión, un contador de peticiones), la herramienta es `actor`. Serializa el acceso sin forzar el hilo principal — el actor puede ejecutarse en cualquier hilo, pero solo en uno a la vez.
+
+La regla derivada: `@MainActor` es una especialización de `actor`. Todo lo que vale para `actor` (requiere `await`, serializa acceso) vale para `@MainActor`, más la restricción adicional de hilo.
 
 ---
 
@@ -788,6 +794,18 @@ flowchart LR
     end
 ```
 
+Lectura del diagrama:
+
+→ **Básico** es el punto de entrada de cualquier operación async. `async/await` para un resultado único, `.task { }` cuando la operación está ligada al ciclo de vida de una vista SwiftUI (cancelación automática), y `Task { }` como última opción cuando no hay alternativa estructurada.
+
+→ **Paralelo** se activa cuando tienes múltiples operaciones independientes. La distinción clave: `async let` cuando el número es fijo en compilación (cargar usuario + posts + fotos = 3), `TaskGroup` cuando el número lo determina el runtime (descargar N imágenes cuyo N viene del servidor).
+
+→ **Protección** es la garantía de seguridad. `Sendable` valida que un tipo puede cruzar fronteras de aislamiento — lo verifica el compilador, no el programador. `actor` serializa acceso a estado mutable. `@MainActor` es `actor` especializado para el hilo principal — obligatorio en ViewModels.
+
+→ **Streaming** para datos que llegan con el tiempo (no una respuesta, sino una secuencia). `for await in` consume cualquier `AsyncSequence`. `AsyncStream` convierte el mundo de callbacks (CoreLocation, NotificationCenter, delegates) al mundo async.
+
+→ **Control** son los patrones de resiliencia: cancelación cooperativa con `Task.isCancelled` para no desperdiciar recursos, y retry/timeout para manejar fallos transitorios de red sin que el usuario vea error.
+
 ### Checklist de concurrencia para un junior
 
 **Básico (usa a diario):**
@@ -854,71 +872,27 @@ Si dominas estos puntos, puedes manejar cualquier escenario de concurrencia en e
 **Solución razonada:**
 
 ```swift
-// En el ViewModel
-@MainActor
-final class CatalogViewModel: ObservableObject {
-    @Published var products: [Product] = []
+// En el ViewModel — patrón scaffold (@Observable, no ObservableObject)
+@Observable @MainActor
+final class CatalogViewModel {
+    private(set) var products: [Product] = []
     private var loadTask: Task<Void, Never>?
+    private let repository: any CatalogRepository
+
+    init(repository: any CatalogRepository) {
+        self.repository = repository
+    }
 
     func load() {
         loadTask?.cancel()  // Cancelar carga anterior
         loadTask = Task {
             do {
-                let result = try await repository.loadProducts()
-                if !Task.isCancelled {
-                    products = result
-                }
-            } catch {
-                // Manejar error (no actualizar si cancelado)
-            }
-        }
-    }
-}
-
-// Test
-func test_load_cancels_previous_load() async {
-    let slowRepo = SlowStubRepository(delay: .seconds(2), result: [Product(name: "Old", price: 1)])
-    let fastRepo = StubRepository(result: [Product(name: "New", price: 2)])
-
-    let sut = CatalogViewModel(repository: slowRepo)
-    sut.load()  // Primera carga (lenta)
-
-    // Cambiar a repo rapido y cargar de nuevo
-    sut.repository = fastRepo
-    sut.load()  // Segunda carga (cancela la primera)
-
-    // Esperar a que la segunda complete
-    try? await Task.sleep(for: .milliseconds(200))
-    XCTAssertEqual(sut.products.first?.name, "New")
-}
-```
-
-La cancelación no es un detalle de implementación: es un requisito de UX. Sin ella, el usuario puede ver datos de una carga que ya no es relevante (por ejemplo, resultados de una busqueda anterior).
-
-<details>
-<summary>Solución de referencia</summary>
-
-```swift
-@MainActor
-final class CatalogViewModel: ObservableObject {
-    @Published private(set) var products: [Product] = []
-
-    private let repository: ProductRepository
-    private var loadTask: Task<Void, Never>?
-
-    init(repository: ProductRepository) {
-        self.repository = repository
-    }
-
-    func load() {
-        loadTask?.cancel()
-        loadTask = Task {
-            do {
-                let loaded = try await repository.loadProducts()
+                let result = try await repository.fetchCatalog()
+                // Verificar cancelación ANTES de publicar resultado
                 try Task.checkCancellation()
-                products = loaded
+                products = result
             } catch is CancellationError {
-                return
+                return  // Carga cancelada — no actualizar productos
             } catch {
                 products = []
             }
@@ -926,18 +900,79 @@ final class CatalogViewModel: ObservableObject {
     }
 }
 
-func test_load_cancels_previous_load() async {
-    let repository = SlowStubRepository(
+// Test
+func test_load_cancels_previous_load() async throws {
+    let slowRepo = SlowCatalogRepositoryStub(
+        delay: .seconds(2),
+        result: [Product(id: "old", title: "Old", price: 1.0)]
+    )
+    let fastRepo = CatalogRepositoryStub(
+        result: [Product(id: "new", title: "New", price: 2.0)]
+    )
+
+    let sut = await CatalogViewModel(repository: slowRepo)
+    await sut.load()  // Primera carga (lenta, se cancela)
+
+    // Iniciar segunda carga con repositorio rápido
+    let fastViewModel = await CatalogViewModel(repository: fastRepo)
+    await fastViewModel.load()
+    try await Task.sleep(for: .milliseconds(200))
+
+    let products = await fastViewModel.products
+    XCTAssertEqual(products.map(\.id), ["new"])
+}
+```
+
+> **Nota scaffold:** El protocolo real es `CatalogRepository` con `fetchCatalog()` (no `ProductRepository.loadProducts()`). El modelo `Product` usa `title: String` y `price: Double` (no `name` ni un tipo `Price`). El ViewModel usa `@Observable` (no `ObservableObject`), que requiere Swift 5.9+ con el macro `@Observable`.
+
+La cancelación no es un detalle de implementación: es un requisito de UX. Sin ella, el usuario puede ver datos de una carga que ya no es relevante (por ejemplo, resultados de una busqueda anterior).
+
+<details>
+<summary>Solución de referencia</summary>
+
+```swift
+// Patrón correcto con scaffold: @Observable + CatalogRepository
+@Observable @MainActor
+final class CatalogViewModel {
+    private(set) var products: [Product] = []
+    private(set) var errorMessage: String?
+
+    private let repository: any CatalogRepository
+    private var loadTask: Task<Void, Never>?
+
+    init(repository: any CatalogRepository) {
+        self.repository = repository
+    }
+
+    func load() {
+        loadTask?.cancel()
+        loadTask = Task {
+            do {
+                let loaded = try await repository.fetchCatalog()
+                try Task.checkCancellation()
+                products = loaded
+                errorMessage = nil
+            } catch is CancellationError {
+                return  // Silencioso — fue cancelado intencionalmente
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+}
+
+func test_load_cancels_previous_load() async throws {
+    let repository = SlowCatalogRepositoryStub(
         results: [
-            .delayed(.seconds(2), [Product(id: "old", name: "Old", price: 1)]),
-            .delayed(.milliseconds(50), [Product(id: "new", name: "New", price: 2)])
+            .delayed(.seconds(2), [Product(id: "old", title: "Old", price: 1.0)]),
+            .delayed(.milliseconds(50), [Product(id: "new", title: "New", price: 2.0)])
         ]
     )
     let sut = await CatalogViewModel(repository: repository)
 
     await sut.load()
     await sut.load()
-    try? await Task.sleep(for: .milliseconds(120))
+    try await Task.sleep(for: .milliseconds(120))
 
     let products = await sut.products
     XCTAssertEqual(products.map(\.id), ["new"])
@@ -957,43 +992,70 @@ La Etapa 5 (Maestria) profundiza en estos conceptos con isolation domains, actor
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+Los patrones de esta lección tienen correspondencia directa con el scaffold. Aquí los archivos y las divergencias respecto a los ejemplos del curso.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Archivos del scaffold
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Archivo | Relevancia |
+|---|---|
+| `Sources/FeatureCatalogApplication/LoadCatalogUseCase.swift` | `async throws` — punto de entrada de la capa Application |
+| `Sources/FeatureCatalogInfrastructure/DefaultCatalogRemoteDataSource.swift` | `actor` — serializa acceso a datos en memoria |
+| `Sources/FeatureCatalogInterface/CatalogViewModel.swift` | `@Observable @MainActor` — aplica cancelación de `loadTask` |
+| `Sources/FeatureCatalogDomain/CatalogRepository.swift` | `protocol CatalogRepository: Sendable` — la frontera de aislamiento |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+### Divergencias críticas respecto a los ejemplos del curso
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+**1. `ProductRepository.loadProducts()` → `CatalogRepository.fetchCatalog()`**
+
+El scaffold usa `CatalogRepository` (no `ProductRepository`) y el método es `fetchCatalog()`:
+
+```swift
+// ✅ Scaffold real
+public protocol CatalogRepository: Sendable {
+    func fetchCatalog() async throws -> [Product]
+}
 ```
 
-Lectura semántica mínima de este diagrama:
+**2. El ViewModel usa `@Observable`, no `ObservableObject`**
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+Los ejemplos del ejercicio muestran `ObservableObject` / `@Published` como punto de partida conceptual. El scaffold ya usa el patrón moderno:
+
+```swift
+// ✅ Scaffold real — @Observable elimina @Published y ObservableObject
+@Observable @MainActor
+public final class CatalogViewModel {
+    public private(set) var products: [Product] = []
+    public private(set) var isLoading = false
+    public private(set) var errorMessage: String?
+}
+```
+
+**3. `DefaultCatalogRemoteDataSource` es `actor`, no `struct`**
+
+Los datos en memoria están protegidos por `actor` — ya aplica el patrón de esta lección:
+
+```swift
+// ✅ Scaffold real
+public actor DefaultCatalogRemoteDataSource: CatalogRemoteDataSource {
+    private var products: [Product] = [ ... ]
+    public func fetchAll() async throws -> [Product] { products }
+}
+```
+
+### Ejercicio: verificar cancelación en el CatalogViewModel del scaffold
+
+1. Abre `Sources/FeatureCatalogInterface/CatalogViewModel.swift`
+2. Verifica que tiene una propiedad `private var loadTask: Task<Void, Never>?`
+3. Verifica que `load()` llama a `loadTask?.cancel()` antes de crear un nuevo `Task`
+4. Si no lo tiene, impleméntalo siguiendo el patrón de la "Solución de referencia" arriba
+5. Escribe un test con `SlowCatalogRepositoryStub` para verificar que la segunda llamada a `load()` cancela la primera
+
+---
+
+## Qué sigue
+
+Esta lección cierra la **Etapa 2: Integración**. El siguiente paso es la **Etapa 3: Producción**, donde la app se enfrenta a condiciones reales: sin red, con cache, con observabilidad, y con tests avanzados que van más allá del happy path.
+
+[**Etapa 3 — Lección 12: Caching y modo offline →**](../03-produccion/01-caching-offline.md)

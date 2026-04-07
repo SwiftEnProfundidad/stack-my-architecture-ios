@@ -6,7 +6,7 @@ Una PR es una propuesta de cambio al sistema de producción. Trátala como un co
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, cada cambio en Domain o Data se valida con `swift test` (26 tests) y `./scripts/quality-gates.sh` (cobertura Domain ≥ 85%, Data ≥ 75%). Antes de mergear, el autor verifica que `./scripts/check-dependencies.sh` pasa (no hay imports prohibidos entre módulos). Este flujo se practica en la Etapa 4 (`04-arquitecto/06-quality-gates.md`).
+En `ArchitectureKit`, cada cambio en Domain o Data se valida con `swift test` (26 tests), con umbrales de cobertura de Domain ≥ 85% y Data ≥ 75%. Antes de mergear, el autor verifica que no hay imports prohibidos entre módulos (por ejemplo, Domain no puede importar Infrastructure). Este flujo se practica y formaliza en [Quality Gates — Etapa 4](../04-arquitecto/06-quality-gates.md).
 
 ## Cuándo sí / cuándo no
 
@@ -29,13 +29,15 @@ Una PR está lista cuando su evidencia supera opinión personal. Eso exige build
 
 ## Definition of Done template
 
-Estado funcional esperado:
+Usa esta plantilla como campo de texto en tu PR o ticket. Rellénala antes de marcar la PR como lista para review:
 
-Evidencia técnica adjunta:
+**Estado funcional esperado:**
 
-Riesgos conocidos:
+**Evidencia técnica adjunta:**
 
-Mitigación en release:
+**Riesgos conocidos:**
+
+**Mitigación en release:**
 
 ## Matriz de estrategia de testing
 
@@ -50,66 +52,9 @@ Mitigación en release:
 
 Regla central: evidence over opinion.
 
+
 ---
 
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
+## Qué sigue
 
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semántica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuración.
-3. `==>` contrato o abstracción.
-4. `--o` salida o propagación de resultado.
+Con los criterios de PR-ready interiorizados, el siguiente paso es asegurarte de que el sistema en producción es observable: qué pasa cuando algo falla y cómo lo detectas. Eso lo cubre la siguiente lección.

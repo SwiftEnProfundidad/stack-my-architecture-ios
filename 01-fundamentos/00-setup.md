@@ -45,10 +45,10 @@ swift --version
 Deberías ver algo como:
 
 ```text
-swift-driver version: 1.115 Apple Swift version 6.0.2 (swiftlang-6.0.2.1.2)
+swift-driver version: 1.120 Apple Swift version 6.2 (swiftlang-6.2.0.0)
 ```
 
-**Importante:** Este curso requiere Swift 6.0 o superior. Si ves una versión anterior, actualiza Xcode desde la App Store.
+**Importante:** Este curso requiere Swift 6.2 o superior (incluido en Xcode 16.3+). Si ves una versión anterior, actualiza Xcode desde la App Store.
 
 ## Pausa y practica
 <!-- sma:exercise:v1 -->
@@ -67,7 +67,7 @@ Terminal está en Aplicaciones > Utilidades. También puedes buscarlo con Spotli
 <details>
 <summary>💡 Pista 2: Qué debe aparecer</summary>
 
-Debes ver "Apple Swift version 6.0" o superior. Si ves "command not found", Xcode no está instalado correctamente.
+Debes ver "Apple Swift version 6.2" o superior. Si ves "command not found", Xcode no está instalado correctamente.
 
 </details>
 
@@ -77,7 +77,7 @@ Debes ver "Apple Swift version 6.0" o superior. Si ves "command not found", Xcod
 1. Abre Terminal
 2. Escribe: `swift --version`
 3. Presiona Enter
-4. Si ves "Apple Swift version 6.0.x", ¡listo! Si no, reinstala Xcode.
+4. Si ves "Apple Swift version 6.2" o superior, ¡listo! Si no, actualiza Xcode desde la App Store.
 
 </details>
 <!-- /sma:exercise:v1 -->
@@ -297,7 +297,7 @@ swift build
 swift test
 ```
 
-Si ves errores, verifica que `swift --version` sea 6.0+.
+Si ves errores, verifica que `swift --version` sea 6.2+ (incluido en Xcode 16.3+).
 
 </details>
 <!-- /sma:exercise:v1 -->
@@ -372,7 +372,7 @@ Si todo funciona, verás la app en el simulador y los tests pasando.
 
 Antes de continuar, verifica que tienes todo listo:
 
-- [ ] Xcode instalado (Swift 6.0+)
+- [ ] Xcode 16.3+ instalado (Swift 6.2+)
 - [ ] Terminal básica dominada (cd, ls, mkdir)
 - [ ] Git configurado y funcionando
 - [ ] SPM funciona (swift build, swift test)
@@ -417,7 +417,6 @@ sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
 ¿Por qué crees que es importante dominar el entorno (Terminal, Git, Xcode) antes de escribir código de arquitectura? Piensa en una situación donde no conocieras estas herramientas: ¿qué pasaría si te pidieran "haz commit de tus cambios" y no supieras qué significa?
 
-## Continuación
+## Qué sigue
 
-- 
--
+La siguiente lección, [Principios de ingeniería](01-principios-ingenieria.md), establece los fundamentos de diseño sobre los que se construye todo el curso: separación de responsabilidades, contratos explícitos y dependencias controladas.

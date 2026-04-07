@@ -8,7 +8,20 @@ En esta lección vamos a construir los siguientes tipos, todos con TDD (test pri
 
 El Value Object `Email`, que garantiza que un email tiene formato válido. El Value Object `Password`, que garantiza que una contraseña no está vacía. El tipo `Credentials` que agrupa ambos. El enum `AuthError` con los errores de autenticación. El enum `LoginEvent` con los eventos del dominio. Y el struct `Session` que representa una autenticación exitosa.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los tipos que construyes en esta lección usan nombres pedagógicos. En el scaffold `apps/ios/ArchitectureKit` los equivalentes son: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`. El patrón es idéntico; solo cambia el nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Los tipos que construyes en esta lección usan nombres y diseños pedagógicos. En el scaffold `apps/ios/ArchitectureKit` hay diferencias que van más allá del nombre:
+>
+> | Lección | Scaffold | Qué cambia |
+> |---|---|---|
+> | `Email` | `EmailAddress` | Solo nombre |
+> | `Password` — valida `!isEmpty` | `Password` — valida `count >= 8` | Regla de negocio más estricta |
+> | `Email.ValidationError` / `Password.ValidationError` (errores anidados por VO) | `LoginError` (enum unificado con `.invalidEmail`, `.invalidPassword`, `.invalidCredentials`, `.network`) | Arquitectura de errores: anidada → unificada |
+> | `Session(token:, email:)` | `UserSession(userId:, token:)` | Campos distintos (`email` → `userId`) |
+> | `AuthError { invalidCredentials, connectivity }` | Integrado en `LoginError { ..., .network }` | Enum separado → unificado |
+> | `LoginEvent { success, failure }` | No existe — el ViewModel maneja el resultado directamente | Tipo pedagógico sin equivalente en scaffold |
+>
+> **¿Por qué la lección enseña un diseño diferente?** Porque el patrón de errores anidados por Value Object y los eventos de dominio explícitos son más puros desde DDD y enseñan mejor los principios. El scaffold usa un enum unificado porque en un proyecto real con 4 casos de error, la pragmática pesa más que la pureza. Ambos diseños son válidos — la diferencia es intencional y entenderla es parte del aprendizaje.
+>
+> Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -463,6 +476,8 @@ struct Password: Equatable, Sendable {
 
 Ambos tests pasan. El `Password` está completo.
 
+> **Divergencia scaffold:** En el scaffold real, `Password` valida `count >= 8` (mínimo 8 caracteres) en vez de solo `!isEmpty`. Esto es una decisión de negocio más estricta. En esta lección usamos `!isEmpty` porque el foco está en aprender el patrón TDD de Value Objects, no en definir reglas de negocio finales. Cuando evoluciones el proyecto, endurecer la validación es un solo cambio de `guard` — exactamente lo que te permite el patrón.
+
 ---
 
 ## El tipo Credentials
@@ -499,6 +514,8 @@ Estos errores son diferentes de los errores de validación de los Value Objects 
 
 ¿Por qué esta distinción? Porque el manejo es diferente. Si el email tiene formato inválido, la UI puede mostrar el error inmediatamente sin hacer ninguna petición de red. Si el servidor rechaza las credenciales, la UI muestra un mensaje diferente ("email o contraseña incorrectos"). Si no hay conectividad, la UI muestra otro mensaje diferente ("sin conexión a internet, inténtalo de nuevo").
 
+> **Divergencia scaffold:** En el scaffold real, los errores de validación de VOs y los de autenticación están **unificados** en un solo `LoginError { invalidEmail, invalidPassword, invalidCredentials, network }`. La lección separa `Email.ValidationError` + `Password.ValidationError` + `AuthError` como tres tipos porque es más fiel al principio de Single Responsibility y enseña mejor la distinción entre error de formato y error de autenticación. En un proyecto real con solo 4 casos de error, la pragmática de un enum unificado puede pesar más. Comprende ambos diseños: la pureza de la lección y la pragmática del scaffold.
+
 ---
 
 ## Los eventos del dominio
@@ -509,14 +526,16 @@ Los eventos representan hechos que ya ocurrieron y que son relevantes para el si
 // StackMyArchitecture/Features/Login/Domain/Events/LoginEvent.swift
 
 enum LoginEvent: Equatable, Sendable {
-    case succeeded(email: String)
-    case failed(AuthError)
+    case success(Session)
+    case failure(AuthError)
 }
 ```
 
-¿Para qué sirven los eventos? Para desacoplar la feature de lo que ocurre después. Cuando el login es exitoso, la feature emite `LoginEvent.succeeded(email: "user@example.com")`. Pero la feature **no sabe** qué pasa después. No sabe que el coordinador va a navegar a la pantalla de Home. No sabe que quizá se va a guardar la sesión en el keychain. Esas son decisiones de otros componentes que escuchan el evento y actúan en consecuencia.
+¿Para qué sirven los eventos? Para desacoplar la feature de lo que ocurre después. Cuando el login es exitoso, la feature emite `LoginEvent.success(session)` con la sesión completa (token incluido). Pero la feature **no sabe** qué pasa después. No sabe que el coordinador va a navegar a la pantalla de Home. No sabe que quizá se va a guardar la sesión en el Keychain. Esas son decisiones de otros componentes que escuchan el evento y actúan en consecuencia.
 
 Esto es fundamental para la modularidad. Si Login supiera que después del éxito hay que navegar a Home, estaría acoplado a Home. No podrías reutilizar Login en otro contexto donde después del éxito se vaya a otra pantalla. Con eventos, Login dice "pasó esto" y se desentiende del "y ahora qué".
+
+> **Divergencia scaffold:** `LoginEvent` no existe en el scaffold real. En su lugar, el `LoginViewModel` maneja el resultado de `AuthenticateUserUseCase.execute()` directamente con un `do/catch`, y navega llamando a `navigator.goToCatalog()` tras el éxito. Es un enfoque más directo pero menos desacoplado. La lección enseña eventos porque son un patrón de diseño fundamental que necesitarás en sistemas más grandes donde múltiples componentes reaccionan a un mismo hecho de dominio. El scaffold simplifica porque con solo dos pantallas (Login → Catalog), el desacoplamiento extra no aporta valor proporcional a su coste.
 
 ---
 
@@ -536,6 +555,8 @@ struct Session: Equatable, Sendable {
 El `token` es opaco para el dominio. El dominio no sabe ni le importa qué formato tiene (JWT, UUID, lo que sea). Solo sabe que es un string que la infraestructura le devolvió y que el sistema necesita para futuras peticiones autenticadas. El formato y la interpretación del token son responsabilidad de la capa de infraestructura.
 
 El `email` está aquí como string (no como `Email`) porque la sesión representa la respuesta del servidor, no un dato validado localmente. El servidor devuelve el email como string en su respuesta JSON, y nosotros lo guardamos tal cual. Podríamos construir un `Email` a partir de él, pero no aportaría valor en este contexto: si el servidor nos devuelve un email, confiamos en que es válido.
+
+> **Divergencia scaffold:** En el scaffold real, `UserSession` tiene `userId: String` y `token: String` — no tiene `email`. La razón es pragmática: el servidor devuelve un identificador de usuario opaco en vez del email, y es ese `userId` el que se usa para futuras peticiones. En tu proyecto pedagógico puedes usar `email` porque es más intuitivo; al evolucionar hacia producción lo sustituirías por un identificador del servidor.
 
 ---
 
@@ -577,46 +598,10 @@ Todo es inmutable, `Sendable`, `Equatable`, y no importa nada externo (salvo Fou
 
 En la siguiente lección vamos a subir una capa: la Application. Allí construiremos el caso de uso `LoginUseCase` que orquesta todo el flujo de login, usando los Value Objects del Domain para validación local y un puerto (protocolo) para delegar la autenticación remota.
 
+
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Feature Login: Capa Application](02-application.md), construye el `LoginUseCase` que orquesta el flujo completo: validación local con los Value Objects del Domain, delegación de la autenticación remota al puerto `AuthGateway`, y emisión del `LoginEvent` correspondiente.
 

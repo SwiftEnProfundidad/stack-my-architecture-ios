@@ -40,6 +40,16 @@ flowchart LR
     FEED --> HARDEN["Arquitectura mas robusta"]
 ```
 
+Lectura del diagrama:
+
+→ **Escenario BDD → Riesgo temporal/concurrente**: el punto de partida es siempre un comportamiento de negocio formulado como BDD. "Dado que el usuario navega atrás mientras carga, no se muestra resultado tardío" expresa un riesgo temporal concreto.
+
+→ **Riesgo → Test determinista**: el riesgo se traduce en un test que controla el tiempo (Clock inyectado, no `Date()`) y la concurrencia (dobles con `actor`). Determinista significa que pasa o falla igual cada vez.
+
+→ **Test → Feedback de diseño**: si el test es difícil de escribir, es señal de diseño deficiente — el sistema tiene demasiado acoplamiento temporal o de estado. El test actúa como crítica de arquitectura antes de que el problema llegue a producción.
+
+→ **Feedback → Arquitectura más robusta**: el ciclo cierra. La dificultad de testear lleva a extraer protocolos, inyectar reloj, separar estado. Cada iteración produce código más fácil de testear y, por tanto, más robusto.
+
 Sin este túnel, validas estética de código, no robustez real.
 
 ---
@@ -212,6 +222,16 @@ flowchart TD
     D --> R
 ```
 
+Lectura del diagrama:
+
+→ **Cancelar anterior**: "última petición gana" — se cancela la tarea en curso antes de lanzar la nueva. La UI nunca muestra resultados de una carga que ya no es la más reciente. Coste: el progreso de la carga cancelada se pierde.
+
+→ **Serializar**: las peticiones se encolan en el orden de llegada. La segunda espera a que la primera termine. Garantiza orden pero puede acumular latencia si llegan muchas peticiones seguidas.
+
+→ **Debounce**: espera un tiempo de inactividad antes de lanzar. Un usuario que escribe rápido en búsqueda no lanza 10 peticiones — solo una cuando deja de escribir. Introduce latencia mínima intencional a cambio de no saturar la red.
+
+→ **Estado estable**: las tres políticas convergen en el mismo objetivo — la UI nunca queda con datos de una solicitud obsoleta o en estado inconsistente.
+
 ### Test de última petición gana
 
 ```swift
@@ -269,6 +289,16 @@ flowchart LR
     N --> FIX3["Dobles de frontera"]
     O --> FIX4["Controladores de completion"]
 ```
+
+Lectura del diagrama — cada flake tiene causa y cura:
+
+→ **Tiempo real → Clock inyectado**: cualquier test que llama a `Date()` o usa `Task.sleep` para esperar resultados es flaky por diseño. La cura es inyectar un `Clock` que devuelve fechas fijas y controlar completions explícitamente.
+
+→ **Estado global → SUT aislado**: un test que modifica un singleton, una variable `static`, o un actor compartido contamina otros tests. La cura es que cada test crea su propio SUT con `makeSUT()` — sin estado que escape entre tests.
+
+→ **Red real → Dobles de frontera**: cualquier test que llega a la red real es lento, frágil, y depende de infraestructura externa. La cura es un doble en la frontera (`CatalogRemoteDataSource`, no en el repositorio completo) que simula respuestas sin red.
+
+→ **Orden no controlado → Controladores de completion**: los tests de "última petición gana" no pueden depender de `Task.sleep(100ms)` para garantizar orden — si CI es lento, 100ms no es suficiente. La cura es un `ControlledStub` que expone métodos `completeFirstRequest()` / `completeSecondRequest()` para control explícito.
 
 ---
 
@@ -453,35 +483,26 @@ Cuando puedes hacer esto de forma sistemática, tus refactors dejan de ser apues
 ```swift
 // Tests/FeatureCatalogDataIntegrationTests/CancellationTests.swift
 
-import XCTest
-@testable import FeatureCatalogData
+final class CachedCatalogRepositoryCancellationTests: XCTestCase {
 
-final class LoadProductsUseCaseCancellationTests: XCTestCase {
-
-    func test_loadProducts_respectsCancellation_andDoesNotUpdateCache() async throws {
-        // Arrange: repositorio lento (2 segundos) + store espía
-        let slowRemote = SlowStubProductRepository(
+    func test_fetchCatalog_respectsCancellation_andDoesNotUpdateCache() async throws {
+        // Arrange: data source lenta + store espía
+        let slowRemote = SlowCatalogRemoteDataSourceStub(
             delay: .seconds(2),
-            result: .success([
-                Product(
-                    id: "p-1",
-                    name: "Slow Product",
-                    price: Price(amount: Decimal(string: "9.99")!, currency: "EUR"),
-                    imageURL: URL(string: "https://example.com/p1.png")!
-                )
-            ])
+            result: .success([Product(id: "p-1", title: "Slow", price: 9.99)])  // title, no name
         )
-        let store = InMemoryProductStore()
-        let sut = CachedProductRepository(
+        let store = InMemoryCatalogCacheStoreStub()
+        let connectivity = AlwaysOnlineConnectivityStub()
+        let sut = CachedCatalogRepository(
             remote: slowRemote,
-            store: store,
-            maxAge: 300,
-            now: { Date() }
+            cache: store,
+            connectivity: connectivity,
+            ttlSeconds: 300,
+            now: Date.init
         )
 
         // Act: lanzar carga y cancelar rápido
-        let task = Task { try await sut.loadAll() }
-
+        let task = Task { try await sut.fetchCatalog() }  // fetchCatalog, no loadAll
         try await Task.sleep(for: .milliseconds(100))
         task.cancel()
 
@@ -499,70 +520,67 @@ final class LoadProductsUseCaseCancellationTests: XCTestCase {
     }
 }
 
-// Stub de repositorio lento para tests de cancelación
-final class SlowStubProductRepository: ProductRepository, @unchecked Sendable {
-    private let delay: Duration
-    private let result: Result<[Product], Error>
+// Stub del data source lento — struct + Sendable automático
+struct SlowCatalogRemoteDataSourceStub: CatalogRemoteDataSource {
+    let delay: Duration
+    let result: Result<[Product], Error>
 
-    init(delay: Duration, result: Result<[Product], Error>) {
-        self.delay = delay
-        self.result = result
-    }
-
-    func loadAll() async throws -> [Product] {
+    func fetchProducts() async throws -> [Product] {
         try await Task.sleep(for: delay)
-        try Task.checkCancellation()
+        try Task.checkCancellation()  // Cooperativo: verifica después del sleep
         return try result.get()
     }
 }
 ```
 
-La cancelación en Swift es cooperativa: el sistema no mata el `Task` automáticamente; lo marca como cancelado. El stub llama a `Task.checkCancellation()` después del `sleep`, lo que lanza `CancellationError` y permite que el `CachedProductRepository` no llegue a guardar nada en el store. El test verifica dos contratos: (1) la cancelación se propaga hacia arriba, (2) no hay efectos secundarios parciales (el store queda en `nil`).
+> **Nota scaffold:** El protocolo es `CatalogRemoteDataSource` con `fetchProducts()` (no `ProductRepository.loadAll()`). El repositorio es `CachedCatalogRepository` con `fetchCatalog()`. El `Product` usa `title: String` y `price: Double`. El stub usa `struct` (no `final class @unchecked Sendable`).
 
-**Resultado esperado**: el test pasa de forma determinista en 10 ejecuciones consecutivas, el `task.value` lanza `CancellationError`, y el store permanece vacío.
+La cancelación es cooperativa: el sistema marca el `Task` como cancelado, el stub llama a `Task.checkCancellation()` después del `sleep`, lo que lanza `CancellationError`. El repositorio no llega a guardar en cache. El test verifica dos contratos: (1) la cancelación se propaga, (2) no hay efectos secundarios parciales.
 
 </details>
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+### Archivos del scaffold relevantes para tests avanzados
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+| Archivo | Uso en tests |
+|---|---|
+| `Sources/FeatureCatalogData/InMemoryCatalogStores.swift` | `InMemoryCatalogCacheStore` actor — store para tests de cancelación |
+| `Sources/FeatureCatalogData/CatalogDataContracts.swift` | `CatalogRemoteDataSource`, `ConnectivityChecking` — interfaces para stubs |
+| `Sources/FeatureCatalogData/CachedCatalogRepository.swift` | El SUT principal para tests de integración avanzada |
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+### Divergencias respecto a los ejemplos del curso
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+| Lección | Scaffold real |
+|---|---|
+| `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` |
+| `CatalogRemoteDataSource` (no aparece) | `CatalogRemoteDataSource.fetchProducts()` — la frontera de red real |
+| `InMemoryProductStore` | `InMemoryCatalogCacheStoreStub` (en tests) |
+| `SlowStubProductRepository: @unchecked Sendable` | `SlowCatalogRemoteDataSourceStub: struct` (Sendable automático) |
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` con `Double` |
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+### El `ConnectivityChecking` como herramienta de test
+
+El scaffold tiene `ConnectivityChecking` como dependencia de `CachedCatalogRepository`. Esto hace los tests de backpressure y cancelación más precisos:
+
+```swift
+// ✅ Controlar si el dispositivo "parece online" en tests
+struct AlwaysOnlineConnectivityStub: ConnectivityChecking {
+    func isOnline() async -> Bool { true }
+}
+
+struct AlwaysOfflineConnectivityStub: ConnectivityChecking {
+    func isOnline() async -> Bool { false }
+}
 ```
 
-Lectura semántica mínima de este diagrama:
+Sin `ConnectivityChecking`, tendrías que simular errores de red para testear el path offline. Con él, el control es explícito y determinista.
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+---
+
+## Qué sigue
+
+[**Lección 16: Trade-offs de arquitectura →**](./05-trade-offs.md) — Cómo tomar decisiones de arquitectura con criterio: cuándo añadir una capa, cuándo no, y cómo documentar las decisiones para que el equipo no las revierta sin entenderlas.
 

@@ -43,3 +43,11 @@ Anota una decisión del bloque y el trade-off que te ayudó a entenderla.
 ### Próximo paso
 
 Define qué debes vigilar al entrar en Integración para no perder la limpieza conseguida.
+
+---
+
+## Qué sigue
+
+Con el checkpoint completado, el último paso de la Etapa 1 es consolidar los entregables que demuestran lo que has construido.
+
+→ [Entregables — Etapa 1: Junior](entregables-etapa-1.md) — Entregables y cierre de la Etapa 1.

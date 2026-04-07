@@ -1628,9 +1628,29 @@
       bookmarksByTopicId: {}
     };
 
+    const localBookmarksKey = `sma:${courseId}:local:bookmarks`;
+    const localNotesKey = `sma:${courseId}:local:notes`;
+
+    function loadLocalBookmarks() {
+      try { return JSON.parse(localStorage.getItem(localBookmarksKey) || '{}'); } catch (_) { return {}; }
+    }
+    function persistLocalBookmarks() {
+      localStorage.setItem(localBookmarksKey, JSON.stringify(state.bookmarksByTopicId));
+    }
+    function loadLocalNotes() {
+      try { return JSON.parse(localStorage.getItem(localNotesKey) || '{}'); } catch (_) { return {}; }
+    }
+    function persistLocalNotes() {
+      localStorage.setItem(localNotesKey, JSON.stringify(state.notesByTopicId));
+    }
+
     async function bootstrap() {
       state.bootstrapped = true;
       if (!hasAuthenticatedCloudProfile()) {
+        if (isLocalContext()) {
+          Object.assign(state.bookmarksByTopicId, loadLocalBookmarks());
+          Object.assign(state.notesByTopicId, loadLocalNotes());
+        }
         render();
         return false;
       }
@@ -1687,6 +1707,20 @@
       if (!helper || !editor || !saveBtn || !clearBtn) return;
 
       if (!hasAuthenticatedCloudProfile()) {
+        if (isLocalContext()) {
+          helper.textContent = currentTopic
+            ? `Tema actual: ${currentTopic.lessonLabel || currentTopic.id}`
+            : 'Selecciona una lección para escribir tu nota local.';
+          const note = currentTopic ? state.notesByTopicId[currentTopic.id] : null;
+          editor.disabled = !currentTopic;
+          saveBtn.disabled = !currentTopic;
+          clearBtn.disabled = !currentTopic;
+          editor.value = note ? String(note.content || '') : '';
+          if (status) status.textContent = note && note.updatedAt
+            ? `Guardado localmente: ${formatNotebookDate(note.updatedAt)}`
+            : 'Nota guardada solo en este dispositivo (sin cuenta).';
+          return;
+        }
         helper.textContent = 'Inicia sesión para guardar notas privadas sincronizadas por cuenta.';
         editor.value = '';
         editor.disabled = true;
@@ -1715,7 +1749,7 @@
       const list = document.getElementById('study-bookmarks-list');
       if (!list) return;
 
-      if (!hasAuthenticatedCloudProfile()) {
+      if (!hasAuthenticatedCloudProfile() && !isLocalContext()) {
         list.innerHTML = '<p class=\"study-bookmarks-empty\">Inicia sesión para sincronizar bookmarks privados entre dispositivos.</p>';
         return;
       }
@@ -1760,6 +1794,24 @@
     async function saveCurrentNote() {
       if (!currentTopic) return;
       if (!hasAuthenticatedCloudProfile()) {
+        if (isLocalContext()) {
+          const editor = document.getElementById('study-note-editor');
+          if (!editor) return;
+          const content = String(editor.value || '').trim();
+          const status = document.getElementById('study-note-status');
+          const now = new Date().toISOString();
+          if (content) {
+            state.notesByTopicId[currentTopic.id] = { content, updatedAt: now };
+          } else {
+            delete state.notesByTopicId[currentTopic.id];
+          }
+          persistLocalNotes();
+          if (status) status.textContent = content
+            ? `Guardado localmente: ${formatNotebookDate(now)}`
+            : 'Nota eliminada.';
+          render();
+          return;
+        }
         goAuthPortal();
         return;
       }
@@ -1812,6 +1864,20 @@
     async function toggleBookmark() {
       if (!currentTopic) return;
       if (!hasAuthenticatedCloudProfile()) {
+        if (isLocalContext()) {
+          const status = document.getElementById('study-bookmark-status');
+          if (state.bookmarksByTopicId[currentTopic.id]) {
+            delete state.bookmarksByTopicId[currentTopic.id];
+            if (status) status.textContent = `Bookmark eliminado de ${currentTopic.lessonLabel || currentTopic.id}.`;
+          } else {
+            state.bookmarksByTopicId[currentTopic.id] = { updatedAt: new Date().toISOString() };
+            if (status) status.textContent = `Bookmark guardado para ${currentTopic.lessonLabel || currentTopic.id}.`;
+          }
+          persistLocalBookmarks();
+          render();
+          scheduleDecorateNavStates();
+          return;
+        }
         goAuthPortal();
         return;
       }

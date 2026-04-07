@@ -76,7 +76,7 @@ Los DTOs (`AuthRequest`, `AuthResponse`) representan **el formato de los datos e
 ```swift
 // StackMyArchitecture/Features/Login/Infrastructure/DTOs/AuthRequest.swift
 
-struct AuthRequest: Encodable, Sendable {
+struct AuthRequest: Codable, Sendable {
     let email: String
     let password: String
 }
@@ -370,8 +370,10 @@ final class RemoteAuthGatewayTests: XCTestCase {
 
 `makeCredentials()` y `makeSuccessJSON(...)` son otros helpers que crean datos de prueba reutilizables. El objetivo es el mismo: que cada test solo contenga lo que es **único** de ese escenario.
 
+Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTests`:
+
 ```swift
-    // MARK: - Happy Path
+    // MARK: - Happy Path  (continuación de RemoteAuthGatewayTests)
     
     func test_authenticate_on_200_with_valid_json_returns_session() async throws {
         let json = makeSuccessJSON(token: "abc-123", email: "user@example.com")
@@ -532,46 +534,10 @@ Un `RemoteAuthGateway` que traduce entre el mundo HTTP/JSON y la interfaz limpia
 
 En la siguiente lección llegaremos a la última capa: Interface. Allí construiremos el `LoginViewModel` y la `LoginView` con SwiftUI, conectando todo el flujo desde la UI hasta el Domain.
 
+
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md), construye el `LoginViewModel` y la `LoginView` — la capa más externa de la feature que conecta la UI con el `LoginUseCase`.
 

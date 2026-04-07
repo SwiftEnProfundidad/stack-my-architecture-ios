@@ -121,6 +121,16 @@ flowchart LR
     end
 ```
 
+Lectura del diagrama:
+
+→ **Navegación** organiza el flujo entre pantallas: `TabView` estructura la app en secciones, `NavigationLink` y `navigationDestination` controlan la profundidad dentro de cada sección, `.toolbar` aporta las acciones contextuales de cada pantalla.
+
+→ **Presentación modal** interrumpe el flujo cuando la tarea requiere atención o confirmación: `.sheet` para tareas opcionales que el usuario puede cancelar, `.fullScreenCover` para tareas obligatorias, `.alert` para decisiones binarias, `.confirmationDialog` para selección entre varias opciones.
+
+→ **Datos y búsqueda** conectan el estado del sistema con la UI: `.refreshable` y `.searchable` actúan directamente sobre datos del ViewModel, `@AppStorage` persiste preferencias simples localmente, `@Environment` da acceso a contexto del sistema (modo oscuro, zona horaria, dismiss).
+
+→ **Composición** estandariza la presentación: `@Binding` propaga cambios entre padre e hijo, `ViewModifier` encapsula estilos repetidos, `Form + Section` estructura pantallas de configuración siguiendo las convenciones iOS.
+
 ---
 
 ## 12. @Bindable — El compañero de @Observable
@@ -162,10 +172,6 @@ struct ProfileScreen: View {
 // Vista HIJA que RECIBE el ViewModel (usa @Bindable)
 struct ProfileForm: View {
     @Bindable var viewModel: ProfileViewModel
-<!-- [MermaidChart: afc61fb0-cf1e-46e9-ba7a-be5a09a6c115] -->
-<!-- [MermaidChart: b7bd4a9a-8f85-48f3-b5ea-6d034e66f4b5] -->
-<!-- [MermaidChart: 57951fc6-05a4-4f55-842f-f5b362b9ec83] -->
-<!-- [MermaidChart: afc61fb0-cf1e-46e9-ba7a-be5a09a6c115] -->
 
     var body: some View {
         Form {
@@ -575,6 +581,88 @@ Image("banner")
 `containerRelativeFrame` es el reemplazo moderno de `GeometryReader` para la mayoria de casos. Es más eficiente porque no causa multiples pasadas de layout.
 
 ---
+
+## Implementación en tu proyecto
+
+Los patrones de rendimiento y composición de esta lección aplican directamente sobre las vistas del scaffold. Aquí los archivos relevantes y las divergencias con los ejemplos del curso.
+
+### Archivos del scaffold
+
+| Archivo | Qué aplicar |
+|---|---|
+| `Sources/FeatureCatalogInterface/CatalogView.swift` | `LazyVStack`, identidad estable, `Button` vs `onTapGesture` |
+| `Sources/FeatureCatalogInterface/` | `ViewModifier` compartido (`CardStyle`, estilos de fila) |
+| `Sources/FeatureLoginInterface/LoginView.swift` | Accesibilidad en campos de texto y botón de login |
+
+### Divergencias críticas respecto a los ejemplos del curso
+
+**1. `product.name` no existe — es `product.title`**
+
+Los ejemplos de accesibilidad, animaciones y rendimiento del curso usan `product.name`. El scaffold tiene `product.title`:
+
+```swift
+// ✅ Scaffold real
+.accessibilityLabel("\(product.title), \(product.price.formatted(.number))")
+Button {
+    viewModel.selectProduct(product)
+} label: {
+    Text(product.title)
+}
+```
+
+**2. `product.price` es `Double`, no un tipo `Price`**
+
+Los ejemplos usan `product.price.amount > 10` y `product.price.formatted`. En el scaffold `price` es `Double`:
+
+```swift
+// ✅ Scaffold real
+let expensive = products.filter { $0.price > 10.0 }
+Text(product.price.formatted(.number.precision(.fractionLength(2))))
+```
+
+**3. `viewModel.state = .loaded(products)` no existe**
+
+Los ejemplos de animación usan `enum State`. El scaffold usa propiedades separadas:
+
+```swift
+// ✅ Scaffold real — animar cambio de estado
+withAnimation(.easeInOut(duration: 0.3)) {
+    viewModel.products = newProducts  // NO existe: setter público
+}
+// En la práctica, la animación se aplica al container que observa isLoading:
+Group {
+    if viewModel.isLoading {
+        ProgressView()
+    } else {
+        List(viewModel.products, id: \.id) { ... }
+    }
+}
+.animation(.easeInOut, value: viewModel.isLoading)
+```
+
+**4. `@StateObject` / `@ObservedObject` son legacy**
+
+Si ves `@StateObject` o `@ObservedObject` en el scaffold o en ejemplos de curso anteriores a esta lección, son el patrón antiguo. El scaffold moderno usa `@Observable` + `@State`:
+
+```swift
+// ✅ Scaffold actual
+@Observable @MainActor
+final class CatalogViewModel { ... }
+
+// En la vista:
+@State private var viewModel: CatalogViewModel
+```
+
+### Ejercicio: aplicar `Button` + accesibilidad al CatalogView del scaffold
+
+1. Abre `Sources/FeatureCatalogInterface/CatalogView.swift`
+2. Encuentra las filas con `.onTapGesture` y cámbialas a `Button { } label: { }.buttonStyle(.plain)`
+3. Añade `.accessibilityLabel("\(product.title), \(product.price.formatted(.number)) euros")` a cada fila
+4. Ejecuta los tests — si tienes `CatalogViewTests`, deben pasar sin cambios (la lógica no cambia)
+5. Prueba con VoiceOver en el simulador (Settings → Accessibility → VoiceOver) para verificar que cada fila se anuncia correctamente
+
 ---
 
-**Navegación:** [← Parte 1](./07a-swiftui-enterprise-navegacion.md) · [Parte 3: Liquid Glass y Ejercicio →](./07c-swiftui-enterprise-moderno.md)
+## Qué sigue
+
+[**Parte 3: Liquid Glass, APIs modernas iOS 26 y ejercicio completo →**](./07c-swiftui-enterprise-moderno.md) — Las APIs de iOS 26 (`.glassEffect`, materiales, `MeshGradient`), tabla completa de deprecaciones, y el ejercicio guiado que integra todo lo aprendido en las tres partes.

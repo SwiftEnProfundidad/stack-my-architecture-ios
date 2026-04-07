@@ -148,7 +148,7 @@ Nivel fuerte:
 | --- | --- | --- |
 | `swift-concurrency` | Coordinador, eventos, boundaries async | aislamiento justificado, eventos `Sendable`, cancelación correcta |
 | `swiftui-expert-skill` | Interface de Catalog y navegación | flujo de estado correcto, vistas sin lógica de negocio, APIs modernas |
-| `windsurf-rules-ios` (si aplica) | consistencia de arquitectura iOS | reglas Clean + BDD/TDD mantenidas durante integración |
+| `ios-enterprise-rules` (si aplica) | consistencia de arquitectura iOS | reglas Clean + BDD/TDD mantenidas durante integración |
 
 La skill está aplicada solo si cambia decisiones y resultados verificables.
 
@@ -284,46 +284,7 @@ Aunque no cierres todos los entregables:
 
 ---
 
-## Siguiente etapa
+## Qué sigue
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+[**Etapa 3: Evolución →**](../03-evolucion/00-introduccion.md) — Cache/offline, consistencia, observabilidad, tests avanzados y trade-offs. Tu app deja de ser un prototipo y empieza a comportarse como software de producción resiliente.
 

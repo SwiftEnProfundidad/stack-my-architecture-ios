@@ -152,7 +152,7 @@ struct ProductRow: View {
     let product: Product
     
     var body: some View {
-        Text(product.name)
+        Text(product.title)
             .foregroundStyle(viewModel.theme.primaryColor)
     }
 }
@@ -178,7 +178,7 @@ struct ProductRow: View {
     let primaryColor: Color // ← Solo lo que necesita
     
     var body: some View {
-        Text(product.name)
+        Text(product.title)
             .foregroundStyle(primaryColor)
     }
 }
@@ -245,7 +245,7 @@ private struct ProductRowContent: View {
     
     var body: some View {
         VStack {
-            Text(product.name)
+            Text(product.title)
             if isExpanded {
                 Text(product.description)
             }
@@ -297,7 +297,7 @@ Lo mismo aplica para ordenamientos, filtros, y transformaciones de datos:
 ```swift
 // ❌ Anti-patrón: ordena el array en cada evaluación de body
 var body: some View {
-    List(products.sorted { $0.name < $1.name }) { product in
+    List(products.sorted { $0.title < $1.name }) { product in
         ProductRow(product: product)
     }
 }
@@ -309,7 +309,7 @@ final class CatalogViewModel {
     private(set) var products: [Product] = []
     
     var sortedProducts: [Product] {
-        products.sorted { $0.name < $1.name }
+        products.sorted { $0.title < $1.name }
     }
 }
 
@@ -455,46 +455,7 @@ Antes de considerar una vista "terminada":
 
 ---
 
----
+## Qué sigue
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+[**Composición avanzada →**](07-composicion-avanzada.md) — Decoradores, interceptores y el patrón de composición en la Composition Root: cómo extender comportamiento sin modificar código existente (OCP en acción).
 

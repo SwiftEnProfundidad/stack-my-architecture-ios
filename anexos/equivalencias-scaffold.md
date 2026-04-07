@@ -22,8 +22,8 @@ Esta tabla es la referencia canónica. Cuando una lección diga `LoginUseCase`, 
 | `Password.ValidationError.empty` | `LoginError.invalidPassword` | `Sources/FeatureLoginDomain/LoginError.swift` |
 | `AuthGateway` (protocol/puerto) | `AuthRepository` | `Sources/FeatureLoginDomain/AuthRepository.swift` |
 | `LoginUseCase` | `AuthenticateUserUseCase` | `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift` |
-| `RemoteAuthGateway` | `RemoteAuthRepository` | `Sources/FeatureLoginData/RemoteAuthRepository.swift` |
-| `StubAuthGateway` | `StubAuthRepository` | `Sources/FeatureLoginData/StubAuthRepository.swift` |
+| `RemoteAuthGateway` | `AuthHTTPRepository` | `Sources/FeatureLoginData/AuthHTTPRepository.swift` |
+| `StubAuthGateway` | `InMemoryAuthRepository` | `Sources/FeatureLoginData/InMemoryAuthRepository.swift` |
 | `LoginViewModel` | `LoginViewModel` | `Sources/FeatureLoginUI/LoginViewModel.swift` |
 | `LoginView` | `LoginView` | `Sources/FeatureLoginUI/LoginView.swift` |
 | `@testable import StackMyArchitecture` | `@testable import FeatureLoginDomain` | en cada test |
@@ -77,10 +77,38 @@ En el scaffold es:
 
 ## Feature Catalog
 
-| Nombre en lecciones | Nombre en scaffold |
-|---|---|
-| `Product` | `Product` |
-| `CatalogRepository` | `CatalogRepository` |
-| `LoadCatalogUseCase` | `FetchProductsUseCase` |
-| `CatalogViewModel` | `CatalogViewModel` |
-| `CatalogGateway` | `CatalogRepository` (protocol) |
+| Nombre en lecciones | Nombre en scaffold | Ruta en scaffold |
+|---|---|---|
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` | `Sources/FeatureCatalogDomain/Product.swift` |
+| `product.name` | `product.title` | campo renombrado |
+| `Price(amount: Decimal, currency: String)` | `price: Double` — sin tipo `Price` | `Product.price` directamente |
+| `product.imageURL: URL` | no existe en scaffold | — |
+| `CatalogError.invalidData` | no existe — solo `.network`, `.offlineNoCache`, `.staleCacheUnavailable` | `Sources/FeatureCatalogDomain/CatalogError.swift` |
+| `CatalogGateway` (protocol/puerto) | `CatalogRepository` | `Sources/FeatureCatalogDomain/CatalogRepository.swift` |
+| `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` | `Sources/FeatureCatalogDomain/CatalogRepository.swift` |
+| `LoadCatalogUseCase` | `LoadCatalogUseCase` | `Sources/FeatureCatalogDomain/LoadCatalogUseCase.swift` |
+| `CatalogViewModel` | `CatalogViewModel` (`@Observable`) | `Sources/FeatureCatalogUI/CatalogViewModel.swift` |
+| `CatalogView` | `CatalogView` | `Sources/FeatureCatalogUI/CatalogView.swift` |
+| `RemoteCatalogGateway` | `CachedCatalogRepository` | `Sources/FeatureCatalogData/CachedCatalogRepository.swift` |
+
+---
+
+## Navegación y Composition Root
+
+| Nombre en lecciones | Nombre en scaffold | Ruta en scaffold |
+|---|---|---|
+| `AppDestination` | `AppRoute` | `Sources/AppContracts/NavigationContracts.swift` |
+| `CompositionRoot` | `AppCompositionRoot` | `Sources/AppComposition/AppCompositionRoot.swift` |
+| `NavigationCoordinator` | `NavigationStore` | `Sources/AppComposition/NavigationStore.swift` |
+| `LoginNavigating` (protocol) | `LoginNavigating` | `Sources/AppContracts/NavigationContracts.swift` |
+
+---
+
+## Patrones SwiftUI — Lecciones vs Scaffold
+
+| Aspecto | Lecciones | Scaffold |
+|---|---|---|
+| Observación | `@Observable` (macro moderna) | `@Observable` (macro moderna) |
+| Binding en vistas | `@Bindable var viewModel` | `@Bindable var viewModel` |
+| ViewModel es | `@Observable @MainActor class` | `@Observable @MainActor public final class` |
+| Vista recibe VM por | init parameter | init parameter |

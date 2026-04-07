@@ -175,3 +175,9 @@ Tu ejercicio es escribir tu propia "narrativa natural" respondiendo estas pregun
 5. Cierra con métricas o indicadores concretos de éxito
 
 Practica estas narrativas hasta que fluyan naturalmente, sin sonar memorizadas. La autenticidad es más convincente que la perfección.
+
+---
+
+## Qué sigue
+
+[**Arquitectura adaptativa →**](12-arquitectura-adaptativa.md) — La lección de cierre: cómo evolucionar tu arquitectura ante cambios de requisitos, escala y equipo sin reescribir desde cero.

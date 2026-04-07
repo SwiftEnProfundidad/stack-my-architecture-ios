@@ -10,7 +10,7 @@
 - [ ] **Escenarios BDD** del Login documentados (happy path, sad path, edge cases).
 - [ ] **Value Objects** `Email` y `Password` con validación por construcción.
 - [ ] **Errores tipados** `AuthError` y `LoginUseCase.Error`.
-- [ ] **Evento** `LoginEvent` (succeeded/failed).
+- [ ] **Evento** `LoginEvent` (success/failure).
 - [ ] **Puerto** `AuthGateway` como protocolo en Application.
 - [ ] **Caso de uso** `LoginUseCase` con TDD completo.
 - [ ] **Implementación** `RemoteAuthGateway` + `StubAuthGateway`.
@@ -55,7 +55,6 @@ LoginView
 ```
 
 ---
----
 
 ## Si no cumples todos los entregables
 
@@ -95,3 +94,11 @@ Aunque no cumplas todos los entregables, seguro que has aprendido algo:
 - ✅ Algún concepto de Value Objects o TDD
 
 **Esto ya es más de lo que sabías antes de empezar.** Cada línea de código cuenta.
+
+---
+
+## Qué sigue
+
+Has completado la Etapa 1. Conoces Clean Architecture, Feature-First, BDD, TDD, y tienes una app iOS funcional con separación real de responsabilidades.
+
+La Etapa 2 (Integración) añade una segunda feature, navegación entre features, y un coordinador central. Los mismos principios, más complejidad.

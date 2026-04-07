@@ -482,3 +482,7 @@ Este ejercicio no produce código nuevo; entrena la habilidad de mantener docume
 
 ---
 
+## Qué sigue
+
+[**Quality Gates →**](06-quality-gates.md) — Cómo automatizar la verificación de calidad con scripts que protegen cobertura, dependencias, rendimiento y compilación antes de cada merge.
+

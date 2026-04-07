@@ -118,6 +118,22 @@ flowchart LR
     end
 ```
 
+Lectura del diagrama:
+
+→ **Navegación** (`TabView`, `NavigationLink`, `navigationDestination`, `.toolbar`) — define cómo el usuario se mueve entre pantallas y qué acciones tiene disponibles en cada una.
+
+→ **Presentación modal** (`.sheet`, `.fullScreenCover`, `.alert`, `.confirmationDialog`) — interrumpe el flujo con tareas secundarias o confirmaciones. El criterio de elección es si la tarea es opcional (`.sheet`) u obligatoria (`.fullScreenCover`), y si la decisión es binaria (`.alert`) o múltiple (`.confirmationDialog`).
+
+→ **Datos y búsqueda** (`.refreshable`, `.searchable`, `@AppStorage`, `@Environment`) — conectan el sistema con la UI. `.refreshable` y `.searchable` activan el ViewModel; `@AppStorage` persiste preferencias sin capa de Infrastructure; `@Environment` da acceso a contexto del sistema.
+
+→ **State management** (`@State`, `@Binding`, `@Bindable`, `@Observable`) — determina la propiedad del dato. La regla es: quien crea el dato usa `@State`; quien recibe un valor simple usa `@Binding`; quien recibe un objeto observable inyectado y necesita bindings de sus propiedades usa `@Bindable`.
+
+→ **Performance** (`LazyVStack`, identidad estable, pre-filtrado, datos mínimos) — cuatro reglas que se aplican juntas. Ninguna es difícil por separado, pero olvidar una puede degradar listas de 1000 elementos de 60fps a 20fps.
+
+→ **Visual** (animaciones, Liquid Glass, `ViewModifier`, accesibilidad) — la capa de presentación. `ViewModifier` estandariza estilos, Liquid Glass es el futuro visual de iOS 26+, y accesibilidad es un requisito legal en muchos mercados enterprise.
+
+→ **Composición** (`@ViewBuilder`, `Form + Section`, `containerRelativeFrame`) — herramientas para construir vistas reutilizables y layouts adaptables sin `GeometryReader`.
+
 ### Checklist COMPLETO para un junior
 
 Antes de entregar tu primera PR en una app enterprise, asegurate de dominar:
@@ -194,8 +210,8 @@ Si dominas estos 28 puntos, estas preparado para cualquier proyecto enterprise e
 
 ```swift
 List {
-    ForEach(viewModel.products, id: \.name) { product in
-        Text("\(product.name) — \(product.price)")
+    ForEach(viewModel.products, id: \.id) { product in
+        Text("\(product.title) — \(product.price.formatted(.number))")
     }
 }
 .refreshable { await viewModel.load() }
@@ -210,6 +226,8 @@ List {
 }
 ```
 
+> **Nota scaffold:** El campo es `product.title` (no `name`) y `product.price` es `Double` (no un tipo `Price`). Usa `id: \.id` en `ForEach` — `\.name` no es `Hashable` ni único.
+
 Estos tres patrones cubren los estados fundamentales de cualquier pantalla de datos: cargando, vacio y con datos. En enterprise, olvidar el empty state o el loading state es una de las causas más frecuentes de mala UX.
 
 <details>
@@ -222,9 +240,9 @@ struct CatalogScreen: View {
     var body: some View {
         List(viewModel.products, id: \.id) { product in
             VStack(alignment: .leading, spacing: 4) {
-                Text(product.name)
+                Text(product.title)
                     .font(.headline)
-                Text(product.price.formatted())
+                Text(product.price.formatted(.number.precision(.fractionLength(2))))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -265,43 +283,47 @@ La siguiente lección complementa esta: si SwiftUI define como se ve la app, Swi
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+El ejercicio guiado de esta lección es directamente aplicable al scaffold real. Aquí los archivos exactos y las divergencias a tener en cuenta.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Archivos del scaffold
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Archivo | Qué implementar |
+|---|---|
+| `Sources/FeatureCatalogInterface/CatalogView.swift` | `.refreshable`, `ContentUnavailableView`, `ProgressView` overlay |
+| `Sources/FeatureCatalogInterface/` | Liquid Glass en tarjetas de producto (si iOS 26+ target) |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+### Divergencias del ejercicio respecto al scaffold
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+La "Solución razonada" del ejercicio usa la API correcta del scaffold. Las diferencias clave:
+
+| Ejercicio | Scaffold real |
+|---|---|
+| `product.name` | `product.title` |
+| `product.price.formatted()` | `product.price.formatted(.number.precision(.fractionLength(2)))` |
+| `id: \.name` | `id: \.id` — siempre usar la propiedad `id` |
+
+### Sobre Liquid Glass en el scaffold
+
+El scaffold tiene target mínimo iOS 17. Para añadir Liquid Glass:
+
+```swift
+// En cualquier vista del scaffold
+if #available(iOS 26, *) {
+    ProductRow(product: product)
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+} else {
+    ProductRow(product: product)
+        .background(.background)
+        .clipShape(.rect(cornerRadius: 12))
+}
 ```
 
-Lectura semántica mínima de este diagrama:
+No migres todo el scaffold a Liquid Glass — es una feature de presentación. Aplícala solo donde el diseño lo justifique, siempre con `#available` y fallback.
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+---
+
+## Qué sigue
+
+[**Lección 11: Swift Concurrency Enterprise →**](./08-swift-concurrency-enterprise.md) — `async/await` avanzado, `actor`, `TaskGroup`, cancelación estructurada, y cómo gestionar concurrencia en una app completa con múltiples features ejecutando en paralelo.

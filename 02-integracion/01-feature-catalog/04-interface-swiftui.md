@@ -1,9 +1,17 @@
 # Feature Catalog: Capa Interface (SwiftUI)
 
-<!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
 > En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
+
+## Objetivo de aprendizaje
+
+Al terminar esta lección vas a poder construir la capa Interface de `Catalog` con un ViewModel que modela el estado de pantalla como una máquina de estados tipada, una View SwiftUI que reacciona a ese estado sin lógica de negocio, y tests que cubren los cuatro estados posibles sin depender de la UI real.
+
+En lenguaje simple: Interface es el escaparate. No decide qué hay en el almacén (Domain) ni cómo llega (Infrastructure). Solo decide cómo se muestra lo que le entregan.
+
+---
+
 ## Una pantalla con cuatro estados
 
 La Interface del Catalog es más compleja que la de Login. Login tenía un formulario con dos campos, un botón, y un mensaje de error. Catalog tiene una pantalla que puede estar en cuatro estados diferentes (loading, loaded, empty, error), cada uno con una representación visual distinta. Esto nos obligará a pensar en cómo modelar el estado de la UI de forma limpia.
@@ -308,7 +316,11 @@ struct ProductRow: View {
 }
 ```
 
-La imagen se carga con `AsyncImage`, el componente de SwiftUI para carga asíncrona de imágenes por URL. Mientras la imagen carga, muestra un placeholder gris. Si la carga falla, también muestra el placeholder.
+**Por qué `ProductRow` es una subvista separada** — extraer la fila a su propia `View` tiene tres ventajas: `CatalogView` queda limpia (solo gestiona el switch de estado), `ProductRow` es testeable en preview de forma independiente, y si el diseño de la fila cambia, no hay que tocar la vista principal.
+
+**`AsyncImage`** — carga la imagen de forma asíncrona sin bloquear la UI. El primer closure (`{ image in image.resizable()... }`) recibe la imagen cuando está disponible. El segundo (`placeholder`) se muestra mientras carga o si la carga falla. SwiftUI gestiona el ciclo de vida automáticamente: si el `ProductRow` desaparece de pantalla, `AsyncImage` cancela la descarga.
+
+**`.clipShape(RoundedRectangle(cornerRadius: 8))`** — recorta la imagen en un rectángulo redondeado. Si la imagen es más grande que el frame de 60×60, `aspectRatio(.fill)` la escala para llenar el espacio y `.clipShape` elimina lo que sobresale.
 
 Para formatear el precio, añadimos una propiedad computada a `Price`:
 
@@ -327,7 +339,9 @@ extension Price {
 }
 ```
 
-Esto formatea el precio según la moneda: `29.99 EUR` se muestra como "29,99 €" en un dispositivo configurado en español. `NumberFormatter` usa la localización del dispositivo automáticamente.
+**`formatter.string(from: amount as NSDecimalNumber)`** — `NumberFormatter` no acepta `Decimal` directamente, por eso el cast `as NSDecimalNumber` (que es el tipo Obj-C compatible). El resultado incluye el símbolo de moneda y el formato local: "29,99 €" en España, "$29.99" en EEUU. El `?? "\(amount) \(currency)"` es el fallback por si `NumberFormatter` devuelve `nil` (muy raro, pero posible con localizaciones inusuales).
+
+**Trade-off de esta extensión en Domain** — `Price+Formatted` añade lógica de presentación a un tipo de Domain. Estrictamente, Domain no debería conocer `NumberFormatter` porque es un detalle de UI. La alternativa más pura sería una extensión en la capa Interface (`Price+Display.swift` en la carpeta Interface). En Etapa 2 aceptamos este trade-off por simplicidad: el formateo de un precio es una responsabilidad tan cercana al tipo que la mayoría de equipos la acepta aquí. Si en el futuro necesitas múltiples formatos para el mismo precio (lista vs. detalle vs. factura), ese sería el momento de moverlo a Interface o a un formatter dedicado.
 
 ---
 
@@ -427,11 +441,11 @@ final class CatalogViewModelTests: XCTestCase {
         await sut.load()
         XCTAssertEqual(sut.state, .error("Sin conexión a internet. Inténtalo de nuevo."))
         
-        // Second load should go through loading state
-        // After completion it will be error again (same stub), but the state was reset
+        // Segunda carga: verifica que load() puede llamarse múltiples veces (botón Reintentar).
+        // El estado intermedio .loading ocurre síncronamente al inicio de load(),
+        // pero no es observable desde XCTest sin añadir mecanismos de observación async.
+        // Lo que sí podemos verificar es el estado final después de la segunda carga.
         await sut.load()
-        // We can verify the final state; the intermediate loading state
-        // is hard to test without async observation
         XCTAssertEqual(sut.state, .error("Sin conexión a internet. Inténtalo de nuevo."))
     }
     
@@ -448,6 +462,8 @@ final class CatalogViewModelTests: XCTestCase {
     }
 }
 ```
+
+**`@MainActor` en la clase de tests** — `CatalogViewModel` está aislado en `@MainActor`, lo que significa que sus métodos solo pueden llamarse desde el actor principal. Si los tests no tuvieran `@MainActor`, Swift 6 rechazaría `await sut.load()` porque estarías llamando un método de `@MainActor` desde un contexto sin aislamiento. Anotar la clase entera con `@MainActor` es la forma más limpia de indicar que todos sus tests se ejecutan en el hilo principal, que es exactamente donde el ViewModel vive.
 
 **Explicacion de cada test del CatalogViewModel:**
 
@@ -482,13 +498,19 @@ final class CatalogViewModelTests: XCTestCase {
                     repository: StubProductRepository()
                 ),
                 onProductSelected: { product in
-                    print("Selected: \(product.name)")
+                    print("Seleccionado: \(product.name)")
                 }
             )
         )
     }
 }
 ```
+
+**`StubProductRepository` vs `ProductRepositoryStub`** — en los tests usamos `ProductRepositoryStub` (configurable con `.success` o `.failure`). En previews se usa `StubProductRepository`, que típicamente devuelve datos fijos hardcodeados para visualización en Xcode Canvas sin red. Son dos tipos distintos con propósitos distintos: el stub de tests es flexible para simular cualquier escenario; el stub de preview tiene datos fijos representativos del happy path. Ambos implementan `ProductRepository`.
+
+**`#Preview("Catalog - Products")`** — el nombre del preview aparece en el selector de Xcode Canvas. Con varios previews puedes visualizar todos los estados sin modificar el código: `#Preview("Catalog - Empty")`, `#Preview("Catalog - Error")`, etc.
+
+**`NavigationStack` en el preview** — la `CatalogView` usa `.navigationTitle("Catálogo")`, que solo se muestra cuando la vista está dentro de un `NavigationStack`. Sin él, el preview no muestra el título y la apariencia es distinta a la del dispositivo real. Siempre envuelve previews de vistas que usan navegación en el contenedor correcto.
 
 ---
 
@@ -506,44 +528,278 @@ Ambas features siguen el mismo patrón arquitectónico (ViewModel con @Observabl
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Anti-patrones y depuración
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Anti-patrón 1: lógica de negocio en la View
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+Síntoma: la View decide qué mostrar basándose en múltiples condiciones en lugar de reaccionar al estado del ViewModel.
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+```swift
+// ❌ Mal — la View toma decisiones de lógica
+struct CatalogView: View {
+    @State private var viewModel: CatalogViewModel
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+    var body: some View {
+        if viewModel.isLoading {
+            ProgressView()
+        } else if viewModel.products.isEmpty && viewModel.errorMessage == nil {
+            Text("No hay productos")  // ❌ lógica de estado dispersa en la View
+        } else if let error = viewModel.errorMessage {
+            Text(error)
+        } else {
+            List(viewModel.products, id: \.id) { ProductRow(product: $0) }
+        }
+    }
+}
+
+// ✅ Bien — la View solo reacciona al estado; el ViewModel decide
+struct CatalogView: View {
+    @State private var viewModel: CatalogViewModel
+
+    var body: some View {
+        Group {
+            switch viewModel.state {        // ← un único punto de decisión
+            case .loading:  ProgressView()
+            case .loaded(let products): List(products, id: \.id) { ProductRow(product: $0) }
+            case .empty:    ContentUnavailableView("No hay productos", systemImage: "cart")
+            case .error(let msg): Text(msg)
+            }
+        }
+    }
+}
 ```
 
-Lectura semántica mínima de este diagrama:
+### Anti-patrón 2: ViewModel con propiedades independientes en lugar de enum
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+Síntoma: el ViewModel tiene flags separados que permiten estados contradictorios.
+
+```swift
+// ❌ Mal — estados imposibles pero compilables
+@Observable @MainActor
+final class CatalogViewModel {
+    var isLoading = false
+    var products: [Product] = []
+    var errorMessage: String?
+    // isLoading=true + products=[p1] + errorMessage="error" → ¿qué muestra la UI?
+}
+
+// ✅ Bien — enum que hace imposibles los estados contradictorios
+@Observable @MainActor
+final class CatalogViewModel {
+    enum State: Equatable {
+        case loading
+        case loaded([Product])
+        case empty
+        case error(String)
+    }
+    private(set) var state: State = .loading
+    // Solo UN estado activo a la vez. El compilador lo garantiza.
+}
+```
+
+### Anti-patrón 3: ViewModel construye sus propias dependencias
+
+Síntoma: el ViewModel crea `RemoteProductRepository` o `URLSession` directamente. Se vuelve imposible de testear.
+
+```swift
+// ❌ Mal — ViewModel acoplado a Infrastructure
+@Observable @MainActor
+final class CatalogViewModel {
+    private let repository = RemoteProductRepository(  // ❌ acoplado a implementación concreta
+        httpClient: URLSessionHTTPClient(),
+        baseURL: URL(string: "https://api.example.com")!
+    )
+}
+
+// ✅ Bien — dependencias inyectadas desde Composition Root
+@Observable @MainActor
+final class CatalogViewModel {
+    private let loadProducts: LoadProductsUseCase   // ← solo conoce el UseCase
+    init(loadProducts: LoadProductsUseCase, ...) { ... }
+}
+```
+
+### Guía rápida de depuración
+
+1. Si la UI no actualiza tras `load()`, verificar que el ViewModel es `@Observable` y que la View usa `@State` (no `@StateObject`).
+2. Si aparece un estado imposible, buscar propiedades `var` sueltas — convertir a enum.
+3. Si los tests no compilan con `await sut.load()`, verificar que la clase de tests tiene `@MainActor`.
+4. Si `AsyncImage` nunca muestra la imagen, verificar que `imageURL` es una URL válida (no `nil`) con un breakpoint antes del `ProductRow`.
+
+---
+
+## A/B/C de diseño de Interface en esta etapa
+
+La elección de cómo modelar el estado y gestionar la reactividad determina la complejidad de la Interface. En Etapa 2 usamos las APIs modernas de iOS 17+, que simplifican el código a costa de requerir una versión mínima más alta.
+
+### Opción A: `@Observable` + enum State (decisión actual)
+
+Ventajas:
+
+- `@Observable` elimina el boilerplate de `@Published` y observación manual;
+- el enum de estado hace imposibles los estados contradictorios en compilación;
+- el ViewModel es un `class` normal con menos wrapping sintáctico.
+
+Costes:
+
+- requiere iOS 17+;
+- `@State private var viewModel: CatalogViewModel` puede sorprender a devs acostumbrados a `@StateObject`.
+
+```swift
+// ✅ Opción A — iOS 17+, moderno y limpio
+@Observable @MainActor
+final class CatalogViewModel {
+    private(set) var state: State = .loading
+    // SwiftUI detecta cambios en 'state' automáticamente sin @Published
+}
+
+struct CatalogView: View {
+    @State private var viewModel: CatalogViewModel  // @State para @Observable
+    // ...
+}
+```
+
+### Opción B: `ObservableObject` + `@Published` (patrón iOS 14-16)
+
+Ventajas:
+
+- compatible con iOS 14+ y proyectos legacy;
+- ampliamente documentado y conocido por el equipo.
+
+Costes:
+
+- más boilerplate: `@Published` en cada propiedad, `@StateObject` en la View;
+- `@StateObject` tiene semántica de ownership diferente a `@State` — confunde a juniors.
+
+```swift
+// Opción B — iOS 14+, más verboso
+@MainActor
+final class CatalogViewModel: ObservableObject {
+    @Published private(set) var state: State = .loading
+}
+
+struct CatalogView: View {
+    @StateObject private var viewModel: CatalogViewModel  // @StateObject para ObservableObject
+}
+```
+
+### Opción C: lógica en la View, sin ViewModel
+
+Ventajas:
+
+- menos archivos iniciales.
+
+Costes:
+
+- lógica no testeable sin levantar la UI;
+- si el estado crece, la View se convierte en un monolito imposible de mantener;
+- viola la separación Interface / Application.
+
+```swift
+// ❌ Opción C — lógica de carga directamente en la View
+struct CatalogView: View {
+    @State private var products: [Product] = []
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+
+    var body: some View { ... }
+
+    func load() async {
+        // Lógica de negocio mezclada con SwiftUI — imposible de testear unitariamente
+        do {
+            products = try await URLSession.shared.loadProducts()
+            isLoading = false
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+```
+
+Trigger para pasar de A (Opción A) a Opción B:
+
+- el proyecto necesita soportar iOS 16 o inferior;
+- el equipo tiene experiencia consolidada con `ObservableObject` y el cambio tiene coste de migración alto.
+
+---
+
+## Checklist de calidad
+
+- [ ] ViewModel anotado con `@Observable` y `@MainActor`.
+- [ ] Estado modelado como enum con casos mutuamente excluyentes.
+- [ ] View usa `@State` para el ViewModel (no `@StateObject`).
+- [ ] View inicia la carga con `.task` (no en `onAppear` con `Task { }`).
+- [ ] View sin lógica de negocio: solo `switch` sobre el estado.
+- [ ] Tests cubren los 4 estados posibles (loading, loaded, empty, error).
+- [ ] Closure de navegación inyectado desde Composition Root, no hardcodeado.
+- [ ] `ProductRow` como subvista separada y testeable en preview.
+
+---
+
+## ADR corto de la lección
+
+```markdown
+## ADR-004: Interface de Catalog con @Observable + enum State
+- Estado: Aprobado
+- Contexto: pantalla con 4 estados mutuamente excluyentes; proyecto iOS 17+
+- Decisión: usar enum State anidado en ViewModel con @Observable para eliminar estados imposibles
+- Consecuencias: código más seguro y legible; requiere iOS 17+; devs deben aprender @State vs @StateObject
+- Fecha: 2026-02-07
+```
+
+---
+
+## Implementación en tu proyecto
+
+El scaffold tiene `CatalogViewModel` en `Sources/FeatureCatalogUI/CatalogViewModel.swift`. Ábrelo ahora y observa una diferencia importante con respecto a lo que enseña esta lección:
+
+```swift
+// Lo que ya existe en el scaffold
+// Sources/FeatureCatalogUI/CatalogViewModel.swift
+@MainActor
+public final class CatalogViewModel {
+    public private(set) var products: [Product] = []   // ← propiedades independientes
+    public private(set) var isLoading = false           //   NO enum de estado
+    public private(set) var errorMessage: String?
+
+    private let useCase: LoadCatalogUseCase
+
+    public func load() async {
+        isLoading = true
+        errorMessage = nil
+        do {
+            products = try await useCase.execute()
+        } catch {
+            errorMessage = "No se pudo cargar el catálogo."
+        }
+        isLoading = false
+    }
+}
+```
+
+**Por qué el scaffold usa propiedades independientes en lugar del enum State.** El scaffold prioriza ser lo más accesible posible para un primer encuentro con la arquitectura. Las propiedades independientes son más familiares para estudiantes que vienen de tutoriales de SwiftUI básicos. El enum State (que enseña esta lección) es la evolución natural que aprenderás a aplicar cuando construyas apps más complejas.
+
+**Lo que pierdes con propiedades independientes:** puedes tener `isLoading = true` y `errorMessage = "Error"` al mismo tiempo — un estado contradictorio que el compilador no detecta y que la UI puede interpretar de forma inesperada. El anti-patrón 2 de esta lección documenta exactamente este problema.
+
+**Qué hacer ahora:**
+1. Abre `Sources/FeatureCatalogUI/CatalogViewModel.swift` — confirma la implementación del scaffold.
+2. **Ejercicio de mejora:** actualiza el ViewModel del scaffold para usar el `enum State` de esta lección. La refactorización implica:
+   - Añadir el enum `State` anidado en el ViewModel
+   - Reemplazar las tres propiedades por `private(set) var state: State = .loading`
+   - Actualizar `load()` para asignar `state` en lugar de las tres propiedades
+   - Actualizar la `CatalogView` (si existe en el scaffold) para hacer `switch viewModel.state`
+   - Actualizar los tests del ViewModel para verificar `state` en lugar de las propiedades individuales
+3. Abre `Tests/FeatureCatalogDomainTests/` para ver cómo el scaffold testea la capa de UI.
+
+Esta refactorización es un ejercicio excelente porque no cambia el comportamiento — solo mejora la seguridad de tipos del estado de pantalla. Si los tests pasan antes y después, la refactorización fue correcta.
+
+---
+
+## Qué sigue
+
+Con las cuatro capas de Catalog completadas (Domain, Application, Infrastructure, Interface), el siguiente paso es el ADR consolidado de toda la feature y la conexión con el sistema de navegación por eventos.
+
+→ [ADR-002: Catalog — Decisiones de arquitectura consolidadas](ADR-002-catalog.md)
 

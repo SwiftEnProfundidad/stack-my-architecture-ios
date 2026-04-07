@@ -14,7 +14,19 @@ El **caso de uso** `LoginUseCase`, que orquesta el flujo completo: valida email,
 
 Todo con TDD usando XCTest, un test a la vez.
 
-> **Nota de nomenclatura lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase` como nombres pedagógicos. En el scaffold SPM del repositorio (`apps/ios/ArchitectureKit`), los equivalentes son `AuthRepository` (protocolo en `Sources/FeatureLoginDomain/AuthRepository.swift`) y `AuthenticateUserUseCase` (en `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift`). El patrón es idéntico; solo cambia el nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura y diseño lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase`. En el scaffold SPM (`apps/ios/ArchitectureKit`) los equivalentes son `AuthRepository` y `AuthenticateUserUseCase`. Pero la diferencia va más allá del nombre:
+>
+> | Lección | Scaffold | Qué cambia |
+> |---|---|---|
+> | `AuthGateway` (protocol) | `AuthRepository` | Solo nombre |
+> | `LoginUseCase` con `LoginUseCase.Error` (4 casos) | `AuthenticateUserUseCase` **sin error propio** | El scaffold no necesita traducción de errores porque ya usa `LoginError` unificado |
+> | `LoginUseCase.execute` con 3 bloques `do/catch` para traducir | `execute` con 2 líneas limpias: `try EmailAddress(email)`, `try Password(password)` | La traducción de errores es innecesaria con enum unificado |
+> | `AuthGatewayStub` — `class` con `@unchecked Sendable` | `AuthRepositoryStub` — `actor` (Sendable por definición) | El scaffold usa `actor` como patrón más seguro para stubs |
+> | Devuelve `Session` | Devuelve `UserSession` | Campos diferentes (ver nota en [01-domain](01-domain.md)) |
+>
+> **¿Por qué la lección enseña error translation?** Porque es un patrón fundamental en Clean Architecture que necesitarás en sistemas donde las capas internas tienen tipos de error distintos a la API pública de la feature. En el scaffold, como todos los errores son `LoginError` desde el principio, la traducción es innecesaria. La lección te enseña el patrón general; el scaffold muestra el caso pragmático donde ese patrón se simplifica.
+>
+> Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -111,11 +123,11 @@ No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. E
 ```mermaid
 graph LR
     subgraph Test["En TESTS - rapido, determinista"]
-        UC1["LoginUseCase"] -.->|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
+        UC1["LoginUseCase"] ==>|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
     end
 
     subgraph Prod["En PRODUCCION - real"]
-        UC2["LoginUseCase"] -.->|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
+        UC2["LoginUseCase"] ==>|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
     end
 
     style Test fill:#d4edda,stroke:#28a745
@@ -155,7 +167,9 @@ final class AuthGatewayStub: AuthGateway, @unchecked Sendable {
 }
 ```
 
-**Explicación línea por línea (esto es un spy, lee la guía de test doubles si no recuerdas qué es):**
+> **Divergencia scaffold — stubs con `actor`:** En el scaffold real, los stubs de test usan `private actor AuthRepositoryStub: AuthRepository` en vez de `class` + `@unchecked Sendable`. Un `actor` es `Sendable` por definición y serializa accesos, evitando la necesidad de `@unchecked`. La lección usa `class` porque todavía no has visto actors (se enseñan en Etapa 5). Cuando llegues ahí, sabrás cuándo preferir `actor` sobre `@unchecked Sendable`.
+
+**Explicación línea por línea** (en la [Metodología TDD](../02-metodologia-tdd-practica.md) explicamos los tipos de dobles de test: stub, spy, mock):**
 
 `final class AuthGatewayStub: AuthGateway, @unchecked Sendable` — Es una clase, no un struct. ¿Por qué? Porque necesitamos **mutabilidad**: cuando el UseCase llame a `authenticate`, queremos guardar las credenciales que recibió (eso es mutar la propiedad `receivedCredentials`). Los structs no permiten eso fácilmente en funciones de protocolo. `: AuthGateway` significa que conforma el protocolo — es decir, tiene el mismo método `authenticate` que el AuthGateway real. Esto es clave: el UseCase no sabe si recibe un stub o el real, porque ambos conforman el mismo protocolo. `@unchecked Sendable` le dice al compilador "confía en mí, este tipo es seguro para concurrencia". En producción evitamos `@unchecked`, pero en tests es aceptable porque cada test se ejecuta de forma aislada.
 
@@ -673,6 +687,10 @@ En su lugar, el caso de uso traduce todos los errores posibles a un conjunto uni
 
 Si mañana cambiamos la validación del email (por ejemplo, añadiendo un nuevo caso de error `Email.ValidationError.disposableProvider`), el caso de uso puede decidir cómo traducir ese nuevo error sin que la UI se entere. Quizá lo traduce a `.invalidEmail` como los demás, quizá añade un nuevo caso a `LoginUseCase.Error`. Pero la decisión se toma aquí, no en la UI.
 
+> **Contraste scaffold:** El scaffold toma un camino distinto pero igualmente válido. En vez de tener errores anidados por VO (`Email.ValidationError`) y luego traducirlos, usa un `LoginError` unificado desde el principio. Así el `AuthenticateUserUseCase` del scaffold no necesita traducción — los errores que lanzan `EmailAddress` y `Password` ya son `LoginError.invalidEmail` y `LoginError.invalidPassword`. Resultado: el caso de uso del scaffold son **4 líneas** sin `do/catch`.
+>
+> Ambos diseños son correctos. El de esta lección es más **explícito y extensible** (cada capa tiene su vocabulario de errores). El del scaffold es más **pragmático** (un enum unificado para 4 casos). Lo importante es que entiendas el trade-off: la traducción de errores añade claridad semántica a costa de verbosidad.
+
 ---
 
 ## Por qué el caso de uso es un struct y no una clase
@@ -701,11 +719,11 @@ Siete tests XCTest que cubren todos los escenarios BDD: happy path, validación 
 
 Un stub (`AuthGatewayStub`) que permite testear el caso de uso de forma aislada, rápida, y determinista.
 
-En la siguiente lección implementaremos la capa Infrastructure: la implementación real del `AuthGateway` que habla con un servidor, y un `StubAuthGateway` para desarrollo sin servidor.
-
 ---
 
 ## Persistencia segura de sesión: Keychain
+
+> **Enterprise (Etapa 2+):** Esta sección describe un patrón que **no se implementa en Etapa 1**. Lo introducimos aquí como contexto porque los escenarios BDD de seguridad lo mencionan. La implementación real de `SessionRepository` y `KeychainClient` se aborda a partir de Etapa 2.
 
 El `LoginUseCase` devuelve una `Session` al llamante. Pero ¿quién decide dónde se guarda esa sesión? Y más importante: ¿cómo debe guardarse de forma segura?
 
@@ -740,14 +758,15 @@ final class SessionRepositoryKeychain: SessionRepository {
     }
     
     func save(_ session: Session) async throws {
-        try keychain.set(session.accessToken, forKey: "user_session_token")
+        try keychain.set(session.token, forKey: "user_session_token")
     }
     
     func load() async throws -> Session? {
         guard let token = try keychain.get("user_session_token") else {
             return nil
         }
-        return Session(accessToken: token, email: "user@example.com")
+        // Simplificado: en producción también persiste el userId/email
+        return Session(token: token, email: "")
     }
     
     func clear() async throws {
@@ -796,46 +815,10 @@ Este flujo es transparente para el usuario. La app detecta el 401, intenta refre
 
 **En este curso básico** no implementamos refresh token porque requiere un backend que lo soporte. Pero es importante que sepas que existe este patrón y que en producción deberías implementarlo.
 
+
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Feature Login: Capa Infrastructure](03-infrastructure.md), implementa `RemoteAuthGateway` — la implementación real del protocolo `AuthGateway` que hace la petición HTTP al servidor — y un `StubAuthGateway` para desarrollo sin conexión.
 

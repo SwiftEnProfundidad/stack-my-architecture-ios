@@ -33,9 +33,6 @@ graph TD
         UI1["LoginViewModelTests<br/>estado inicial, submit ok,<br/>email invalido msg, password msg,<br/>credenciales msg, conectividad msg,<br/>isLoading false, limpia error"]
     end
 
-    Domain --> Application --> Infrastructure
-    Application --> Interface
-
     style Domain fill:#d4edda,stroke:#28a745
     style Application fill:#cce5ff,stroke:#007bff
     style Infrastructure fill:#fff3cd,stroke:#ffc107
@@ -44,7 +41,7 @@ graph TD
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
 
-La relación entre cajas también importa: `Domain -> Application -> Infrastructure` indica profundidad técnica, mientras `Application -> Interface` confirma que el estado de UI depende del caso de uso y no al revés.
+Las cuatro capas son independientes en sus tests: cada una usa stubs de la capa inferior y no depende de ninguna implementación concreta exterior. El orden de implementación fue Domain → Application → Infrastructure → Interface, siguiendo la regla de dependencias del curso (las flechas de importación siempre apuntan hacia el centro, hacia el Domain).
 
 > **Nota:** Los 28 tests descritos aquí son el diseño conceptual completo de la feature Login. El scaffold SPM del repositorio (`apps/ios/ArchitectureKit`) consolida algunos de estos tests y tiene 26 tests totales incluyendo Login, Catalog y Composition. La diferencia se debe a que el scaffold agrupa ciertos escenarios en tests de integración de mayor nivel.
 
@@ -257,7 +254,7 @@ Esto nos permite verificar no solo **qué resultado** devuelve el SUT, sino **c�
 
 ```swift
 func test_execute_with_invalid_email_does_not_call_gateway() async {
-    let gateway = AuthGatewayStub(result: .success(anySession))
+    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e@e.com")))
     let sut = LoginUseCase(authGateway: gateway)
     
     _ = try? await sut.execute(email: "sin-arroba", password: "pass")
@@ -343,7 +340,7 @@ Estas son las lecciones que extraemos de la feature Login y que aplicaremos a ca
 
 Para cerrar, unas métricas que dan perspectiva:
 
-**Archivos de producción:** 12 (Email, Password, Credentials, Session, AuthError, LoginEvent, AuthGateway, LoginUseCase, RemoteAuthGateway, StubAuthGateway, LoginViewModel, LoginView + DTOs y HTTPClient)
+**Archivos de producción:** 15 (Domain: Email, Password, Credentials, Session, AuthError, LoginEvent — Application: AuthGateway, LoginUseCase — Infrastructure: RemoteAuthGateway, StubAuthGateway, HTTPClient, AuthRequest, AuthResponse — Interface: LoginViewModel, LoginView — App: CompositionRoot)
 
 **Archivos de test:** 5 (EmailTests, PasswordTests, LoginUseCaseTests, RemoteAuthGatewayTests, LoginViewModelTests + stubs)
 
@@ -357,46 +354,10 @@ Para cerrar, unas métricas que dan perspectiva:
 
 Esta es la primera feature completa del curso. Es pequeña (un formulario de login), pero contiene todos los patrones arquitectónicos que escalaremos a features más complejas. En la Etapa 2, cuando construyamos la feature Catalog, el proceso será exactamente el mismo: BDD → Domain → Application → Infrastructure → Interface. Solo cambiará el contenido, no el proceso.
 
+
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [ADR-001: Decisiones de arquitectura del Login](ADR-001-login.md), documenta formalmente las decisiones de diseño que tomamos durante la implementación y el razonamiento detrás de cada una.
 

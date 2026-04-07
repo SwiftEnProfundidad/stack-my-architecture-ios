@@ -213,10 +213,12 @@ Cada feature en nuestro proyecto tiene exactamente cuatro capas:
 Las dependencias **siempre** apuntan hacia dentro, hacia el Domain. Nunca al revés.
 
 ```text
-Interface ──> Application ──> Domain <── Infrastructure
+Interface ──> Application ──> Domain
+                  ↑
+            Infrastructure
 ```
 
-Esto significa que puedes cambiar la UI (pasar de SwiftUI a UIKit) sin tocar el Domain ni los casos de uso. Puedes cambiar la infraestructura (pasar de URLSession a Alamofire, o de un servidor a una base de datos local) sin tocar el Domain ni la UI. El Domain es el centro estable del sistema: cambia solo cuando cambian las reglas de negocio.
+Interface y Infrastructure dependen de Application. Application depende de Domain. **Domain no depende de nadie**: es el centro estable del sistema, cambia solo cuando cambian las reglas de negocio. Puedes cambiar la UI (de SwiftUI a UIKit) o cambiar la infraestructura (de URLSession a otra librería) sin tocar el Domain ni los casos de uso.
 
 ---
 
@@ -308,44 +310,9 @@ Cada pieza tiene su razón de ser. Si quitas una, las demás se debilitan. Por e
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Qué sigue
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Estructura Feature-First: paso a paso en Xcode](04-estructura-feature-first.md), traduce la teoría de modularización de esta lección en pasos concretos: cómo crear la estructura de carpetas en Xcode, cómo configurar los targets y cómo verificar que los límites entre features se mantienen.
 

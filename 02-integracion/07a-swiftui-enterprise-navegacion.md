@@ -599,6 +599,151 @@ struct SettingsView: View {
 `Form` y `@AppStorage` viven en la **capa Interface**. Si las preferencias afectan a la lógica de negocio (ej: la moneda cambia como se muestran los precios), el ViewModel lee de `@AppStorage` y lo pasa al UseCase.
 
 ---
+
+## Concurrencia en los patrones SwiftUI
+
+Cada modifier de esta lección que recibe un closure `async` tiene implicaciones de concurrencia que no son obvias.
+
+### `.task` — Cancelación ligada al ciclo de vida
+
+El modifier `.task { await viewModel.load() }` no es solo "ejecutar código async al aparecer la vista". Es un **contrato de ciclo de vida**: SwiftUI crea un `Task` cuando la vista aparece y lo cancela cuando la vista desaparece. Si el usuario navega atrás mientras el catálogo carga, el `Task` recibe `CancellationError` y la respuesta del servidor se descarta antes de actualizar la UI.
+
+Esto resuelve el problema clásico de `onAppear` + `Task { }` manual: si creas el task tú mismo, tienes que cancelarlo tú mismo. Con `.task`, SwiftUI se encarga.
+
+```swift
+// ✅ .task cancela automáticamente si la vista desaparece
+.task {
+    await viewModel.load()
+}
+
+// ❌ Task manual — se ejecuta aunque la vista ya no exista
+.onAppear {
+    Task { await viewModel.load() }
+}
+```
+
+Para que `.task` funcione correctamente, `viewModel.load()` no debe suprimir `CancellationError`:
+
+```swift
+func load() async {
+    do {
+        let products = try await repository.fetchCatalog()
+        self.products = products
+    } catch is CancellationError {
+        // No actualizar UI — la vista ya no existe
+        return
+    } catch {
+        self.errorMessage = error.localizedDescription
+    }
+}
+```
+
+### `.refreshable` — Backpressure y el doble gesto
+
+`.refreshable` tiene una propiedad útil: serializa los gestos. Si el usuario hace pull-to-refresh mientras ya hay un refresh en curso, SwiftUI espera a que el primero termine. Pero hay un caso delicado: si `viewModel.load()` cancela internamente el `Task` anterior para "empezar de cero", el primer refresh recibe `CancellationError` y SwiftUI oculta el spinner — aunque el segundo todavía no ha terminado.
+
+La solución es que el ViewModel solo cancele la tarea anterior si el gesto viene explícitamente de un "nuevo" pull, no si viene de la serialización de SwiftUI. En la práctica, para apps enterprise con latencias normales (<2s), la serialización de SwiftUI es suficiente sin lógica extra.
+
+### `@MainActor` — Por qué las mutaciones del ViewModel son seguras
+
+Las vistas SwiftUI están anotadas `@MainActor` implícitamente a partir de iOS 16. Los closures de `.task`, `.refreshable`, y `.onAppear` heredan este contexto. Por eso `self.products = products` en el ViewModel se ejecuta en el hilo principal sin que tengas que escribir `await MainActor.run { }` explícitamente — siempre que el ViewModel también esté anotado `@MainActor`.
+
+Si el ViewModel no tiene `@MainActor`, el compilador de Swift 6 lo detecta y da error: "sending main actor-isolated value of type '[Product]' to nonisolated context".
+
 ---
 
-**Navegación:** [← Índice](./07-swiftui-enterprise.md) · [Parte 2: Composición y Rendimiento →](./07b-swiftui-enterprise-composicion.md)
+## Implementación en tu proyecto
+
+Los patrones de esta lección se implementan sobre las vistas ya existentes en el scaffold. Aquí encontrarás los archivos y las divergencias críticas respecto a los ejemplos del curso.
+
+### Archivos del scaffold
+
+| Archivo | Qué contiene |
+|---|---|
+| `Sources/FeatureCatalogInterface/CatalogView.swift` | Vista de catálogo — añade `.searchable`, `.refreshable`, `.toolbar` |
+| `Sources/FeatureLoginInterface/LoginView.swift` | Vista de login — añade `.fullScreenCover` si necesitas onboarding |
+| `Sources/AppComposition/AppCompositionRoot.swift` | Composition Root — TabView se instancia aquí o en `StackMyArchitectureApp` |
+| `Sources/AppContracts/NavigationContracts.swift` | `AppRoute` enum y protocolo `LoginNavigating` |
+
+### Divergencias críticas respecto a los ejemplos del curso
+
+**1. `AppDestination` no existe en el scaffold — usa `AppRoute`**
+
+El código de TabView en la lección usa `AppDestination.productDetail` para demostrar el patrón completo. El scaffold solo tiene `AppRoute.login` y `AppRoute.catalog`:
+
+```swift
+// ✅ Scaffold real (NavigationContracts.swift)
+public enum AppRoute: Equatable, Sendable {
+    case login
+    case catalog
+    // productDetail no existe aún — es el ejercicio de Lección 9
+}
+
+// El ejemplo de la lección incluye productDetail como destino futuro
+// Puedes añadirlo como ejercicio de extensión del scaffold
+```
+
+**2. `CatalogView` usa propiedades separadas, no `enum State`**
+
+Los ejemplos de `.searchable` y `.sheet` del curso usan `switch viewModel.state { case .loaded: }`. El scaffold usa propiedades separadas:
+
+```swift
+// ✅ Scaffold real (CatalogViewModel.swift)
+public private(set) var products: [Product] = []
+public private(set) var isLoading = false
+public private(set) var errorMessage: String?
+
+// Adapta el .searchable al scaffold:
+.searchable(text: $searchText, prompt: "Buscar productos...")
+// Y en el body:
+let filtered = viewModel.products.filter {
+    searchText.isEmpty || $0.title.localizedCaseInsensitiveContains(searchText)
+}
+List(filtered, id: \.id) { ... }
+```
+
+**3. `product.name` no existe — es `product.title`**
+
+```swift
+// ❌ Ejemplo del curso
+product.name.localizedCaseInsensitiveContains(searchText)
+
+// ✅ Scaffold real (Product.swift)
+product.title.localizedCaseInsensitiveContains(searchText)
+```
+
+**4. No hay `coordinator.catalogPath: NavigationPath`**
+
+El scaffold usa `NavigationStore` con `routes: [AppRoute]`, no `NavigationPath`. La integración con TabView es:
+
+```swift
+// ✅ Scaffold real
+@State private var navigationStore = NavigationStore()
+
+TabView {
+    Tab("Catálogo", systemImage: "book.fill") {
+        NavigationStack(path: Binding(
+            get: { navigationStore.routes.filter { $0 != .login }.map { $0 } },
+            set: { _ in }
+        )) {
+            CatalogView(viewModel: compositionRoot.catalogViewModel!)
+        }
+    }
+}
+```
+
+O más sencillo: usa `NavigationStack` sin `path` explícito y delega la navegación programática a `NavigationStore.goToCatalog()` desde el `LoginNavigating` protocol.
+
+### Ejercicio: añadir búsqueda al CatalogView del scaffold
+
+1. Abre `Sources/FeatureCatalogInterface/CatalogView.swift`
+2. Añade `@State private var searchText = ""`
+3. Añade `.searchable(text: $searchText, prompt: "Buscar...")` al `List`
+4. Filtra `viewModel.products` por `title` (no `name`) con `localizedCaseInsensitiveContains`
+5. Ejecuta los tests de `CatalogViewTests` — deben seguir en verde (la búsqueda es local, no cambia el ViewModel)
+
+---
+
+## Qué sigue
+
+[**Parte 2: Composición y Rendimiento →**](./07b-swiftui-enterprise-composicion.md) — `@ViewBuilder`, `LazyVStack`, `GeometryReader`, listas grandes con identidad estable, y cómo evitar re-renders innecesarios.

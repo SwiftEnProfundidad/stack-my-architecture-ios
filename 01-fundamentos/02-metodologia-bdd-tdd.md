@@ -1,18 +1,12 @@
 # Metodología BDD: especificación y descubrimiento
 
-## Dos prácticas complementarias que se necesitan mutuamente
+## Especificar el comportamiento antes de implementarlo
 
-En la lección anterior hablamos de principios abstractos: aclarar intención, lotes pequeños, tests como feedback, diseño modular. En esta lección vamos a convertir esos principios en una **metodología concreta** que vas a aplicar cada vez que construyas una feature en este curso. Esa metodología se compone de dos prácticas que trabajan juntas: BDD (Behavior-Driven Development) y TDD (Test-Driven Development).
+En la lección anterior establecimos los cuatro principios de ingeniería que guían el curso. Esta lección convierte el primero de ellos — aclarar la intención antes de codificar — en una práctica concreta: **BDD (Behavior-Driven Development)**.
 
-La relación entre ambas es muy sencilla de entender si piensas en las preguntas que responde cada una:
+BDD responde a la pregunta: **"¿Qué tiene que hacer el sistema?"** Define el comportamiento esperado en lenguaje que cualquiera puede leer y validar, incluido alguien que no sabe programar. Ocurre antes de escribir código y produce los escenarios que guían la implementación.
 
-BDD responde a la pregunta: **"¿Qué tiene que hacer el sistema?"** Se ocupa de definir el comportamiento esperado en lenguaje que cualquiera pueda entender, incluido alguien que no sabe programar. Es la práctica de especificación. Ocurre antes de escribir código.
-
-TDD responde a la pregunta: **"¿Cómo implemento eso con seguridad?"** Se ocupa de guiar la implementación paso a paso, escribiendo primero un test que describe un comportamiento concreto, luego el código mínimo que lo hace pasar, y luego limpiando el diseño. Es la práctica de implementación disciplinada.
-
-Sin BDD, no sabes exactamente qué construir. Puedes hacer TDD perfecto y construir algo que no es lo que se necesitaba. Sin TDD, sabes qué construir pero no tienes la disciplina ni la red de seguridad para hacerlo de forma incremental y confiable. Las dos prácticas juntas forman un flujo completo: primero defines qué, luego implementas con seguridad.
-
-Para que el estudio sea más ligero, esta metodología ahora está dividida en dos lecciones: aquí cubrimos la parte de **BDD** (especificación) y en la siguiente cubrimos la parte de **TDD** (implementación).
+La práctica complementaria — **TDD** — responde a "¿cómo implemento eso con seguridad?" y se cubre en la lección siguiente. Las dos forman el flujo completo: primero defines qué, luego implementas con disciplina.
 
 ---
 
@@ -204,52 +198,9 @@ BDD **no** se aplica cuando estás haciendo un refactor interno que no cambia ni
 
 ---
 
-## Puente hacia TDD (siguiente lección)
+## Qué sigue
 
-Hasta aquí hemos resuelto el **qué** y el **por qué** de la feature con escenarios de comportamiento. Ese trabajo conecta directamente con el **Principio 1** de la lección de principios: aclarar la intención antes de codificar.
+Hasta aquí hemos resuelto el **qué** y el **por qué** de la feature con escenarios de comportamiento. En la siguiente lección pasamos al **cómo**: implementar cada comportamiento con TDD usando ciclos cortos Red-Green-Refactor.
 
-En la siguiente lección pasamos al **cómo**: implementar cada comportamiento con TDD usando ciclos cortos Red-Green-Refactor.
-
----
-
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección es [Metodología TDD: práctica Red-Green-Refactor](02-metodologia-tdd-practica.md).
 

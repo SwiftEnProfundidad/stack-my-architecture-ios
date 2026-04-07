@@ -184,7 +184,7 @@ Resultado esperado:
 - ViewModel gobierna estado,
 - vista representa estado, no reglas de negocio.
 
-## `windsurf-rules-ios` (si aplica al repositorio objetivo)
+## `ios-enterprise-rules` (si aplica al repositorio objetivo)
 
 Se aplica en:
 - mantener Clean Architecture bajo presión de cambios,
@@ -381,44 +381,9 @@ El foco es resiliencia útil y sostenible, no complejidad ornamental.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-3.md](../03-evolucion/entregables-etapa-3.md).
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Qué sigue
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+[**Caching y offline →**](01-caching-offline.md) — La primera lección de esta etapa: estrategia remote-first con fallback a cache, TTL, y cómo el `CachedCatalogRepository` del scaffold implementa resiliencia sin que Domain se entere.
 

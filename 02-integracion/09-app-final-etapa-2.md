@@ -1,9 +1,7 @@
 # App Final Etapa 2: Login + Catalog Funcionando Juntos
 
-<!-- snippet-mapping-note:auto -->
-> **Nota de nomenclatura pedagógica**
-> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
-> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
+> **Nota de nomenclatura pedagógica:** Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual. En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`. Consulta la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
+
 ## El cierre visual de la integración
 
 Has completado la Etapa 2: construiste la feature Catalog con sus 4 capas, implementaste navegación por eventos con `AppCoordinator`, y conectaste Login con Catalog mediante contratos desacoplados. Los tests pasan, la arquitectura es sólida.
@@ -502,5 +500,7 @@ Pero primero, revisa los entregables de la Etapa 2.
 
 ---
 
----
+## Qué sigue
+
+[**Entregables Etapa 2 →**](entregables-etapa-2.md) — Verifica que dominas integración de features, navegación por eventos, contratos, infra real y Composition Root antes de pasar a la Etapa 3: Evolución.
 

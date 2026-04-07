@@ -12,13 +12,9 @@ TDD es una disciplina de desarrollo que consiste en un ciclo de tres pasos que s
 
 ```mermaid
 graph LR
-    RED["RED<br/>Escribe un test<br/>que FALLA"] --> GREEN["GREEN<br/>Escribe lo MINIMO<br/>para que PASE"]
-    GREEN --> REFACTOR["REFACTOR<br/>Mejora el diseno<br/>sin cambiar comportamiento"]
-    REFACTOR --> RED
-
-    RED -.->|"Duracion: 1-3 min"| GREEN
-    GREEN -.->|"Duracion: 1-5 min"| REFACTOR
-    REFACTOR -.->|"Duracion: 0-5 min"| RED
+    RED["RED<br/>Escribe un test<br/>que FALLA"] -->|"1-3 min"| GREEN["GREEN<br/>Escribe lo MINIMO<br/>para que PASE"]
+    GREEN -->|"1-5 min"| REFACTOR["REFACTOR<br/>Mejora el diseno<br/>sin cambiar comportamiento"]
+    REFACTOR -->|"0-5 min"| RED
 
     style RED fill:#f8d7da,stroke:#dc3545
     style GREEN fill:#d4edda,stroke:#28a745
@@ -150,7 +146,7 @@ Hay 5 tipos de test doubles. Cada uno tiene un propósito diferente:
 graph TD
     TD["Test Doubles<br/>Objetos falsos para tests"] --> DUMMY["Dummy<br/>No hace nada.<br/>Solo rellena un parametro."]
     TD --> STUB["Stub<br/>Devuelve datos fijos.<br/>Tu configuras que devuelve."]
-    TD -.-> SPY["Spy<br/>Registra las llamadas.<br/>Puedes verificar que se llamo."]
+    TD --> SPY["Spy<br/>Registra las llamadas.<br/>Puedes verificar que se llamo."]
     TD --> MOCK["Mock<br/>Verifica expectativas.<br/>Falla si no se cumple lo esperado."]
     TD --> FAKE["Fake<br/>Implementacion real simplificada.<br/>Funciona pero con atajos."]
 
@@ -366,33 +362,33 @@ flowchart TD
 
 Fíjate en la dirección: **del centro hacia fuera**. Domain primero (las reglas puras), luego Application (la orquestación), luego Infrastructure (la conexión con el mundo real), y finalmente Interface (lo que ve el usuario). Esta dirección no es arbitraria — es lo que garantiza que cada capa sea testeable de forma independiente.
 
-### Diagrama: dirección de implementación (del core hacia fuera)
+### Diagrama: dirección de dependencias (hacia el core)
 
 ```mermaid
 graph LR
-    subgraph CORE["Core - sin dependencias"]
-        DOMAIN["Domain<br/>Email, Password<br/>AuthGateway protocol"]
-    end
-    
-    subgraph MIDDLE["Orquestacion"]
-        APP["Application<br/>LoginUseCase"]
-    end
-    
     subgraph EDGE["Periferia - dependencias reales"]
         INFRA["Infrastructure<br/>RemoteAuthGateway"]
         UI["Interface<br/>LoginView"]
     end
 
-    DOMAIN --> APP
-    APP --> INFRA
-    APP --> UI
-    
-    style CORE fill:#d4edda,stroke:#28a745
-    style MIDDLE fill:#cce5ff,stroke:#007bff
+    subgraph MIDDLE["Orquestacion"]
+        APP["Application<br/>LoginUseCase"]
+    end
+
+    subgraph CORE["Core - sin dependencias"]
+        DOMAIN["Domain<br/>Email, Password<br/>AuthGateway protocol"]
+    end
+
+    INFRA ==> APP
+    UI --> APP
+    APP ==> DOMAIN
+
     style EDGE fill:#fff3cd,stroke:#ffc107
+    style MIDDLE fill:#cce5ff,stroke:#007bff
+    style CORE fill:#d4edda,stroke:#28a745
 ```
 
-Las flechas apuntan hacia fuera: el Domain no sabe nada de Application. Application no sabe nada de Infrastructure ni de Interface. Solo el Composition Root (que veremos en la Etapa 2) conoce todas las piezas y las conecta. Esta es la **Dependency Rule** de Clean Architecture: las dependencias siempre apuntan hacia adentro, nunca hacia fuera.
+Las flechas apuntan hacia el centro: Infrastructure implementa los puertos definidos en Application (`==>`), Application depende de los contratos del Domain (`==>`), y la Interface usa Application. **Domain no depende de nadie.** Solo el Composition Root (que veremos en la Etapa 2) conoce todas las piezas y las conecta. Esta es la **Dependency Rule** de Clean Architecture: las dependencias siempre apuntan hacia adentro, hacia el dominio.
 
 **Paso 1: Especificación BDD.** Escribimos todos los escenarios de la feature (happy path, sad path, edge cases). Esto se hace en un documento Markdown, no en código. El resultado es la lista completa de comportamientos que el sistema debe soportar.
 
@@ -434,44 +430,9 @@ Hay muchas confusiones comunes sobre ambas prácticas. Vamos a aclararlas para q
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Qué sigue
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Stack tecnológico](03-stack-tecnologico.md), describe las herramientas concretas que usaremos durante todo el curso: SPM, XCTest, SwiftUI y las decisiones de tooling que soportan el flujo BDD→TDD que acabas de aprender.
 

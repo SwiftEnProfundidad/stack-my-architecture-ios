@@ -40,6 +40,16 @@ flowchart LR
     TRACE --> DIAG["Diagnostico reproducible"]
 ```
 
+Lectura del diagrama:
+
+→ **Operación → Evento estructurado**: cada operación significativa emite un evento con `message` como clave semántica estable (`catalog.load.started`, no `"Cargando..."`) y campos de contexto. La clave semántica es lo que permite escribir consultas en logs de producción.
+
+→ **Evento → Sink**: el sink es la implementación concreta de logging — `os.Logger` en producción, `InMemoryLogger` en tests. El evento no sabe adónde va — esto es lo que permite testear la observabilidad.
+
+→ **Sink → Correlación por traceId**: los eventos de una misma operación comparten un `traceId` generado al inicio de la operación. Permite reconstruir el timeline completo de "esta llamada específica" a través de todas las capas.
+
+→ **Correlación → Diagnóstico reproducible**: con traceId puedes filtrar en producción `"traceId = t-abc123"` y ver el ciclo completo: `started → load remote → fallback cache → failed`. Sin correlación, tienes eventos sueltos sin relación causal.
+
 Sin estructura, todo queda en ruido difícil de filtrar.
 
 ---
@@ -229,6 +239,18 @@ sequenceDiagram
     UC-->>UI: state update
 ```
 
+Lectura del diagrama:
+
+→ **UI → UseCase**: el ViewModel genera o recibe un `traceId` al inicio de la operación y lo propaga hacia abajo. Este ID es el hilo conductor.
+
+→ **UseCase → LoggingRepository**: el UseCase no sabe que el repositorio tiene logging — recibe un `CatalogRepository` normal. El decorador de logging es invisible para el UseCase.
+
+→ **LoggingRepository → RemoteRepository**: el decorador emite `catalog.load.started` antes de delegar, y `catalog.load.succeeded/failed` después. El repositorio real no sabe que alguien está observando.
+
+→ **RemoteRepository → API**: la petición HTTP ocurre sin conocimiento de observabilidad. Si falla, el error sube a través de todos los decoradores.
+
+→ **Error o éxito → UI**: el `traceId` aparece en todos los logs del camino. Si en producción alguien reporta "catálogo no cargó", buscas ese `traceId` y reconstruyes el timeline completo.
+
 Con un `traceId` estable, cada salto deja rastro conectado.
 
 ---
@@ -285,25 +307,40 @@ Estrategias:
 ### Anti-ejemplo
 
 ```swift
+// ❌ print suelto — cero valor en producción
 func loadProducts() async {
     print("Empieza")
     let products = try? await repository.loadAll()
     print(products)
+    // En producción: "Optional([...])" sin contexto, sin nivel, sin causa de fallo
 }
 ```
 
-Problemas:
-
-- no hay niveles ni contexto;
-- no hay correlación;
-- `try?` borra causa del error;
-- en producción esos prints casi no sirven.
+Problemas: `try?` suprime el error (el `print` no lo ve), no hay correlación entre inicio y fin, y en CI/CD los prints no se enrutan a ningún sistema de observabilidad.
 
 ### Corrección
 
-- usar `AppLogger` con eventos estructurados;
-- registrar inicio/fin/fallo;
-- capturar error semántico y contexto.
+```swift
+// ✅ Decorador estructurado — observable, testeable, sin contaminar dominio
+func fetchCatalog() async throws -> [Product] {
+    let traceId = UUID().uuidString
+    await observability.record(CatalogFetchStarted(traceId: traceId))
+    do {
+        let products = try await wrapped.fetchCatalog()
+        await observability.record(
+            CatalogFetchMetric(path: .remote, durationMs: elapsed(), cacheHit: false)
+        )
+        return products
+    } catch {
+        await observability.record(
+            CatalogFetchMetric(path: .networkNoCache, durationMs: elapsed(), cacheHit: false)
+        )
+        throw error  // El error se propaga intacto — nunca se suprime
+    }
+}
+```
+
+La diferencia crítica: el error se propaga (`throw error`), no se suprime. Suprimir errores con `try?` es la forma más rápida de que los problemas de producción sean invisibles.
 
 ---
 
@@ -499,26 +536,25 @@ Cuando esas señales aparecen, la observabilidad deja de ser un adorno y se vuel
 <summary>Solución de referencia</summary>
 
 ```swift
+// ✅ Usando el protocolo del scaffold: CatalogObservability
 // Sources/FeatureCatalogData/Logging/LoggingCatalogRepository.swift
 
-import Foundation
-
-final class LoggingProductRepository: ProductRepository, @unchecked Sendable {
-    private let inner: any ProductRepository
+struct LoggingCatalogRepository: CatalogRepository, Sendable {
+    private let inner: any CatalogRepository  // fetchCatalog(), no loadAll()
     private let log: @Sendable (String) -> Void
 
     init(
-        inner: any ProductRepository,
+        inner: any CatalogRepository,
         log: @escaping @Sendable (String) -> Void
     ) {
         self.inner = inner
         self.log = log
     }
 
-    func loadAll() async throws -> [Product] {
+    func fetchCatalog() async throws -> [Product] {
         log("catalog.load.started")
         do {
-            let products = try await inner.loadAll()
+            let products = try await inner.fetchCatalog()
             log("catalog.load.succeeded count=\(products.count)")
             return products
         } catch {
@@ -528,25 +564,17 @@ final class LoggingProductRepository: ProductRepository, @unchecked Sendable {
     }
 }
 
-// Tests/FeatureCatalogDataTests/LoggingProductRepositoryTests.swift
+// Tests/FeatureCatalogDataTests/LoggingCatalogRepositoryTests.swift
 
-import XCTest
-@testable import FeatureCatalogData
-
-final class LoggingProductRepositoryTests: XCTestCase {
+final class LoggingCatalogRepositoryTests: XCTestCase {
 
     func test_loggingDecorator_emitsEventsInOrder_onSuccess() async throws {
         var logs: [String] = []
-        let product = Product(
-            id: "p-1",
-            name: "Laptop",
-            price: Price(amount: Decimal(string: "999.99")!, currency: "EUR"),
-            imageURL: URL(string: "https://example.com/laptop.png")!
-        )
-        let stub = StubProductRepository(result: .success([product]))
-        let sut = LoggingProductRepository(inner: stub) { logs.append($0) }
+        let product = Product(id: "p-1", title: "Laptop", price: 999.99)  // title, no name
+        let stub = CatalogRepositoryStub(result: .success([product]))
+        let sut = LoggingCatalogRepository(inner: stub) { logs.append($0) }
 
-        _ = try await sut.loadAll()
+        _ = try await sut.fetchCatalog()
 
         XCTAssertEqual(logs, [
             "catalog.load.started",
@@ -556,10 +584,10 @@ final class LoggingProductRepositoryTests: XCTestCase {
 
     func test_loggingDecorator_emitsFailedEvent_onError() async {
         var logs: [String] = []
-        let stub = StubProductRepository(result: .failure(CatalogError.connectivity))
-        let sut = LoggingProductRepository(inner: stub) { logs.append($0) }
+        let stub = CatalogRepositoryStub(result: .failure(CatalogError.network))
+        let sut = LoggingCatalogRepository(inner: stub) { logs.append($0) }
 
-        _ = try? await sut.loadAll()
+        _ = try? await sut.fetchCatalog()
 
         XCTAssertEqual(logs.first, "catalog.load.started")
         XCTAssertTrue(logs.last?.hasPrefix("catalog.load.failed") == true)
@@ -567,52 +595,66 @@ final class LoggingProductRepositoryTests: XCTestCase {
 }
 ```
 
-El patrón decorador permite componer logging, métricas y tracing sin tocar el repositorio original. En `AppComposition`, el repositorio real se envuelve con `LoggingProductRepository` antes de pasarlo al `LoadProductsUseCase`: el caso de uso recibe exactamente la misma interfaz `ProductRepository` y no sabe que hay logging alrededor.
+> **Nota scaffold:** El protocolo es `CatalogRepository` con `fetchCatalog()`. El error es `CatalogError.network` (no `.connectivity`). El `struct` es suficiente — no se necesita `@unchecked Sendable`. El `Product` usa `title: String` y `price: Double`.
 
-**Resultado esperado**: ambos tests pasan con `swift test --filter LoggingProduct`, los logs aparecen en el orden exacto `started → succeeded/failed`, y el comportamiento del repositorio interno (éxito o error) se propaga intacto al llamador.
+El patrón decorador permite componer logging sin tocar el repositorio original. En `AppCompositionRoot`, el repositorio real se envuelve con `LoggingCatalogRepository` antes de pasarlo al `LoadCatalogUseCase`.
 
 </details>
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+### Archivos del scaffold
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+| Archivo | Qué contiene |
+|---|---|
+| `Sources/FeatureCatalogData/CatalogDataContracts.swift` | `CatalogObservability`, `CatalogFetchMetric`, `CatalogLoadPath` — el sistema de observabilidad ya implementado |
+| `Sources/FeatureCatalogData/CachedCatalogRepository.swift` | Llama a `observability.record(...)` en cada ruta — el decorador está integrado |
+| `Sources/FeatureCatalogData/InMemoryCatalogStores.swift` | `InMemoryCatalogObservability` actor — para tests |
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+### El scaffold ya tiene `CatalogObservability`
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+El scaffold no usa un `AppLogger` genérico — tiene un protocolo específico de dominio más rico:
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+```swift
+// ✅ Scaffold real — observabilidad con semántica de dominio
+public protocol CatalogObservability: Sendable {
+    func record(_ metric: CatalogFetchMetric) async
+}
+
+public struct CatalogFetchMetric: Equatable, Sendable {
+    public let path: CatalogLoadPath  // .remote, .fallbackCache, .offlineCache, .offlineNoCache...
+    public let durationMs: Double
+    public let cacheHit: Bool
+}
 ```
 
-Lectura semántica mínima de este diagrama:
+Esto es más rico que `AppLogger`: cada métrica dice exactamente qué ruta tomó la carga, cuánto tardó, y si hubo cache hit. Para tests, usa `InMemoryCatalogObservability`:
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+```swift
+let observability = InMemoryCatalogObservability()
+let sut = CachedCatalogRepository(..., observability: observability)
+
+// Tras la operación:
+let metrics = await observability.snapshot()
+XCTAssertEqual(metrics.first?.path, .remote)
+XCTAssertFalse(metrics.first?.cacheHit ?? true)
+```
+
+### Divergencias respecto a los ejemplos del curso
+
+| Lección | Scaffold real |
+|---|---|
+| `AppLogger` genérico | `CatalogObservability` específico de dominio |
+| `LoggingProductRepository` | Observabilidad integrada en `CachedCatalogRepository` |
+| `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` |
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` con `Double` |
+| `CatalogError.connectivity` | `CatalogError.network` |
+
+---
+
+## Qué sigue
+
+[**Lección 15: Tests avanzados →**](./04-tests-avanzados.md) — Más allá del happy path: tests de integración que usan las capas reales, property-based testing, y cómo testear observabilidad como contrato.
 

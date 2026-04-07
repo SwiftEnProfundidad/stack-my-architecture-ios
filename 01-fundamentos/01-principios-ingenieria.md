@@ -117,7 +117,7 @@ graph LR
 
     subgraph Bajo["Bajo acoplamiento - enchufado"]
         direction TB
-        VM2["LoginViewModel"] -.->|"protocolo"| AUTH["any AuthGateway"]
+        VM2["LoginViewModel"] ==>|"contrato"| AUTH["any AuthGateway"]
         VM2 -->|"closure"| ONLOGIN["onLoginSuccess closure"]
         AUTH -.->|"impl. A"| REMOTE["RemoteAuthGateway<br/>URLSession"]
         AUTH -.->|"impl. B"| STUB["StubAuthGateway<br/>datos falsos"]
@@ -162,9 +162,6 @@ graph TD
     P1["1. Aclarar intencion<br/>Que? Por que? Que NO?"] -->|"Produce piezas con<br/>responsabilidad clara"| P4["4. Diseno modular<br/>Bajo acoplamiento + Alta cohesion"]
     P2["2. Lotes pequenos<br/>Incrementos verificables"] -->|"Obliga a construir<br/>una pieza a la vez"| P4
     P3["3. Tests como feedback<br/>Funciona? Buen diseno?"] -->|"Detecta acoplamiento<br/>y responsabilidades excesivas"| P4
-    P4 -->|"Hace posible todo<br/>lo anterior a escala"| P1
-    P4 -->|"Modulos claros =<br/>lotes mas pequenos"| P2
-    P4 -->|"Componentes aislados =<br/>tests simples"| P3
 
     P1 -.->|"Se materializa en"| BDD["BDD: Escenarios<br/>Given/When/Then"]
     P2 -.->|"Se materializa en"| TDD["TDD: Red-Green-Refactor<br/>ciclos de minutos"]
@@ -189,44 +186,9 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Qué sigue
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Metodología BDD y TDD](02-metodologia-bdd-tdd.md), muestra cómo estos principios se convierten en prácticas concretas: escenarios Given/When/Then para aclarar intención y el ciclo Red-Green-Refactor para feedback inmediato.
 

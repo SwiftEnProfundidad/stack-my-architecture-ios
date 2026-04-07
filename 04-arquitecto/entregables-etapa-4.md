@@ -222,4 +222,6 @@ Aunque no cierres todos los entregables:
 
 ---
 
-## Siguiente etapa
+## Qué sigue
+
+[**Etapa 5: Maestría →**](../05-maestria/00-introduccion.md) — Isolation domains, actors, structured concurrency, testing concurrente, SwiftUI avanzado, composición, memory leaks, migración Swift 6 y preparación para entrevistas. El salto final a nivel arquitecto.

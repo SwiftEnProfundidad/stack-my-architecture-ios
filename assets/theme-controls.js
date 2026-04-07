@@ -155,7 +155,7 @@
     root.style.setProperty('--mermaid-label-bg', p.labelBg);
     root.style.setProperty('--mermaid-legend-direct', p.direct);
     root.style.setProperty('--mermaid-legend-dashed-closed', p.dashedClosed);
-    root.style.setProperty('--mermaid-legend-dashed-open', p.dashedOpen);
+    root.style.setProperty('--mermaid-legend-contract', p.dashedOpen);
     root.style.setProperty('--mermaid-legend-solid-open', p.solidOpen);
   }
 

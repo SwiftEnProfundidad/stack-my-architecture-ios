@@ -120,7 +120,7 @@ Scenario: Login fallido porque el servidor rechaza las credenciales
   And el sistema valida que el password no está vacío (pasa)
   And el sistema envía las credenciales al servidor de autenticación
   And el servidor rechaza las credenciales
-  Then el sistema devuelve un error de tipo InvalidCredentials
+  And el sistema devuelve un error de tipo InvalidCredentials
   And no se crea ninguna sesión
 ```
 
@@ -136,7 +136,7 @@ Scenario: Login fallido porque no hay conexión a internet
   And el sistema valida que el password no está vacío (pasa)
   And el sistema intenta enviar las credenciales al servidor
   And la conexión falla porque no hay internet
-  Then el sistema devuelve un error de tipo Connectivity
+  And el sistema devuelve un error de tipo Connectivity
   And no se crea ninguna sesión
 ```
 
@@ -274,18 +274,20 @@ El escenario de login exitoso dice "el sistema devuelve la sesión al llamante".
 
 Cada escenario debe poder rastrearse hasta un test automatizado. Esta tabla muestra qué test cubrirá cada escenario cuando los implementemos en las próximas lecciones:
 
-| Escenario | Nombre del test XCTest | Componente que se testea |
-|-----------|----------------------|--------------------------|
-| Login exitoso | `test_execute_with_valid_credentials_returns_session` | `LoginUseCaseTests` |
-| Credenciales rechazadas | `test_execute_with_rejected_credentials_returns_invalidCredentials` | `LoginUseCaseTests` |
-| Sin conectividad | `test_execute_without_connectivity_returns_connectivityError` | `LoginUseCaseTests` |
-| Email inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` |
-| Password vacío | `test_init_with_empty_string_throws_empty` | `PasswordTests` |
-| Cancelación | `test_execute_cancellation_does_not_return_result` | `LoginUseCaseTests` |
-| Sesión sin token | `test_session_init_without_token_throws_malformedSession` | `SessionTests` |
-| Token expirado | `test_adapter_on401_after_login_throws_sessionExpired` | `AuthAdapterTests` |
-| Cuenta bloqueada | `test_execute_on_account_locked_returns_accountLocked` | `LoginUseCaseTests` |
-| Persistencia segura | `test_session_is_stored_in_keychain_not_userdefaults` | `SessionRepositoryTests` |
+| Escenario | Nombre del test XCTest | Componente | Etapa |
+|-----------|----------------------|------------|-------|
+| Login exitoso | `test_execute_with_valid_credentials_returns_session` | `LoginUseCaseTests` | 1 |
+| Credenciales rechazadas | `test_execute_with_rejected_credentials_returns_invalidCredentials` | `LoginUseCaseTests` | 1 |
+| Sin conectividad | `test_execute_without_connectivity_returns_connectivityError` | `LoginUseCaseTests` | 1 |
+| Email inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` | 1 |
+| Password vacío | `test_init_with_empty_string_throws_empty` | `PasswordTests` | 1 |
+| Cancelación | `test_execute_cancellation_does_not_return_result` | `LoginUseCaseTests` | 1 |
+| Sesión sin token | `test_session_init_without_token_throws_malformedSession` | `SessionTests` | 2 |
+| Token expirado | `test_adapter_on401_after_login_throws_sessionExpired` | `AuthAdapterTests` | 2 |
+| Cuenta bloqueada | `test_execute_on_account_locked_returns_accountLocked` | `LoginUseCaseTests` | 2 |
+| Persistencia segura | `test_session_is_stored_in_keychain_not_userdefaults` | `SessionRepositoryTests` | 3 |
+
+Los escenarios de **Etapa 2 y 3** los especificamos aquí porque aparecen en los escenarios de seguridad, pero sus tests no se implementan hasta que el stack tenga persistencia real y un adaptador HTTP completo. En Etapa 1 solo implementamos los seis primeros.
 
 Fíjate en los nombres de los tests. Siguen un patrón: `test_[método]_[condición]_[resultado esperado]`. Este patrón hace que al leer el nombre del test sepas exactamente qué escenario cubre sin necesidad de abrir el código. Es una convención que seguiremos en todo el curso.
 
@@ -344,81 +346,10 @@ Una lista completa de todos los comportamientos que el Login debe soportar. Un v
 
 En la siguiente lección empezaremos a implementar, empezando por la capa Domain: los Value Objects `Email` y `Password`, con TDD usando XCTest.
 
+
 ---
 
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC -.o PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `-.o` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+La siguiente lección, [Feature Login: Capa Domain](01-domain.md), implementa los primeros seis escenarios con TDD: los Value Objects `Email` y `Password` y los errores de dominio `AuthError`.
 
