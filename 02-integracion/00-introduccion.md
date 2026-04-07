@@ -116,7 +116,7 @@ Si una lección no cumple estas 6 capas, no se considera cerrada.
 
 ## Qué vamos a construir
 
-## 1) Feature Catalog (segunda feature completa)
+### 1) Feature Catalog (segunda feature completa)
 
 Catalog repite la disciplina de Login:
 
@@ -128,7 +128,7 @@ Catalog repite la disciplina de Login:
 Objetivo didáctico:
 - demostrar que el método no era solo para Login, sino reproducible.
 
-## 2) Navegación por eventos
+### 2) Navegación por eventos
 
 Se introduce `AppCoordinator` como árbitro de rutas globales.
 
@@ -139,7 +139,7 @@ Se introduce `AppCoordinator` como árbitro de rutas globales.
 Objetivo didáctico:
 - separar “emitir intención” de “decidir navegación”.
 
-## 3) Contratos entre features
+### 3) Contratos entre features
 
 Definimos qué tipos se comparten y por qué.
 
@@ -150,14 +150,14 @@ Regla de oro:
 Objetivo didáctico:
 - controlar acoplamiento semántico y técnico.
 
-## 4) Infraestructura real mínima
+### 4) Infraestructura real mínima
 
 Introducción de `URLSessionHTTPClient` y composición con clientes autenticados.
 
 Objetivo didáctico:
 - conectar mundo real sin romper Clean Architecture.
 
-## 5) Integration tests
+### 5) Integration tests
 
 Validamos colaboración real entre componentes (no solo mocks).
 
@@ -214,7 +214,7 @@ Señal de buen uso:
 - estado claramente poseído vs inyectado,
 - vista sin lógica de negocio.
 
-### `windsurf-rules-ios` (si aplica al proyecto destino)
+### `ios-enterprise-rules`
 
 Se aplica en:
 
@@ -229,7 +229,7 @@ Señal de buen uso:
 
 ## Errores típicos de esta etapa y cómo evitarlos
 
-## Error 1: “Integrar” conectando features directamente
+### Error 1: “Integrar” conectando features directamente
 
 Síntoma:
 - `import FeatureCatalog` desde Login (o viceversa).
@@ -240,7 +240,33 @@ Riesgo:
 Corrección:
 - contrato/evento + coordinador.
 
-## Error 2: confundir shared kernel con cajón desastre
+```swift
+// ❌ Login importa Catalog directamente:
+import FeatureCatalog
+
+final class LoginViewModel {
+    func onLoginSuccess() {
+        // Login sabe cómo lanzar Catalog — acoplamiento directo
+        CatalogViewModel().load()
+    }
+}
+// Si Catalog cambia su init, Login deja de compilar.
+// Si Catalog mueve su módulo, Login se rompe también.
+
+// ✅ Login emite un evento; el coordinador decide la ruta:
+final class LoginViewModel {
+    var onLoginSucceeded: ((Session) -> Void)?
+
+    func onLoginSuccess(session: Session) {
+        onLoginSucceeded?(session)
+        // Login solo comunica lo que pasó. No sabe nada de Catalog.
+    }
+}
+// AppCoordinator escucha el evento y navega a Catalog.
+// Cambiar o eliminar Catalog no toca LoginViewModel ni una línea.
+```
+
+### Error 2: confundir shared kernel con cajón desastre
 
 Síntoma:
 - todo acaba en `Shared` sin ownership.
@@ -251,7 +277,23 @@ Riesgo:
 Corrección:
 - compartir solo tipos estables y mínimos.
 
-## Error 3: usar solo unit tests y asumir integración
+```swift
+// ❌ Shared como cajón desastre:
+// Shared/
+//   LoginViewModel.swift   ← UI-level, no debería estar aquí
+//   CatalogError.swift     ← owned por Catalog, no por Shared
+//   APIClient.swift        ← Infrastructure, no contrato
+//   UserSession.swift      ← este sí pertenece a Shared
+
+// ✅ Shared solo contiene contratos que AMBAS features usan:
+// Shared/
+//   UserSession.swift      ← tipo de dominio compartido estable
+//   AppEvent.swift         ← eventos cross-feature
+//   AuthenticatedUser.swift ← identidad que Catalog necesita saber de Login
+// Regla: si solo una feature lo usa, vive dentro de esa feature.
+```
+
+### Error 3: usar solo unit tests y asumir integración
 
 Síntoma:
 - green local, fallo al conectar capas reales.
@@ -262,7 +304,30 @@ Riesgo:
 Corrección:
 - integration tests focalizados por flujo crítico.
 
-## Error 4: navegación decidida en vistas
+```swift
+// ❌ Solo unit test con mock — no detecta errores de contrato:
+func test_loadProducts_returnsMock() async throws {
+    let sut = LoadProductsUseCase(repo: MockProductRepo())
+    let products = try await sut.execute()
+    XCTAssertFalse(products.isEmpty)
+}
+// Este test pasa aunque el JSON real de la API tenga otro formato.
+// MockProductRepo inventa datos; la red real puede devolver campos distintos.
+
+// ✅ Integration test con stub de red que reproduce el contrato real:
+func test_loadProducts_parsesRealAPIContract() async throws {
+    let json = “””
+    [{“id”: “p1”, “name”: “Producto A”, “price”: {“amount”: 9.99, “currency”: “EUR”}}]
+    “””
+    let client = StubHTTPClient(response: json)
+    let sut = LoadProductsUseCase(repo: RemoteProductRepo(client: client))
+    let products = try await sut.execute()
+    XCTAssertEqual(products.first?.name, “Producto A”)
+    // Si la API cambia `”name”` por `”title”`, este test falla inmediatamente.
+}
+```
+
+### Error 4: navegación decidida en vistas
 
 Síntoma:
 - `NavigationLink`/push con reglas de negocio embebidas.
@@ -272,6 +337,46 @@ Riesgo:
 
 Corrección:
 - coordinador con política de ruta centralizada.
+
+```swift
+// ❌ Vista decide navegación con lógica de negocio:
+struct LoginView: View {
+    var body: some View {
+        Button(“Login”) {
+            if isAdmin {
+                // Lógica de ruta duplicada en cada vista que la necesite
+                NavigationLink(destination: AdminDashboard()) { }
+            } else {
+                NavigationLink(destination: CatalogView()) { }
+            }
+        }
+    }
+}
+
+// ✅ Vista emite intención; coordinador decide ruta:
+struct LoginView: View {
+    @Bindable var viewModel: LoginViewModel
+
+    var body: some View {
+        Button(“Login”) {
+            Task { await viewModel.submit() }
+            // La vista no sabe qué pantalla sigue. Solo informa al ViewModel.
+        }
+    }
+}
+
+// AppCoordinator centraliza todas las reglas de ruta:
+func handle(event: AppEvent) {
+    switch event {
+    case .loginSucceeded(let session) where session.isAdmin:
+        navigate(to: .adminDashboard)
+    case .loginSucceeded:
+        navigate(to: .catalog)
+    }
+    // Cambiar la regla (p.ej. redirigir por tipo de plan)
+    // solo requiere tocar este switch, en un único lugar.
+}
+```
 
 ---
 
@@ -312,9 +417,12 @@ Si falta cualquiera, el cierre está incompleto.
 
 ---
 
-## Siguiente paso
+## Qué sigue
 
 Empieza por la especificación BDD de Catalog y recorre la etapa completa en orden. No saltes directamente a infraestructura o tests: en esta etapa, el orden es parte de la arquitectura.
+
+→ [Feature Catalog: Especificación BDD](01-feature-catalog/00-especificacion-bdd.md) — Primera lección de la Etapa 2.
+
 ---
 
 ## Señales de progreso dentro de la etapa
@@ -361,46 +469,6 @@ Debe poder explicar y defender el flujo completo Login -> evento -> Coordinator 
 
 ## Entregables de cierre de etapa
 
-- Revisa y completa los entregables oficiales aqui: [entregables-etapa-2.md](../02-integración/entregables-etapa-2.md).
+- Revisa y completa los entregables oficiales aquí: [Entregables — Etapa 2](entregables-etapa-2.md).
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
-```
-
-Lectura semántica mínima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
 

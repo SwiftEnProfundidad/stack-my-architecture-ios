@@ -20,6 +20,29 @@ Cache es guardar una copia local de datos para responder rápido o degradar bien
 
 Offline-friendly no significa “funciona todo sin internet”. Significa “las rutas críticas siguen siendo útiles en escenarios de conectividad degradada”.
 
+```swift
+// ❌ Sin cache: cualquier fallo de red deja la pantalla vacía
+func fetchCatalog() async throws -> [Product] {
+    try await remote.fetchProducts()  // Timeout, 500, sin cobertura → .error
+}
+
+// ✅ Con cache: degrada con dignidad cuando la red falla
+func fetchCatalog() async throws -> [Product] {
+    do {
+        let fresh = try await remote.fetchProducts()
+        try? await store.save(products: fresh, timestamp: now())
+        return fresh
+    } catch {
+        guard let cached = try? await store.load(), isValid(cached) else {
+            throw error  // Sin cache útil → propaga el error
+        }
+        return cached.products  // Datos de hace N minutos, mejores que nada
+    }
+}
+```
+
+La diferencia no es complejidad: es una decisión de diseño sobre qué le pasa al usuario cuando el servidor falla.
+
 ---
 
 ## Modelo mental interno
@@ -44,21 +67,84 @@ flowchart TD
     CACHE -->|"No"| SHOW_ERR["Mostrar error"]
 ```
 
+Lectura del diagrama:
+
+→ **Punto de entrada**: el usuario abre Catalog. El ViewModel llama `fetchCatalog()` — una sola operación desde la perspectiva de la UI.
+
+→ **Bifurcación 1** (¿Remote disponible?): el sistema comprueba conectividad antes de hacer la petición de red. Esto evita timeouts innecesarios cuando el dispositivo está claramente offline.
+
+→ **Ruta feliz** (Remote OK): datos frescos → guardar con timestamp → mostrar. El timestamp es crítico: es la "fecha de nacimiento" del dato en cache. Sin él, no hay TTL posible.
+
+→ **Ruta de fallo, bifurcación 2** (¿Cache válido?): si el remote falla, el sistema no se rinde todavía. Comprueba si hay cache y si está dentro del TTL. Dos condiciones independientes: existencia Y frescura.
+
+→ **Cache válido → mostrar**: el usuario ve datos de hace N minutos. No hay red, pero hay información útil. La UI debe indicar que los datos pueden no ser recientes.
+
+→ **Sin cache útil → error**: sin red y sin cache aprovechable, el sistema es honesto. Mostrar error es la respuesta correcta — mejor que mostrar datos que pueden estar gravemente desactualizados.
+
 ---
 
 ## Cuándo sí / cuándo no usar cache en este contexto
 
-## Cuándo sí
+### Cuándo sí
 
 - Catálogo de productos que cambia moderadamente.
 - Experiencia donde “algo útil” es mejor que “pantalla vacía”.
 - Dominio donde una ventana corta de desactualización es aceptable.
 
-## Cuándo no (o con más cuidado)
+```swift
+// ✅ Cache apropiada — catálogo de productos con TTL de 5 minutos
+// Si el usuario pierde cobertura en el metro, ve productos de hace 4 minutos.
+// Eso es mejor que “Error: sin conexión” en una pantalla de compras.
+let ttl: TimeInterval = 5 * 60  // 5 minutos
+
+func fetchCatalog() async throws -> [Product] {
+    do {
+        let fresh = try await remote.fetchProducts()
+        await store.save(fresh, timestamp: .now)
+        return fresh
+    } catch {
+        guard let cached = await store.load(),
+              Date.now.timeIntervalSince(cached.timestamp) < ttl else {
+            throw error
+        }
+        return cached.products  // Dato de hace <5 min: aceptable para este dominio
+    }
+}
+```
+
+### Cuándo no (o con más cuidado)
 
 - Datos financieros en tiempo real.
 - Operaciones críticas con impacto legal/contable inmediato.
 - Flujos donde stale data puede inducir decisiones erróneas graves.
+
+```swift
+// ❌ Cache inapropiada — saldo bancario o tipo de cambio en tiempo real
+// Un usuario podría confirmar una transferencia basándose en un saldo de hace 10 minutos.
+// El coste de la información desactualizada supera el coste de la mala UX.
+func fetchBalance() async throws -> Balance {
+    // Si hay cache → devolverla sin preguntar... ❌
+    if let cached = await store.load() { return cached }
+    return try await remote.fetchBalance()
+    // Si falla: mostrar error. No hay alternativa aceptable con stale data.
+}
+
+// ✅ En dominios críticos: sin cache, o cache solo para display con aviso explícito
+func fetchBalance() async throws -> BalanceResult {
+    do {
+        return .current(try await remote.fetchBalance())
+    } catch {
+        if let cached = await store.load() {
+            // Mostrar el dato viejo pero con contexto claro en UI
+            return .stale(cached, lastUpdated: cached.timestamp)
+            // La UI muestra: “Saldo actualizado el HH:MM — actualiza para ver el valor real”
+        }
+        throw error
+    }
+}
+```
+
+La regla práctica: si el usuario puede tomar una decisión irreversible basándose en el dato, no uses cache silenciosa.
 
 ---
 
@@ -160,9 +246,17 @@ flowchart LR
     HTTP --> NET["API"]
 ```
 
-Punto crítico de diseño:
-- el UseCase no cambia al introducir cache.
-- solo cambia el Composition Root.
+Lectura del diagrama:
+
+→ `LoadCatalogUseCase → CachedCatalogRepository`: el UseCase llama a su dependencia (`CatalogRepository`) sin saber que hay cache. El contrato es idéntico: "dame los productos". Esta es la clave del decorador.
+
+→ `CachedCatalogRepository → RemoteCatalogRepository`: si hay red, el decorador delega en el repositorio remoto. El repositorio remoto no sabe que existe un decorador encima de él.
+
+→ `CachedCatalogRepository → CatalogCacheStore`: en paralelo, el decorador lee y escribe el store local. Ninguna otra capa sabe que existe este store.
+
+→ `RemoteCatalogRepository → HTTPClient → API`: la pila de red es independiente. El HTTPClient no sabe nada de cache.
+
+Punto crítico de diseño: el UseCase **no cambia** al introducir cache. Solo cambia el Composition Root, que inyecta `CachedCatalogRepository` en vez de `RemoteCatalogRepository` directamente. La evolución es por composición, no por modificación.
 
 Esto es exactamente lo que buscábamos desde Etapa 1: evolución por composición, no por reescritura.
 
@@ -170,20 +264,58 @@ Esto es exactamente lo que buscábamos desde Etapa 1: evolución por composició
 
 ## Concurrencia y seguridad
 
-## Aislamiento
+### Aislamiento
 
-- `CachedProductRepository` puede usar actor-store o lock/serialización interna.
-- `ProductStore` debe definir claramente si sus operaciones son thread-safe.
+`CachedCatalogRepository` es un `struct`. En Swift, un `struct` con todas las propiedades `Sendable` (incluyendo los protocolos marcados `Sendable`) es automáticamente `Sendable`. No necesita `actor` ni `@unchecked Sendable`.
 
-## Cancelación
+El store (`CatalogCacheStore`) sí puede necesitar `actor` si tiene estado mutable. La decisión la toma la implementación concreta, no el protocolo:
 
-Si la carga se cancela a mitad:
-- no se debe publicar estado tardío en UI,
-- y no se debe dejar el flujo en estado incoherente.
+```swift
+// Protocolo: solo dice que es Sendable
+public protocol CatalogCacheStore: Sendable {
+    func load() async throws -> CachedCatalog?
+    func save(products: [Product], timestamp: Date) async throws
+}
 
-## Sendable
+// Implementación de test: actor para estado mutable seguro
+actor InMemoryCatalogCacheStore: CatalogCacheStore {
+    private var cached: CachedCatalog?
+    func load() async throws -> CachedCatalog? { cached }
+    func save(products: [Product], timestamp: Date) async throws {
+        cached = CachedCatalog(products: products, timestamp: timestamp)
+    }
+}
+```
 
-Los tipos que cruzan tasks deben cumplir sendability o justificar excepciones en test doubles.
+El protocolo no dicta la implementación de seguridad — la garantiza en la frontera.
+
+### Cancelación
+
+Cuando el usuario navega atrás mientras carga, el `.task { await viewModel.load() }` se cancela. La cadena de cancelación llega hasta `fetchCatalog()`. Hay un caso delicado: el `save` en el store:
+
+```swift
+let fresh = try await remote.fetchProducts()
+try? await store.save(products: fresh, timestamp: now())  // ¿Y si se cancela aquí?
+return fresh
+```
+
+El `try?` en el `save` es intencional: si el guardado falla (o se cancela), los datos frescos ya están disponibles para devolver. No bloquear la devolución por un fallo de persistencia es la decisión correcta aquí — la persistencia es un efecto secundario, no el objetivo principal.
+
+### Sendable
+
+La cadena completa debe ser `Sendable`:
+
+```swift
+CachedCatalogRepository (struct, Sendable automático)
+    ↓ almacena
+CatalogRemoteDataSource (protocolo: Sendable)
+    ↓ almacena
+CatalogCacheStore (protocolo: Sendable)
+    ↓ almacena
+@Sendable () -> Date  // El reloj inyectado
+```
+
+Si cualquier eslabón no es `Sendable`, el compilador de Swift 6 lo detecta al intentar cruzar fronteras de `Task`. El patrón del scaffold garantiza que la cadena completa cumple.
 
 ---
 
@@ -442,7 +574,7 @@ Corrección:
 
 - `swift-concurrency`: cancelación, aislamiento y sendability en ruta de carga.
 - `swiftui-expert-skill`: estado de UI coherente ante fallback.
-- `windsurf-rules-ios` (si aplica): composición limpia y separación de responsabilidades.
+- `ios-enterprise-rules` (si aplica): composición limpia y separación de responsabilidades.
 
 ---
 
@@ -678,44 +810,63 @@ La clave es que `CachedProductRepository` depende de los protocolos `ProductRepo
 
 ---
 
-<!-- semántica-flechas:auto -->
-## Semántica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+El scaffold tiene implementación completa de cache. Lo que la lección enseña es la mecánica del patrón; el scaffold añade una capa de sofisticación que conviene conocer antes de abrirlo.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Archivos del scaffold
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Archivo | Qué contiene |
+|---|---|
+| `Sources/FeatureCatalogData/CachedCatalogRepository.swift` | `struct CachedCatalogRepository: CatalogRepository` — el decorador completo |
+| `Sources/FeatureCatalogData/CatalogDataContracts.swift` | `CatalogCacheStore`, `ConnectivityChecking`, `CatalogObservability` — los protocolos de soporte |
+| `Sources/FeatureCatalogData/CachedCatalog.swift` | `CachedCatalog` (el equivalente de `CachedProducts` de la lección) |
+| `Sources/FeatureCatalogData/InMemoryCatalogStores.swift` | Stubs en memoria para tests |
+| `Sources/FeatureCatalogPersistenceSwiftData/SwiftDataCatalogCacheStore.swift` | Implementación real con SwiftData (Etapa 3) |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+### Divergencias críticas respecto a los ejemplos del curso
 
-    linkStyle 0,1 stroke:#2196F3,stroke-width:2px,stroke-dasharray:5 5
-    linkStyle 2,5 stroke:#555555,stroke-width:2px
-    linkStyle 3 stroke:#4CAF50,stroke-width:3px
-    linkStyle 4 stroke:#FF9800,stroke-width:2px
+**1. Nombres diferentes**
+
+| Lección | Scaffold real |
+|---|---|
+| `CachedProductRepository` | `CachedCatalogRepository` |
+| `ProductStore` | `CatalogCacheStore` |
+| `CachedProducts` | `CachedCatalog` |
+| `store.save(_:timestamp:)` | `store.save(products:timestamp:)` |
+| `loadAll()` | `fetchCatalog()` |
+| `CatalogError.connectivity` | `CatalogError.network` / `.offlineNoCache` / `.staleCacheUnavailable` |
+
+**2. El scaffold tiene `ConnectivityChecking` como dependencia explícita**
+
+La lección usa `try/catch` para detectar fallo de red. El scaffold inyecta un `ConnectivityChecking` que pregunta explícitamente si hay red antes de intentar la petición:
+
+```swift
+// ✅ Scaffold real — ConnectivityChecking decide la ruta
+if await connectivity.isOnline() {
+    // intentar remoto
+} else {
+    // ir directo a cache o lanzar offlineNoCache
+}
 ```
 
-Lectura semántica mínima de este diagrama:
+Esto permite tests deterministas sin necesitar errores de red: simplemente configuras `connectivity.isOnline()` para devolver `false`.
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuración de ensamblado.
-3. `==>` dependencia contra contrato/abstracción.
-4. `--o` salida/propagación desde implementación concreta.
+**3. El scaffold tiene `CatalogObservability` integrado**
+
+El scaffold registra métricas (`CatalogFetchMetric`) en cada carga: ruta usada, duración, cache hit. Esto es el contenido de la Lección 13 (Observabilidad). Si ves `.record(...)` en el código, es esto.
+
+**4. `CachedCatalogRepository` es `struct`, no `final class`**
+
+La lección usa `final class + @unchecked Sendable` para el ejemplo didáctico. El scaffold usa `struct` — más simple y `Sendable` automático sin el `@unchecked`. Prefiere siempre `struct` para repositorios decoradores que no tienen estado mutable propio.
+
+### Tests que ya existen en el scaffold
+
+Busca en `Tests/FeatureCatalogDataTests/` los tests de `CachedCatalogRepository`. Deberías encontrar los cinco escenarios de la lección (happy path, fallback válido, fallback expirado, sin cache, TTL en límite) más escenarios con `ConnectivityChecking`.
+
+---
+
+## Qué sigue
+
+[**Lección 13: Consistencia e invalidación →**](./02-consistencia.md) — Cuándo y cómo invalidar el cache sin romper la UX: invalidación por evento, por tiempo, por política de dominio.
 
