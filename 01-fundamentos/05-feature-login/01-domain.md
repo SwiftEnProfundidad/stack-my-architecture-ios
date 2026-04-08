@@ -601,6 +601,65 @@ En la siguiente lección vamos a subir una capa: la Application. Allí construir
 
 ---
 
+## 🔨 Checkpoint Xcode — Domain en el proyecto real
+
+Has implementado el Domain completo en tu práctica TDD. Ahora lo ves funcionar en el proyecto Swift real. Este es el primer momento en que tu aprendizaje se materializa en código que compila, tiene tests en verde y vive en una arquitectura de producción.
+
+**Paso 1 — Abre el scaffold en Xcode**
+
+Desde la raíz del repositorio del curso:
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+```
+
+Xcode abrirá el paquete con los 13 targets del proyecto. Espera a que indexe — puede tardar un minuto la primera vez.
+
+**Paso 2 — Localiza el módulo `FeatureLoginDomain`**
+
+En el navigator de Xcode, dentro de `Sources/FeatureLoginDomain/`, encontrarás exactamente los tipos que acabas de construir, con las adaptaciones que describe la tabla de equivalencias del inicio de esta lección:
+
+| Tu implementación (lección) | Scaffold (`FeatureLoginDomain/`) | Diferencia clave |
+|---|---|---|
+| `Email` | `EmailAddress.swift` | Nombre + valida dominio con punto |
+| `Password` (valida `!isEmpty`) | `Password.swift` | Regla más estricta: mínimo 8 caracteres |
+| `Credentials` | `Credentials.swift` | Mismo diseño |
+| `Session(token:, email:)` | `UserSession.swift` | Campo `userId` en lugar de `email` |
+| `AuthError` + `Email.ValidationError` | `LoginError.swift` | Enum unificado con 4 casos |
+| `LoginEvent` | _(no existe)_ | El ViewModel lo gestiona directamente |
+
+Abre cada archivo. Lee el código. Entiende cada diferencia — no son errores del scaffold, son decisiones de diseño explicadas al inicio de la lección.
+
+**Paso 3 — Ejecuta los tests del Domain**
+
+En Xcode, selecciona el scheme `ArchitectureKit` y pulsa `Cmd+U`. O desde terminal:
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDomainTests
+```
+
+Deberías ver algo como:
+
+```
+Test Suite 'FeatureLoginDomainTests' passed
+   Executed N tests, with 0 failures
+```
+
+Todos en verde. Esos tests validan exactamente los mismos comportamientos que tú implementaste con TDD: `Email` inválido lanza error, `Password` vacío lanza error, credenciales válidas se construyen correctamente.
+
+**Paso 4 — Conecta con lo que aprendiste**
+
+Antes de continuar, responde mentalmente:
+
+- ¿Por qué `LoginError` está unificado en el scaffold en lugar de tener errores anidados por Value Object?
+- ¿Qué ventaja tiene que `UserSession` tenga `userId` en lugar de `email`?
+- ¿Por qué `Password` exige mínimo 8 caracteres en producción pero la lección empieza con `!isEmpty`?
+
+Si puedes responder las tres, tienes el Domain del Login no solo implementado sino entendido.
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [Feature Login: Capa Application](02-application.md), construye el `LoginUseCase` que orquesta el flujo completo: validación local con los Value Objects del Domain, delegación de la autenticación remota al puerto `AuthGateway`, y emisión del `LoginEvent` correspondiente.

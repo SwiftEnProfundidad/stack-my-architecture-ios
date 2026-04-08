@@ -357,6 +357,90 @@ Esta es la primera feature completa del curso. Es pequeña (un formulario de log
 
 ---
 
+## 🔨 Checkpoint Xcode — AppComposition: la app arranca
+
+Este es el checkpoint final de la Feature Login. Aquí conectas todas las capas y ves la app correr en el simulador.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/AppComposition/AppCompositionRoot.swift
+```
+
+**Lee `AppCompositionRoot.swift` con atención:**
+
+```swift
+@MainActor
+public struct AppCompositionRoot {
+    public let navigation: NavigationStore
+    public let loginViewModel: LoginViewModel
+    public let catalogViewModel: CatalogViewModel?
+
+    public init(
+        authRepository: any AuthRepository = InMemoryAuthRepository(),
+        catalogRepository: (any CatalogRepository)? = nil
+    ) {
+        let navigation = NavigationStore()
+        let loginUseCase = AuthenticateUserUseCase(repository: authRepository)
+        let loginViewModel = LoginViewModel(useCase: loginUseCase, navigator: navigation)
+        // ...
+
+        self.navigation = navigation
+        self.loginViewModel = loginViewModel
+        self.catalogViewModel = catalogViewModel
+    }
+}
+```
+
+**Lo que este único archivo demuestra:**
+
+| Principio | Evidencia en el código |
+|---|---|
+| Un solo lugar conoce implementaciones concretas | Solo `AppCompositionRoot` importa `FeatureLoginData` (la implementación); `FeatureLoginUI` solo importa `FeatureLoginDomain` |
+| Sustitución sin cambiar la feature | `authRepository: any AuthRepository = InMemoryAuthRepository()` — en producción pasas `AuthHTTPRepository()`, sin tocar ni ViewModel ni UseCase |
+| `@MainActor` en la raíz | El ensamblado ocurre en el hilo principal; no hay riesgo de data races al inicializar ViewModels |
+| Inyección por constructor | No hay singletons ocultos ni locators de servicio; cada dependencia es visible en la firma |
+
+**Ejecuta la suite completa:**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test
+```
+
+Resultado esperado: **todos los targets en verde**. Si algún target falla, el error te dice exactamente qué capa rompió el contrato.
+
+**Ahora abre la app en el simulador:**
+
+```bash
+# Desde Xcode: abre apps/ios/ArchitectureKit
+# Selecciona el scheme de la app (no el package)
+# Cmd+R — la app arranca, aparece la pantalla de login
+```
+
+Prueba el flujo completo:
+- Email inválido → el ViewModel muestra mensaje de error sin llegar al servidor
+- Credenciales correctas (definidas en `InMemoryAuthRepository`) → navegación al catálogo
+- Cierra y reabre → el estado inicial es limpio (sin sesión persistida en esta fase)
+
+**Resumen del progreso de la Feature Login:**
+
+| Capa | Archivos de producción | Tests |
+|---|---|---|
+| FeatureLoginDomain | `EmailAddress`, `Password`, `LoginError`, `UserSession`, `AuthRepository` | ✅ EmailTests, PasswordTests |
+| FeatureLoginData | `InMemoryAuthRepository`, `AuthHTTPRepository` | ✅ FeatureLoginDataIntegrationTests |
+| FeatureLoginUI | `LoginViewModel`, `LoginView` | ✅ FeatureLoginUITests |
+| AppComposition | `AppCompositionRoot` | ✅ AppCompositionTests |
+
+**Preguntas de consolidación:**
+
+1. Si mañana necesitas cambiar `InMemoryAuthRepository` por `AuthHTTPRepository` en producción, ¿cuántos archivos tocas? ¿Qué te dice eso sobre el diseño?
+2. `AppCompositionRoot` importa todos los módulos. ¿Por qué eso es correcto aquí y sería incorrecto en `FeatureLoginUI`?
+3. Los 28 tests pedagógicos de la lección se ejecutan en < 1 segundo. ¿Por qué no necesitan simulador? ¿Qué propiedad del diseño lo hace posible?
+
+Si los tests están en verde y la app arranca en el simulador, has completado la Feature Login al completo: especificación BDD → Domain → Application → Infrastructure → Interface → Composition → app corriendo. Esta es la secuencia que repetirás en cada feature del resto del curso.
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [ADR-001: Decisiones de arquitectura del Login](ADR-001-login.md), documenta formalmente las decisiones de diseño que tomamos durante la implementación y el razonamiento detrás de cada una.

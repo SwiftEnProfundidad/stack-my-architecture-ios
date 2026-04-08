@@ -818,6 +818,71 @@ Este flujo es transparente para el usuario. La app detecta el 401, intenta refre
 
 ---
 
+## 🔨 Checkpoint Xcode — Application en el proyecto real
+
+Acabas de construir el caso de uso y el puerto de autenticación. Ahora los ves en el scaffold y ejecutas tests que validan el flujo completo de Application.
+
+**Paso 1 — Localiza los archivos en `FeatureLoginDomain`**
+
+En Xcode, dentro de `Sources/FeatureLoginDomain/`:
+
+| Tu implementación (lección) | Scaffold | Qué cambia |
+|---|---|---|
+| `AuthGateway` (protocol) | `AuthRepository.swift` | Nombre (`Gateway` → `Repository`) y método (`login` → `authenticate`) |
+| `LoginUseCase` | `AuthenticateUserUseCase.swift` | Nombre más explícito; no devuelve `LoginEvent`, lanza directamente `LoginError` |
+
+Abre `AuthRepository.swift`:
+
+```swift
+public protocol AuthRepository: Sendable {
+    func authenticate(credentials: Credentials) async throws -> UserSession
+}
+```
+
+Compara con el `AuthGateway` que diseñaste. El patrón es idéntico: un protocolo que desacopla Application de Infrastructure, con `async throws` para gestionar asincronía y errores.
+
+Abre `AuthenticateUserUseCase.swift`:
+
+```swift
+public struct AuthenticateUserUseCase: Sendable {
+    private let repository: any AuthRepository
+
+    public func execute(email: String, password: String) async throws -> UserSession {
+        let credentials = Credentials(
+            email: try EmailAddress(email),
+            password: try Password(password)
+        )
+        return try await repository.authenticate(credentials: credentials)
+    }
+}
+```
+
+Fíjate: el UseCase recibe `String` crudos (como la UI los enviará), construye los Value Objects dentro (validando aquí), y delega en el repositorio. Mismo patrón que el tuyo, con los nombres del scaffold.
+
+**Paso 2 — Ejecuta los tests del Domain (que incluyen el UseCase)**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDomainTests
+```
+
+Los tests incluyen el caso de uso: credenciales inválidas no llegan al repositorio, credenciales válidas sí. Todo en verde.
+
+**Paso 3 — Comprueba que el Domain no importa infraestructura**
+
+En Xcode, abre `Package.swift`. Localiza el target `FeatureLoginDomain`:
+
+```swift
+.target(
+    name: "FeatureLoginDomain",
+    dependencies: ["CoreDomain"]
+)
+```
+
+Solo depende de `CoreDomain`. Ni rastro de `Foundation` extendido, ni de `URLSession`, ni de SwiftUI. El Domain es puro. El UseCase define el flujo; la infraestructura lo cumplirá.
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [Feature Login: Capa Infrastructure](03-infrastructure.md), implementa `RemoteAuthGateway` — la implementación real del protocolo `AuthGateway` que hace la petición HTTP al servidor — y un `StubAuthGateway` para desarrollo sin conexión.

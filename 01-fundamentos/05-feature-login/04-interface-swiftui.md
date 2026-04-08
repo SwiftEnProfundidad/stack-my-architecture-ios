@@ -761,6 +761,88 @@ func attemptBiometricLogin() async throws -> Session? {
 
 ---
 
+## 🔨 Checkpoint Xcode — Interface en el proyecto real
+
+Abre el scaffold y contrasta lo que acabas de aprender con la implementación de producción.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureLoginUI/LoginViewModel.swift
+# Navega a: Sources/FeatureLoginUI/LoginView.swift
+```
+
+**Diferencias clave respecto a la lección — léelas con atención:**
+
+| Concepto lección | Implementación real | Por qué importa |
+|---|---|---|
+| `@StateObject var viewModel` | `@Bindable var viewModel` | Swift 6: `@Observable` reemplaza `ObservableObject`; `@Bindable` habilita bindings sin `@Published` |
+| `@ObservedObject` / `@Published` | `@Observable @MainActor` | El compilador garantiza que toda mutación de UI ocurre en el hilo principal |
+| `isLoading: Bool` como estado | `Phase` enum (`.idle`, `.loading`, `.authenticated`) | Estado sellado — imposible tener `isLoading: true` + `errorMessage: nil` simultáneamente incoherentes |
+| ViewModel con `submit()` síncrono | `submit() async` marcado con `@MainActor` | Swift Concurrency: la tarea se lanza desde `Task { await viewModel.submit() }` en la View |
+| Elementos UI sin identificadores | `accessibilityIdentifier` en todos los controles | Los tests de UI localizan nodos por este identificador, no por texto visible |
+
+**Inspecciona `LoginViewModel.swift`:**
+
+```swift
+// Esto es lo que ves en el scaffold:
+@Observable @MainActor
+public final class LoginViewModel {
+
+    public enum Phase { case idle, loading, authenticated }
+
+    public private(set) var phase: Phase = .idle
+    public private(set) var errorMessage: String? = nil
+    public var email: String = ""
+    public var password: String = ""
+
+    // ...
+    public func submit() async {
+        phase = .loading
+        // ...
+    }
+}
+```
+
+Nota: `phase` y `errorMessage` son `private(set)` — la View solo puede leerlos, no escribirlos directamente. Esto es el contrato unidireccional aplicado a nivel de compilador.
+
+**Inspecciona `LoginView.swift`:**
+
+```swift
+// @Bindable permite bindings two-way sobre @Observable sin @Published
+@Bindable var viewModel: LoginViewModel
+
+// El botón lanza la corrutina correctamente:
+Button("Iniciar sesión") {
+    Task { await viewModel.submit() }
+}
+```
+
+**Ejecuta los tests de la capa UI:**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginUITests
+```
+
+Resultado esperado: todos los tests en verde. Si alguno falla, es que hay una discrepancia entre la View y el ViewModel — no entre el test y la implementación.
+
+**Preguntas de reflexión antes de continuar:**
+
+1. ¿Por qué `phase` es un enum y no `isLoading: Bool + isAuthenticated: Bool`? ¿Qué estado incoherente imposibilita el enum?
+2. `@MainActor` en la clase entera vs en métodos individuales — ¿qué diferencia produce en la experiencia del compilador?
+3. Si añadieras un estado `.sessionExpired` al `Phase` enum, ¿cuántos archivos tendrías que tocar? ¿Qué te dice eso sobre el diseño?
+
+**Progreso de la feature Login:**
+
+| Capa | Estado |
+|---|---|
+| FeatureLoginDomain | ✅ Tests verdes |
+| FeatureLoginData | ✅ Tests verdes |
+| FeatureLoginUI | ✅ Tests verdes |
+| AppComposition | ⏳ Próxima lección |
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [TDD: ciclo completo Red-Green-Refactor](05-tdd-ciclo-completo.md), consolida todo lo que hemos construido trazando el ciclo TDD completo de punta a punta sobre la feature Login.

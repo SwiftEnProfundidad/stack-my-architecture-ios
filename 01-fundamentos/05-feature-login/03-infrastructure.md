@@ -537,6 +537,43 @@ En la siguiente lección llegaremos a la última capa: Interface. Allí construi
 
 ---
 
+## 🔨 Checkpoint Xcode — Infrastructure en el proyecto real
+
+Acabas de construir el adaptador de red y el stub. Ahora ves cómo el scaffold los implementa, incluyendo decisiones de producción que la lección simplificó.
+
+**Paso 1 — Localiza `FeatureLoginData` en Xcode**
+
+En `Sources/FeatureLoginData/` hay dos archivos:
+
+| Tu implementación (lección) | Scaffold | Diferencia principal |
+|---|---|---|
+| `StubAuthGateway` (struct) | `InMemoryAuthRepository.swift` | Es un **`actor`** (thread-safe) con latencia configurable |
+| `RemoteAuthGateway` | `AuthHTTPRepository.swift` | Guarda sesión en `SessionStore` tras autenticar; DTOs privados |
+
+**Paso 2 — Diferencia importante: `InMemoryAuthRepository` es un `actor`**
+
+Abre `InMemoryAuthRepository.swift`. El scaffold usa `actor` en lugar de `struct` porque en producción varios tasks pueden llamar a `authenticate` concurrentemente. El `actor` serializa el acceso. Esta es la diferencia entre código que funciona en demos y código que aguanta producción. La lección empieza con `struct` para simplificar el aprendizaje del patrón — la evolucion al `actor` es el siguiente paso natural.
+
+**Paso 3 — Ejecuta los tests de integración de Infrastructure**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDataIntegrationTests
+```
+
+Verde. Estos tests verifican exactamente los escenarios de tu lección: autenticación exitosa, credenciales inválidas, error de red.
+
+**Paso 4 — Estado acumulado del proyecto en Xcode**
+
+Hasta aquí, el scaffold tiene compilando y con tests en verde:
+
+- ✅ `FeatureLoginDomain` — Value Objects, UseCase, protocolo `AuthRepository`
+- ✅ `FeatureLoginData` — `InMemoryAuthRepository` + `AuthHTTPRepository`
+- ⏳ `FeatureLoginUI` — siguiente lección
+- ⏳ `AppComposition` — lección 06
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md), construye el `LoginViewModel` y la `LoginView` — la capa más externa de la feature que conecta la UI con el `LoginUseCase`.
