@@ -106,18 +106,28 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 
 ---
 
-## Fase 5 — Rebuild y deploy final ⏳
+## Fase 5 — Rebuild y deploy final ✅
 
 > Una vez cerradas las Fases 1-4, rebuild del HTML y deploy al hub.
 
-⛔ Bloqueado por Fases 1-4.
-
 | Tarea | Estado | Notas |
 |---|---|---|
-| 5.1 Commit en iOS `develop` | ⏳ | |
-| 5.2 PR `develop` → `main` | ⏳ | |
-| 5.3 Rebuild HTML con `build-html.py` | ⏳ | |
-| 5.4 Copy HTML al hub, commit y push → Vercel | ⏳ | |
+| 5.1 Merge `develop` → `main` (fast-forward local) | ✅ | `git merge --ff-only develop` en local sin conflictos |
+| 5.2 Merge `origin/main` (1 commit de audit) → `main` local | ✅ | 76 conflictos resueltos con `--ours`; push a origin |
+| 5.3 Rebuild HTML con `build-html.py` | ✅ | 2348 KB, 117 archivos procesados |
+| 5.4 Copy HTML al hub, commit y push → Vercel | ✅ | hub `main` `edc93f7`, Vercel deploy activo |
+
+**FASE 5 COMPLETADA.**
+
+---
+
+## Estado final del plan ✅
+
+**Todas las fases completadas.** El curso iOS está:
+- Con nomenclatura 100% unificada con el scaffold real (~860 reemplazos)
+- Con 73/91 lecciones con checkpoints (`🔨` o `🔭`)
+- Con modelo pedagógico explícito en intros E1-E3
+- Desplegado en Vercel (hub `main` `edc93f7`)
 
 ---
 
@@ -126,16 +136,8 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 | Fecha | Trabajo realizado |
 |---|---|
 | 2026-04-10 | Auditoría completa, añadidos 73 checkpoints (Etapas 0-5 + Proyecto Final), corrección de nomenclatura parcial en Etapa 1, PR #51 mergeada, CI/CD desactivado |
-| — | Inicio de Fase 1: unificación de nomenclatura |
-| 2026-04-10 | Fase 1.2 completada: AuthGateway → AuthRepository (123 reemplazos en 24 archivos) |
-| 2026-04-10 | Fase 1.3 completada: AuthenticateUserUseCase.Error → LoginError (38 reemplazos en 6 archivos) |
-| 2026-04-10 | Fase 1.4 completada: RemoteAuthRepository/StubAuthRepository → AuthHTTPRepository/InMemoryAuthRepository (116 reemplazos en 27 archivos) |
-| 2026-04-10 | Fase 1.5+1.6 completadas: onLoginSucceeded/onEvent/closure → LoginNavigating/navigator.goToCatalog() + LoginViewModel(useCase:navigator:) en 13 archivos, Etapas 1-5 |
-| 2026-04-10 | Fase 1.7 completada: Email→EmailAddress + Session→UserSession (261 reemplazos en 11 archivos Etapa 1; notas de equivalencia actualizadas) |
-| 2026-04-10 | Fase 1.8 completada: AuthError→LoginError (57 reemplazos Etapa 1 + 11 Etapas 2-5; notas redundantes actualizadas) |
-| 2026-04-10 | Fase 1.9 completada: equivalencias-scaffold.md reescrito; 12 nombres unificados documentados; 3 diferencias pedagógicas restantes justificadas |
-| 2026-04-10 | Fase 1.10 completada: LoginUseCase residual limpiado en atlas-arquitectura, mental-models, ADR-003, apendice-banca-ledger; criterio de Fase 1 verificado |
-| 2026-04-10 | **FASE 1 COMPLETADA** — Nomenclatura unificada en todo el material del curso |
-| 2026-04-10 | **FASE 2 COMPLETADA** — Modelo pedagógico explícito añadido en intros E1-E3; entregables verificados; sesión completa |
-| 2026-04-10 | **FASE 3 COMPLETADA** — 7 checkpoints E1 auditados; 2 stales corregidos (tabla Application, nota Interface) |
-| 2026-04-10 | **FASE 4 COMPLETADA** — 50 checkpoints E0-E5 auditados; 0 stales; `AppDestination` y `Session` del shared kernel documentados como diferencias intencionales |
+| 2026-04-10 | Fase 1 completada: ~860 reemplazos de nomenclatura en 51 archivos |
+| 2026-04-10 | Fase 2 completada: modelo pedagógico explícito en intros E1-E3; entregables verificados |
+| 2026-04-10 | Fase 3 completada: 7 checkpoints E1 auditados; 2 stales corregidos |
+| 2026-04-10 | Fase 4 completada: 50 checkpoints E0-E5 auditados; 0 stales |
+| 2026-04-10 | **FASE 5 COMPLETADA** — Merge, rebuild HTML (2348 KB), deploy Vercel `edc93f7` |
