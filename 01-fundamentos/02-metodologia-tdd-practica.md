@@ -170,7 +170,7 @@ struct DummyLogger: Logger {
 }
 
 // Lo usas así en el test:
-let useCase = AuthenticateUserUseCase(repository: stubGateway, logger: DummyLogger())
+let useCase = AuthenticateUserUseCase(repository: repository, logger: DummyLogger())
 // El DummyLogger solo está ahí para que compile. No verificas nada sobre él.
 ```
 

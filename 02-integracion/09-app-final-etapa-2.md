@@ -169,7 +169,7 @@ final class AppCoordinator {
     
     private func makeCatalogViewModel() -> CatalogViewModel {
         // Stub con productos de ejemplo para que el estudiante vea algo
-        let stubRepository = StubProductRepository(products: [
+        let catalogRepository = StubProductRepository(products: [
             Product(
                 id: "1",
                 name: "iPhone 16 Pro",
@@ -194,7 +194,7 @@ final class AppCoordinator {
         ])
         
         return CatalogViewModel(
-            loadProductsUseCase: LoadProductsUseCase(repository: stubRepository),
+            loadProductsUseCase: LoadProductsUseCase(repository: catalogRepository),
             onProductSelected: { [weak self] product in
                 self?.navigate(to: .productDetail(id: product.id))
             }
@@ -237,7 +237,7 @@ struct StackMyArchitectureApp: App {
     // MARK: - Factory methods
     
     private func makeLoginViewModel() -> LoginViewModel {
-        let stubGateway = InMemoryAuthRepository(
+        let authRepository = InMemoryAuthRepository(
             behaviour: .successAfterDelay(
                 token: "demo-token",
                 delay: .seconds(1)
@@ -245,7 +245,7 @@ struct StackMyArchitectureApp: App {
         )
         
         return LoginViewModel(
-            useCase: AuthenticateUserUseCase(repository: stubGateway),
+            useCase: AuthenticateUserUseCase(repository: authRepository),
             navigator: coordinator  // AppCoordinator implementa LoginNavigating
         )
     }
