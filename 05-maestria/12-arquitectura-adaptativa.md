@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 > Cómo pensar como arquitecto senior cuando no hay "una respuesta correcta" en el libro
 
@@ -59,7 +59,7 @@ NIVEL 3: Implementación Específica
 ├── ¿Actor o lock?
 ├── ¿In-memory o persisted?
 └── ¿Sync o async?
-```text
+```
 
 **El error común:** Saltar directo al Nivel 2 ("¿MVP o MVVM?") sin entender el Nivel 1 ("¿Qué cambia independientemente de qué?").
 
@@ -82,7 +82,7 @@ FUERZA D: Simplicidad (código mantenible)
 Conflicto: A vs B (offline vs fresh)
          A vs D (sync complejo vs simple)
          B vs C (validación vs velocidad)
-```text
+```
 
 **Herramienta:** Diagrama de fuerzas - dibuja cada fuerza como flecha, identifica tensiones.
 
@@ -107,7 +107,7 @@ Ejemplo: App bancaria
 INV 1: Nunca perdemos una transacción confirmada al usuario
 INV 2: Nunca mostramos saldo inconsistente entre pestañas
 INV 3: Nunca procesamos el mismo pago dos veces (idempotencia)
-```text
+```
 
 Las invariantes son tu brújula: **cualquier solución que las viole está descartada**.
 
@@ -133,7 +133,7 @@ CAMBIA LENTO (años): Entidades core, invariantes
 NO CAMBIA: Principios matemáticos, leyes del negocio
 ├── Encapsula: En domain, documenta como ADR
 └── Asume: Son tu fundamento
-```text
+```
 
 ---
 
@@ -169,7 +169,7 @@ OPCIÓN C: Feature Flags + Gradual Migration
 ├── Configuración en runtime decide cuál usar
 ├── A/B testing implícito: métricas comparativas
 └── Rollback instantáneo si algo falla
-```text
+```
 
 **Decisión:** Depende de tu invariante. Si es "zero downtime", usa C. Si es "minimizar código duplicado", usa A. Si es "equipos paralelos", usa B.
 
@@ -195,14 +195,14 @@ class NetworkProductRepository: ProductRepository { ... }
 // Platform-specific UI (ViewModels compartidos, Views nativas)
 #if os(iOS)
 struct ProductView_iOS: View {
-    @StateObject var viewModel: ProductViewModel // Compartido
+    @State var viewModel: ProductViewModel // Compartido (@Observable)
     // UIKit-specific cuando necesario
 }
 #endif
 
 #if os(visionOS)  
 struct ProductView_Vision: View {
-    @StateObject var viewModel: ProductViewModel // Mismo VM
+    @State var viewModel: ProductViewModel // Mismo VM (@Observable)
     // Gestures específicos de visionOS
 }
 #endif
@@ -211,7 +211,7 @@ struct ProductView_Vision: View {
 if SupportsApplePencil {
     showPencilInterface()
 }
-```text
+```
 
 **Principio:** "Same brain, different face". La lógica de negocio es idéntica; la presentación se adapta.
 
@@ -232,7 +232,7 @@ class ViewController {
 func convertPaymentResult(_ sdkResult: PaySDK.Result) -> MyResult {
     // ... 50 líneas de mapping
 }
-```text
+```
 
 **Arquitectura Adaptativa - Anti-Corruption Layers (ACL):**
 
@@ -257,7 +257,7 @@ func convertPaymentResult(_ sdkResult: PaySDK.Result) -> MyResult {
 │  - Delegates con estado mutable    │
 │  - Documentación cambiante         │
 └─────────────────────────────────────┘
-```text
+```
 
 **Beneficios del ACL:**
 - Cambiar PaySDK por Stripe solo toca el Adapter
@@ -309,7 +309,7 @@ enum ConflictStrategy {
     case merge             // Ambos cambios: resolución manual
     case rejectBoth        // Transacciones críticas: abortar
 }
-```text
+```
 
 **Invariante protegida:** "Nunca cobramos por algo que no tenemos". El servidor es la única fuente de verdad para stock, pero la UI no espera bloqueando.
 
@@ -351,7 +351,7 @@ class ComplianceEngine {
 // Nuevas regulaciones = nuevas implementaciones de ComplianceRule
 // Tests garantizan que reglas cumplen la ley
 // Documentación vive en ADRs vinculados a cada rule
-```text
+```
 
 ---
 
@@ -395,7 +395,7 @@ extension ImageProcessor {
         // Implementation...
     }
 }
-```text
+```
 
 **Contención:**
 - Aislado en módulo separado
@@ -432,7 +432,7 @@ class BatchSyncUseCase {
     
     // ... implementación optimizada
 }
-```text
+```
 
 ---
 
@@ -461,7 +461,7 @@ Cuando dudas entre alternativas, visualiza:
                             PROTEGIDOS]
                         │
                  [CRITERIO DE ÉXITO]
-```text
+```
 
 ### 5.2 El "Architecture Journal"
 
@@ -490,7 +490,7 @@ manual en casos edge (0.1% estimado).
 intervención del dispatcher.
 
 **Revisar:** Métricas reales en 3 meses.
-```text
+```
 
 ### 5.3 Análisis de Escenarios
 
@@ -529,7 +529,7 @@ Real-time requirements ─────────┘
 Multi-tenancy (hospitales) ───┐
                               ├──► Flexibilidad vs Uniformidad
 HIPAA audit trail ────────────┘
-```text
+```
 
 ### La Arquitectura Resultante
 
@@ -571,7 +571,7 @@ HIPAA audit trail ────────────┘
 │  - Filesystem: Video recordings (large, external refs) │
 │  - Sync: Custom with conflict resolution per entity type │
 └──────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Decisiones No Estándar
 
@@ -681,7 +681,7 @@ HIPAA audit trail ────────────┘
 
 ## Entregable de esta Lección
 
-Tu **"Architecture Decision Portfolio"** personal:
+Tu **"Architecture Decisión Portfolio"** personal:
 
 1. **3 problemas reales** que hayas enfrentado (o simulado)
 2. **Análisis de fuerzas** para cada uno
@@ -708,64 +708,6 @@ Este portfolio demuestra que no solo aplicas patrones, **piensas como arquitecto
 
 ---
 
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
+## Qué sigue
 
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+[**Entregables Etapa 5 →**](entregables-etapa-5.md) — Verifica todos tus entregables de maestría y consulta la rúbrica de empleabilidad para evaluar tu nivel profesional.

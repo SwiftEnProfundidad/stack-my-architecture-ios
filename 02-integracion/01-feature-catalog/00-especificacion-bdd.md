@@ -1,9 +1,9 @@
 # Feature Catalog: Especificación BDD
 
-<!-- snippet-mapping-note:auto -->
 > **Nota de nomenclatura pedagógica**
 > Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
 > En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
+
 ## Objetivo de esta especificación
 
 Esta especificación no existe para "rellenar documentación". Existe para evitar una de las causas más comunes de deuda técnica: empezar a programar sin tener definido con precisión qué comportamiento espera negocio en escenarios reales.
@@ -63,7 +63,7 @@ flowchart TD
     ERR_CONN --> RETRY["Usuario pulsa reintentar"]
     ERR_DATA --> RETRY
     RETRY --> LOAD
-```text
+```
 
 Este diagrama define la lógica observable de negocio de la feature. Cualquier cambio funcional debería reflejarse aquí antes de tocar implementación.
 
@@ -71,7 +71,9 @@ Este diagrama define la lógica observable de negocio de la feature. Cualquier c
 
 ## Escenarios BDD (Given/When/Then)
 
-## Escenario 1 — Carga exitosa con productos
+> **Relación con AAA.** Los escenarios Given/When/Then son especificación de comportamiento — definen *qué* debe ocurrir. Cuando los implementes como tests XCTest en las lecciones siguientes, cada escenario se traduce en un test con estructura Arrange-Act-Assert: Given → Arrange (preparar estado), When → Act (ejecutar acción), Then → Assert (verificar resultado). Ambos patrones se usan juntos, no son alternativos.
+
+### Escenario 1 — Carga exitosa con productos
 
 ```gherkin
 Feature: Catálogo de productos
@@ -86,7 +88,7 @@ Scenario: Carga exitosa con productos disponibles
   Then el usuario ve la lista de productos
   And cada producto muestra nombre, precio e imagen
   And el estado de carga desaparece
-```text
+```
 
 ### Interpretación técnica
 
@@ -96,7 +98,7 @@ Scenario: Carga exitosa con productos disponibles
 
 ---
 
-## Escenario 2 — Catálogo vacío
+### Escenario 2 — Catálogo vacío
 
 ```gherkin
 Scenario: Respuesta válida sin productos
@@ -105,7 +107,7 @@ Scenario: Respuesta válida sin productos
   When la pantalla Catalog se carga
   Then el usuario ve un estado vacío amigable
   And NO se muestra error de conectividad
-```text
+```
 
 ### Interpretación técnica
 
@@ -115,7 +117,7 @@ Scenario: Respuesta válida sin productos
 
 ---
 
-## Escenario 3 — Error de conectividad
+### Escenario 3 — Error de conectividad
 
 ```gherkin
 Scenario: No hay conexión de red
@@ -125,7 +127,7 @@ Scenario: No hay conexión de red
   Then el usuario ve mensaje de error de conectividad
   And se ofrece acción de reintentar
   And NO se muestra estado vacío
-```text
+```
 
 ### Interpretación técnica
 
@@ -134,7 +136,7 @@ Scenario: No hay conexión de red
 
 ---
 
-## Escenario 4 — Datos inválidos del backend
+### Escenario 4 — Datos inválidos del backend
 
 ```gherkin
 Scenario: El backend devuelve payload inválido
@@ -143,7 +145,7 @@ Scenario: El backend devuelve payload inválido
   When Catalog intenta decodificar la respuesta
   Then el usuario ve un error genérico de carga
   And se ofrece reintentar
-```text
+```
 
 ### Interpretación técnica
 
@@ -152,7 +154,7 @@ Scenario: El backend devuelve payload inválido
 
 ---
 
-## Escenario 5 — Reintento exitoso tras error
+### Escenario 5 — Reintento exitoso tras error
 
 ```gherkin
 Scenario: El usuario reintenta y la carga se recupera
@@ -161,7 +163,7 @@ Scenario: El usuario reintenta y la carga se recupera
   When el usuario pulsa Reintentar
   Then Catalog vuelve a estado loading
   And finalmente muestra productos cargados
-```text
+```
 
 ### Interpretación técnica
 
@@ -170,7 +172,7 @@ Scenario: El usuario reintenta y la carga se recupera
 
 ---
 
-## Escenario 6 — Sesión inválida al entrar por deep link/ruta protegida
+### Escenario 6 — Sesión inválida al entrar por deep link/ruta protegida
 
 ```gherkin
 Scenario: Acceso a ruta protegida sin sesión
@@ -178,7 +180,7 @@ Scenario: Acceso a ruta protegida sin sesión
   When intenta acceder a Catalog por navegación interna o deep link
   Then el sistema redirige a Login
   And conserva intención de navegación cuando aplique
-```text
+```
 
 ### Interpretación técnica
 
@@ -187,7 +189,7 @@ Scenario: Acceso a ruta protegida sin sesión
 
 ---
 
-## Escenario 7 — Cancelación por abandono de pantalla
+### Escenario 7 — Cancelación por abandono de pantalla
 
 ```gherkin
 Scenario: Usuario abandona la pantalla durante la carga
@@ -195,7 +197,7 @@ Scenario: Usuario abandona la pantalla durante la carga
   When el usuario navega fuera antes de recibir respuesta
   Then la tarea de carga se cancela
   And no se publica un estado tardío que ensucie la UI
-```text
+```
 
 ### Interpretación técnica
 
@@ -204,7 +206,7 @@ Scenario: Usuario abandona la pantalla durante la carga
 
 ---
 
-## Escenario 8 — Productos duplicados en payload
+### Escenario 8 — Productos duplicados en payload
 
 ```gherkin
 Scenario: El backend devuelve productos duplicados
@@ -213,7 +215,7 @@ Scenario: El backend devuelve productos duplicados
   When Catalog procesa la respuesta
   Then el sistema aplica política de normalización definida
   And NO rompe la UI por identidad inconsistente
-```text
+```
 
 ### Interpretación técnica
 
@@ -226,7 +228,7 @@ Scenario: El backend devuelve productos duplicados
 
 Estos escenarios fuerzan decisiones concretas:
 
-## 1) Estado de UI como máquina de estados
+### 1) Estado de UI como máquina de estados
 
 No usar banderas sueltas (`isLoading`, `errorMessage`, `products`) porque permiten estados imposibles.
 
@@ -240,9 +242,9 @@ enum CatalogState: Equatable {
     case empty
     case error(CatalogErrorViewData)
 }
-```text
+```
 
-## 2) Error modelado explícitamente
+### 2) Error modelado explícitamente
 
 Separar:
 
@@ -252,7 +254,7 @@ Separar:
 
 para no mezclar UX y semántica.
 
-## 3) Contrato del repositorio orientado a dominio
+### 3) Contrato del repositorio orientado a dominio
 
 El puerto no devuelve DTO ni tipos de red.
 
@@ -262,7 +264,7 @@ protocol ProductRepository: Sendable {
 }
 ```
 
-## 4) Routing y sesión fuera de la feature
+### 4) Routing y sesión fuera de la feature
 
 Catalog no decide reglas globales de autorización. Eso corresponde al coordinador de navegación.
 
@@ -300,37 +302,75 @@ Esta tabla evita una trampa común: tener escenarios de negocio sin corresponden
 
 ## Anti-patrones frecuentes (y corrección)
 
-## Anti-patrón 1: BDD superficial
+### Anti-patrón 1: BDD superficial
 
-Síntoma:
-- escenarios genéricos sin edge cases.
+Síntoma: escenarios genéricos que solo cubren el happy path.
 
-Corrección:
-- incorporar al menos un escenario de cancelación y uno de datos inválidos.
+```gherkin
+// ❌ Demasiado genérico — no dice qué ocurre si hay error
+Scenario: Cargar productos
+  Given el usuario está en Catalog
+  When la pantalla carga
+  Then se muestran los productos
+```
 
-## Anti-patrón 2: Estado ambiguo en UI
+Corrección: añadir al menos un escenario de cancelación y uno de datos inválidos (como los Escenarios 4 y 7 de esta especificación). Si el escenario no cubre edge cases, los tests que genere tampoco lo harán.
 
-Síntoma:
-- vista mostrando lista y error simultáneamente.
+### Anti-patrón 2: Estado ambiguo en UI
 
-Corrección:
-- enum de estado mutuamente excluyente.
+Síntoma: propiedades sueltas permiten estados imposibles.
 
-## Anti-patrón 3: Repositorio devuelve DTO
+```swift
+// ❌ Mal — isLoading=false, products=[], error="fallo" ¿es vacío o error?
+var isLoading: Bool = false
+var products: [Product] = []
+var errorMessage: String?
 
-Síntoma:
-- Interface conoce campos de red.
+// ✅ Bien — un solo estado activo a la vez
+enum CatalogState: Equatable {
+    case idle
+    case loading
+    case loaded([Product])
+    case empty
+    case error(CatalogErrorViewData)
+}
+var state: CatalogState = .idle
+```
 
-Corrección:
-- mapear en Infrastructure y exponer dominio puro.
+### Anti-patrón 3: Repositorio devuelve DTO
 
-## Anti-patrón 4: Retry sin limpiar estado previo
+Síntoma: la capa Interface conoce campos de red.
 
-Síntoma:
-- UI queda bloqueada en error aunque recargue.
+```swift
+// ❌ Mal — ProductDTO es un tipo de Infrastructure, no de Domain
+protocol ProductRepository {
+    func loadProducts() async throws -> [ProductDTO]
+}
 
-Corrección:
-- transicionar explícitamente a `.loading` antes del nuevo intento.
+// ✅ Bien — el puerto expone solo tipos de Domain
+protocol ProductRepository: Sendable {
+    func loadProducts() async throws -> [Product]
+}
+// El mapeo DTO → Product ocurre dentro del adaptador en Infrastructure
+```
+
+### Anti-patrón 4: Retry sin limpiar estado previo
+
+Síntoma: la UI queda bloqueada en error aunque se recargue.
+
+```swift
+// ❌ Mal — no transiciona a loading antes de reintentar
+func retry() async {
+    let products = try? await useCase.execute()
+    state = products.map { .loaded($0) } ?? .error(...)
+}
+
+// ✅ Bien — primero limpia el estado, luego carga
+func retry() async {
+    state = .loading           // el usuario ve el spinner inmediatamente
+    await loadProducts()
+}
+```
 
 ---
 
@@ -338,7 +378,7 @@ Corrección:
 
 - `swift-concurrency`: escenario explícito de cancelación y ownership de tareas.
 - `swiftui-expert-skill`: modelado de estado de pantalla sin estados imposibles.
-- `windsurf-rules-ios` (si aplica): disciplina BDD->TDD, Clean por feature y separación de responsabilidades.
+- `ios-enterprise-rules` (si aplica): disciplina BDD->TDD, Clean por feature y separación de responsabilidades.
 
 ---
 
@@ -352,45 +392,9 @@ Corrección:
 
 ---
 
-## Siguiente paso
+## Qué sigue
 
 Con esta especificación cerrada, ya se puede implementar con TDD sin improvisar comportamiento.
 
----
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+→ [Feature Catalog: Capa Domain](01-domain.md) — Value Objects, errores y eventos de la feature Catalog.
 

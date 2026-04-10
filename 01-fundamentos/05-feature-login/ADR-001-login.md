@@ -2,7 +2,7 @@
 
 ## Qué es un ADR y por qué lo escribimos
 
-Un Architecture Decision Record (ADR) es un documento corto que registra una decisión arquitectónica importante, junto con su contexto, las alternativas que se consideraron, y las consecuencias esperadas. Los ADRs sirven para que alguien que se incorpore al proyecto dentro de seis meses pueda entender **por qué** el código está como está, no solo **cómo** está.
+Un Architecture Decisión Record (ADR) es un documento corto que registra una decisión arquitectónica importante, junto con su contexto, las alternativas que se consideraron, y las consecuencias esperadas. Los ADRs sirven para que alguien que se incorpore al proyecto dentro de seis meses pueda entender **por qué** el código está como está, no solo **cómo** está.
 
 Este es el primer ADR del curso. Documenta las decisiones que tomamos al diseñar la feature Login. Cada feature importante tendrá su propio ADR.
 
@@ -91,7 +91,7 @@ Implementar Login como una feature vertical completa con cuatro capas (Domain, A
 
 **Coordinator/Router como dependencia del ViewModel.** El ViewModel recibiría un protocolo `Navigator` que define acciones de navegación. Esto es más formal que un closure, pero para una sola acción ("login exitoso") un closure es suficiente. Un protocolo de navegación tiene sentido cuando hay múltiples destinos posibles desde una feature. Lo consideraremos en la Etapa 2 cuando haya navegación más compleja. Descartada por sobreingeniería en esta etapa.
 
-**Justificación:** Un closure es la forma más simple y desacoplada de comunicar un evento sin crear abstracciones innecesarias. Es suficiente para la Etapa 1 y se puede evolucionar a un coordinador formal cuando la complejidad lo requiera.
+**Justificación:** Un closure es la forma más simple y desacoplada de comunicar un evento sin crear abstracciónes innecesarias. Es suficiente para la Etapa 1 y se puede evolucionar a un coordinador formal cuando la complejidad lo requiera.
 
 ### 6. DTOs separados de los modelos de Domain
 
@@ -119,7 +119,7 @@ La feature tiene separación clara de responsabilidades por capas. Todos los tes
 
 ### Negativas (trade-offs aceptados)
 
-La feature tiene más archivos que un enfoque "ViewModel + View" directo (aproximadamente 12 archivos de producción y 5 de tests, frente a 2-3 archivos en un enfoque simplificado). Este es un trade-off consciente: más archivos a cambio de más claridad, más testeabilidad, y más facilidad de mantenimiento a largo plazo.
+La feature tiene más archivos que un enfoque "ViewModel + View" directo (aproximadamente 15 archivos de producción y 5 de tests, frente a 2-3 archivos en un enfoque simplificado). Este es un trade-off consciente: más archivos a cambio de más claridad, más testeabilidad, y más facilidad de mantenimiento a largo plazo.
 
 El aprendizaje inicial es más empinado. Un junior necesita entender Value Objects, puertos, adaptadores, y el ciclo BDD+TDD antes de poder contribuir. Pero una vez que entiende el patrón con Login, puede aplicarlo a cualquier feature nueva sin reinventar la rueda.
 
@@ -133,29 +133,17 @@ Ninguno para esta escala. La principal preocupación a futuro es que SharedKerne
 
 Cada decisión está demostrada con código real y tests en las lecciones correspondientes:
 
-**Especificación BDD:** [00-especificacion-bdd.md](00-especificacion-bdd.md) — Los escenarios que guían todas las decisiones.
-**Capa Domain:** [01-domain.md](01-domain.md) — Value Objects, errores, eventos.
-**Capa Application:** [02-application.md](02-application.md) — Caso de uso, puertos, traducción de errores.
-**Capa Infrastructure:** [03-infrastructure.md](03-infrastructure.md) — Gateway, DTOs, contract tests.
-**Capa Interface:** [04-interface-swiftui.md](04-interface-swiftui.md) — ViewModel, Vista, Composition Root.
-**Retrospectiva TDD:** [05-tdd-ciclo-completo.md](05-tdd-ciclo-completo.md) — Patrones y lecciones aprendidas.
+**Especificación BDD:** [Especificación BDD del Login](00-especificacion-bdd.md) — Los escenarios que guían todas las decisiones.
+**Capa Domain:** [Feature Login: Capa Domain](01-domain.md) — Value Objects, errores, eventos.
+**Capa Application:** [Feature Login: Capa Application](02-application.md) — Caso de uso, puertos, traducción de errores.
+**Capa Infrastructure:** [Feature Login: Capa Infrastructure](03-infrastructure.md) — Gateway, DTOs, contract tests.
+**Capa Interface:** [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md) — ViewModel, Vista, Composition Root.
+**Retrospectiva TDD:** [TDD: ciclo completo Red-Green-Refactor](05-tdd-ciclo-completo.md) — Patrones y lecciones aprendidas.
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/ADR-001-login.md`.
+Con la feature Login completamente especificada, implementada, testeada y documentada, el siguiente paso es conectarla al punto de entrada de la aplicación.
 
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
+→ [Conectando la App: Tu Primera App Funcional](../06-conectando-la-app.md) — Composition Root y punto de entrada de la app.

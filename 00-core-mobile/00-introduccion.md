@@ -10,52 +10,49 @@ Existe por una razón práctica: cuando iOS y Android evolucionan con marcos dis
 
 Usa este bloque como capa de decisión transversal.
 
-Si estás en iOS, estúdialo en paralelo con Fundamentos, Integración, Evolución, Arquitecto y Maestría.
+Si estás en el curso iOS, estúdialo en paralelo con cada una de sus etapas:
+[Etapa 1 — Junior](../01-fundamentos/00-introduccion.md) · [Etapa 2 — Mid](../02-integracion/00-introduccion.md) · [Etapa 3 — Senior](../03-evolucion/00-introduccion.md) · [Etapa 4 — Arquitecto](../04-arquitecto/00-introduccion.md) · [Etapa 5 — Maestría](../05-maestria/00-introduccion.md)
 
-Si estás en Android, estúdialo en paralelo con Nivel 0, Junior, Mid, Senior y Maestría.
+Si estás en el curso Android, estúdialo en paralelo con cada uno de sus niveles: **Nivel Cero · Junior · Midlevel · Senior · Maestría** (carpetas `00-nivel-cero` → `04-maestria` del repo Android).
 
-Regla operativa: cada vez que en tu track aparezca una decisión crítica (arquitectura, API, release, seguridad, operación), vuelve al Core y aplica las checklists/templates antes de implementar.
+Regla operativa: cada vez que en tu track aparezca una decisión crítica (arquitectura, API, release, seguridad, operación), vuelve al Core y aplica las [checklists/templates](10-plantillas.md) antes de implementar.
 
-## Principios del Core: decide, validate, operate, evolve
+## Principios del Core: decidir, validar, operar y evolucionar
 
-### Decide
+### Decidir
 
 No se decide por preferencia personal. Se decide por contexto, restricciones y trade-offs explícitos.
 
-### Validate
+### Validar
 
 No basta “suena bien”. Toda decisión debe tener evidencia verificable: tests, métricas, señales operativas.
 
-### Operate
+### Operar
 
 Lo que no se puede observar ni recuperar en incidente no está listo para producción.
 
-### Evolve
+### Evolucionar
 
 La arquitectura no es foto estática. Debe soportar cambios incrementales sin caos ni reescrituras de alto riesgo.
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+Los cuatro principios anteriores no son abstractos: se materializan directamente en cómo está organizado el código. El diagrama siguiente muestra esa estructura visual.
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/00-introduccion.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-<!-- auto-gapfix:layered-mermaid -->
 ## Diagrama de arquitectura por capas
 
 ![Diagrama de arquitectura por capas (Core Mobile)](../assets/architecture-ios-core-mobile.png)
 
 La leyenda visual superior define la semántica por tipo de trazo y punta de flecha; el color de cada flecha indica el módulo de origen.
+
+**Cómo leer este diagrama:** hay cuatro capas principales, de dentro hacia fuera:
+
+- **Domain** (centro, verde): las reglas de negocio puras — Value Objects, errores de dominio y protocolos (contratos). No depende de nada externo.
+- **Application** (azul): los casos de uso — orquestan el flujo llamando a los contratos del Domain. No saben nada de red ni de UI.
+- **Infrastructure** (amarillo): implementaciones concretas de los contratos — adaptadores de red, stores locales. Depende de Domain (implementa sus protocolos), nunca al revés.
+- **Interface** (naranja): vistas SwiftUI y ViewModels — presentan el estado y delegan al Application. No contienen lógica de negocio.
+
+La regla de oro que verás en cada diagrama: **las flechas de dependencia siempre apuntan hacia Domain**. Infrastructure no llama a Interface. Application no importa URLSession. Si ves una flecha que viola esa dirección, hay un problema de diseño.
 
 ### Zoom de detalle por feature
 
@@ -67,4 +64,16 @@ Para evitar sobrecarga visual en el mapa global, aquí tienes dos vistas de deta
 
 #### Catalog (detalle)
 
+> **Nota:** Catalog es la feature que construirás en Etapa 2. En este punto no necesitas entender cada bloque — observa que el patrón de capas (Domain → Application → Infrastructure → Interface) es idéntico al de Login.
+
 ![Diagrama de arquitectura Catalog (detalle)](../assets/architecture-ios-catalog-detail-v4.png)
+
+---
+
+## Qué sigue
+
+Esta introducción te da el marco de referencia. Los principios de **Decidir, Validar, Operar y Evolucionar** son la brújula que usarás cada vez que tomes una decisión de arquitectura a lo largo del curso.
+
+No hace falta memorizar los diagramas ahora. Cuando llegues a cada etapa y construyas cada feature, volverás aquí y los leerás con mucho más contexto.
+
+Usa los botones de navegación del curso para continuar con las siguientes lecciones del Core, o salta directamente a [**Etapa 1 — Junior**](../01-fundamentos/00-introduccion.md) si ya estás listo para construir.

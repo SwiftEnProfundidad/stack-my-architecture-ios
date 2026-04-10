@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Propósito de este documento
 
@@ -97,7 +97,7 @@ Este mapa traduce teoría en práctica diaria. Es obligatorio usarlo como checkl
 | --- | --- | --- |
 | `swift-concurrency` | Lecciones 01, 02, 03, 04, 09 | Fronteras de aislamiento justificadas, cancelación correcta, seguridad de sendability |
 | `swiftui-expert-skill` | Lecciones 05 y 06 | Selección correcta de wrappers, composición de vistas, mejora de performance con evidencia |
-| `windsurf-rules-ios` (si aplica) | Todas las lecciones con código de iOS | Alineación con estándares del repositorio y decisiones consistentes de equipo |
+| `ios-enterprise-rules` (si aplica) | Todas las lecciones con código de iOS | Alineación con estándares del repositorio y decisiones consistentes de equipo |
 
 El criterio de evaluación no es "menciona la skill". Es "la skill cambia decisiones y resultados".
 
@@ -283,39 +283,7 @@ El mejor código que escribiste en la Etapa 5 es mejor que el mejor código que 
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+Consulta la [Rúbrica de empleabilidad iOS](rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio profesional.
 

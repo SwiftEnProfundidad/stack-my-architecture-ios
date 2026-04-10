@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Por qué esta lección es crítica
 
@@ -36,21 +36,21 @@ Los breakpoints pausan la ejecución en una línea específica. Puedes inspeccio
 Click en el margen izquierdo de la línea 42
 → Se añade un punto azul
 → La app se pausa al llegar a esa línea
-```text
+```
 
 **Breakpoint condicional:**
 ```text
 Click derecho en el breakpoint → Edit breakpoint
 → Añade condición: `email.isEmpty`
 → Solo se pausa cuando email está vacío
-```text
+```
 
 **Breakpoint con acción:**
 ```text
 Edit breakpoint → Add Action → Log Message
 → Message: "Email value: @email@"
 → Imprime en consola sin pausar la ejecución
-```text
+```
 
 ### Atajos de teclado esenciales
 
@@ -89,7 +89,7 @@ func submit() async {
         print("Error: \(error)")
     }
 }
-```text
+```
 
 **Flujo de debugging:**
 1. Pon breakpoint en línea 2 (isLoading = true)
@@ -129,7 +129,7 @@ false
 (lldb) po error as? AuthError
 ▿ Optional(AuthError.invalidEmail)
   - some: AuthError.invalidEmail
-```text
+```
 
 ### `po` vs `p`
 
@@ -148,7 +148,7 @@ Error Domain=NSURLErrorDomain Code=-1009 "The Internet connection appears to be 
 
 (lldb) po (error as NSError).userInfo
 ["NSLocalizedDescription": "The Internet connection appears to be offline."]
-```text
+```
 
 ---
 
@@ -215,7 +215,7 @@ class LoginViewModel {
         // hay un ciclo: Coordinator ↔ ViewModel
     }
 }
-```text
+```
 
 **Solución:** `[weak self]` en el closure.
 
@@ -253,7 +253,7 @@ Para problemas de rendimiento: CPU, memoria, red, batería.
 │        └─ 85% - URLSession.data()       │
 │             └─ 80% - _CFReadStreamRead │
 └────────────────────────────────────────┘
-```text
+```
 
 **Conclusión:** El 80% del tiempo está esperando red. No es un problema de código, es latencia de red.
 
@@ -310,7 +310,7 @@ Task {
     }
 }
 // Resultado: counter es probablemente < 2000
-```text
+```
 
 **Debug:**
 1. Ejecuta con Thread Sanitizer: Edit Scheme → Run → Diagnostics → Thread Sanitizer
@@ -331,7 +331,7 @@ actor B {
         await a.callB(self)  // Espera a A → Deadlock!
     }
 }
-```text
+```
 
 **Debug:** La app se congela. Pause execution y mira el stack trace: verás `await` en ambos hilos.
 
@@ -404,66 +404,6 @@ Fix: Normalizar el email en el init.
 
 ---
 
----
+## Qué sigue
 
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
-
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+[**Entrevista arquitecto →**](11-entrevista-arquitecto.md) — Cómo articular decisiones arquitectónicas en entrevistas técnicas: narrativas naturales, trade-offs explícitos y métricas de éxito.

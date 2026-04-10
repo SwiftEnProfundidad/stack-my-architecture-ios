@@ -73,7 +73,7 @@ graph LR
 
     Mono -->|"Dolor medible"| Local
     Local -->|"Consumidores independientes"| Remote
-```text
+```
 
 ---
 
@@ -113,7 +113,7 @@ StackMyArchitecture/
     Catalog/
   SharedKernel/
   Tests/
-```text
+```
 
 ### Siguiente paso (cuando duela): Nivel 2
 
@@ -127,7 +127,7 @@ StackMyArchitecture/
       Package.swift
     CatalogFeature/
       Package.swift
-```text
+```
 
 ---
 
@@ -161,7 +161,7 @@ let package = Package(
         )
     ]
 )
-```text
+```
 
 Punto clave:
 
@@ -185,7 +185,7 @@ public struct Session: Sendable, Equatable, Hashable {
         self.email = email
     }
 }
-```text
+```
 
 Si marcas todo `public`, conviertes detalles internos en contrato difícil de cambiar.
 
@@ -227,7 +227,7 @@ flowchart LR
     V1["1.0.0"] --> V2["1.0.1 PATCH"]
     V2 --> V3["1.1.0 MINOR"]
     V3 --> V4["2.0.0 MAJOR"]
-```text
+```
 
 Si no hay disciplina de semver, consumidores pierden confianza y empiezan a pinnear versiones antiguas.
 
@@ -249,7 +249,7 @@ Ejemplo:
 public var token: String { accessToken }
 
 public let accessToken: String
-```text
+```
 
 ---
 
@@ -385,7 +385,7 @@ Trigger para B -> C:
 - Decisión: mantener Nivel 1 inicialmente; migrar a paquetes locales (Nivel 2) ante dolor medible; evaluar Nivel 3 solo con consumidores independientes reales
 - Consecuencias: menor complejidad inicial, migración guiada por señales objetivas
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -476,7 +476,21 @@ Versionar no es publicar rápido; es publicar cambios que otro equipo puede adop
 - `CoreDomain` es la única dependencia compartida entre features de Domain.
 - `AppComposition` es el único target que depende de todos los demás (es el "techo" del grafo).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# Desde apps/ios/ArchitectureKit/
+swift package show-dependencies --format json | python3 -m json.tool | grep '"name"'
+# Salida esperada: lista de targets sin ciclos
+
+# Contar cuántos targets dependen de CoreDomain
+swift package show-dependencies --format json \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); \
+    [print(p['name']) for p in d.get('dependencies',[]) if 'CoreDomain' in str(p)]"
+```
+
+Grafo simplificado esperado:
 
 ```mermaid
 graph BT
@@ -494,43 +508,15 @@ graph BT
     FeatureCatalogPersistenceSwiftData --> AppComposition
 ```
 
-El grafo muestra que las dependencias fluyen de Domain hacia afuera (Data, UI) y convergen en `AppComposition`. Ninguna flecha va de Data/UI hacia Domain de otra feature. Esta estructura es la que `check-dependencies.sh` protege automáticamente.
+Las dependencias fluyen de Domain hacia afuera (Data, UI) y convergen en `AppComposition`. Ninguna flecha va de Data/UI hacia Domain de otra feature. Esta estructura es exactamente la que `check-dependencies.sh` protege automáticamente: si una flecha ilegal apareciera, el script fallaría en CI antes del merge.
+
+**Resultado esperado**: el grafo JSON no contiene ciclos, `CoreDomain` aparece como dependencia en exactamente los targets de Domain, y `AppComposition` lista todos los demás como sus dependencias.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Guía de arquitectura →**](05-guia-arquitectura.md) — El documento ADR viviente que consolida las decisiones de plataforma: convenciones de naming, reglas de capas y criterios de evolución.
 

@@ -6,7 +6,7 @@ meta_leccion:
   tiempo_practica: "30 min"
   dificultad: 2
   prerequisitos:
-    - "02-integracion/entregables-etapa-2.md"
+    - "02-integración/entregables-etapa-2.md"
   si_te_atascas: "#checklist-de-verificacion"
 <!-- /sma:meta:v1 -->
 
@@ -118,7 +118,7 @@ protocol FavoritesRepository {
     func save(productId: String) async throws
     func getAll() async throws -> [String]
 }
-```xml
+```
 
 </details>
 
@@ -178,7 +178,7 @@ Antes de pasar a la Etapa 3, verifica:
 ## Continuación
 
 - 
-- **Si necesitas repasar:** [Contratos entre features](../02-integracion/03-contratos-features.md)
+- **Si necesitas repasar:** [Contratos entre features](../02-integración/03-contratos-features.md)
 
 ---
 

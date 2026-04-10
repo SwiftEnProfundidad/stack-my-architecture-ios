@@ -11,6 +11,7 @@ Este directorio centraliza material de apoyo para estudio, recuperación y prepa
 - [como-leer-documentacion.md](como-leer-documentacion.md)
 
 2. Arquitectura y diseño:
+- [equivalencias-scaffold.md](equivalencias-scaffold.md) — Tabla de equivalencias nombres pedagógicos ↔ scaffold real
 - [mental-models.md](mental-models.md)
 - [guia-solid.md](guia-solid.md)
 - [guia-cqs-cqrs.md](guia-cqs-cqrs.md)
@@ -29,7 +30,7 @@ Este directorio centraliza material de apoyo para estudio, recuperación y prepa
 - [adrs/INDICE-ADRS.md](adrs/INDICE-ADRS.md)
 
 5. Consolidación por etapas y cierre:
-- [consolidacion-etapa-2-integracion.md](consolidacion-etapa-2-integracion.md)
+- [consolidacion-etapa-2-integración.md](consolidacion-etapa-2-integración.md)
 - [consolidacion-etapa-4-arquitecto.md](consolidacion-etapa-4-arquitecto.md)
 - [calentamiento-etapa-3-evolucion.md](calentamiento-etapa-3-evolucion.md)
 - [calentamiento-etapa-5-maestria.md](calentamiento-etapa-5-maestria.md)

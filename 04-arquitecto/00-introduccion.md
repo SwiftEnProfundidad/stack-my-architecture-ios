@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Objetivo de la etapa
 
@@ -30,7 +30,7 @@ flowchart LR
     E1["Etapa 1\nFeature correcta"] --> E2["Etapa 2\nIntegracion entre features"]
     E2 --> E3["Etapa 3\nResiliencia operativa"]
     E3 --> E4["Etapa 4\nPlataforma y gobernanza"]
-```text
+```
 
 Pregunta de etapa 3:
 
@@ -71,7 +71,7 @@ flowchart TD
     NAV --> PKG["Versionado y paquetizacion"]
     PKG --> GUIDE["Guia arquitectura viva"]
     GUIDE --> GATES["Quality gates CI"]
-```text
+```
 
 ---
 
@@ -394,39 +394,7 @@ Al cerrar Arquitecto, el siguiente salto es optimización fina de concurrencia, 
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Bounded Contexts →**](01-bounded-contexts.md) — La primera lección de esta etapa: cómo delimitar fronteras reales entre features para que Login y Catalog evolucionen sin romperse mutuamente.
 

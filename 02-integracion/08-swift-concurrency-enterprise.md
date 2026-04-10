@@ -1,9 +1,5 @@
 # Swift Concurrency Enterprise: Patrones Imprescindibles
 
-<!-- snippet-mapping-note:auto -->
-> **Nota de nomenclatura pedagógica**
-> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
-> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
 ## Mapa de lectura (~35 min)
 
 | # | Sección | Línea | Tiempo |
@@ -55,7 +51,7 @@ func loadProducts() async throws -> [Product] {
     let (data, _) = try await httpClient.execute(request)
     return try JSONDecoder().decode([Product].self, from: data)
 }
-```text
+```
 
 **Explicacion:**
 
@@ -82,7 +78,7 @@ sequenceDiagram
     Note over VM: REANUDADO<br/>Continua donde se pausó
     VM->>VM: state = .loaded(products)
     VM-->>V: SwiftUI detecta cambio → redibuja
-```text
+```
 
 **Clave:** Mientras `ViewModel.load()` espera la respuesta de red, el hilo **no esta bloqueado**. Puede ejecutar otras tareas. Esto es radicalmente diferente a `DispatchQueue.sync` que bloquea el hilo hasta que termina.
 
@@ -103,17 +99,17 @@ Button("Cargar") {
         await viewModel.load()
     }
 }
-```text
+```
 
 `Task { ... }` — Crea un nuevo contexto async desde código sincrono. Lo necesitas porque el action de un `Button` no es `async`. El `Task` "envuelve" el código async para que pueda ejecutarse.
 
-**Peligro:** Si la vista desaparece, este `Task` sigue ejecutandose. Por eso en SwiftUI preferimos `.task { }` (que se cancela automaticamente).
+**Peligro:** Si la vista desaparece, este `Task` sigue ejecutandose. Por eso en SwiftUI preferimos `.task { }` (que se cancela automáticamente).
 
 ### .task vs Task { }
 
 | `.task { }` (structured) | `Task { }` (unstructured) |
 |---|---|
-| Se cancela automaticamente cuando la vista desaparece | Vive independientemente — puede causar memory leaks |
+| Se cancela automáticamente cuando la vista desaparece | Vive independientemente — puede causar memory leaks |
 | No necesitas guardarlo ni cancelarlo manualmente | Necesitas guardar la referencia para cancelar |
 | Preferido en SwiftUI | Solo cuando no hay alternativa |
 
@@ -127,7 +123,7 @@ Button("Cargar") {
 Task {
     await viewModel.load()
 }
-```text
+```
 
 ### Cancelación manual de Task
 
@@ -156,7 +152,7 @@ final class SearchViewModel {
         }
     }
 }
-```text
+```
 
 **Explicacion:**
 
@@ -197,13 +193,13 @@ func loadProfile() async throws -> ProfileData {
     )
     // Total: ~2 segundos (el mas lento)
 }
-```text
+```
 
 **Explicacion:**
 
 `async let user = fetchUser()` — Lanza `fetchUser()` inmediatamente en background, pero NO espera el resultado. Es como pedir tres pizzas a la vez en vez de pedir una, esperar, pedir otra, esperar, pedir otra.
 
-`try await ProfileData(user: user, posts: posts, photos: photos)` — Aquí es donde esperas los tres resultados. Si alguno falla, los demas se **cancelan automaticamente** (structured concurrency).
+`try await ProfileData(user: user, posts: posts, photos: photos)` — Aquí es donde esperas los tres resultados. Si alguno falla, los demas se **cancelan automáticamente** (structured concurrency).
 
 ```mermaid
 gantt
@@ -220,13 +216,13 @@ gantt
     fetchUser     :0, 2
     fetchPosts    :0, 1
     fetchPhotos   :0, 1
-```text
+```
 
 ### Cuando usar async let
 
 - Sabes **cuantas** operaciones son en compilacion (2, 3, 5...).
 - Las operaciones son **independientes** (no dependen del resultado de otra).
-- Quieres que si una falla, las demas se **cancelen automaticamente**.
+- Quieres que si una falla, las demas se **cancelen automáticamente**.
 
 ---
 
@@ -259,7 +255,7 @@ func loadProductImages(urls: [URL]) async -> [URL: Data] {
         return results
     }
 }
-```text
+```
 
 **Explicacion:**
 
@@ -301,7 +297,7 @@ class ImageCache {
         cache[url] = data  // Hilo 2 escribe AL MISMO TIEMPO → CRASH
     }
 }
-```text
+```
 
 ### La solución con actor
 
@@ -321,11 +317,11 @@ actor ImageCache {
 // Uso: requiere await porque el actor puede estar ocupado
 let data = await imageCache.get(url)
 await imageCache.set(url, data: imageData)
-```swift
+```
 
 **Explicacion:**
 
-`actor ImageCache` — Igual que `class`, pero con serializacion automatica. Cuando el Hilo 1 esta ejecutando `get()`, el Hilo 2 que quiere ejecutar `set()` espera automaticamente hasta que el Hilo 1 termine. No necesitas `DispatchQueue`, `NSLock`, ni `@synchronized`. El compilador lo garantiza.
+`actor ImageCache` — Igual que `class`, pero con serializacion automática. Cuando el Hilo 1 esta ejecutando `get()`, el Hilo 2 que quiere ejecutar `set()` espera automáticamente hasta que el Hilo 1 termine. No necesitas `DispatchQueue`, `NSLock`, ni `@synchronized`. El compilador lo garantiza.
 
 `await imageCache.get(url)` — **Todo** acceso a un actor desde fuera requiere `await`, porque puede que el actor este ocupado atendiendo otra peticion y tengas que esperar.
 
@@ -336,7 +332,7 @@ await imageCache.set(url, data: imageData)
 ```swift
 @Observable @MainActor
 final class CatalogViewModel { ... }
-```text
+```
 
 **Por que:** Las propiedades del ViewModel son leidas por SwiftUI para renderizar. SwiftUI solo renderiza en el hilo principal. Si cambiaras `state` desde un hilo de background, la app crashearia. `@MainActor` previene eso.
 
@@ -356,7 +352,17 @@ flowchart TD
     style SENDABLE fill:#d4edda,stroke:#28a745
     style MAINACTOR fill:#cce5ff,stroke:#007bff
     style ACTOR fill:#fff3cd,stroke:#ffc107
-```text
+```
+
+Lectura del diagrama:
+
+→ La primera pregunta es: **¿necesitas proteger estado mutable compartido?** Si no — porque tu tipo es un `struct` inmutable o no hay concurrencia — marca `Sendable` y listo. El compilador lo verificará en tiempo de compilación.
+
+→ Si sí necesitas protección, la segunda pregunta es: **¿es código de UI?** Si es UI (ViewModel, coordinador, cualquier cosa que SwiftUI lee), la herramienta es `@MainActor`. Garantiza que todas las mutaciones ocurren en el hilo principal, donde SwiftUI espera encontrarlas.
+
+→ Si no es código de UI (una cache de imágenes, un store de sesión, un contador de peticiones), la herramienta es `actor`. Serializa el acceso sin forzar el hilo principal — el actor puede ejecutarse en cualquier hilo, pero solo en uno a la vez.
+
+La regla derivada: `@MainActor` es una especialización de `actor`. Todo lo que vale para `actor` (requiere `await`, serializa acceso) vale para `@MainActor`, más la restricción adicional de hilo.
 
 ---
 
@@ -366,7 +372,7 @@ flowchart TD
 
 `Sendable` es un protocolo que dice: "este tipo es seguro para enviarse entre hilos". Ya lo usamos en todos los modelos de dominio. Aquí profundizamos en POR QUE y CUANDO.
 
-### Que tipos son Sendable automaticamente
+### Que tipos son Sendable automáticamente
 
 | Tipo | Sendable? | Por que |
 |---|---|---|
@@ -394,9 +400,9 @@ Task {
 group.addTask {
     return processedItem  // processedItem debe ser Sendable
 }
-```text
+```
 
-### @unchecked Sendable — Deuda tecnica
+### @unchecked Sendable — Deuda técnica
 
 A veces necesitas marcar un tipo como Sendable cuando el compilador no puede verificarlo:
 
@@ -406,7 +412,7 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
     var result: Result<(Data, HTTPURLResponse), Error>
     // ...
 }
-```text
+```
 
 `@unchecked Sendable` — Le dices al compilador: "confio en que esto es thread-safe". Pero si te equivocas, habra data races que el compilador no detectara.
 
@@ -439,7 +445,7 @@ func processLargeDataset(_ items: [Item]) async throws -> [ProcessedItem] {
 
     return results
 }
-```text
+```
 
 **Explicacion:**
 
@@ -451,7 +457,7 @@ Alternativa manual:
 guard !Task.isCancelled else {
     return results  // Devolver lo que tengamos hasta ahora
 }
-```text
+```
 
 ### Por que es importante
 
@@ -475,7 +481,7 @@ let url = URL(fileURLWithPath: "/path/to/large-file.txt")
 for try await line in url.lines {
     process(line)
 }
-```text
+```
 
 `for try await line in url.lines` — Igual que `for line in array`, pero cada linea llega de forma asincrona. El bucle se pausa esperando la siguiente linea, sin bloquear el hilo.
 
@@ -502,7 +508,7 @@ func observeLocationUpdates() -> AsyncStream<CLLocation> {
 for await location in observeLocationUpdates() {
     updateMap(with: location)
 }
-```text
+```
 
 **Explicacion:**
 
@@ -543,7 +549,7 @@ final class ProductListViewModel {
         }
     }
 }
-```text
+```
 
 `defer { isLoading = false }` — Se ejecuta **siempre** al salir de la función, sea por exito o por error. Garantiza que `isLoading` se pone en `false` sin importar que pase. Es como un "al salir, apaga la luz".
 
@@ -570,7 +576,7 @@ func withRetry<T>(
 let products = try await withRetry {
     try await repository.loadAll()
 }
-```text
+```
 
 ### Patrón: Timeout
 
@@ -599,7 +605,7 @@ func withTimeout<T>(
 let products = try await withTimeout(seconds: 10) {
     try await repository.loadAll()
 }
-```text
+```
 
 **Explicacion:** Lanza dos tareas en paralelo: la operación real y un timer. Si el timer termina primero (timeout), cancela la operación. Si la operación termina primero, cancela el timer.
 
@@ -633,7 +639,7 @@ final class MyService: Sendable {
 struct MyService: Sendable {
     func doWork() { }
 }
-```text
+```
 
 **Error 2: "Main actor-isolated property cannot be accessed from nonisolated context"**
 ```swift
@@ -651,7 +657,7 @@ func process(vm: ViewModel) {
 func process(vm: ViewModel) async {
     print(await vm.name)  // OK: await cruza la frontera
 }
-```text
+```
 
 **Error 3: "Capture of non-Sendable in @Sendable closure"**
 ```swift
@@ -674,13 +680,13 @@ let processor = DataProcessor()
 Task {
     await processor.add("nuevo")  // OK: serializado por el actor
 }
-```text
+```
 
 ### Como prepararte
 
 1. En Xcode: Build Settings → **Strict Concurrency Checking** = **Complete**
 2. Corrige los warnings uno por uno (son los futuros errores de Swift 6)
-3. Convierte `class` a `struct` donde sea posible (los structs son Sendable automaticamente)
+3. Convierte `class` a `struct` donde sea posible (los structs son Sendable automáticamente)
 4. Usa `actor` para estado mutable compartido
 5. Marca `@MainActor` solo lo que genuinamente necesita el hilo principal
 
@@ -711,7 +717,7 @@ func loadData() async throws -> Data {
     let (data, _) = try await session.data(from: url)
     return data
 }
-```text
+```
 
 `DispatchSemaphore`, `NSLock`, y `pthread_mutex` **nunca** deben usarse en contextos async. Bloquean el hilo del executor, y como el executor tiene un número limitado de hilos, puedes causar un deadlock donde todas las tareas estan esperando un hilo que esta bloqueado.
 
@@ -727,7 +733,7 @@ Task.detached {
 Task {
     await viewModel.load()  // Hereda @MainActor si el padre es @MainActor
 }
-```swift
+```
 
 `Task.detached` NO hereda el contexto del padre (prioridad, actor isolation). Solo usalo si necesitas **explicitamente** ejecutar fuera del contexto actual (raro).
 
@@ -752,7 +758,7 @@ func processItems(_ items: [Item]) async throws -> [Result] {
     }
     return results
 }
-```text
+```
 
 ---
 
@@ -786,13 +792,25 @@ flowchart LR
         C1["Cancelacion<br/>Task.isCancelled"]
         C2["Retry + Timeout<br/>Patrones enterprise"]
     end
-```text
+```
+
+Lectura del diagrama:
+
+→ **Básico** es el punto de entrada de cualquier operación async. `async/await` para un resultado único, `.task { }` cuando la operación está ligada al ciclo de vida de una vista SwiftUI (cancelación automática), y `Task { }` como última opción cuando no hay alternativa estructurada.
+
+→ **Paralelo** se activa cuando tienes múltiples operaciones independientes. La distinción clave: `async let` cuando el número es fijo en compilación (cargar usuario + posts + fotos = 3), `TaskGroup` cuando el número lo determina el runtime (descargar N imágenes cuyo N viene del servidor).
+
+→ **Protección** es la garantía de seguridad. `Sendable` valida que un tipo puede cruzar fronteras de aislamiento — lo verifica el compilador, no el programador. `actor` serializa acceso a estado mutable. `@MainActor` es `actor` especializado para el hilo principal — obligatorio en ViewModels.
+
+→ **Streaming** para datos que llegan con el tiempo (no una respuesta, sino una secuencia). `for await in` consume cualquier `AsyncSequence`. `AsyncStream` convierte el mundo de callbacks (CoreLocation, NotificationCenter, delegates) al mundo async.
+
+→ **Control** son los patrones de resiliencia: cancelación cooperativa con `Task.isCancelled` para no desperdiciar recursos, y retry/timeout para manejar fallos transitorios de red sin que el usuario vea error.
 
 ### Checklist de concurrencia para un junior
 
 **Básico (usa a diario):**
 - [ ] `async/await` para operaciones asincronas
-- [ ] `.task { }` en SwiftUI para carga automatica con cancelación
+- [ ] `.task { }` en SwiftUI para carga automática con cancelación
 - [ ] `Task { }` solo cuando no puedas usar `.task`
 - [ ] `try/catch` para manejar errores async
 
@@ -854,46 +872,115 @@ Si dominas estos puntos, puedes manejar cualquier escenario de concurrencia en e
 **Solución razonada:**
 
 ```swift
-// En el ViewModel
-@MainActor
-final class CatalogViewModel: ObservableObject {
-    @Published var products: [Product] = []
+// En el ViewModel — patrón scaffold (@Observable, no ObservableObject)
+@Observable @MainActor
+final class CatalogViewModel {
+    private(set) var products: [Product] = []
     private var loadTask: Task<Void, Never>?
+    private let repository: any CatalogRepository
+
+    init(repository: any CatalogRepository) {
+        self.repository = repository
+    }
 
     func load() {
         loadTask?.cancel()  // Cancelar carga anterior
         loadTask = Task {
             do {
-                let result = try await repository.loadProducts()
-                if !Task.isCancelled {
-                    products = result
-                }
+                let result = try await repository.fetchCatalog()
+                // Verificar cancelación ANTES de publicar resultado
+                try Task.checkCancellation()
+                products = result
+            } catch is CancellationError {
+                return  // Carga cancelada — no actualizar productos
             } catch {
-                // Manejar error (no actualizar si cancelado)
+                products = []
             }
         }
     }
 }
 
 // Test
-func test_load_cancels_previous_load() async {
-    let slowRepo = SlowStubRepository(delay: .seconds(2), result: [Product(name: "Old", price: 1)])
-    let fastRepo = StubRepository(result: [Product(name: "New", price: 2)])
+func test_load_cancels_previous_load() async throws {
+    let slowRepo = SlowCatalogRepositoryStub(
+        delay: .seconds(2),
+        result: [Product(id: "old", title: "Old", price: 1.0)]
+    )
+    let fastRepo = CatalogRepositoryStub(
+        result: [Product(id: "new", title: "New", price: 2.0)]
+    )
 
-    let sut = CatalogViewModel(repository: slowRepo)
-    sut.load()  // Primera carga (lenta)
+    let sut = await CatalogViewModel(repository: slowRepo)
+    await sut.load()  // Primera carga (lenta, se cancela)
 
-    // Cambiar a repo rapido y cargar de nuevo
-    sut.repository = fastRepo
-    sut.load()  // Segunda carga (cancela la primera)
+    // Iniciar segunda carga con repositorio rápido
+    let fastViewModel = await CatalogViewModel(repository: fastRepo)
+    await fastViewModel.load()
+    try await Task.sleep(for: .milliseconds(200))
 
-    // Esperar a que la segunda complete
-    try? await Task.sleep(for: .milliseconds(200))
-    XCTAssertEqual(sut.products.first?.name, "New")
+    let products = await fastViewModel.products
+    XCTAssertEqual(products.map(\.id), ["new"])
 }
 ```
 
+> **Nota scaffold:** El protocolo real es `CatalogRepository` con `fetchCatalog()` (no `ProductRepository.loadProducts()`). El modelo `Product` usa `title: String` y `price: Double` (no `name` ni un tipo `Price`). El ViewModel usa `@Observable` (no `ObservableObject`), que requiere Swift 5.9+ con el macro `@Observable`.
+
 La cancelación no es un detalle de implementación: es un requisito de UX. Sin ella, el usuario puede ver datos de una carga que ya no es relevante (por ejemplo, resultados de una busqueda anterior).
+
+<details>
+<summary>Solución de referencia</summary>
+
+```swift
+// Patrón correcto con scaffold: @Observable + CatalogRepository
+@Observable @MainActor
+final class CatalogViewModel {
+    private(set) var products: [Product] = []
+    private(set) var errorMessage: String?
+
+    private let repository: any CatalogRepository
+    private var loadTask: Task<Void, Never>?
+
+    init(repository: any CatalogRepository) {
+        self.repository = repository
+    }
+
+    func load() {
+        loadTask?.cancel()
+        loadTask = Task {
+            do {
+                let loaded = try await repository.fetchCatalog()
+                try Task.checkCancellation()
+                products = loaded
+                errorMessage = nil
+            } catch is CancellationError {
+                return  // Silencioso — fue cancelado intencionalmente
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+}
+
+func test_load_cancels_previous_load() async throws {
+    let repository = SlowCatalogRepositoryStub(
+        results: [
+            .delayed(.seconds(2), [Product(id: "old", title: "Old", price: 1.0)]),
+            .delayed(.milliseconds(50), [Product(id: "new", title: "New", price: 2.0)])
+        ]
+    )
+    let sut = await CatalogViewModel(repository: repository)
+
+    await sut.load()
+    await sut.load()
+    try await Task.sleep(for: .milliseconds(120))
+
+    let products = await sut.products
+    XCTAssertEqual(products.map(\.id), ["new"])
+}
+```
+
+La garantia clave es doble: la tarea anterior se cancela antes de lanzar la nueva y, justo antes de publicar resultado, se vuelve a comprobar cancelacion. Eso evita que una respuesta lenta y obsoleta sobreescriba estado mas reciente.
+</details>
 
 ---
 
@@ -905,39 +992,70 @@ La Etapa 5 (Maestria) profundiza en estos conceptos con isolation domains, actor
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+Los patrones de esta lección tienen correspondencia directa con el scaffold. Aquí los archivos y las divergencias respecto a los ejemplos del curso.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Archivos del scaffold
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Archivo | Relevancia |
+|---|---|
+| `Sources/FeatureCatalogApplication/LoadCatalogUseCase.swift` | `async throws` — punto de entrada de la capa Application |
+| `Sources/FeatureCatalogInfrastructure/DefaultCatalogRemoteDataSource.swift` | `actor` — serializa acceso a datos en memoria |
+| `Sources/FeatureCatalogInterface/CatalogViewModel.swift` | `@Observable @MainActor` — aplica cancelación de `loadTask` |
+| `Sources/FeatureCatalogDomain/CatalogRepository.swift` | `protocol CatalogRepository: Sendable` — la frontera de aislamiento |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+### Divergencias críticas respecto a los ejemplos del curso
 
-Lectura semantica minima de este diagrama:
+**1. `ProductRepository.loadProducts()` → `CatalogRepository.fetchCatalog()`**
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+El scaffold usa `CatalogRepository` (no `ProductRepository`) y el método es `fetchCatalog()`:
 
+```swift
+// ✅ Scaffold real
+public protocol CatalogRepository: Sendable {
+    func fetchCatalog() async throws -> [Product]
+}
+```
+
+**2. El ViewModel usa `@Observable`, no `ObservableObject`**
+
+Los ejemplos del ejercicio muestran `ObservableObject` / `@Published` como punto de partida conceptual. El scaffold ya usa el patrón moderno:
+
+```swift
+// ✅ Scaffold real — @Observable elimina @Published y ObservableObject
+@Observable @MainActor
+public final class CatalogViewModel {
+    public private(set) var products: [Product] = []
+    public private(set) var isLoading = false
+    public private(set) var errorMessage: String?
+}
+```
+
+**3. `DefaultCatalogRemoteDataSource` es `actor`, no `struct`**
+
+Los datos en memoria están protegidos por `actor` — ya aplica el patrón de esta lección:
+
+```swift
+// ✅ Scaffold real
+public actor DefaultCatalogRemoteDataSource: CatalogRemoteDataSource {
+    private var products: [Product] = [ ... ]
+    public func fetchAll() async throws -> [Product] { products }
+}
+```
+
+### Ejercicio: verificar cancelación en el CatalogViewModel del scaffold
+
+1. Abre `Sources/FeatureCatalogInterface/CatalogViewModel.swift`
+2. Verifica que tiene una propiedad `private var loadTask: Task<Void, Never>?`
+3. Verifica que `load()` llama a `loadTask?.cancel()` antes de crear un nuevo `Task`
+4. Si no lo tiene, impleméntalo siguiendo el patrón de la "Solución de referencia" arriba
+5. Escribe un test con `SlowCatalogRepositoryStub` para verificar que la segunda llamada a `load()` cancela la primera
+
+---
+
+## Qué sigue
+
+Esta lección cierra la **Etapa 2: Integración**. El siguiente paso es la **Etapa 3: Producción**, donde la app se enfrenta a condiciones reales: sin red, con cache, con observabilidad, y con tests avanzados que van más allá del happy path.
+
+[**Etapa 3 — Lección 12: Caching y modo offline →**](../03-produccion/01-caching-offline.md)

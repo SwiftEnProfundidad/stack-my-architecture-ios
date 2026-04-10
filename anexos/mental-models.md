@@ -32,7 +32,7 @@ Los juniors memorizan reglas: "Domain no depende de nada". Los seniors entienden
 │  - No sabe de meseros ni almacén                       │
 │  - Reglas universales de la cocina                   │
 └─────────────────────────────────────────────────────────┘
-```text
+```
 
 **Insight:** Cada capa tiene una frontera clara. La sala no entra a la cocina. La cocina no decide qué ingredientes comprar.
 
@@ -59,7 +59,7 @@ Application   ←─── NO FLUIRÁ
 Infrastructure
     ↑
 Interface     ←─── EL BOTÓN FUNCIONA
-```text
+```
 
 **Principio:** La electricidad fluye hacia arriba (de infraestructura a dominio), pero **nunca** hacia abajo.
 
@@ -74,7 +74,7 @@ import FirebaseAuth  // ← ¡DOMAIN SABE DE FIREBASE!
 struct User {
     let firebaseUser: FirebaseAuth.User  // ← Acoplamiento mortal
 }
-```text
+```
 → Tu dominio está "electrocutado" cada vez que Firebase cambia.
 
 **✅ Solución - Inversión de Dependencias:**
@@ -95,7 +95,7 @@ class FirebaseAuthService: AuthService {  // Implementa protocolo del dominio
         return User(id: fbUser.uid, email: fbUser.email)
     }
 }
-```text
+```
 
 **Insight:** Domain define el **qué** (protocolo). Infrastructure implementa el **cómo**.
 
@@ -131,7 +131,7 @@ class LoginViewModel {
         }
     }
 }
-```text
+```
 
 ### Mentalidad: "Quiero que pase X"
 
@@ -156,7 +156,7 @@ class LoginViewModel {
 │  - 220V AC      │     │  - 220V AC      │     │  - Red eléctrica │
 │  - 50-60Hz      │     │  - 50-60Hz      │     │  - O generador   │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-```text
+```
 
 **Insight:** Tu laptop (ViewModel) no sabe si la electricidad viene de la red o de un generador. Solo sabe que cumple el contrato.
 
@@ -190,7 +190,7 @@ class GetCatalogUseCase {
         return try await repository.getProducts()
     }
 }
-```text
+```
 
 **Poder:** Puedes cambiar de Remote a Local sin tocar el UseCase. Solo inyectas otra implementación.
 
@@ -211,7 +211,7 @@ class GetCatalogUseCase {
 │  - Errors    │         │  - Input →   │         │  - Events    │
 │              │         │    Commands  │         │              │
 └──────────────┘         └──────────────┘         └──────────────┘
-```text
+```
 
 ### Responsabilidad del ViewModel
 
@@ -225,7 +225,7 @@ enum LoginState {
     case success(UserViewData)
     case error(String)  // Mensaje traducido para humanos
 }
-```text
+```
 
 **Traduce del UI al Domain:**
 ```swift
@@ -234,7 +234,7 @@ enum LoginState {
 Task {
     await loginUseCase.execute(email: email, password: password)
 }
-```text
+```
 
 **Nunca hace:**
 - ❌ Lógica de negocio (eso es Application/Domain)
@@ -267,7 +267,7 @@ class LoginViewModel {
         self.validator = validator
     }
 }
-```text
+```
 
 ### CompositionRoot: La Fábrica
 
@@ -296,7 +296,7 @@ enum CompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```text
+```
 
 **Insight:** La app se "ensambla" en un solo lugar. El resto del código solo usa lo que le dieron.
 
@@ -318,7 +318,7 @@ enum CompositionRoot {
 │   "Código         "Interfaces    "Features      "Usuario   │
 │    correcto"      respetadas"    funcionan"   feliz"     │
 └────────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Jerarquía de Tests
 
@@ -360,7 +360,7 @@ class OldViewModel: ObservableObject {
     }
 }
 // ¿Qué pasa si olvidas isLoading = false en algún path? 🐛
-```text
+```
 
 **✅ Programación Declarativa (Snapshot - una foto):**
 ```swift
@@ -388,7 +388,7 @@ class ModernViewModel {
         }
     }
 }
-```text
+```
 
 **Insight:** Cada estado es **mutuamente excluyente**. No puedes estar simultáneamente en `loading` y `error`.
 

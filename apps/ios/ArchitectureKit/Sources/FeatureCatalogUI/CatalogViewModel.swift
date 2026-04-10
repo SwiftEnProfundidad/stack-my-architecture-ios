@@ -1,26 +1,27 @@
 import FeatureCatalogDomain
+import Observation
 
+@Observable
 @MainActor
 public final class CatalogViewModel {
-    public private(set) var products: [Product] = []
-    public private(set) var isLoading = false
-    public private(set) var errorMessage: String?
+  public private(set) var products: [Product] = []
+  public private(set) var isLoading = false
+  public private(set) var errorMessage: String?
 
-    private let useCase: LoadCatalogUseCase
+  private let useCase: LoadCatalogUseCase
 
-    public init(useCase: LoadCatalogUseCase) {
-        self.useCase = useCase
+  public init(useCase: LoadCatalogUseCase) {
+    self.useCase = useCase
+  }
+
+  public func load() async {
+    isLoading = true
+    errorMessage = nil
+    do {
+      products = try await useCase.execute()
+    } catch {
+      errorMessage = "No se pudo cargar el catálogo."
     }
-
-    public func load() async {
-        isLoading = true
-        errorMessage = nil
-        do {
-            products = try await useCase.execute()
-        } catch {
-            errorMessage = "No se pudo cargar el catálogo."
-        }
-        isLoading = false
-    }
+    isLoading = false
+  }
 }
-

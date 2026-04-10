@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Propósito de este cierre
 
@@ -137,7 +137,7 @@ Aceptación:
 | --- | --- | --- |
 | `swift-concurrency` | cancelación, aislamiento y pruebas async | tests deterministas + fronteras justificadas |
 | `swiftui-expert-skill` | estados UI coherentes ante fallback/error | ViewModel/state sin estados imposibles |
-| `windsurf-rules-ios` (si aplica) | consistencia arquitectónica en evolución | decisiones limpias por capas y BDD->TDD sostenido |
+| `ios-enterprise-rules` (si aplica) | consistencia arquitectónica en evolución | decisiones limpias por capas y BDD->TDD sostenido |
 
 ---
 
@@ -254,57 +254,7 @@ Aunque no cierres todos los entregables:
 
 ---
 
-## Siguiente etapa
+## Qué sigue
 
----
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `03-evolucion/entregables-etapa-3.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Etapa 4: Arquitecto →**](../04-arquitecto/00-introduccion.md) — Bounded contexts, reglas de dependencia automatizadas, deep links, versionado SPM y quality gates. Pasas de construir features a gobernar la plataforma.
 

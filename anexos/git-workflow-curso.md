@@ -19,7 +19,7 @@ Usa mensajes de commit descriptivos que expliquen qué cambió y por qué:
 - Password enforces minimum length of 8
 - Both conform to Equatable, Hashable, Sendable
 - Includes unit tests for valid/invalid cases
-```text
+```
 
 ### Estructura del mensaje
 
@@ -28,7 +28,7 @@ Usa mensajes de commit descriptivos que expliquen qué cambió y por qué:
 
 - Detalle de cambios
 - Motivación o contexto
-```text
+```
 
 ### Prefijos por etapa
 
@@ -58,7 +58,7 @@ git tag -l
 
 # Volver a un tag específico (si rompes algo)
 git checkout e1-complete
-```text
+```
 
 ### Tags recomendados
 
@@ -113,7 +113,7 @@ git commit -m "[INIT] Add .gitignore for Xcode project"
 
 # Crear tag inicial
 git tag -a inicio-curso -m "Punto de partida del curso"
-```text
+```
 
 ### Durante el desarrollo (después de cada lección)
 
@@ -133,7 +133,7 @@ git commit -m "[E1] Domain: Add Email value object with validation
 
 # Opcional: crear tag si es un hito
 git tag -a e1-email-domain -m "Email VO completo con tests"
-```text
+```
 
 ### Cuando algo se rompe
 
@@ -154,7 +154,7 @@ git reset --hard e1-login-domain
 git checkout e1-login-domain
 # ...verificar que funcionaba...
 git checkout main  # volver a la rama actual
-```text
+```
 
 ---
 
@@ -172,7 +172,7 @@ git checkout -b etapa-2-catalog
 git checkout main
 git merge etapa-2-catalog
 git tag -a e2-complete -m "Etapa 2 lista"
-```text
+```
 
 ### Estrategia de ramas simple
 
@@ -180,7 +180,7 @@ git tag -a e2-complete -m "Etapa 2 lista"
 main (estable)
   └─ etapa-2-catalog (desarrollo)
   └─ etapa-3-evolucion (desarrollo)
-```text
+```
 
 ---
 
@@ -208,7 +208,7 @@ main (estable)
 ```bash
 # Recuperar archivo de un commit anterior
 git checkout e1-complete -- Features/Login/Domain/Email.swift
-```text
+```
 
 ### "Hice un desastre y quiero empezar de cero desde el último commit bueno"
 
@@ -218,7 +218,7 @@ git log --oneline
 
 # Volver al commit antes del desastre
 git reset --hard abc1234  # hash del commit bueno
-```text
+```
 
 ### "Quiero guardar cambios sin hacer commit (para cambiar de rama/tarea)"
 
@@ -230,14 +230,14 @@ git stash
 
 # Recuperar cambios
 git stash pop
-```text
+```
 
 ### "Commit en el mensaje equivocado"
 
 ```bash
 # Corregir mensaje del último commit
 git commit --amend -m "[E1] Domain: Add Email value object (corregido)"
-```text
+```
 
 ---
 
@@ -329,24 +329,4 @@ Git es tu **red de seguridad**. No es solo para compartir código, es para:
 - [Oh Shit, Git!?](https://ohshitgit.com/) - Soluciones rápidas a problemas comunes
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/git-workflow-curso.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

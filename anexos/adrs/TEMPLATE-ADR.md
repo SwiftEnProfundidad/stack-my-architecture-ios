@@ -52,23 +52,3 @@
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/TEMPLATE-ADR.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-

@@ -546,7 +546,7 @@ Ejemplo de respuesta:
 | Bloque | Si fallaste más de 1 |
 |--------|---------------------|
 | Fundamentos | Revisa [Value Objects](../01-fundamentos/05-feature-login/01-domain.md) y [TDD](../01-fundamentos/02-metodologia-tdd-practica.md) |
-| Integración | Revisa [Navegación](../02-integracion/02-navegacion-eventos.md) y [Composition Root](../02-integracion/06-composition-root.md) |
+| Integración | Revisa [Navegación](../02-integración/02-navegación-eventos.md) y [Composition Root](../02-integración/06-composition-root.md) |
 | Evolución | Revisa [Cache](../03-evolucion/01-caching-offline.md) y [Observabilidad](../03-evolucion/03-observabilidad.md) |
 | Arquitecto | Revisa [Bounded Contexts](../04-arquitecto/01-bounded-contexts.md) y [Quality Gates](../04-arquitecto/06-quality-gates.md) |
 | Maestría | Revisa [Actors](../05-maestria/02-actors-en-arquitectura.md) y [Memory Leaks](../05-maestria/08-memory-leaks-y-diagnostico.md) |

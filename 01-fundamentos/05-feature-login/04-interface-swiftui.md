@@ -8,6 +8,8 @@ Ahora llegamos a la capa más externa: la Interface. Esta es la capa que el usua
 
 La regla fundamental de esta capa es: **no contiene lógica de negocio**. La vista no valida emails. No decide si el login fue exitoso. No traduce errores. Solo muestra lo que el ViewModel le dice y envía las acciones del usuario al ViewModel. Es la capa más "tonta" del sistema, y eso es exactamente lo que queremos.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `LoginUseCase` → `AuthenticateUserUseCase`, `Session` → `UserSession`. `LoginViewModel` y `LoginView` mantienen el mismo nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 Aquí reaparece el **Principio 4** de [Principios de ingeniería](../01-principios-ingenieria.md): la UI se mantiene cohesionada en presentación y desacoplada del core de negocio.
@@ -49,7 +51,7 @@ sequenceDiagram
         VM->>VM: isLoading = false
         Note over View: SwiftUI detecta cambio<br/>muestra error en rojo
     end
-```text
+```
 
 La vista **no sabe nada** de `LoginUseCase`, ni de `AuthGateway`, ni de `Email`, ni de `Password`. Solo conoce strings (`email`, `password`, `errorMessage`) y booleans (`isLoading`). **Esa es la separación de responsabilidades en acción.**
 
@@ -81,7 +83,7 @@ graph TD
     style View fill:#ffe0cc,stroke:#fd7e14
     style ViewModel fill:#cce5ff,stroke:#007bff
     style UseCase fill:#d4edda,stroke:#28a745
-```text
+```
 
 ---
 
@@ -142,7 +144,7 @@ final class LoginViewModel {
         }
     }
 }
-```swift
+```
 
 **Explicación línea por línea del LoginViewModel completo:**
 
@@ -183,7 +185,7 @@ flowchart TD
     style SUCCESS fill:#d4edda,stroke:#28a745
     style KNOWN fill:#f8d7da,stroke:#dc3545
     style UNKNOWN fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 `isLoading = true` — Lo primero que hace submit: pone el loading en true. SwiftUI detecta el cambio y muestra el spinner automáticamente.
 
@@ -286,11 +288,11 @@ struct LoginView: View {
         .navigationTitle("Login")
     }
 }
-```text
+```
 
 Vamos a repasar cada parte:
 
-**Los TextFields.** El `TextField` del email tiene configuraciones que mejoran la experiencia del usuario: `textContentType(.emailAddress)` activa el autocompletado del teclado, `textInputAutocapitalization(.never)` desactiva la mayúscula inicial (los emails no empiezan por mayúscula), y `keyboardType(.emailAddress)` muestra el teclado con arroba. El `SecureField` oculta los caracteres del password. Estos son detalles de UX que no afectan a la lógica, pero que hacen la diferencia entre una app amateur y una profesional.
+**Los TextFields.** El `TextField` del email tiene configuraciónes que mejoran la experiencia del usuario: `textContentType(.emailAddress)` activa el autocompletado del teclado, `textInputAutocapitalization(.never)` desactiva la mayúscula inicial (los emails no empiezan por mayúscula), y `keyboardType(.emailAddress)` muestra el teclado con arroba. El `SecureField` oculta los caracteres del password. Estos son detalles de UX que no afectan a la lógica, pero que hacen la diferencia entre una app amateur y una profesional.
 
 **El binding.** `$viewModel.email` y `$viewModel.password` son bindings bidireccionales: cuando el usuario escribe, el ViewModel se actualiza automáticamente, y cuando el ViewModel cambia (por ejemplo, al limpiar un error), la vista se actualiza también. Esto es la magia de SwiftUI + `@Observable`: el flujo de datos es declarativo y automático.
 
@@ -318,7 +320,7 @@ graph LR
     style STUB fill:#d4edda,stroke:#28a745
     style UC fill:#fff3cd,stroke:#ffc107
     style VM fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 ```swift
 // StackMyArchitectureTests/Features/Login/Interface/LoginViewModelTests.swift
@@ -340,7 +342,7 @@ final class LoginViewModelTests: XCTestCase {
         let sut = LoginViewModel(login: useCase, onLoginSucceeded: onLoginSucceeded)
         return (sut, gateway)
     }
-```swift
+```
 
 **Explicación del makeSUT del ViewModel:**
 
@@ -363,7 +365,7 @@ Dentro de makeSUT, se crean los tres componentes en cadena: stub → useCase →
         XCTAssertFalse(sut.isLoading)
         XCTAssertNil(sut.errorMessage)
     }
-```text
+```
 
 **Explicación del test de estado inicial:**
 
@@ -393,7 +395,7 @@ Este test verifica que cuando creas un ViewModel nuevo, su estado es correcto: e
         XCTAssertEqual(receivedSession, expectedSession)
         XCTAssertNil(sut.errorMessage)
     }
-```text
+```
 
 **Explicación del test del happy path (el más interesante):**
 
@@ -425,7 +427,7 @@ Este test verifica que cuando el usuario escribe credenciales válidas y pulsa s
         
         XCTAssertEqual(sut.errorMessage, "El email no tiene un formato válido.")
     }
-```text
+```
 
 **Explicación del test de error de email:**
 
@@ -498,7 +500,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
         XCTAssertEqual(sut.errorMessage, "Email o contraseña incorrectos.")
     }
 }
-```text
+```
 
 Fíjate en que los tests del ViewModel son `@MainActor`. Esto es necesario porque el ViewModel es `@MainActor`, así que todas las interacciones con él deben ocurrir en el main actor. Los tests `async` de XCTest soportan esto correctamente.
 
@@ -529,7 +531,7 @@ Una de las grandes ventajas de nuestra arquitectura es que las previews de Swift
         )
     }
 }
-```text
+```
 
 El stub tiene un delay de 1 segundo para que puedas ver el estado de loading en la preview. Si quieres probar el estado de error, puedes crear un stub que siempre falle:
 
@@ -551,7 +553,7 @@ struct FailingAuthGateway: AuthGateway, Sendable {
         )
     }
 }
-```text
+```
 
 Esto te permite ver cómo se ve la pantalla de login con un mensaje de error sin necesidad de tener un servidor real que rechace credenciales. Las previews son una herramienta de desarrollo, y con nuestra arquitectura, son extremadamente potentes.
 
@@ -583,7 +585,7 @@ struct CompositionRoot {
         return LoginView(viewModel: viewModel)
     }
 }
-```text
+```
 
 El Composition Root es el **único lugar** que conoce las implementaciones concretas. Es el único que sabe que `AuthGateway` se implementa con `RemoteAuthGateway`, que `HTTPClient` se implementa con `URLSessionHTTPClient`, y que la URL del servidor es `https://api.example.com`.
 
@@ -592,13 +594,13 @@ Si quieres cambiar a un stub para desarrollo local, cambias una línea:
 ```swift
 // Para desarrollo sin servidor:
 let gateway = StubAuthGateway()
-```text
+```
 
 Si quieres apuntar a staging:
 
 ```swift
 let baseURL = URL(string: "https://staging.example.com")!
-```text
+```
 
 Ningún otro archivo del proyecto cambia. Eso es inversión de dependencias en acción.
 
@@ -688,61 +690,160 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ---
 
+## Error copy orientado al usuario
+
+El `LoginViewModel` ya implementa la traducción correcta: el método `message(for:)` convierte cada caso de `LoginUseCase.Error` a un string legible en español, sin exponer detalles técnicos al usuario.
+
+Esta separación es importante por principio: **nunca pases directamente el mensaje del servidor a la UI**. Si el backend cambia su formato de error, tu app mostraría mensajes extraños o incluso podría exponer información sensible.
+
+Un error copy enterprise sigue estas reglas:
+
+1. **No menciona tecnología** — no digas "database timeout", di "no pudimos conectar con el servidor".
+2. **No revela arquitectura** — no digas "JWT verification failed", di "tu sesión ha expirado".
+3. **Sugiere acción** — en lugar de "error 500", di "inténtalo de nuevo en unos minutos".
+4. **Es amigable** — usa lenguaje natural, no código de error.
+
+Nuestro `message(for:)` ya sigue estas reglas para los cuatro errores de Etapa 1. Cuando en Etapa 2 se añadan casos como `sessionExpired` o `accountLocked`, simplemente se añaden nuevas ramas al `switch` — sin tocar nada más.
+
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Evolución natural: biometría (Face ID / Touch ID)
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/04-interface-swiftui.md`.
+> **Enterprise (Etapa 2+):** Esta sección describe un patrón que **no se implementa en Etapa 1**. Requiere `SessionRepository` y Keychain, que se abordan más adelante.
 
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+Una vez que tienes login con email/contraseña funcionando, la evolución natural en una app enterprise es añadir **biometría** para facilitar el acceso recurrente.
 
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+### Patrón de biometría en iOS
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+El flujo biometrico no reemplaza al login con credenciales — lo complementa:
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
+1. **Primer login** — usuario introduce email/contraseña, sesión se guarda en Keychain.
+2. **Login posterior** — app detecta que hay sesión guardada en Keychain.
+3. **Prompt biometrico** — app muestra "Iniciar sesión con Face ID?".
+4. **Si acepta** — app desbloquea el token de Keychain y usa la sesión directamente.
+5. **Si rechaza** — app muestra login con email/contraseña.
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+Este patrón requiere:
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+- Guardar un flag en Keychain indicando que el usuario ha activado biometría.
+- Usar `LocalAuthentication` framework para el prompt.
+- Proteger el token en Keychain con `kSecAttrAccessControl` que requiere biometría.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+```swift
+import LocalAuthentication
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+func attemptBiometricLogin() async throws -> Session? {
+    let context = LAContext()
+    var authError: NSError?
+    
+    guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) else {
+        return nil  // Biometría no disponible en este dispositivo
+    }
+    
+    let localizedReason = "Inicia sesión con Face ID para acceder a tu cuenta"
+    let success = try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
+                                                  localizedReason: localizedReason)
+    guard success else { return nil }
+    
+    // Biometría exitosa: desbloquear token de Keychain (Etapa 2+)
+    return try await sessionRepository.load()
+}
+```
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+### Consideraciones UX
 
-Lectura semantica minima de este diagrama:
+- **No forzar biometría** — siempre ofrecer opción de login con contraseña.
+- **Fall-back grácil** — si biometría falla (dedo mojado, Face ID no reconoce), mostrar login normal.
+- **Explicar valor** — el prompt debe decir claramente "para acceder a tu cuenta", no solo "Face ID".
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+**En este curso básico** no implementamos biometría porque requiere configuración adicional en Keychain y manejo de permisos. Pero es importante que sepas que esta es la evolución natural del login en apps enterprise.
+
+
+---
+
+## 🔨 Checkpoint Xcode — Interface en el proyecto real
+
+Abre el scaffold y contrasta lo que acabas de aprender con la implementación de producción.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureLoginUI/LoginViewModel.swift
+# Navega a: Sources/FeatureLoginUI/LoginView.swift
+```
+
+**Diferencias clave respecto a la lección — léelas con atención:**
+
+| Concepto lección | Implementación real | Por qué importa |
+|---|---|---|
+| `@StateObject var viewModel` | `@Bindable var viewModel` | Swift 6: `@Observable` reemplaza `ObservableObject`; `@Bindable` habilita bindings sin `@Published` |
+| `@ObservedObject` / `@Published` | `@Observable @MainActor` | El compilador garantiza que toda mutación de UI ocurre en el hilo principal |
+| `isLoading: Bool` como estado | `Phase` enum (`.idle`, `.loading`, `.authenticated`) | Estado sellado — imposible tener `isLoading: true` + `errorMessage: nil` simultáneamente incoherentes |
+| ViewModel con `submit()` síncrono | `submit() async` marcado con `@MainActor` | Swift Concurrency: la tarea se lanza desde `Task { await viewModel.submit() }` en la View |
+| Elementos UI sin identificadores | `accessibilityIdentifier` en todos los controles | Los tests de UI localizan nodos por este identificador, no por texto visible |
+
+**Inspecciona `LoginViewModel.swift`:**
+
+```swift
+// Esto es lo que ves en el scaffold:
+@Observable @MainActor
+public final class LoginViewModel {
+
+    public enum Phase { case idle, loading, authenticated }
+
+    public private(set) var phase: Phase = .idle
+    public private(set) var errorMessage: String? = nil
+    public var email: String = ""
+    public var password: String = ""
+
+    // ...
+    public func submit() async {
+        phase = .loading
+        // ...
+    }
+}
+```
+
+Nota: `phase` y `errorMessage` son `private(set)` — la View solo puede leerlos, no escribirlos directamente. Esto es el contrato unidireccional aplicado a nivel de compilador.
+
+**Inspecciona `LoginView.swift`:**
+
+```swift
+// @Bindable permite bindings two-way sobre @Observable sin @Published
+@Bindable var viewModel: LoginViewModel
+
+// El botón lanza la corrutina correctamente:
+Button("Iniciar sesión") {
+    Task { await viewModel.submit() }
+}
+```
+
+**Ejecuta los tests de la capa UI:**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginUITests
+```
+
+Resultado esperado: todos los tests en verde. Si alguno falla, es que hay una discrepancia entre la View y el ViewModel — no entre el test y la implementación.
+
+**Preguntas de reflexión antes de continuar:**
+
+1. ¿Por qué `phase` es un enum y no `isLoading: Bool + isAuthenticated: Bool`? ¿Qué estado incoherente imposibilita el enum?
+2. `@MainActor` en la clase entera vs en métodos individuales — ¿qué diferencia produce en la experiencia del compilador?
+3. Si añadieras un estado `.sessionExpired` al `Phase` enum, ¿cuántos archivos tendrías que tocar? ¿Qué te dice eso sobre el diseño?
+
+**Progreso de la feature Login:**
+
+| Capa | Estado |
+|---|---|
+| FeatureLoginDomain | ✅ Tests verdes |
+| FeatureLoginData | ✅ Tests verdes |
+| FeatureLoginUI | ✅ Tests verdes |
+| AppComposition | ⏳ Próxima lección |
+
+---
+
+## Qué sigue
+
+La siguiente lección, [TDD: ciclo completo Red-Green-Refactor](05-tdd-ciclo-completo.md), consolida todo lo que hemos construido trazando el ciclo TDD completo de punta a punta sobre la feature Login.
 

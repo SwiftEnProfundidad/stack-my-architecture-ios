@@ -13,7 +13,6 @@ import shutil
 import subprocess
 import tempfile
 import html
-import time
 import hashlib
 from pathlib import Path, PurePosixPath
 
@@ -32,8 +31,24 @@ CONTENT_DIRS = [
     "03-evolucion",
     "04-arquitecto",
     "05-maestria",
+    "06-proyecto-final",
     "anexos",
 ]
+
+
+def compute_asset_version(asset_names: list[str]) -> str:
+    digest = hashlib.sha1()
+    found = False
+    for name in asset_names:
+        asset_path = ASSETS_SRC_DIR / name
+        if not asset_path.exists():
+            continue
+        found = True
+        digest.update(name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(asset_path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()[:12] if found else "0"
 
 def discover_files() -> list[str]:
     """
@@ -62,8 +77,9 @@ def discover_files() -> list[str]:
 # O usa discover_files() para autodiscovery
 FILE_ORDER = [
     "00-informe/INFORME-CURSO.md",
-    "00-informe/DECISIONES-TOMADAS.md",
-    "00-informe/TODO.md",
+    "00-informe/MATRIZ-COMPETENCIAS.md",
+    "00-informe/RUBRICA-GATES-POR-FASE.md",
+    "00-informe/SCORECARD-EMPLEABILIDAD.md",
     "00-core-mobile/00-introduccion.md",
     "00-core-mobile/01-marco-de-decisiones.md",
     "00-core-mobile/02-invariantes-y-contratos.md",
@@ -92,6 +108,7 @@ FILE_ORDER = [
     "01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md",
     "01-fundamentos/05-feature-login/ADR-001-login.md",
     "01-fundamentos/06-conectando-la-app.md",
+    "01-fundamentos/checkpoint-y-bitacora-etapa-1.md",
     "01-fundamentos/entregables-etapa-1.md",
     "02-integracion/00-introduccion.md",
     "02-integracion/01-feature-catalog/00-especificacion-bdd.md",
@@ -146,6 +163,8 @@ FILE_ORDER = [
     "05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md",
     "05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md",
     "05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md",
+    "06-proyecto-final/00-proyecto-final-ios.md",
+    "06-proyecto-final/01-rubrica-y-entrega.md",
     "anexos/calentamiento-etapa-5-maestria.md",
     "anexos/quizzes-autoevaluacion.md",
     "anexos/guia-recuperacion-ios.md",
@@ -177,7 +196,6 @@ FILE_ORDER = [
     "anexos/adrs/TEMPLATE-ADR.md",
     "anexos/apendice-banca-ledger.md",
     "anexos/glosario.md",
-    "anexos/proyecto-final.md",
 ]
 
 
@@ -260,9 +278,12 @@ ARCHITECTURE_WEBP_ASSET_BY_PNG = {
 
 def mermaid_needs_arrow_legend(raw_code_content: str, file_path: str) -> bool:
     source = f"{file_path}\n{raw_code_content}".lower()
-    relation_tokens = ("-->", "-.->", "==>", "--o", "<|--", "--|>", "..|>", "..>", "o--", "*--")
-    has_relations = any(token in raw_code_content for token in relation_tokens)
-    if not has_relations:
+    # La leyenda solo es relevante cuando el diagrama usa el sistema semántico de flechas
+    # (-.-> wiring, ==> contrato/abstracción, --o salida/propagación).
+    # Diagramas que solo usan --> (flujos conceptuales simples) no necesitan la leyenda.
+    semantic_tokens = ("-.->", "==>", "--o", "<|--", "--|>", "..|>", "..>", "o--", "*--")
+    has_semantic_relations = any(token in raw_code_content for token in semantic_tokens)
+    if not has_semantic_relations:
         return False
     return any(keyword in source for keyword in MERMAID_ARROW_LEGEND_KEYWORDS)
 
@@ -365,27 +386,56 @@ def is_layered_architecture_mermaid(raw_code_content: str) -> bool:
 
 
 def render_mermaid_arrow_legend() -> str:
+    def item(svg_class: str, is_closed: bool, name: str, desc: str, usage: str) -> str:
+        head = (
+            '<polygon points="30,2 38,6 30,10"></polygon>'
+            if is_closed
+            else '<polyline points="30,2 38,6 30,10"></polyline>'
+        )
+        svg = (
+            f'<svg class="sma-legend-arrow {svg_class}" viewBox="0 0 40 12" aria-hidden="true">'
+            f'<line x1="2" y1="6" x2="30" y2="6"></line>{head}</svg>'
+        )
+        return (
+            f'<div class="sma-mermaid-legend-item">'
+            f'{svg}'
+            f'<div class="sma-legend-item-body">'
+            f'<span class="sma-legend-item-name">{name}</span>'
+            f'<span class="sma-legend-item-desc">{desc}</span>'
+            f'<span class="sma-legend-item-usage">{usage}</span>'
+            f'</div></div>'
+        )
+
     return (
         '<div class="sma-mermaid-legend" role="note" aria-label="Leyenda de flechas para diagramas de arquitectura">'
         '<p class="sma-mermaid-legend-title">Leyenda de flechas</p>'
         '<div class="sma-mermaid-legend-grid">'
-        '<span class="sma-mermaid-legend-item">'
-        '<svg class="sma-legend-arrow direct-closed" viewBox="0 0 40 12" aria-hidden="true">'
-        '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
-        "</svg>Dependencia directa (runtime)</span>"
-        '<span class="sma-mermaid-legend-item">'
-        '<svg class="sma-legend-arrow dashed-closed" viewBox="0 0 40 12" aria-hidden="true">'
-        '<line x1="2" y1="6" x2="30" y2="6"></line><polygon points="30,2 38,6 30,10"></polygon>'
-        "</svg>Wiring / configuracion</span>"
-        '<span class="sma-mermaid-legend-item">'
-        '<svg class="sma-legend-arrow contract-open" viewBox="0 0 40 12" aria-hidden="true">'
-        '<line x1="2" y1="6" x2="30" y2="6"></line><polyline points="30,2 38,6 30,10"></polyline>'
-        "</svg>Contrato / abstraccion</span>"
-        '<span class="sma-mermaid-legend-item">'
-        '<svg class="sma-legend-arrow solid-open" viewBox="0 0 40 12" aria-hidden="true">'
-        '<line x1="2" y1="6" x2="30" y2="6"></line><polyline points="30,2 38,6 30,10"></polyline>'
-        "</svg>Salida / propagacion</span>"
-        "</div>"
+        + item(
+            "direct-closed", True,
+            "Línea continua + punta cerrada (&#8594;)",
+            "Dependencia directa en runtime: A usa o invoca a B. Implica referencia fuerte o composición.",
+            "Úsala cuando la relación es parte del flujo principal de ejecución.",
+        )
+        + item(
+            "dashed-closed", True,
+            "Línea discontinua + punta cerrada (-.-&gt;)",
+            "Wiring / configuración: un ensamblador conecta piezas. Relación de infraestructura, no de comportamiento del dominio.",
+            "Úsala para indicar \u201cesto se construye aquí y se inyecta allá\u201d.",
+        )
+        + item(
+            "contract-open", False,
+            "Línea discontinua + punta abierta (-.o)",
+            "Contrato / abstracción: implementa o depende de una interfaz o protocolo.",
+            "Úsala para resaltar inversión de dependencias y sustituibilidad.",
+        )
+        + item(
+            "solid-open", False,
+            "Línea continua + punta abierta (--o)",
+            "Salida / propagación: A emite datos o eventos hacia B. Útil para callbacks, delegación, observers y streams.",
+            "Úsala cuando quieras diferenciar \u201centrada/uso\u201d de \u201csalida/notificación\u201d.",
+        )
+        + "</div>"
+        '<p class="sma-legend-rule">Regla práctica: decide una convención (como esta) y úsala de forma consistente en todo el diagrama.</p>'
         "</div>\n"
     )
 
@@ -1384,10 +1434,11 @@ def build_nav(files_content):
         "00-informe": {"title": "Informe fundacional", "lesson_label": "Documento", "numbered": False},
         "00-core-mobile": {"title": "ETAPA 0: CORE MOBILE", "lesson_label": "Leccion", "numbered": True},
         "01-fundamentos": {"title": "ETAPA 1: JUNIOR", "lesson_label": "Leccion", "numbered": True},
-        "02-integracion": {"title": "ETAPA 2: MID", "lesson_label": "Leccion", "numbered": True},
+        "02-integracion": {"title": "ETAPA 2: MIDLEVEL", "lesson_label": "Leccion", "numbered": True},
         "03-evolucion": {"title": "ETAPA 3: SENIOR", "lesson_label": "Leccion", "numbered": True},
         "04-arquitecto": {"title": "ETAPA 4: ARQUITECTO", "lesson_label": "Leccion", "numbered": True},
         "05-maestria": {"title": "ETAPA 5: MAESTRIA", "lesson_label": "Leccion", "numbered": True},
+        "06-proyecto-final": {"title": "ETAPA 6: PROYECTO FINAL", "lesson_label": "Leccion", "numbered": True},
         "anexos": {"title": "Anexos", "lesson_label": "Anexo", "numbered": False},
     }
 
@@ -1458,12 +1509,7 @@ def build_html():
         "assistant-panel.css",
         "assistant-bridge.js",
     ]
-    version_marks = [
-        int((ASSETS_SRC_DIR / name).stat().st_mtime)
-        for name in version_sources
-        if (ASSETS_SRC_DIR / name).exists()
-    ]
-    asset_version = str(max(version_marks + [int(time.time())]))
+    asset_version = compute_asset_version(version_sources)
 
     body_html = ""
     for filepath, content in files_content:
@@ -1481,6 +1527,41 @@ def build_html():
 <meta name="darkreader-lock">
 <meta name="course-id" content="stack-my-architecture-ios">
 <title>Stack: My Architecture iOS</title>
+<script>
+(function () {{
+  try {{
+    var host = String(window.location.hostname || '').toLowerCase();
+    var local172 = host.match(/^172\\.(\\d{{1,3}})\\.\\d{{1,3}}\\.\\d{{1,3}}$/);
+    var isLocal = window.location.protocol === 'file:' ||
+      host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0' ||
+      host.endsWith('.local') ||
+      /^10\\.\\d{{1,3}}\\.\\d{{1,3}}\\.\\d{{1,3}}$/.test(host) ||
+      /^192\\.168\\.\\d{{1,3}}\\.\\d{{1,3}}$/.test(host) ||
+      (local172 && Number(local172[1]) >= 16 && Number(local172[1]) <= 31);
+    if (isLocal) return;
+
+    var user = JSON.parse(localStorage.getItem('sma:auth:user:v1') || 'null');
+    var session = JSON.parse(localStorage.getItem('sma:auth:session:v1') || 'null');
+    var isValid = !!(user && user.id && session && session.accessToken);
+    if (isValid && session.expiresAt) {{
+      var expiresAt = Date.parse(String(session.expiresAt));
+      if (Number.isFinite(expiresAt) && expiresAt <= Date.now()) isValid = false;
+    }}
+    if (isValid) return;
+
+    localStorage.removeItem('sma:auth:user:v1');
+    localStorage.removeItem('sma:auth:session:v1');
+    localStorage.removeItem('sma:cloud:profile:v1');
+    var next = window.location.pathname + window.location.search + window.location.hash;
+    var login = new URL('/auth/login.html', window.location.origin);
+    login.searchParams.set('next', next);
+    window.location.replace(login.pathname + login.search + login.hash);
+  }} catch (_error) {{
+    var next = window.location.pathname + window.location.search + window.location.hash;
+    window.location.replace('/auth/login.html?next=' + encodeURIComponent(next));
+  }}
+}})();
+</script>
 <link rel="stylesheet" href="assets/study-ux.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/course-switcher.css?v=__ASSET_VERSION__">
 <link rel="stylesheet" href="assets/assistant-panel.css?v=__ASSET_VERSION__">
@@ -2150,10 +2231,10 @@ p code, li code, td code {{
     --mermaid-node-border: #1d4ed8;
     --mermaid-line: #1e40af;
     --mermaid-label-bg: #eef2ff;
-    --mermaid-legend-direct: #cbd5e1;
-    --mermaid-legend-dashed-closed: #cbd5e1;
-    --mermaid-legend-contract: #cbd5e1;
-    --mermaid-legend-solid-open: #cbd5e1;
+    --mermaid-legend-direct: #f472b6;
+    --mermaid-legend-dashed-closed: #94a3b8;
+    --mermaid-legend-contract: #60a5fa;
+    --mermaid-legend-solid-open: #86efac;
 }}
 
 .sma-mermaid-block {{
@@ -2179,16 +2260,48 @@ p code, li code, td code {{
 
 .sma-mermaid-legend-grid {{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 6px 12px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px 16px;
 }}
 
 .sma-mermaid-legend-item {{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     font-size: 0.78rem;
     color: var(--text);
+}}
+
+.sma-legend-item-body {{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}}
+
+.sma-legend-item-name {{
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+}}
+
+.sma-legend-item-desc {{
+    color: var(--text-secondary);
+    line-height: 1.4;
+}}
+
+.sma-legend-item-usage {{
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.4;
+}}
+
+.sma-legend-rule {{
+    margin: 10px 0 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
 }}
 
 .sma-legend-arrow {{
@@ -2196,6 +2309,7 @@ p code, li code, td code {{
     height: 12px;
     flex: 0 0 40px;
     overflow: visible;
+    margin-top: 3px;
 }}
 
 .sma-legend-arrow line,
@@ -2217,10 +2331,7 @@ p code, li code, td code {{
     stroke-dasharray: 6 4;
 }}
 
-.sma-legend-arrow.direct-closed {{ color: var(--mermaid-legend-direct); }}
-.sma-legend-arrow.dashed-closed {{ color: var(--mermaid-legend-dashed-closed); }}
-.sma-legend-arrow.contract-open {{ color: var(--mermaid-legend-contract); }}
-.sma-legend-arrow.solid-open {{ color: var(--mermaid-legend-solid-open); }}
+
 
 .sma-semantic-arrow-item .sma-semantic-arrow-icon {{
     width: 42px;

@@ -40,15 +40,15 @@ Una vez instalado, abre **Terminal** (Aplicaciones > Utilidades > Terminal) y ej
 
 ```bash
 swift --version
-```text
+```
 
 Deberías ver algo como:
 
 ```text
-swift-driver version: 1.115 Apple Swift version 6.0.2 (swiftlang-6.0.2.1.2)
-```text
+swift-driver version: 1.120 Apple Swift version 6.2 (swiftlang-6.2.0.0)
+```
 
-**Importante:** Este curso requiere Swift 6.0 o superior. Si ves una versión anterior, actualiza Xcode desde la App Store.
+**Importante:** Este curso requiere Swift 6.2 o superior (incluido en Xcode 16.3+). Si ves una versión anterior, actualiza Xcode desde la App Store.
 
 ## Pausa y practica
 <!-- sma:exercise:v1 -->
@@ -67,7 +67,7 @@ Terminal está en Aplicaciones > Utilidades. También puedes buscarlo con Spotli
 <details>
 <summary>💡 Pista 2: Qué debe aparecer</summary>
 
-Debes ver "Apple Swift version 6.0" o superior. Si ves "command not found", Xcode no está instalado correctamente.
+Debes ver "Apple Swift version 6.2" o superior. Si ves "command not found", Xcode no está instalado correctamente.
 
 </details>
 
@@ -77,7 +77,7 @@ Debes ver "Apple Swift version 6.0" o superior. Si ves "command not found", Xcod
 1. Abre Terminal
 2. Escribe: `swift --version`
 3. Presiona Enter
-4. Si ves "Apple Swift version 6.0.x", ¡listo! Si no, reinstala Xcode.
+4. Si ves "Apple Swift version 6.2" o superior, ¡listo! Si no, actualiza Xcode desde la App Store.
 
 </details>
 <!-- /sma:exercise:v1 -->
@@ -119,7 +119,7 @@ Curso-iOS/
 ├── Etapa-3/
 ├── Etapa-4/
 └── Etapa-5/
-```xml
+```
 
 <details>
 <summary>💡 Pista 1: Secuencia de comandos</summary>
@@ -143,7 +143,7 @@ cd ~
 cd Curso-iOS
 mkdir Etapa-1 Etapa-2 Etapa-3 Etapa-4 Etapa-5
 ls  # Verifica que se crearon
-```xml
+```
 
 </details>
 <!-- /sma:exercise:v1 -->
@@ -157,7 +157,7 @@ Git es un sistema de control de versiones. Piensa en él como el "deshacer" ilim
 ```bash
 git config --global user.name "Tu Nombre"
 git config --global user.email "tu@email.com"
-```text
+```
 
 ### 4.2 Comandos básicos
 
@@ -178,7 +178,7 @@ echo "# Mi Proyecto iOS" > README.md
 git add .
 git commit -m "Primer commit: setup inicial"
 git log
-```text
+```
 
 ## Pausa y practica
 <!-- sma:exercise:v1 -->
@@ -214,7 +214,7 @@ git status
 git add practica.txt
 git commit -m "Agrego archivo de practica"
 git log --oneline
-```text
+```
 
 Deberías ver tu commit en la lista.
 
@@ -230,7 +230,7 @@ SPM (Swift Package Manager) es la forma moderna de organizar código Swift. Es c
 ```bash
 cd ~/Curso-iOS/Etapa-1
 swift package init --type library --name MiLibreria
-```text
+```
 
 Esto crea:
 ```text
@@ -242,7 +242,7 @@ MiLibreria/
 └── Tests/
     └── MiLibreriaTests/
         └── MiLibreriaTests.swift
-```text
+```
 
 ### 5.2 Compilar y testear
 
@@ -250,14 +250,14 @@ MiLibreria/
 cd MiLibreria
 swift build        # Compila el código
 swift test         # Ejecuta los tests
-```text
+```
 
 Si todo va bien, verás:
 ```text
 Building for debugging...
 Build complete!
 Test Suite 'MiLibreriaTests' started...
-```text
+```
 
 ## Pausa y practica
 <!-- sma:exercise:v1 -->
@@ -275,7 +275,7 @@ swift package init --type library --name PruebaSetup
 cd PruebaSetup
 swift build
 swift test
-```xml
+```
 
 </details>
 
@@ -295,9 +295,9 @@ swift package init --type library --name PruebaSetup
 cd PruebaSetup
 swift build
 swift test
-```text
+```
 
-Si ves errores, verifica que `swift --version` sea 6.0+.
+Si ves errores, verifica que `swift --version` sea 6.2+ (incluido en Xcode 16.3+).
 
 </details>
 <!-- /sma:exercise:v1 -->
@@ -372,7 +372,7 @@ Si todo funciona, verás la app en el simulador y los tests pasando.
 
 Antes de continuar, verifica que tienes todo listo:
 
-- [ ] Xcode instalado (Swift 6.0+)
+- [ ] Xcode 16.3+ instalado (Swift 6.2+)
 - [ ] Terminal básica dominada (cd, ls, mkdir)
 - [ ] Git configurado y funcionando
 - [ ] SPM funciona (swift build, swift test)
@@ -417,71 +417,6 @@ sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
 ¿Por qué crees que es importante dominar el entorno (Terminal, Git, Xcode) antes de escribir código de arquitectura? Piensa en una situación donde no conocieras estas herramientas: ¿qué pasaría si te pidieran "haz commit de tus cambios" y no supieras qué significa?
 
-## Continuación
+## Qué sigue
 
-- 
--
-
----
-
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
-
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+La siguiente lección, [Principios de ingeniería](01-principios-ingenieria.md), establece los fundamentos de diseño sobre los que se construye todo el curso: separación de responsabilidades, contratos explícitos y dependencias controladas.

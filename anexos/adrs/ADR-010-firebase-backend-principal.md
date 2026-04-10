@@ -36,8 +36,13 @@ Curso requiere backend gratuito, integrable y didáctico para Auth + datos.
 
 ### Opción B: Usar mock estático sin backend real (no demuestra integración real)
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Cero dependencias externas; todos los datos viven en el código fuente y los tests son totalmente deterministas
+  - El alumno puede trabajar sin conexión a internet y sin configurar ningún servicio en la nube
+- **Contras:**
+  - No enseña a integrar un backend real ni a gestionar errores de red auténticos (timeouts, problemas de autenticación, permisos de Firestore); el aprendizaje queda incompleto
+  - Los datos mock no reflejan la asincronía real de una llamada remota, ocultando problemas de estado de carga, paginación y manejo de streams que el alumno encontrará en proyectos reales
+  - Cuando el alumno pase a un proyecto con backend real, tendrá que reaprender la integración desde cero; el mock no transfiere conocimiento práctico
 
 ### Opción C: Firebase como backend principal encapsulado (elegida)
 
@@ -89,24 +94,4 @@ Ver la lección [07-backend-firebase](../../03-evolucion/07-backend-firebase.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-010-firebase-backend-principal.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

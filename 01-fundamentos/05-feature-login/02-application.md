@@ -14,7 +14,19 @@ El **caso de uso** `LoginUseCase`, que orquesta el flujo completo: valida email,
 
 Todo con TDD usando XCTest, un test a la vez.
 
-> **Nota de nomenclatura lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase` como nombres pedagógicos. En el scaffold SPM del repositorio (`apps/ios/ArchitectureKit`), los equivalentes son `AuthRepository` (protocolo en `Sources/FeatureLoginDomain/AuthRepository.swift`) y `AuthenticateUserUseCase` (en `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift`). El patrón es idéntico; solo cambia el nombre.
+> **Nota de nomenclatura y diseño lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase`. En el scaffold SPM (`apps/ios/ArchitectureKit`) los equivalentes son `AuthRepository` y `AuthenticateUserUseCase`. Pero la diferencia va más allá del nombre:
+>
+> | Lección | Scaffold | Qué cambia |
+> |---|---|---|
+> | `AuthGateway` (protocol) | `AuthRepository` | Solo nombre |
+> | `LoginUseCase` con `LoginUseCase.Error` (4 casos) | `AuthenticateUserUseCase` **sin error propio** | El scaffold no necesita traducción de errores porque ya usa `LoginError` unificado |
+> | `LoginUseCase.execute` con 3 bloques `do/catch` para traducir | `execute` con 2 líneas limpias: `try EmailAddress(email)`, `try Password(password)` | La traducción de errores es innecesaria con enum unificado |
+> | `AuthGatewayStub` — `class` con `@unchecked Sendable` | `AuthRepositoryStub` — `actor` (Sendable por definición) | El scaffold usa `actor` como patrón más seguro para stubs |
+> | Devuelve `Session` | Devuelve `UserSession` | Campos diferentes (ver nota en [01-domain](01-domain.md)) |
+>
+> **¿Por qué la lección enseña error translation?** Porque es un patrón fundamental en Clean Architecture que necesitarás en sistemas donde las capas internas tienen tipos de error distintos a la API pública de la feature. En el scaffold, como todos los errores son `LoginError` desde el principio, la traducción es innecesaria. La lección te enseña el patrón general; el scaffold muestra el caso pragmático donde ese patrón se simplifica.
+>
+> Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -41,7 +53,7 @@ La solución es definir un protocolo/puerto que diga "necesito algo que pueda re
 protocol AuthGateway: Sendable {
     func authenticate(credentials: Credentials) async throws -> Session
 }
-```swift
+```
 
 Vamos a analizar cada aspecto de esta declaración, porque cada palabra está ahí por una razón:
 
@@ -97,7 +109,7 @@ sequenceDiagram
         GW-->>UC: throws AuthError.connectivity
         UC-->>Caller: throws AuthError.connectivity
     end
-```text
+```
 
 Fíjate en que el UseCase hace **tres cosas** en orden:
 1. **Valida** los datos de entrada usando los Value Objects del Domain
@@ -111,16 +123,16 @@ No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. E
 ```mermaid
 graph LR
     subgraph Test["En TESTS - rapido, determinista"]
-        UC1["LoginUseCase"] ..>|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
+        UC1["LoginUseCase"] ==>|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
     end
 
     subgraph Prod["En PRODUCCION - real"]
-        UC2["LoginUseCase"] ..>|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
+        UC2["LoginUseCase"] ==>|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
     end
 
     style Test fill:#d4edda,stroke:#28a745
     style Prod fill:#cce5ff,stroke:#007bff
-```text
+```
 
 El mismo `LoginUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthGateway` (su protocolo/puerto). **Esto es inyección de dependencias en acción.**
 
@@ -153,9 +165,11 @@ final class AuthGatewayStub: AuthGateway, @unchecked Sendable {
         return try result.get()
     }
 }
-```swift
+```
 
-**Explicación línea por línea (esto es un spy, lee la guía de test doubles si no recuerdas qué es):**
+> **Divergencia scaffold — stubs con `actor`:** En el scaffold real, los stubs de test usan `private actor AuthRepositoryStub: AuthRepository` en vez de `class` + `@unchecked Sendable`. Un `actor` es `Sendable` por definición y serializa accesos, evitando la necesidad de `@unchecked`. La lección usa `class` porque todavía no has visto actors (se enseñan en Etapa 5). Cuando llegues ahí, sabrás cuándo preferir `actor` sobre `@unchecked Sendable`.
+
+**Explicación línea por línea** (en la [Metodología TDD](../02-metodologia-tdd-practica.md) explicamos los tipos de dobles de test: stub, spy, mock):**
 
 `final class AuthGatewayStub: AuthGateway, @unchecked Sendable` — Es una clase, no un struct. ¿Por qué? Porque necesitamos **mutabilidad**: cuando el UseCase llame a `authenticate`, queremos guardar las credenciales que recibió (eso es mutar la propiedad `receivedCredentials`). Los structs no permiten eso fácilmente en funciones de protocolo. `: AuthGateway` significa que conforma el protocolo — es decir, tiene el mismo método `authenticate` que el AuthGateway real. Esto es clave: el UseCase no sabe si recibe un stub o el real, porque ambos conforman el mismo protocolo. `@unchecked Sendable` le dice al compilador "confía en mí, este tipo es seguro para concurrencia". En producción evitamos `@unchecked`, pero en tests es aceptable porque cada test se ejecuta de forma aislada.
 
@@ -193,7 +207,7 @@ final class LoginUseCaseTests: XCTestCase {
         XCTAssertEqual(session, expectedSession)
     }
 }
-```text
+```
 
 **Explicación línea por línea, siguiendo el patrón Arrange-Act-Assert:**
 
@@ -207,7 +221,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```text
+```
 
 **Fase ARRANGE (preparar el escenario):**
 
@@ -248,7 +262,7 @@ struct LoginUseCase: Sendable {
         return try await authGateway.authenticate(credentials: credentials)
     }
 }
-```swift
+```
 
 **Explicación línea por línea del LoginUseCase:**
 
@@ -287,7 +301,7 @@ flowchart TD
     style ERR2 fill:#f8d7da,stroke:#dc3545
     style ERR3 fill:#f8d7da,stroke:#dc3545
     style ERR4 fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Ejecutamos. El test pasa. Fíjate en que la implementación ya hace algo útil: crea los Value Objects (que se validan solos) y delega al gateway. No hemos hecho "lo mínimo tonto" (como devolver una sesión hardcodeada) porque el test pide una sesión que viene del gateway, y la forma natural de satisfacer eso es pasar las credenciales al gateway. TDD no significa hacer trampas; significa no implementar más de lo que los tests piden.
 
@@ -309,7 +323,7 @@ func test_execute_sends_validated_credentials_to_gateway() async throws {
     XCTAssertEqual(gateway.receivedCredentials?.email.value, "user@example.com")
     XCTAssertEqual(gateway.receivedCredentials?.password.value, "pass123")
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios. Las credenciales ya se pasan correctamente. El test tiene valor documental: deja explícito que el caso de uso transforma los strings de entrada en Value Objects validados antes de pasarlos al gateway.
 
@@ -331,7 +345,7 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
         XCTAssertTrue(error is Email.ValidationError)
     }
 }
-```text
+```
 
 Ejecutamos. Pasa, porque `Email("invalid-email")` ya lanza `Email.ValidationError.invalidFormat` y nuestro `execute` propaga el error con `try`. Pero hay un problema: el error que recibe el llamante es `Email.ValidationError.invalidFormat`, que es un tipo interno del Domain. ¿Queremos que la UI tenga que conocer los tipos internos de validación del Domain? No. Queremos que el caso de uso traduzca ese error a un error propio, más limpio.
 
@@ -351,7 +365,7 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Falla porque `LoginUseCase.Error` no existe y el caso de uso no traduce errores.
 
@@ -399,7 +413,7 @@ struct LoginUseCase: Sendable {
         }
     }
 }
-```text
+```
 
 Ejecutamos. Todos los tests pasan (incluido el test del happy path, que sigue funcionando).
 
@@ -423,7 +437,7 @@ func test_execute_with_empty_password_throws_emptyPassword() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios, porque la implementación ya traduce `Password.ValidationError` a `LoginUseCase.Error.emptyPassword`.
 
@@ -442,7 +456,7 @@ func test_execute_with_invalid_email_does_not_call_gateway() async {
     
     XCTAssertNil(gateway.receivedCredentials)
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios, porque el `try Email(email)` falla antes de llegar a `authGateway.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
 
@@ -466,7 +480,7 @@ func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambios, porque la implementación ya captura `AuthError.invalidCredentials` y lo traduce a `LoginUseCase.Error.invalidCredentials`.
 
@@ -488,7 +502,7 @@ func test_execute_without_connectivity_throws_connectivity() async {
         XCTFail("Unexpected error type: \(error)")
     }
 }
-```text
+```
 
 Ejecutamos. Pasa. Todos los escenarios BDD están cubiertos.
 
@@ -542,7 +556,7 @@ struct LoginUseCase: Sendable {
         }
     }
 }
-```text
+```
 
 ### LoginUseCaseTests (tests completos)
 
@@ -673,6 +687,10 @@ En su lugar, el caso de uso traduce todos los errores posibles a un conjunto uni
 
 Si mañana cambiamos la validación del email (por ejemplo, añadiendo un nuevo caso de error `Email.ValidationError.disposableProvider`), el caso de uso puede decidir cómo traducir ese nuevo error sin que la UI se entere. Quizá lo traduce a `.invalidEmail` como los demás, quizá añade un nuevo caso a `LoginUseCase.Error`. Pero la decisión se toma aquí, no en la UI.
 
+> **Contraste scaffold:** El scaffold toma un camino distinto pero igualmente válido. En vez de tener errores anidados por VO (`Email.ValidationError`) y luego traducirlos, usa un `LoginError` unificado desde el principio. Así el `AuthenticateUserUseCase` del scaffold no necesita traducción — los errores que lanzan `EmailAddress` y `Password` ya son `LoginError.invalidEmail` y `LoginError.invalidPassword`. Resultado: el caso de uso del scaffold son **4 líneas** sin `do/catch`.
+>
+> Ambos diseños son correctos. El de esta lección es más **explícito y extensible** (cada capa tiene su vocabulario de errores). El del scaffold es más **pragmático** (un enum unificado para 4 casos). Lo importante es que entiendas el trade-off: la traducción de errores añade claridad semántica a costa de verbosidad.
+
 ---
 
 ## Por qué el caso de uso es un struct y no una clase
@@ -701,62 +719,171 @@ Siete tests XCTest que cubren todos los escenarios BDD: happy path, validación 
 
 Un stub (`AuthGatewayStub`) que permite testear el caso de uso de forma aislada, rápida, y determinista.
 
-En la siguiente lección implementaremos la capa Infrastructure: la implementación real del `AuthGateway` que habla con un servidor, y un `StubAuthGateway` para desarrollo sin servidor.
-
 ---
 
----
+## Persistencia segura de sesión: Keychain
 
-<!-- plantilla-pedagogica:auto -->
+> **Enterprise (Etapa 2+):** Esta sección describe un patrón que **no se implementa en Etapa 1**. Lo introducimos aquí como contexto porque los escenarios BDD de seguridad lo mencionan. La implementación real de `SessionRepository` y `KeychainClient` se aborda a partir de Etapa 2.
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/02-application.md`.
+El `LoginUseCase` devuelve una `Session` al llamante. Pero ¿quién decide dónde se guarda esa sesión? Y más importante: ¿cómo debe guardarse de forma segura?
 
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+### No uses UserDefaults para tokens
 
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+Es tentador guardar la sesión en `UserDefaults` porque es la forma más rápida. Pero `UserDefaults` tiene problemas de seguridad:
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
+- No está cifrado por defecto. Los datos se almacenan en texto plano en el bundle de la app.
+- Se incluye en backups de iTunes/iCloud si no están cifrados.
+- Cualquiera con acceso al dispositivo puede extraer los tokens fácilmente.
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+En una app enterprise, los tokens de sesión son secretos sensibles. Exponerlos compromete la seguridad del usuario.
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+### Keychain: almacenamiento seguro del sistema
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+Apple proporciona **Keychain Services** como solución oficial para almacenar datos sensibles:
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+- Cifrado a nivel de sistema con la clave de desbloqueo del dispositivo.
+- Aislado por app: otras apps no pueden acceder.
+- Se excluye de backups no cifrados.
+- Se integra con Face ID / Touch ID para acceder a datos sensibles.
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+Para una `Session` que contiene `accessToken`, el patrón enterprise es:
+
+```swift
+// Infrastructure/SessionRepositoryKeychain.swift
+final class SessionRepositoryKeychain: SessionRepository {
+    private let keychain: KeychainClient
+    
+    init(keychain: KeychainClient = KeychainClient.default) {
+        self.keychain = keychain
+    }
+    
+    func save(_ session: Session) async throws {
+        try keychain.set(session.token, forKey: "user_session_token")
+    }
+    
+    func load() async throws -> Session? {
+        guard let token = try keychain.get("user_session_token") else {
+            return nil
+        }
+        // Simplificado: en producción también persiste el userId/email
+        return Session(token: token, email: "")
+    }
+    
+    func clear() async throws {
+        try keychain.delete("user_session_token")
+    }
+}
+```
+
+**Nota:** En este curso básico no implementamos `SessionRepository` como un contrato separado, pero en una app enterprise sí deberías hacerlo. Esto permite cambiar la implementación (por ejemplo, para tests) sin tocar el caso de uso.
+
+### Token refresh: cuando expira la sesión
+
+Los tokens de acceso suelen tener una vida útil limitada (15–60 minutos). Cuando expiran, el servidor responde con `401 Unauthorized`. En este punto, la app tiene dos opciones:
+
+1. **Forzar logout** — borrar sesión y pedir al usuario que se autentique de nuevo.
+2. **Silent refresh** — usar un `refreshToken` para obtener un nuevo `accessToken` sin intervención del usuario.
+
+El patrón enterprise es el silent refresh. El flujo es:
+
 ```text
+┌──────────┐     ┌──────────────┐       ┌──────────────┐      ┌────────────┐
+│  Usuario │     │  App Layer   │       │   Keychain   │      │  Servidor  │
+│  (UI)    │     │   (Refresh)  │       │              │      │  (Remoto)  │
+└────┬─────┘     └───────┬──────┘       └──────┬───────┘      └─────┬──────┘
+     │                   │                     │                    │
+     │ 401 en petición   │                     │                    │
+     │──────────────────>│                     │                    │
+     │                   │ lee refreshToken    │                    │
+     │                   │────────────────────>│                    │
+     │                   │ refreshToken        │                    │
+     │                   │<────────────────────│                    │
+     │                   │ POST /auth/refresh  │                    │
+     │                   │─────────────────────────────────────────>│
+     │                   │                     │                    │
+     │                   │ 200 + nuevo token   │                    │
+     │                   │<─────────────────────────────────────────│
+     │                   │ guarda nuevo token  │                    │
+     │                   │────────────────────>│                    │
+     │                   │ reintenta petición  │                    │
+     │                   │--──────────────────>│                    │
+     │ 200 OK (datos)    │                     │                    │
+     │<──────────────────│                     │                    │
+```
 
-Lectura semantica minima de este diagrama:
+Este flujo es transparente para el usuario. La app detecta el 401, intenta refrescar el token silenciosamente, y reintenta la petición original. Si el refresh también falla (por ejemplo, el refreshToken también expiró), entonces sí se fuerza el logout.
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+**En este curso básico** no implementamos refresh token porque requiere un backend que lo soporte. Pero es importante que sepas que existe este patrón y que en producción deberías implementarlo.
+
+
+---
+
+## 🔨 Checkpoint Xcode — Application en el proyecto real
+
+Acabas de construir el caso de uso y el puerto de autenticación. Ahora los ves en el scaffold y ejecutas tests que validan el flujo completo de Application.
+
+**Paso 1 — Localiza los archivos en `FeatureLoginDomain`**
+
+En Xcode, dentro de `Sources/FeatureLoginDomain/`:
+
+| Tu implementación (lección) | Scaffold | Qué cambia |
+|---|---|---|
+| `AuthGateway` (protocol) | `AuthRepository.swift` | Nombre (`Gateway` → `Repository`) y método (`login` → `authenticate`) |
+| `LoginUseCase` | `AuthenticateUserUseCase.swift` | Nombre más explícito; no devuelve `LoginEvent`, lanza directamente `LoginError` |
+
+Abre `AuthRepository.swift`:
+
+```swift
+public protocol AuthRepository: Sendable {
+    func authenticate(credentials: Credentials) async throws -> UserSession
+}
+```
+
+Compara con el `AuthGateway` que diseñaste. El patrón es idéntico: un protocolo que desacopla Application de Infrastructure, con `async throws` para gestionar asincronía y errores.
+
+Abre `AuthenticateUserUseCase.swift`:
+
+```swift
+public struct AuthenticateUserUseCase: Sendable {
+    private let repository: any AuthRepository
+
+    public func execute(email: String, password: String) async throws -> UserSession {
+        let credentials = Credentials(
+            email: try EmailAddress(email),
+            password: try Password(password)
+        )
+        return try await repository.authenticate(credentials: credentials)
+    }
+}
+```
+
+Fíjate: el UseCase recibe `String` crudos (como la UI los enviará), construye los Value Objects dentro (validando aquí), y delega en el repositorio. Mismo patrón que el tuyo, con los nombres del scaffold.
+
+**Paso 2 — Ejecuta los tests del Domain (que incluyen el UseCase)**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDomainTests
+```
+
+Los tests incluyen el caso de uso: credenciales inválidas no llegan al repositorio, credenciales válidas sí. Todo en verde.
+
+**Paso 3 — Comprueba que el Domain no importa infraestructura**
+
+En Xcode, abre `Package.swift`. Localiza el target `FeatureLoginDomain`:
+
+```swift
+.target(
+    name: "FeatureLoginDomain",
+    dependencies: ["CoreDomain"]
+)
+```
+
+Solo depende de `CoreDomain`. Ni rastro de `Foundation` extendido, ni de `URLSession`, ni de SwiftUI. El Domain es puro. El UseCase define el flujo; la infraestructura lo cumplirá.
+
+---
+
+## Qué sigue
+
+La siguiente lección, [Feature Login: Capa Infrastructure](03-infrastructure.md), implementa `RemoteAuthGateway` — la implementación real del protocolo `AuthGateway` que hace la petición HTTP al servidor — y un `StubAuthGateway` para desarrollo sin conexión.
 

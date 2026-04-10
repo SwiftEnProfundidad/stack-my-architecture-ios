@@ -2,6 +2,11 @@ body.with-global-topbar {
   padding-top: var(--global-topbar-offset, 86px);
 }
 
+:root {
+  --study-topbar-box-height: 46px;
+  --study-topbar-button-height: 40px;
+}
+
 .global-topbar {
   position: fixed;
   top: 0;
@@ -9,7 +14,8 @@ body.with-global-topbar {
   right: 0;
   z-index: 12000;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 10px 12px;
   background: var(--bg-elevated, #0f172a);
@@ -23,12 +29,16 @@ body.with-global-topbar {
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+  min-height: var(--study-topbar-box-height);
+  order: 1;
 }
 
 .study-current-lesson {
-  flex: 1 1 auto;
-  min-width: clamp(260px, 24vw, 420px);
-  max-width: min(52vw, 860px);
+  flex: 1 1 320px;
+  min-width: clamp(220px, 20vw, 360px);
+  max-width: min(42vw, 680px);
+  min-height: var(--study-topbar-box-height);
+  order: 2;
   border: 1px solid var(--border, #334155);
   border-radius: 10px;
   background: var(--bg, #111827);
@@ -68,6 +78,7 @@ body.with-global-topbar {
   padding: 8px 10px;
   font-size: 12.5px;
   font-weight: 700;
+  min-height: var(--study-topbar-button-height);
   cursor: pointer;
 }
 
@@ -78,9 +89,17 @@ body.with-global-topbar {
 #study-ux-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--study-topbar-box-height);
+  align-content: center;
+  order: 4;
+  overflow-x: visible;
   gap: 8px;
-  margin-left: auto;
-  padding: 8px;
+  margin-left: 0;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 1px solid var(--border, #334155);
   background: var(--bg, #111827);
@@ -88,6 +107,7 @@ body.with-global-topbar {
 
 #study-ux-controls button,
 #theme-controls button,
+#course-switcher button,
 .study-topic-nav button,
 .study-ux-index-actions button {
   display: inline-flex;
@@ -101,7 +121,7 @@ body.with-global-topbar {
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.15;
-  min-height: 36px;
+  min-height: var(--study-topbar-button-height);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -146,6 +166,15 @@ body.with-global-topbar {
 #theme-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--study-topbar-box-height);
+  align-content: center;
+  order: 3;
+  overflow-x: visible;
+  margin-left: auto;
   gap: 8px;
 }
 
@@ -212,7 +241,8 @@ body.with-global-topbar {
 }
 
 .study-ux-completed-badge,
-.study-ux-review-badge {
+.study-ux-review-badge,
+.study-ux-bookmark-badge {
   margin-left: 6px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -224,6 +254,179 @@ body.with-global-topbar {
 
 .study-ux-review-badge {
   color: var(--accent, #60a5fa);
+}
+
+.study-ux-bookmark-badge {
+  color: #fbbf24;
+}
+
+.study-notes-panel,
+.study-bookmarks-panel,
+.study-interview-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.study-interview-panel[hidden] {
+  display: none;
+}
+
+.study-interview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.study-interview-eyebrow,
+.study-interview-rubric-title {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent, #60a5fa);
+}
+
+.study-interview-head h4,
+.study-interview-question,
+.study-interview-current {
+  margin: 0;
+}
+
+.study-interview-head p {
+  margin: 8px 0 0;
+  color: var(--text-secondary, #cbd5e1);
+  line-height: 1.5;
+  max-width: 72ch;
+}
+
+.study-interview-actions,
+.study-interview-source-row,
+.study-interview-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-interview-chip {
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: var(--text, #e5e7eb);
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.study-interview-chip.is-active {
+  border-color: rgba(96, 165, 250, 0.42);
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.study-interview-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.82);
+  padding: 14px;
+}
+
+.study-interview-question {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--text, #e5e7eb);
+}
+
+.study-interview-current {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.study-interview-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text, #e5e7eb);
+}
+
+.study-interview-source {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text, #e5e7eb);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.study-interview-empty {
+  margin: 0;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+#study-note-editor {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--border, #334155);
+  border-radius: 10px;
+  background: var(--bg, #111827);
+  color: var(--text, #e5e7eb);
+  padding: 12px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.45;
+}
+
+#study-note-editor:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.study-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-note-status,
+.study-bookmarks-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.study-bookmarks-list {
+  display: grid;
+  gap: 10px;
+}
+
+.study-bookmark-item {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.82);
+  padding: 10px 12px;
+}
+
+.study-bookmark-item p {
+  margin: 6px 0 0;
+}
+
+.study-bookmark-link {
+  width: 100%;
+  justify-content: flex-start !important;
+  white-space: normal !important;
+  text-align: left;
 }
 
 a.doc-nav-link.study-nav-active {
@@ -286,9 +489,9 @@ main hr {
     width: 100%;
     margin-left: 0;
     flex: 1 1 auto;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
   }
 
   #study-ux-controls {
@@ -309,6 +512,11 @@ main hr {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --study-topbar-box-height: auto;
+    --study-topbar-button-height: 32px;
+  }
+
   #study-current-lesson {
     display: none !important;
   }
@@ -344,13 +552,15 @@ main hr {
 
   #study-ux-controls,
   #theme-controls {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    overflow-x: visible;
   }
 }
 
 @media (max-width: 480px) {
+  :root {
+    --study-topbar-button-height: 30px;
+  }
+
   .global-topbar {
     gap: 6px;
     padding: 6px 8px;
@@ -413,5 +623,95 @@ main hr {
     margin-right: calc(clamp(320px, 33vw, 520px) + 16px) !important;
     width: auto !important;
     max-width: calc(100vw - clamp(320px, 33vw, 520px) - 48px) !important;
+  }
+}
+
+.study-nav-locked {
+  opacity: 0.58;
+  position: relative;
+}
+
+.study-nav-locked::after {
+  content: " 🔒";
+}
+
+.study-access-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(96, 165, 250, 0.34);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(14, 30, 58, 0.9));
+  box-shadow: 0 20px 32px rgba(2, 6, 23, 0.2);
+}
+
+.study-access-banner-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.study-access-banner-copy strong {
+  color: #eff6ff;
+  font-size: 1rem;
+}
+
+.study-access-banner-copy p {
+  margin: 0;
+  color: #cbd5e1;
+  max-width: 72ch;
+  line-height: 1.5;
+}
+
+.study-access-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.study-access-banner-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 165, 250, 0.42);
+  background: rgba(59, 130, 246, 0.16);
+  color: #eff6ff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.study-access-banner-link.secondary {
+  background: rgba(15, 23, 42, 0.78);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+@media (max-width: 640px) {
+  .study-access-banner {
+    padding: 14px;
+  }
+
+  .study-access-banner-actions {
+    width: 100%;
+  }
+
+  .study-access-banner-link {
+    flex: 1 1 100%;
+  }
+
+  .study-interview-actions,
+  .study-interview-source-row {
+    width: 100%;
+  }
+
+  .study-interview-actions button,
+  .study-interview-source,
+  .study-interview-chip {
+    flex: 1 1 100%;
   }
 }

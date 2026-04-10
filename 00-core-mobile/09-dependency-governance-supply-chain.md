@@ -6,27 +6,40 @@ Las dependencias son como proveedores externos de tu empresa: cada uno que añad
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, el `Package.swift` define explícitamente qué targets pueden importar qué. `FeatureLoginDomain` solo depende de `CoreDomain`; nunca de `InfraHTTP` ni de `FeatureCatalogDomain`. El script `check-dependencies.sh` verifica estas reglas en cada build. Si alguien añade un `import InfraHTTP` dentro de `FeatureLoginDomain`, el gate falla. Consulta la Etapa 4 (`04-arquitecto/02-reglas-dependencia-ci.md`) para la estrategia completa.
+En `ArchitectureKit`, el `Package.swift` define explícitamente qué targets pueden importar qué. `FeatureLoginDomain` solo depende de `CoreDomain`; nunca de `InfraHTTP` ni de `FeatureCatalogDomain`. Si alguien añade un `import InfraHTTP` dentro de `FeatureLoginDomain`, el gate de build falla. Consulta la [estrategia completa de reglas de dependencia en CI](../04-arquitecto/02-reglas-dependencia-ci.md) en la Etapa 4 (Arquitecto). El scaffold de referencia está en `ArchitectureKit/Package.swift` en la raíz del repositorio del curso.
 
 ## Cuándo sí / cuándo no
 
-Aplica gobernanza de dependencias desde que tienes más de 3 módulos SPM o más de una dependencia externa. No la apliques a proyectos de un solo target donde el compilador ya controla todo.
+Aplica gobernanza de dependencias desde que tienes más de 3 módulos SPM o más de una dependencia externa: a partir de ese punto, el compilador ya no puede impedirte importar lo que no debes, necesitas reglas explícitas. No la apliques a proyectos de un solo target donde el compilador ya controla todo.
 
 ## Reglas de dependencia modular
 
 Define direcciones permitidas y prohibidas entre módulos. Las reglas deben ser ejecutables (lint/build checks) para evitar que la arquitectura dependa de disciplina manual.
 
+Ejemplo en `Package.swift`:
+- `FeatureLoginDomain` → puede importar `CoreDomain` ✓
+- `FeatureLoginDomain` → no puede importar `InfraHTTP` ✗
+- `FeatureLoginDomain` → no puede importar `FeatureCatalogDomain` ✗
+
+Si una regla solo existe en un documento pero no hay un gate que la verifique, no es una regla: es un deseo.
+
 ## Política de upgrades
 
-Establece cadencia de actualización (por ejemplo mensual/trimestral), criterios de priorización por riesgo y gates de validación (build, tests, perf, seguridad).
+Establece cadencia de actualización según el tipo de dependencia: mensual para dependencias de infraestructura activa (SDKs de red, analítica, auth); trimestral para dependencias estables de bajo riesgo.
 
-Cada upgrade relevante debe incluir plan de rollback.
+Prioriza upgrades por riesgo: (1) vulnerabilidad conocida → inmediato, (2) breaking change en dependencia crítica → siguiente sprint, (3) mejora menor → cadencia normal.
+
+Gates de validación antes de mergear un upgrade: build limpio, tests en verde, sin regresión de performance medible, sin nuevos permisos o capacidades no justificados.
+
+Cada upgrade de dependencia crítica debe incluir plan de rollback explícito: versión anterior pineada en `Package.swift`, con procedimiento documentado de cómo revertir si el upgrade introduce un defecto en producción.
 
 ## Supply chain basics
 
-Usa lockfiles, verifica checksums cuando la herramienta lo permita y minimiza permisos/capacidades de dependencias.
+En iOS con SPM, `Package.resolved` actúa como lockfile: fija versiones exactas y checksums de cada dependencia. Commitea siempre `Package.resolved` al repositorio para garantizar builds reproducibles. SPM verifica checksums automáticamente al resolver; no requiere configuración adicional.
 
-Evita introducir SDKs sin justificar valor, riesgo y estrategia de salida.
+Antes de introducir cualquier SDK externo, justifica: qué problema resuelve que no puedes resolver con código propio en menos de una semana, qué riesgo añade (mantenimiento, superficie de ataque, licencia) y cuál es la estrategia de salida si el SDK queda abandonado o introduce una vulnerabilidad.
+
+La [lección anterior sobre threat modeling](08-seguridad-privacidad-threat-modeling.md) incluye "SDK de terceros mal configurado" como actor de amenaza. La gobernanza de supply chain es el control que mitiga ese riesgo.
 
 ## Dependency Governance Rules checklist
 
@@ -40,78 +53,6 @@ Evita introducir SDKs sin justificar valor, riesgo y estrategia de salida.
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/09-dependency-governance-supply-chain.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
-
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+La siguiente lección, [Plantillas operativas](10-plantillas.md), reúne ADR, RFC, PR checklist, DoD y el threat model en un único documento de referencia con ejemplos reales. Es el punto de síntesis de todo lo aprendido en Core Mobile.

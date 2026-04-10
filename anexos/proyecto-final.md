@@ -46,9 +46,9 @@ Vas a construir una app de catalogo de libros desde cero. La app permite al usua
 
 - Tiene un **dominio claro** (libros, autores, precios) — para aplicar Value Objects y modelos.
 - Necesita **carga de datos asincrona** — para aplicar async/await, Sendable, repositorios.
-- Tiene **dos pantallas** (lista + detalle) — para aplicar navegacion con NavigationPath.
+- Tiene **dos pantallas** (lista + detalle) — para aplicar navegación con NavigationPath.
 - Requiere **tests** — para aplicar TDD, stubs, spies, Arrange-Act-Assert.
-- Es lo suficientemente pequena para hacerla en unas horas, pero lo suficientemente completa para cubrir todo el curso.
+- Es lo suficientemente pequeña para hacerla en unas horas, pero lo suficientemente completa para cubrir todo el curso.
 
 ---
 
@@ -75,14 +75,14 @@ Estos son los escenarios BDD que tu app debe cumplir:
 
 ### Feature: Ver detalle de un libro
 
-**Escenario 4: Navegacion a detalle**
+**Escenario 4: Navegación a detalle**
 - Given la lista de libros se ha cargado
 - When el usuario pulsa sobre un libro
-- Then la app navega a la pantalla de detalle mostrando titulo, autor, precio, y descripcion
+- Then la app navega a la pantalla de detalle mostrando titulo, autor, precio, y descripción
 
 ---
 
-## Requisitos tecnicos (COMO tiene que estar construida)
+## Requisitos técnicos (COMO tiene que estar construida)
 
 ### Estructura de carpetas (Feature-First)
 
@@ -137,7 +137,7 @@ BookShelfTests/
 └── App/
     └── Navigation/
         └── AppCoordinatorTests.swift
-```swift
+```
 
 ### Modelo de dominio
 
@@ -151,9 +151,9 @@ Book
 ├── price: Price        (reutiliza el Price del curso o crea uno nuevo)
 ├── coverURL: URL
 └── description: String
-```swift
+```
 
-**Pregunta para ti:** Que protocolos necesita conformar `Book`? Piensa en: tests (necesitas `==`), navegacion (necesitas NavigationPath), concurrencia (es async). Escribe los protocolos ANTES de mirar la respuesta.
+**Pregunta para ti:** Que protocolos necesita conformar `Book`? Piensa en: tests (necesitas `==`), navegación (necesitas NavigationPath), concurrencia (es async). Escribe los protocolos ANTES de mirar la respuesta.
 
 <details>
 <summary>Respuesta</summary>
@@ -173,7 +173,7 @@ enum BooksError: Error, Equatable, Sendable {
     case connectivity
     case invalidData
 }
-```text
+```
 
 **Pregunta para ti:** Por que `Error`, `Equatable` y `Sendable`? Escribe tu respuesta antes de mirar.
 
@@ -193,7 +193,7 @@ enum BooksError: Error, Equatable, Sendable {
 Estas reglas son **innegociables**. Si no las cumples, la practica no esta aprobada:
 
 ### 1. TDD obligatorio
-- Escribe SIEMPRE el test ANTES del codigo de produccion.
+- Escribe SIEMPRE el test ANTES del código de produccion.
 - Ciclo Red, Green, Refactor en cada iteracion.
 - Minimo **12 tests** en total (ver rubrica).
 
@@ -209,13 +209,13 @@ Estas reglas son **innegociables**. Si no las cumples, la practica no esta aprob
 - ViewModels: `@Observable @MainActor final class`.
 - No usar `@unchecked Sendable` en produccion (solo en test doubles).
 
-### 4. Navegacion por eventos
+### 4. Navegación por eventos
 - Las features NO se conocen entre si.
-- El ViewModel NO sabe de navegacion.
+- El ViewModel NO sabe de navegación.
 - Los closures (`onBookSelected`) conectan features con el coordinador.
 - El coordinador gestiona `NavigationPath`.
 
-### 5. Inyeccion de dependencias
+### 5. Inyección de dependencias
 - Ningun componente crea sus propias dependencias.
 - Todo se ensambla en el `CompositionRoot`.
 - Los tests inyectan stubs/spies.
@@ -288,7 +288,7 @@ El servidor devuelve este JSON para el endpoint `GET /books`:
 11. `test_load_on_empty_sets_empty_state`
 12. `test_load_on_error_sets_error_state`
 
-### Navegacion (2 tests)
+### Navegación (2 tests)
 13. `test_handleBookSelected_pushes_bookDetail`
 14. `test_path_starts_empty`
 
@@ -296,7 +296,7 @@ El servidor devuelve este JSON para el endpoint `GET /books`:
 
 ---
 
-## Rubrica de evaluacion
+## Rubrica de evaluación
 
 Evalua tu propio trabajo con esta rubrica. Se honesto contigo mismo — el objetivo es aprender, no "aprobar".
 
@@ -335,19 +335,19 @@ Evalua tu propio trabajo con esta rubrica. Se honesto contigo mismo — el objet
 |---|---|---|
 | ViewModel usa `@Observable` | 2 | No `ObservableObject` ni `@Published` |
 | Vista usa `@State` para el ViewModel | 2 | `@State private var viewModel` en la vista |
-| Navegacion con `NavigationPath` | 2 | AppCoordinator gestiona un `NavigationPath` |
-| `.task` para carga automatica | 2 | La vista usa `.task { await viewModel.load() }` |
+| Navegación con `NavigationPath` | 2 | AppCoordinator gestiona un `NavigationPath` |
+| `.task` para carga automática | 2 | La vista usa `.task { await viewModel.load() }` |
 | Preview funciona con Stub | 2 | La Preview usa `StubBookRepository` y se ve en Xcode |
 
-### Calidad de codigo (0-10 puntos)
+### Calidad de código (0-10 puntos)
 
 | Criterio | Puntos | Como verificar |
 |---|---|---|
-| Nombres descriptivos | 2 | Los nombres dicen QUE hace el codigo, no COMO |
+| Nombres descriptivos | 2 | Los nombres dicen QUE hace el código, no COMO |
 | Sin force unwraps innecesarios | 2 | No `!` excepto en URLs hardcodeadas |
-| Errores semanticos, no tecnicos | 2 | `BooksError.connectivity`, no `URLError` |
+| Errores semánticos, no técnicos | 2 | `BooksError.connectivity`, no `URLError` |
 | DTO separado del Domain | 2 | `BookDTO` != `Book`, mapping explicito |
-| Sin codigo muerto | 2 | No hay funciones o imports que no se usen |
+| Sin código muerto | 2 | No hay funciones o imports que no se usen |
 
 ### Puntuacion total
 
@@ -371,7 +371,7 @@ Sigue este orden, igual que en el curso:
 3. **Application:** Crea `BookRepository` (protocolo), `LoadBooksUseCase`. Escribe tests con stub.
 4. **Infrastructure:** Crea `BookDTO`, `BookMapper`, `RemoteBookRepository`, `StubBookRepository`. Escribe tests con `HTTPClientStub`.
 5. **Interface:** Crea `BooksViewModel`, `BooksView`, `BookRow`, `BookDetailView`. Escribe tests del ViewModel.
-6. **Navegacion:** Crea `AppDestination`, `AppCoordinator`. Conecta todo en `CompositionRoot`.
+6. **Navegación:** Crea `AppDestination`, `AppCoordinator`. Conecta todo en `CompositionRoot`.
 7. **Prueba final:** Cmd+B (compila), Cmd+U (tests), Cmd+R (ejecuta con stub).
 
 ### Si te atascas
@@ -384,7 +384,7 @@ Sigue este orden, igual que en el curso:
 
 - **No copies y pegues del curso** cambiando nombres. Escribe cada linea tu mismo. El objetivo es que entiendas, no que copies.
 - **No te saltes los tests.** Si no escribes tests primero, no estas haciendo TDD y no estas practicando lo que aprendiste.
-- **No busques atajos.** Si algo te parece tedioso (crear archivos, escribir stubs), es parte del oficio. La repeticion construye musculo.
+- **No busques atajos.** Si algo te parece tedioso (crear archivos, escribir stubs), es parte del oficio. La repetición construye musculo.
 
 ---
 
@@ -392,7 +392,7 @@ Sigue este orden, igual que en el curso:
 
 Si tu puntuacion es 35 o mas, felicidades: has demostrado que puedes construir una app iOS con Clean Architecture, TDD, y SwiftUI moderno. Eso te pone por delante del 90% de los juniors que salen de un bootcamp.
 
-Si tu puntuacion es menor de 35, no te frustres. Vuelve a las lecciones que fallen, repite los ejercicios, y vuelve a intentar esta practica. La repeticion es la madre del aprendizaje.
+Si tu puntuacion es menor de 35, no te frustres. Vuelve a las lecciones que fallen, repite los ejercicios, y vuelve a intentar esta practica. La repetición es la madre del aprendizaje.
 
 **El siguiente paso:** Intenta conectar la app a una API real (puedes usar una API publica de libros como Open Library). Eso te obligara a adaptar el DTO al formato real de la API, que es exactamente lo que haras en tu primer trabajo como desarrollador iOS.
 

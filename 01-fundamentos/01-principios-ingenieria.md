@@ -20,7 +20,7 @@ Este es el principio más simple de todos, y paradójicamente el que más gente 
 
 Probablemente estás pensando: "esto es obvio, yo ya lo hago mentalmente". Y es posible que sea verdad. Pero hay una diferencia enorme entre hacerlo mentalmente y hacerlo de forma explícita. Cuando lo haces mentalmente, es fácil que los límites se difuminen conforme avanzas. Empiezas implementando el caso de uso de login y, sin darte cuenta, acabas metiendo lógica de navegación dentro del caso de uso porque "es más fácil aquí". Cuando lo haces de forma explícita (escribiéndolo, aunque sea en un comentario o en un escenario BDD), los límites quedan claros y es mucho más difícil cruzarlos por accidente.
 
-En este curso, esta práctica se materializa en dos cosas concretas. Primero, en los **escenarios BDD** que escribiremos antes de cada feature: son la respuesta explícita a "¿qué tiene que hacer esto?". Segundo, en los **ADRs** (Architecture Decision Records) que escribiremos para decisiones no obvias: son la respuesta explícita a "¿por qué se hizo así y no de otra forma?".
+En este curso, esta práctica se materializa en dos cosas concretas. Primero, en los **escenarios BDD** que escribiremos antes de cada feature: son la respuesta explícita a "¿qué tiene que hacer esto?". Segundo, en los **ADRs** (Architecture Decisión Records) que escribiremos para decisiones no obvias: son la respuesta explícita a "¿por qué se hizo así y no de otra forma?".
 
 ### Un ejemplo real para que quede claro
 
@@ -117,7 +117,7 @@ graph LR
 
     subgraph Bajo["Bajo acoplamiento - enchufado"]
         direction TB
-        VM2["LoginViewModel"] ..>|"protocolo"| AUTH["any AuthGateway"]
+        VM2["LoginViewModel"] ==>|"contrato"| AUTH["any AuthGateway"]
         VM2 -->|"closure"| ONLOGIN["onLoginSuccess closure"]
         AUTH -.->|"impl. A"| REMOTE["RemoteAuthGateway<br/>URLSession"]
         AUTH -.->|"impl. B"| STUB["StubAuthGateway<br/>datos falsos"]
@@ -125,7 +125,7 @@ graph LR
 
     style Alto fill:#f8d7da,stroke:#dc3545
     style Bajo fill:#d4edda,stroke:#28a745
-```text
+```
 
 En el primer caso, si quieres testear el ViewModel, necesitas un servidor HTTP real, acceso a UserDefaults, y una jerarquía de navegación. En el segundo, le pasas un `StubAuthGateway` que devuelve lo que tú quieras, y verificas el resultado. **La diferencia no es estilo: es la diferencia entre "puedo testear esto en 1 segundo" y "necesito 30 minutos montando infraestructura".**
 
@@ -162,9 +162,6 @@ graph TD
     P1["1. Aclarar intencion<br/>Que? Por que? Que NO?"] -->|"Produce piezas con<br/>responsabilidad clara"| P4["4. Diseno modular<br/>Bajo acoplamiento + Alta cohesion"]
     P2["2. Lotes pequenos<br/>Incrementos verificables"] -->|"Obliga a construir<br/>una pieza a la vez"| P4
     P3["3. Tests como feedback<br/>Funciona? Buen diseno?"] -->|"Detecta acoplamiento<br/>y responsabilidades excesivas"| P4
-    P4 -->|"Hace posible todo<br/>lo anterior a escala"| P1
-    P4 -->|"Modulos claros =<br/>lotes mas pequenos"| P2
-    P4 -->|"Componentes aislados =<br/>tests simples"| P3
 
     P1 -.->|"Se materializa en"| BDD["BDD: Escenarios<br/>Given/When/Then"]
     P2 -.->|"Se materializa en"| TDD["TDD: Red-Green-Refactor<br/>ciclos de minutos"]
@@ -191,56 +188,7 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/01-principios-ingenieria.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+La siguiente lección, [Metodología BDD y TDD](02-metodologia-bdd-tdd.md), muestra cómo estos principios se convierten en prácticas concretas: escenarios Given/When/Then para aclarar intención y el ciclo Red-Green-Refactor para feedback inmediato.
 

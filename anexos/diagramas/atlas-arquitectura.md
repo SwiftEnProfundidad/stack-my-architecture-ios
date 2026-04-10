@@ -59,7 +59,7 @@ graph TB
     style APP fill:#cce5ff,stroke:#007bff
     style ADAPT fill:#fff3cd,stroke:#ffc107
     style OUTER fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Como leer este diagrama:**
 
@@ -84,7 +84,7 @@ graph LR
     end
 
     style SIN_INV fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Problema: si cambias la implementación de `RemoteAuthGateway` (por ejemplo, migras de URLSession a Firebase), tienes que **tocar LoginUseCase**. Y si tocas LoginUseCase, tienes que re-testear todo el flujo.
 
@@ -93,14 +93,14 @@ Con inversión de dependencias, Application define un protocolo y no sabe quién
 ```mermaid
 graph LR
     subgraph CON_INV["CON inversion: desacoplamiento por protocolo"]
-        UC2["LoginUseCase"] ..> PROTO["AuthGateway<br/>(protocolo)"]
+        UC2["LoginUseCase"] -.-> PROTO["AuthGateway<br/>(protocolo)"]
         PROTO -.->|"implementa"| RG2["RemoteAuthGateway"]
         PROTO -.->|"implementa"| STUB["AuthGatewayStub<br/>(tests)"]
         RG2 --> URL2["URLSession"]
     end
 
     style CON_INV fill:#d4edda,stroke:#28a745
-```text
+```
 
 **La flecha de dependencia se invierte:** ahora `RemoteAuthGateway` depende de `AuthGateway` (el protocolo que vive en Application), no al revés. LoginUseCase solo conoce el protocolo.
 
@@ -147,7 +147,7 @@ sequenceDiagram
     VM->>VM: state = success
     VM->>VM: onLoginSucceeded(session)
     V-->>U: Navega al Catalogo
-```text
+```
 
 **Que datos viajan en cada tramo:**
 
@@ -203,7 +203,7 @@ sequenceDiagram
     end
 
     V-->>U: Muestra lista o mensaje
-```text
+```
 
 ---
 
@@ -296,7 +296,7 @@ graph TD
     style INFRA fill:#fff3cd,stroke:#ffc107
     style INTERFACE fill:#e2d5f1,stroke:#6f42c1
     style COMPOSITION fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Como leer este grafo:**
 
@@ -347,7 +347,7 @@ graph TD
     style MAIN fill:#e2d5f1,stroke:#6f42c1
     style NONISOLATED fill:#d4edda,stroke:#28a745
     style COOPERATIVE fill:#cce5ff,stroke:#007bff
-```swift
+```
 
 **Que significa cada zona:**
 
@@ -357,7 +357,7 @@ graph TD
 
 **Donde se necesita Sendable:** Cada vez que un dato **cruza** de una zona a otra (las flechas del diagrama), ese dato debe ser `Sendable`. Por eso todos nuestros modelos (Email, Product, Session, etc.) son structs conformando `Sendable`.
 
-**Cancelacion:** Cuando el usuario sale de una pantalla, la `Task` que lanzó el `.task` de SwiftUI se cancela automaticamente. Esa cancelacion se propaga por toda la cadena: ViewModel → UseCase → Gateway → URLSession. Si URLSession recibe la cancelacion, deja de esperar la respuesta del servidor.
+**Cancelacion:** Cuando el usuario sale de una pantalla, la `Task` que lanzó el `.task` de SwiftUI se cancela automáticamente. Esa cancelacion se propaga por toda la cadena: ViewModel → UseCase → Gateway → URLSession. Si URLSession recibe la cancelacion, deja de esperar la respuesta del servidor.
 
 ---
 
@@ -437,7 +437,9 @@ graph TD
     style CATALOG fill:#d4edda,stroke:#28a745
     style NAV fill:#e2d5f1,stroke:#6f42c1
     style COMP fill:#f8d7da,stroke:#dc3545
-```text
+```
+
+La semántica clave de este grafo es que `AppComposition` conecta wiring, mientras `SharedKernel` actúa como base común; `Platform` y `BackendFirebase` proveen infraestructura técnica; y las capas `Domain`, `Application`, `Interface` e `Infrastructure` se mantienen separadas por frontera de imports.
 
 La semántica clave de este grafo es que `AppComposition` conecta wiring, mientras `SharedKernel` actúa como base común; `Platform` y `BackendFirebase` proveen infraestructura técnica; y las capas `Domain`, `Application`, `Interface` e `Infrastructure` se mantienen separadas por frontera de imports.
 
@@ -506,12 +508,12 @@ Si mañana migras de Firebase a Supabase, solo cambias `BackendFirebase` por `Ba
 
 ## Como usar este atlas
 
-- **Antes de empezar una leccion:** mira el diagrama 1 (capas) para ubicar donde estas trabajando.
+- **Antes de empezar una lección:** mira el diagrama 1 (capas) para ubicar donde estas trabajando.
 - **Si no entiendes por que existe un protocolo:** mira el diagrama 2 (Dependency Inversion).
 - **Si no entiendes el flujo de datos:** mira los diagramas 3 o 4 (secuencias end-to-end).
 - **Si no sabes quien depende de quien:** mira el diagrama 5 (grafo de dependencias).
 - **Si no entiendes `Sendable` o `@MainActor`:** mira el diagrama 6 (concurrencia).
-- **Si quieres ver la estructura de modulos futura:** mira el diagrama 7 (SPM).
+- **Si quieres ver la estructura de módulos futura:** mira el diagrama 7 (SPM).
 - **Si quieres saber como encaja Firebase:** mira el diagrama 8 (backend).
 
 ---

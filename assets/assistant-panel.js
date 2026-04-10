@@ -1176,7 +1176,12 @@
             });
         }
 
-        return tryPath(0);
+        return ensureProxyBaseReachable().then(function (ok) {
+            if (!ok) {
+                throw new Error('Asistente no disponible. Inicia stack-my-architecture-hub/open-proxy.command');
+            }
+            return tryPath(0);
+        });
     }
 
     function syncRuntimeConfig(options) {

@@ -8,6 +8,21 @@ En esta lección vamos a construir los siguientes tipos, todos con TDD (test pri
 
 El Value Object `Email`, que garantiza que un email tiene formato válido. El Value Object `Password`, que garantiza que una contraseña no está vacía. El tipo `Credentials` que agrupa ambos. El enum `AuthError` con los errores de autenticación. El enum `LoginEvent` con los eventos del dominio. Y el struct `Session` que representa una autenticación exitosa.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los tipos que construyes en esta lección usan nombres y diseños pedagógicos. En el scaffold `apps/ios/ArchitectureKit` hay diferencias que van más allá del nombre:
+>
+> | Lección | Scaffold | Qué cambia |
+> |---|---|---|
+> | `Email` | `EmailAddress` | Solo nombre |
+> | `Password` — valida `!isEmpty` | `Password` — valida `count >= 8` | Regla de negocio más estricta |
+> | `Email.ValidationError` / `Password.ValidationError` (errores anidados por VO) | `LoginError` (enum unificado con `.invalidEmail`, `.invalidPassword`, `.invalidCredentials`, `.network`) | Arquitectura de errores: anidada → unificada |
+> | `Session(token:, email:)` | `UserSession(userId:, token:)` | Campos distintos (`email` → `userId`) |
+> | `AuthError { invalidCredentials, connectivity }` | Integrado en `LoginError { ..., .network }` | Enum separado → unificado |
+> | `LoginEvent { success, failure }` | No existe — el ViewModel maneja el resultado directamente | Tipo pedagógico sin equivalente en scaffold |
+>
+> **¿Por qué la lección enseña un diseño diferente?** Porque el patrón de errores anidados por Value Object y los eventos de dominio explícitos son más puros desde DDD y enseñan mejor los principios. El scaffold usa un enum unificado porque en un proyecto real con 4 casos de error, la pragmática pesa más que la pureza. Ambos diseños son válidos — la diferencia es intencional y entenderla es parte del aprendizaje.
+>
+> Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 Aquí aplicamos explícitamente dos principios de [Principios de ingeniería](../01-principios-ingenieria.md):
@@ -50,7 +65,7 @@ graph TD
     style Composed fill:#cce5ff,stroke:#007bff
     style Errors fill:#f8d7da,stroke:#dc3545
     style Events fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 Cada tipo en este diagrama es algo que vas a construir con TDD. Los Value Objects (verde) son lo primero, porque todo lo demás depende de ellos.
 
@@ -74,7 +89,7 @@ graph LR
 
     style Raw fill:#f8d7da,stroke:#dc3545
     style VO fill:#d4edda,stroke:#28a745
-```text
+```
 
 ---
 
@@ -118,7 +133,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email.value, "user@example.com")
     }
 }
-```swift
+```
 
 **Explicación línea por línea para que no quede ninguna duda:**
 
@@ -148,7 +163,7 @@ struct Email: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```swift
+```
 
 **Explicación línea por línea:**
 
@@ -178,7 +193,7 @@ func test_init_with_string_without_at_sign_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```swift
+```
 
 **Explicación línea por línea:**
 
@@ -209,7 +224,7 @@ struct Email: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```swift
+```
 
 **Explicación de las líneas nuevas:**
 
@@ -237,7 +252,7 @@ func test_init_with_email_without_domain_dot_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Falla porque "user@domain" contiene arroba y pasa nuestra validación actual.
 
@@ -256,7 +271,7 @@ private static func isValid(_ value: String) -> Bool {
     guard parts.count == 2 else { return false }
     return parts[1].contains(".")
 }
-```text
+```
 
 Ejecutamos. Los tres tests pasan.
 
@@ -270,7 +285,7 @@ func test_init_with_empty_string_throws_invalidFormat() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambiar nada porque un string vacío no contiene "@". El test tiene valor documental: deja explícito que un email vacío es inválido.
 
@@ -286,7 +301,7 @@ func test_init_trims_whitespace_from_valid_email() throws {
     
     XCTAssertEqual(email.value, "user@example.com")
 }
-```text
+```
 
 Ejecutamos. Falla porque nuestro `init` guarda el valor tal cual, con espacios.
 
@@ -300,7 +315,7 @@ init(_ rawValue: String) throws {
     }
     self.value = trimmed
 }
-```text
+```
 
 Ejecutamos. Todos los tests pasan.
 
@@ -336,7 +351,7 @@ struct Email: Equatable, Sendable {
         return parts[1].contains(".")
     }
 }
-```text
+```
 
 Y el archivo de tests completo es:
 
@@ -378,7 +393,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email.value, "user@example.com")
     }
 }
-```text
+```
 
 Fíjate en lo que ha pasado: 5 tests, 5 iteraciones de TDD, y el resultado es un tipo de dominio completo, verificado, y con una cobertura que cubre todos los escenarios BDD que definimos. Y el código de producción tiene exactamente lo que necesitamos, nada más. No hay "código por si acaso". Todo lo que hay, lo pidió un test.
 
@@ -406,7 +421,7 @@ final class PasswordTests: XCTestCase {
         XCTAssertEqual(password.value, "securePass123")
     }
 }
-```text
+```
 
 No compila porque `Password` no existe.
 
@@ -422,7 +437,7 @@ struct Password: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Pasa.
 
@@ -436,7 +451,7 @@ func test_init_with_empty_string_throws_empty() {
         XCTAssertEqual(error as? Password.ValidationError, .empty)
     }
 }
-```text
+```
 
 Falla.
 
@@ -457,9 +472,11 @@ struct Password: Equatable, Sendable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Ambos tests pasan. El `Password` está completo.
+
+> **Divergencia scaffold:** En el scaffold real, `Password` valida `count >= 8` (mínimo 8 caracteres) en vez de solo `!isEmpty`. Esto es una decisión de negocio más estricta. En esta lección usamos `!isEmpty` porque el foco está en aprender el patrón TDD de Value Objects, no en definir reglas de negocio finales. Cuando evoluciones el proyecto, endurecer la validación es un solo cambio de `guard` — exactamente lo que te permite el patrón.
 
 ---
 
@@ -474,7 +491,7 @@ struct Credentials: Equatable, Sendable {
     let email: Email
     let password: Password
 }
-```swift
+```
 
 No escribimos tests para `Credentials` porque no tiene comportamiento propio. Es un tipo de datos puro, sin lógica. Testear que un struct guarda los valores que le pasas no aporta valor. Los tests de `Email` y `Password` ya cubren la validación de sus componentes.
 
@@ -491,11 +508,13 @@ enum AuthError: Error, Equatable, Sendable {
     case invalidCredentials
     case connectivity
 }
-```text
+```
 
 Estos errores son diferentes de los errores de validación de los Value Objects (`Email.ValidationError.invalidFormat`, `Password.ValidationError.empty`). Los errores de los Value Objects son errores de **formato**: los datos del usuario no pasan la validación local. `AuthError` son errores de **autenticación**: los datos pasaron la validación local pero algo falló en la comunicación con el servidor.
 
 ¿Por qué esta distinción? Porque el manejo es diferente. Si el email tiene formato inválido, la UI puede mostrar el error inmediatamente sin hacer ninguna petición de red. Si el servidor rechaza las credenciales, la UI muestra un mensaje diferente ("email o contraseña incorrectos"). Si no hay conectividad, la UI muestra otro mensaje diferente ("sin conexión a internet, inténtalo de nuevo").
+
+> **Divergencia scaffold:** En el scaffold real, los errores de validación de VOs y los de autenticación están **unificados** en un solo `LoginError { invalidEmail, invalidPassword, invalidCredentials, network }`. La lección separa `Email.ValidationError` + `Password.ValidationError` + `AuthError` como tres tipos porque es más fiel al principio de Single Responsibility y enseña mejor la distinción entre error de formato y error de autenticación. En un proyecto real con solo 4 casos de error, la pragmática de un enum unificado puede pesar más. Comprende ambos diseños: la pureza de la lección y la pragmática del scaffold.
 
 ---
 
@@ -507,14 +526,16 @@ Los eventos representan hechos que ya ocurrieron y que son relevantes para el si
 // StackMyArchitecture/Features/Login/Domain/Events/LoginEvent.swift
 
 enum LoginEvent: Equatable, Sendable {
-    case succeeded(email: String)
-    case failed(AuthError)
+    case success(Session)
+    case failure(AuthError)
 }
-```text
+```
 
-¿Para qué sirven los eventos? Para desacoplar la feature de lo que ocurre después. Cuando el login es exitoso, la feature emite `LoginEvent.succeeded(email: "user@example.com")`. Pero la feature **no sabe** qué pasa después. No sabe que el coordinador va a navegar a la pantalla de Home. No sabe que quizá se va a guardar la sesión en el keychain. Esas son decisiones de otros componentes que escuchan el evento y actúan en consecuencia.
+¿Para qué sirven los eventos? Para desacoplar la feature de lo que ocurre después. Cuando el login es exitoso, la feature emite `LoginEvent.success(session)` con la sesión completa (token incluido). Pero la feature **no sabe** qué pasa después. No sabe que el coordinador va a navegar a la pantalla de Home. No sabe que quizá se va a guardar la sesión en el Keychain. Esas son decisiones de otros componentes que escuchan el evento y actúan en consecuencia.
 
 Esto es fundamental para la modularidad. Si Login supiera que después del éxito hay que navegar a Home, estaría acoplado a Home. No podrías reutilizar Login en otro contexto donde después del éxito se vaya a otra pantalla. Con eventos, Login dice "pasó esto" y se desentiende del "y ahora qué".
+
+> **Divergencia scaffold:** `LoginEvent` no existe en el scaffold real. En su lugar, el `LoginViewModel` maneja el resultado de `AuthenticateUserUseCase.execute()` directamente con un `do/catch`, y navega llamando a `navigator.goToCatalog()` tras el éxito. Es un enfoque más directo pero menos desacoplado. La lección enseña eventos porque son un patrón de diseño fundamental que necesitarás en sistemas más grandes donde múltiples componentes reaccionan a un mismo hecho de dominio. El scaffold simplifica porque con solo dos pantallas (Login → Catalog), el desacoplamiento extra no aporta valor proporcional a su coste.
 
 ---
 
@@ -534,6 +555,8 @@ struct Session: Equatable, Sendable {
 El `token` es opaco para el dominio. El dominio no sabe ni le importa qué formato tiene (JWT, UUID, lo que sea). Solo sabe que es un string que la infraestructura le devolvió y que el sistema necesita para futuras peticiones autenticadas. El formato y la interpretación del token son responsabilidad de la capa de infraestructura.
 
 El `email` está aquí como string (no como `Email`) porque la sesión representa la respuesta del servidor, no un dato validado localmente. El servidor devuelve el email como string en su respuesta JSON, y nosotros lo guardamos tal cual. Podríamos construir un `Email` a partir de él, pero no aportaría valor en este contexto: si el servidor nos devuelve un email, confiamos en que es válido.
+
+> **Divergencia scaffold:** En el scaffold real, `UserSession` tiene `userId: String` y `token: String` — no tiene `email`. La razón es pragmática: el servidor devuelve un identificador de usuario opaco en vez del email, y es ese `userId` el que se usa para futuras peticiones. En tu proyecto pedagógico puedes usar `email` porque es más intuitivo; al evolucionar hacia producción lo sustituirías por un identificador del servidor.
 
 ---
 
@@ -575,57 +598,69 @@ Todo es inmutable, `Sendable`, `Equatable`, y no importa nada externo (salvo Fou
 
 En la siguiente lección vamos a subir una capa: la Application. Allí construiremos el caso de uso `LoginUseCase` que orquesta todo el flujo de login, usando los Value Objects del Domain para validación local y un puerto (protocolo) para delegar la autenticación remota.
 
----
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## 🔨 Checkpoint Xcode — Domain en el proyecto real
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/01-domain.md`.
+Has implementado el Domain completo en tu práctica TDD. Ahora lo ves funcionar en el proyecto Swift real. Este es el primer momento en que tu aprendizaje se materializa en código que compila, tiene tests en verde y vive en una arquitectura de producción.
 
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+**Paso 1 — Abre el scaffold en Xcode**
 
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+Desde la raíz del repositorio del curso:
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+```
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+Xcode abrirá el paquete con los 13 targets del proyecto. Espera a que indexe — puede tardar un minuto la primera vez.
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+**Paso 2 — Localiza el módulo `FeatureLoginDomain`**
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+En el navigator de Xcode, dentro de `Sources/FeatureLoginDomain/`, encontrarás exactamente los tipos que acabas de construir, con las adaptaciones que describe la tabla de equivalencias del inicio de esta lección:
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Tu implementación (lección) | Scaffold (`FeatureLoginDomain/`) | Diferencia clave |
+|---|---|---|
+| `Email` | `EmailAddress.swift` | Nombre + valida dominio con punto |
+| `Password` (valida `!isEmpty`) | `Password.swift` | Regla más estricta: mínimo 8 caracteres |
+| `Credentials` | `Credentials.swift` | Mismo diseño |
+| `Session(token:, email:)` | `UserSession.swift` | Campo `userId` en lugar de `email` |
+| `AuthError` + `Email.ValidationError` | `LoginError.swift` | Enum unificado con 4 casos |
+| `LoginEvent` | _(no existe)_ | El ViewModel lo gestiona directamente |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+Abre cada archivo. Lee el código. Entiende cada diferencia — no son errores del scaffold, son decisiones de diseño explicadas al inicio de la lección.
 
-Lectura semantica minima de este diagrama:
+**Paso 3 — Ejecuta los tests del Domain**
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+En Xcode, selecciona el scheme `ArchitectureKit` y pulsa `Cmd+U`. O desde terminal:
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDomainTests
+```
+
+Deberías ver algo como:
+
+```
+Test Suite 'FeatureLoginDomainTests' passed
+   Executed N tests, with 0 failures
+```
+
+Todos en verde. Esos tests validan exactamente los mismos comportamientos que tú implementaste con TDD: `Email` inválido lanza error, `Password` vacío lanza error, credenciales válidas se construyen correctamente.
+
+**Paso 4 — Conecta con lo que aprendiste**
+
+Antes de continuar, responde mentalmente:
+
+- ¿Por qué `LoginError` está unificado en el scaffold en lugar de tener errores anidados por Value Object?
+- ¿Qué ventaja tiene que `UserSession` tenga `userId` en lugar de `email`?
+- ¿Por qué `Password` exige mínimo 8 caracteres en producción pero la lección empieza con `!isEmpty`?
+
+Si puedes responder las tres, tienes el Domain del Login no solo implementado sino entendido.
+
+---
+
+## Qué sigue
+
+La siguiente lección, [Feature Login: Capa Application](02-application.md), construye el `LoginUseCase` que orquesta el flujo completo: validación local con los Value Objects del Domain, delegación de la autenticación remota al puerto `AuthGateway`, y emisión del `LoginEvent` correspondiente.
 

@@ -36,8 +36,13 @@ Escalado por equipos necesita límites semánticos explícitos.
 
 ### Opción B: Microservicios desde día 1 (overkill para el curso, complejidad innecesaria)
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Cada servicio es desplegable y escalable de forma independiente; un equipo puede publicar cambios en el servicio de catálogo sin afectar al servicio de identidad
+  - Los límites entre equipos son explícitos desde el primer día al estar separados en repositorios y pipelines distintos
+- **Contras:**
+  - La complejidad operativa (orquestación, service discovery, trazas distribuidas, gestión de versiones de API entre servicios) es completamente desproporcionada para una app iOS en fase de aprendizaje
+  - La latencia de red entre servicios y la gestión de transacciones distribuidas (consistencia eventual, sagas) introduce problemas avanzados que oscurecen los conceptos arquitectónicos que el curso quiere enseñar
+  - Requiere infraestructura de despliegue (Kubernetes, API Gateway, service mesh) que el alumno no puede reproducir localmente de forma sencilla; el entorno local es difícil de replicar
 
 ### Opción C: Bounded contexts (elegida)
 
@@ -89,24 +94,4 @@ Ver la lección [01-bounded-contexts](../../04-arquitecto/01-bounded-contexts.md
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-011-bounded-contexts-governance.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

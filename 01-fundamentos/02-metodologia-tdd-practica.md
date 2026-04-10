@@ -12,18 +12,14 @@ TDD es una disciplina de desarrollo que consiste en un ciclo de tres pasos que s
 
 ```mermaid
 graph LR
-    RED["RED<br/>Escribe un test<br/>que FALLA"] --> GREEN["GREEN<br/>Escribe lo MINIMO<br/>para que PASE"]
-    GREEN --> REFACTOR["REFACTOR<br/>Mejora el diseno<br/>sin cambiar comportamiento"]
-    REFACTOR --> RED
-
-    RED -.->|"Duracion: 1-3 min"| GREEN
-    GREEN -.->|"Duracion: 1-5 min"| REFACTOR
-    REFACTOR -.->|"Duracion: 0-5 min"| RED
+    RED["RED<br/>Escribe un test<br/>que FALLA"] -->|"1-3 min"| GREEN["GREEN<br/>Escribe lo MINIMO<br/>para que PASE"]
+    GREEN -->|"1-5 min"| REFACTOR["REFACTOR<br/>Mejora el diseno<br/>sin cambiar comportamiento"]
+    REFACTOR -->|"0-5 min"| RED
 
     style RED fill:#f8d7da,stroke:#dc3545
     style GREEN fill:#d4edda,stroke:#28a745
     style REFACTOR fill:#cce5ff,stroke:#007bff
-```text
+```
 
 Cada vuelta al ciclo dura entre 2 y 10 minutos. Si llevas más de 10 minutos sin ejecutar tests, tu paso es demasiado grande. Pártelo.
 
@@ -52,7 +48,7 @@ final class EmailTests: XCTestCase {
         XCTAssertEqual(email?.value, "user@example.com")
     }
 }
-```text
+```
 
 Ejecutamos. El test no compila porque `Email` no existe. Eso es el "rojo" en TDD: puede ser un fallo de compilación o un `XCTAssertEqual` que no se cumple. Ambos cuentan como rojo.
 
@@ -66,7 +62,7 @@ struct Email: Equatable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Ejecutamos. El test pasa. ¿Es la implementación completa? No, ni de lejos. No valida nada. Pero el test que tenemos solo pide que se pueda crear un `Email` con un string válido, y eso funciona. Lo mínimo para que pase.
 
@@ -80,7 +76,7 @@ func test_init_with_string_without_at_sign_throws_error() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Falla porque `Email.ValidationError` no existe y porque el `init` actual acepta cualquier string.
 
@@ -101,7 +97,7 @@ struct Email: Equatable {
         self.value = rawValue
     }
 }
-```text
+```
 
 Ejecutamos. Ambos tests pasan.
 
@@ -115,7 +111,7 @@ func test_init_with_empty_string_throws_error() {
         XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
     }
 }
-```text
+```
 
 Ejecutamos. Pasa sin cambiar nada, porque un string vacío no contiene "@" y nuestra validación ya lo cubre. ¿Eso es bueno o malo? Es bueno: significa que la implementación ya cubre este caso. Pero el test tiene valor documental: deja explícito que un email vacío es inválido. Lo dejamos.
 
@@ -150,7 +146,7 @@ Hay 5 tipos de test doubles. Cada uno tiene un propósito diferente:
 graph TD
     TD["Test Doubles<br/>Objetos falsos para tests"] --> DUMMY["Dummy<br/>No hace nada.<br/>Solo rellena un parametro."]
     TD --> STUB["Stub<br/>Devuelve datos fijos.<br/>Tu configuras que devuelve."]
-    TD -.-> SPY["Spy<br/>Registra las llamadas.<br/>Puedes verificar que se llamo."]
+    TD --> SPY["Spy<br/>Registra las llamadas.<br/>Puedes verificar que se llamo."]
     TD --> MOCK["Mock<br/>Verifica expectativas.<br/>Falla si no se cumple lo esperado."]
     TD --> FAKE["Fake<br/>Implementacion real simplificada.<br/>Funciona pero con atajos."]
 
@@ -159,7 +155,7 @@ graph TD
     style SPY fill:#cce5ff,stroke:#007bff
     style MOCK fill:#fff3cd,stroke:#ffc107
     style FAKE fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 #### 1. Dummy (el maniquí)
 
@@ -176,7 +172,7 @@ struct DummyLogger: Logger {
 // Lo usas así en el test:
 let useCase = LoginUseCase(gateway: stubGateway, logger: DummyLogger())
 // El DummyLogger solo está ahí para que compile. No verificas nada sobre él.
-```swift
+```
 
 **Cuándo usarlo:** Cuando un componente pide una dependencia que no es relevante para lo que estás testeando. Si estás testeando la lógica de login, el logger no importa, así que pasas un dummy.
 
@@ -210,7 +206,7 @@ func test_login_exitoso_devuelve_session() async throws {
     // ASSERT: verifico que me devolvió la sesión del stub
     XCTAssertEqual(resultado, sessionEsperada)
 }
-```text
+```
 
 **Cuándo usarlo:** Cuando necesitas **controlar qué datos recibe** el componente que estás testeando. El stub es el test double más común. Lo usarás en casi todos los tests del curso.
 
@@ -258,7 +254,7 @@ func test_usecase_envia_credenciales_al_gateway() async throws {
     // Y que recibió las credenciales correctas
     XCTAssertEqual(spy.receivedCredentials.first?.email.value, "user@test.com")
 }
-```text
+```
 
 **Cuándo usarlo:** Cuando además de controlar la respuesta, necesitas **verificar que la llamada se hizo correctamente**. Por ejemplo: verificar que el UseCase NO llama al gateway cuando el email es inválido.
 
@@ -275,7 +271,7 @@ mock.expect(.authenticate, calledTimes: 1, withArguments: credentials)
 
 // Después de ejecutar el código...
 mock.verify() // Si no se cumplieron las expectativas, el test falla automáticamente
-```text
+```
 
 **Cuándo usarlo:** En frameworks de mocking como OCMock o Mockito (en Android). En Swift puro con XCTest, **no usamos mocks en este sentido**. Usamos spies + asserts manuales, que es más claro y más fácil de depurar. Si un spy tiene un `assert` manual que verifica la llamada, logra lo mismo que un mock pero de forma más explícita.
 
@@ -298,7 +294,7 @@ struct InMemoryProductStore: ProductStore {
         return products // Lee de memoria, no de disco
     }
 }
-```text
+```
 
 **Cuándo usarlo:** En **tests de integración** donde necesitas que la dependencia realmente funcione pero no quieres la complejidad de la implementación real. Un `InMemoryProductStore` funciona como el `FileProductStore` real pero sin tocar el disco, lo que hace los tests más rápidos y sin efectos secundarios.
 
@@ -319,7 +315,7 @@ graph TD
     style STUB fill:#d4edda,stroke:#28a745
     style SPY fill:#cce5ff,stroke:#007bff
     style FAKE fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 **Regla práctica para este curso:** el 90% de las veces usarás un **spy** (que incluye la funcionalidad de stub). El 10% restante será un **fake** para tests de integración. Los dummies los usarás ocasionalmente. Los mocks automáticos, nunca.
 
@@ -362,37 +358,37 @@ flowchart TD
     style S5 fill:#cce5ff,stroke:#007bff
     style S6 fill:#fff3cd,stroke:#ffc107
     style S7 fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 Fíjate en la dirección: **del centro hacia fuera**. Domain primero (las reglas puras), luego Application (la orquestación), luego Infrastructure (la conexión con el mundo real), y finalmente Interface (lo que ve el usuario). Esta dirección no es arbitraria — es lo que garantiza que cada capa sea testeable de forma independiente.
 
-### Diagrama: dirección de implementación (del core hacia fuera)
+### Diagrama: dirección de dependencias (hacia el core)
 
 ```mermaid
 graph LR
-    subgraph CORE["Core - sin dependencias"]
-        DOMAIN["Domain<br/>Email, Password<br/>AuthGateway protocol"]
-    end
-    
-    subgraph MIDDLE["Orquestacion"]
-        APP["Application<br/>LoginUseCase"]
-    end
-    
     subgraph EDGE["Periferia - dependencias reales"]
         INFRA["Infrastructure<br/>RemoteAuthGateway"]
         UI["Interface<br/>LoginView"]
     end
 
-    DOMAIN --> APP
-    APP --> INFRA
-    APP --> UI
-    
-    style CORE fill:#d4edda,stroke:#28a745
-    style MIDDLE fill:#cce5ff,stroke:#007bff
+    subgraph MIDDLE["Orquestacion"]
+        APP["Application<br/>LoginUseCase"]
+    end
+
+    subgraph CORE["Core - sin dependencias"]
+        DOMAIN["Domain<br/>Email, Password<br/>AuthGateway protocol"]
+    end
+
+    INFRA ==> APP
+    UI --> APP
+    APP ==> DOMAIN
+
     style EDGE fill:#fff3cd,stroke:#ffc107
+    style MIDDLE fill:#cce5ff,stroke:#007bff
+    style CORE fill:#d4edda,stroke:#28a745
 ```
 
-Las flechas apuntan hacia fuera: el Domain no sabe nada de Application. Application no sabe nada de Infrastructure ni de Interface. Solo el Composition Root (que veremos en la Etapa 2) conoce todas las piezas y las conecta. Esta es la **Dependency Rule** de Clean Architecture: las dependencias siempre apuntan hacia adentro, nunca hacia fuera.
+Las flechas apuntan hacia el centro: Infrastructure implementa los puertos definidos en Application (`==>`), Application depende de los contratos del Domain (`==>`), y la Interface usa Application. **Domain no depende de nadie.** Solo el Composition Root (que veremos en la Etapa 2) conoce todas las piezas y las conecta. Esta es la **Dependency Rule** de Clean Architecture: las dependencias siempre apuntan hacia adentro, hacia el dominio.
 
 **Paso 1: Especificación BDD.** Escribimos todos los escenarios de la feature (happy path, sad path, edge cases). Esto se hace en un documento Markdown, no en código. El resultado es la lista completa de comportamientos que el sistema debe soportar.
 
@@ -436,56 +432,7 @@ Hay muchas confusiones comunes sobre ambas prácticas. Vamos a aclararlas para q
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-tdd-practica.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+La siguiente lección, [Stack tecnológico](03-stack-tecnologico.md), describe las herramientas concretas que usaremos durante todo el curso: SPM, XCTest, SwiftUI y las decisiones de tooling que soportan el flujo BDD→TDD que acabas de aprender.
 

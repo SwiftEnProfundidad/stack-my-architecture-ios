@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Objetivo de aprendizaje
 
@@ -38,7 +38,17 @@ flowchart LR
     RISK --> TEST["Test determinista"]
     TEST --> FEED["Feedback de diseño"]
     FEED --> HARDEN["Arquitectura mas robusta"]
-```text
+```
+
+Lectura del diagrama:
+
+→ **Escenario BDD → Riesgo temporal/concurrente**: el punto de partida es siempre un comportamiento de negocio formulado como BDD. "Dado que el usuario navega atrás mientras carga, no se muestra resultado tardío" expresa un riesgo temporal concreto.
+
+→ **Riesgo → Test determinista**: el riesgo se traduce en un test que controla el tiempo (Clock inyectado, no `Date()`) y la concurrencia (dobles con `actor`). Determinista significa que pasa o falla igual cada vez.
+
+→ **Test → Feedback de diseño**: si el test es difícil de escribir, es señal de diseño deficiente — el sistema tiene demasiado acoplamiento temporal o de estado. El test actúa como crítica de arquitectura antes de que el problema llegue a producción.
+
+→ **Feedback → Arquitectura más robusta**: el ciclo cierra. La dificultad de testear lleva a extraer protocolos, inyectar reloj, separar estado. Cada iteración produce código más fácil de testear y, por tanto, más robusto.
 
 Sin este túnel, validas estética de código, no robustez real.
 
@@ -94,7 +104,7 @@ final class CancellationTests: XCTestCase {
         }
     }
 }
-```text
+```
 
 ### Error típico
 
@@ -121,7 +131,7 @@ struct FixedClock: Clock {
     let value: Date
     func now() -> Date { value }
 }
-```text
+```
 
 ### Test determinista
 
@@ -135,7 +145,7 @@ func test_policy_marksStale_afterMaxAge() {
         return XCTFail("Expected stale")
     }
 }
-```text
+```
 
 Si usas `sleep(300)` en tests, estás construyendo deuda de CI.
 
@@ -156,7 +166,7 @@ final class UnsafeSpy: ProductRepository, @unchecked Sendable {
         return []
     }
 }
-```text
+```
 
 Si hay llamadas concurrentes, este spy introduce carreras.
 
@@ -175,7 +185,7 @@ actor SafeProductRepositorySpy: ProductRepository {
         callCount
     }
 }
-```text
+```
 
 Regla de curso:
 
@@ -210,7 +220,17 @@ flowchart TD
     C --> R["Estado estable"]
     S --> R
     D --> R
-```text
+```
+
+Lectura del diagrama:
+
+→ **Cancelar anterior**: "última petición gana" — se cancela la tarea en curso antes de lanzar la nueva. La UI nunca muestra resultados de una carga que ya no es la más reciente. Coste: el progreso de la carga cancelada se pierde.
+
+→ **Serializar**: las peticiones se encolan en el orden de llegada. La segunda espera a que la primera termine. Garantiza orden pero puede acumular latencia si llegan muchas peticiones seguidas.
+
+→ **Debounce**: espera un tiempo de inactividad antes de lanzar. Un usuario que escribe rápido en búsqueda no lanza 10 peticiones — solo una cuando deja de escribir. Introduce latencia mínima intencional a cambio de no saturar la red.
+
+→ **Estado estable**: las tres políticas convergen en el mismo objetivo — la UI nunca queda con datos de una solicitud obsoleta o en estado inconsistente.
 
 ### Test de última petición gana
 
@@ -228,7 +248,7 @@ func test_viewModel_lastRequestWins_underRapidRefresh() async {
     let state = await sut.state
     XCTAssertEqual(state.products.first?.id, "2")
 }
-```text
+```
 
 Este test protege contra resultados fuera de orden.
 
@@ -268,7 +288,17 @@ flowchart LR
     G --> FIX2["SUT aislado por test"]
     N --> FIX3["Dobles de frontera"]
     O --> FIX4["Controladores de completion"]
-```text
+```
+
+Lectura del diagrama — cada flake tiene causa y cura:
+
+→ **Tiempo real → Clock inyectado**: cualquier test que llama a `Date()` o usa `Task.sleep` para esperar resultados es flaky por diseño. La cura es inyectar un `Clock` que devuelve fechas fijas y controlar completions explícitamente.
+
+→ **Estado global → SUT aislado**: un test que modifica un singleton, una variable `static`, o un actor compartido contamina otros tests. La cura es que cada test crea su propio SUT con `makeSUT()` — sin estado que escape entre tests.
+
+→ **Red real → Dobles de frontera**: cualquier test que llega a la red real es lento, frágil, y depende de infraestructura externa. La cura es un doble en la frontera (`CatalogRemoteDataSource`, no en el repositorio completo) que simula respuestas sin red.
+
+→ **Orden no controlado → Controladores de completion**: los tests de "última petición gana" no pueden depender de `Task.sleep(100ms)` para garantizar orden — si CI es lento, 100ms no es suficiente. La cura es un `ControlledStub` que expone métodos `completeFirstRequest()` / `completeSecondRequest()` para control explícito.
 
 ---
 
@@ -337,7 +367,7 @@ final class CatalogAdvancedTestPlan {
         "Last request wins under rapid refresh"
     ]
 }
-```text
+```
 
 La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 
@@ -352,7 +382,7 @@ La idea no es tener 500 tests, sino tests correctos en puntos de máximo riesgo.
 - Decisión: introducir clocks inyectados, dobles seguros y casos avanzados en rutas criticas
 - Consecuencias: mayor confianza en evoluciones con coste moderado de diseño de tests
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -447,69 +477,110 @@ Cuando puedes hacer esto de forma sistemática, tus refactors dejan de ser apues
 - El caso de uso usa `try Task.checkCancellation()` o `withTaskCancellationHandler` internamente.
 - No se usa `Task.sleep` en el test para esperar resultados (usa `Task.value` con expectativa de error).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-func test_loadProducts_respectsCancellation() async throws {
-    let slowRemote = SlowStubRemote(delay: .seconds(2), result: .success([Product(name: "A", price: 1)]))
-    let store = InMemoryProductStore()
-    let sut = CachedProductRepository(remote: slowRemote, store: store, ttlSeconds: 300)
+// Tests/FeatureCatalogDataIntegrationTests/CancellationTests.swift
 
-    let task = Task { try await sut.loadProducts() }
+final class CachedCatalogRepositoryCancellationTests: XCTestCase {
 
-    // Cancelar rápido
-    try await Task.sleep(for: .milliseconds(100))
-    task.cancel()
+    func test_fetchCatalog_respectsCancellation_andDoesNotUpdateCache() async throws {
+        // Arrange: data source lenta + store espía
+        let slowRemote = SlowCatalogRemoteDataSourceStub(
+            delay: .seconds(2),
+            result: .success([Product(id: "p-1", title: "Slow", price: 9.99)])  // title, no name
+        )
+        let store = InMemoryCatalogCacheStoreStub()
+        let connectivity = AlwaysOnlineConnectivityStub()
+        let sut = CachedCatalogRepository(
+            remote: slowRemote,
+            cache: store,
+            connectivity: connectivity,
+            ttlSeconds: 300,
+            now: Date.init
+        )
 
-    do {
-        _ = try await task.value
-        XCTFail("Debería haber lanzado CancellationError")
-    } catch is CancellationError {
-        // Esperado
+        // Act: lanzar carga y cancelar rápido
+        let task = Task { try await sut.fetchCatalog() }  // fetchCatalog, no loadAll
+        try await Task.sleep(for: .milliseconds(100))
+        task.cancel()
+
+        // Assert: debe terminar con CancellationError
+        do {
+            _ = try await task.value
+            XCTFail("Debería haber lanzado CancellationError")
+        } catch is CancellationError {
+            // Correcto: cancelación propagada
+        }
+
+        // Assert: el store NO debe haberse actualizado
+        let cached = try await store.load()
+        XCTAssertNil(cached, "Cache no debe actualizarse tras cancelación")
     }
+}
 
-    let cached = try await store.load()
-    XCTAssertNil(cached, "Cache no debe actualizarse tras cancelación")
+// Stub del data source lento — struct + Sendable automático
+struct SlowCatalogRemoteDataSourceStub: CatalogRemoteDataSource {
+    let delay: Duration
+    let result: Result<[Product], Error>
+
+    func fetchProducts() async throws -> [Product] {
+        try await Task.sleep(for: delay)
+        try Task.checkCancellation()  // Cooperativo: verifica después del sleep
+        return try result.get()
+    }
 }
 ```
 
-La cancelación es un caso funcional, no una excepción ignorable. Si el caso de uso no la respeta, el usuario puede ver datos de una operación que ya descartó.
+> **Nota scaffold:** El protocolo es `CatalogRemoteDataSource` con `fetchProducts()` (no `ProductRepository.loadAll()`). El repositorio es `CachedCatalogRepository` con `fetchCatalog()`. El `Product` usa `title: String` y `price: Double`. El stub usa `struct` (no `final class @unchecked Sendable`).
+
+La cancelación es cooperativa: el sistema marca el `Task` como cancelado, el stub llama a `Task.checkCancellation()` después del `sleep`, lo que lanza `CancellationError`. El repositorio no llega a guardar en cache. El test verifica dos contratos: (1) la cancelación se propaga, (2) no hay efectos secundarios parciales.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+### Archivos del scaffold relevantes para tests avanzados
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+| Archivo | Uso en tests |
+|---|---|
+| `Sources/FeatureCatalogData/InMemoryCatalogStores.swift` | `InMemoryCatalogCacheStore` actor — store para tests de cancelación |
+| `Sources/FeatureCatalogData/CatalogDataContracts.swift` | `CatalogRemoteDataSource`, `ConnectivityChecking` — interfaces para stubs |
+| `Sources/FeatureCatalogData/CachedCatalogRepository.swift` | El SUT principal para tests de integración avanzada |
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+### Divergencias respecto a los ejemplos del curso
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+| Lección | Scaffold real |
+|---|---|
+| `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` |
+| `CatalogRemoteDataSource` (no aparece) | `CatalogRemoteDataSource.fetchProducts()` — la frontera de red real |
+| `InMemoryProductStore` | `InMemoryCatalogCacheStoreStub` (en tests) |
+| `SlowStubProductRepository: @unchecked Sendable` | `SlowCatalogRemoteDataSourceStub: struct` (Sendable automático) |
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` con `Double` |
 
-Lectura semantica minima de este diagrama:
+### El `ConnectivityChecking` como herramienta de test
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+El scaffold tiene `ConnectivityChecking` como dependencia de `CachedCatalogRepository`. Esto hace los tests de backpressure y cancelación más precisos:
+
+```swift
+// ✅ Controlar si el dispositivo "parece online" en tests
+struct AlwaysOnlineConnectivityStub: ConnectivityChecking {
+    func isOnline() async -> Bool { true }
+}
+
+struct AlwaysOfflineConnectivityStub: ConnectivityChecking {
+    func isOnline() async -> Bool { false }
+}
+```
+
+Sin `ConnectivityChecking`, tendrías que simular errores de red para testear el path offline. Con él, el control es explícito y determinista.
+
+---
+
+## Qué sigue
+
+[**Lección 16: Trade-offs de arquitectura →**](./05-trade-offs.md) — Cómo tomar decisiones de arquitectura con criterio: cuándo añadir una capa, cuándo no, y cómo documentar las decisiones para que el equipo no las revierta sin entenderlas.
 

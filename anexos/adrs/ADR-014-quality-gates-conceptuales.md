@@ -36,8 +36,13 @@ Esta edición prioriza aprendizaje de arquitectura sobre automatización complet
 
 ### Opción B: Sin gates (sin estándares de calidad)
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Fricción de contribución mínima: el alumno puede hacer merge de cualquier cambio sin esperar a que pase ninguna verificación, lo que acelera la iteración durante el aprendizaje inicial
+  - Sin configuración adicional de CI ni de scripts de validación; el proyecto arranca con cero overhead de herramientas
+- **Contras:**
+  - Sin ningún gate, las violaciones de arquitectura (un import de UIKit en Domain, un ciclo de dependencias) se acumulan silenciosamente y son muy costosas de revertir cuando se detectan tarde
+  - El alumno no desarrolla el hábito de validar sus cambios antes de integrar; al llegar a un equipo real con CI estricto, el cambio de cultura es brusco y genera frustración
+  - No hay señal objetiva de que el código cumple los principios enseñados; el aprendizaje queda solo en la teoría sin ningún mecanismo de verificación, aunque sea manual
 
 ### Opción C: Quality gates conceptuales orientados a arquitectura (elegida)
 
@@ -89,24 +94,4 @@ Ver la lección [06-quality-gates](../../04-arquitecto/06-quality-gates.md) para
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-014-quality-gates-conceptuales.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

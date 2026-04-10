@@ -12,6 +12,8 @@ El **`RemoteAuthGateway`**, que implementa el protocolo `AuthGateway` llamando a
 
 Todo con tests XCTest.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `AuthGateway` → `AuthRepository`, `RemoteAuthGateway` → `RemoteAuthRepository`, `StubAuthGateway` → `StubAuthRepository`, `Session` → `UserSession`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 En esta capa se ve muy claro el **Principio 4** de [Principios de ingeniería](../01-principios-ingenieria.md): bajo acoplamiento y alta cohesión. Infrastructure adapta el mundo externo sin contaminar Domain ni Application.
@@ -49,7 +51,7 @@ graph LR
     style Clean fill:#d4edda,stroke:#28a745
     style Adapter fill:#fff3cd,stroke:#ffc107
     style Dirty fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 El adaptador es el **traductor** entre dos idiomas: el idioma limpio del Domain (`Credentials`, `Session`) y el idioma del servidor (JSON, HTTP status codes, URLs). Si el servidor cambia su JSON, solo cambias el adaptador. El UseCase ni se entera.
 
@@ -74,11 +76,11 @@ Los DTOs (`AuthRequest`, `AuthResponse`) representan **el formato de los datos e
 ```swift
 // StackMyArchitecture/Features/Login/Infrastructure/DTOs/AuthRequest.swift
 
-struct AuthRequest: Encodable, Sendable {
+struct AuthRequest: Codable, Sendable {
     let email: String
     let password: String
 }
-```text
+```
 
 El `AuthRequest` es el cuerpo de la petición HTTP que enviamos al servidor. Es `Encodable` porque lo vamos a serializar a JSON. Fíjate en que usa `String`, no `Email` ni `Password`. ¿Por qué? Porque al servidor le enviamos strings planos en JSON. La validación ya ocurrió en la capa Domain. Para cuando los datos llegan aquí, ya sabemos que son válidos.
 
@@ -91,7 +93,7 @@ struct AuthResponse: Decodable, Sendable {
     let token: String?
     let email: String?
 }
-```text
+```
 
 El `AuthResponse` es el body de la respuesta HTTP del servidor. Es `Decodable` porque lo vamos a deserializar desde JSON. El `token` es opcional porque en caso de error (credenciales rechazadas), el servidor no envía token. El `email` también es opcional por la misma razón.
 
@@ -107,7 +109,7 @@ El `RemoteAuthGateway` necesita hacer peticiones HTTP. Pero si usara `URLSession
 protocol HTTPClient: Sendable {
     func execute(_ request: URLRequest) async throws -> (Data, HTTPURLResponse)
 }
-```text
+```
 
 Este protocolo dice: "dame un URLRequest, te devuelvo los datos y la respuesta HTTP". Es lo mínimo que necesitamos. En producción, la implementación será un wrapper alrededor de `URLSession`. En tests, será un stub que devuelve datos predeterminados.
 
@@ -166,7 +168,7 @@ struct RemoteAuthGateway: AuthGateway, Sendable {
         return Session(token: token, email: credentials.email.value)
     }
 }
-```text
+```
 
 **Explicación línea por línea del RemoteAuthGateway:**
 
@@ -179,7 +181,7 @@ flowchart LR
     style DOMAIN fill:#d4edda,stroke:#28a745
     style GATEWAY fill:#cce5ff,stroke:#007bff
     style HTTP fill:#fff3cd,stroke:#ffc107
-```swift
+```
 
 `struct RemoteAuthGateway: AuthGateway, Sendable` — Conforma el protocolo/puerto `AuthGateway` (definido en Application). Esto significa que implementa el método `authenticate(credentials:)`. Es `Sendable` para poder usarse en funciones `async`.
 
@@ -231,7 +233,7 @@ flowchart TD
     style MAP2 fill:#d4edda,stroke:#28a745
     style ERR1 fill:#f8d7da,stroke:#dc3545
     style ERR2 fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 ---
 
@@ -257,7 +259,7 @@ struct StubAuthGateway: AuthGateway, Sendable {
         )
     }
 }
-```text
+```
 
 El stub tiene un delay configurable que por defecto es 0.5 segundos. ¿Por qué no devolver el resultado inmediatamente? Porque queremos que el desarrollo con el stub sea lo más parecido posible a la producción. En producción, la petición de red tarda un tiempo. Si el stub devuelve instantáneamente, no detectarás problemas de UX: estados de loading que no se muestran, animaciones que se saltan, condiciones de carrera cuando el usuario pulsa dos veces el botón. El delay simulado te obliga a manejar estos casos durante el desarrollo, no en producción cuando ya es tarde.
 
@@ -298,7 +300,7 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
         return try result.get()
     }
 }
-```swift
+```
 
 **Explicación línea por línea del HTTPClientStub:**
 
@@ -352,7 +354,7 @@ final class RemoteAuthGatewayTests: XCTestCase {
         let json = ["token": token, "email": email]
         return try! JSONSerialization.data(withJSONObject: json)
     }
-```text
+```
 
 **¿Qué es `makeSUT` y por qué existe?**
 
@@ -368,8 +370,10 @@ final class RemoteAuthGatewayTests: XCTestCase {
 
 `makeCredentials()` y `makeSuccessJSON(...)` son otros helpers que crean datos de prueba reutilizables. El objetivo es el mismo: que cada test solo contenga lo que es **único** de ese escenario.
 
+Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTests`:
+
 ```swift
-    // MARK: - Happy Path
+    // MARK: - Happy Path  (continuación de RemoteAuthGatewayTests)
     
     func test_authenticate_on_200_with_valid_json_returns_session() async throws {
         let json = makeSuccessJSON(token: "abc-123", email: "user@example.com")
@@ -456,7 +460,7 @@ final class RemoteAuthGatewayTests: XCTestCase {
         }
     }
 }
-```text
+```
 
 ### Por qué usamos helpers en los tests
 
@@ -484,7 +488,7 @@ struct Session: Codable {
     let token: String
     let email: String
 }
-```text
+```
 
 Si `Session` es `Codable`, se puede usar directamente para parsear la respuesta del servidor. Parece eficiente: un solo tipo para todo. Pero tiene un problema grave: estás acoplando tu modelo de dominio al formato de datos del servidor.
 
@@ -530,60 +534,47 @@ Un `RemoteAuthGateway` que traduce entre el mundo HTTP/JSON y la interfaz limpia
 
 En la siguiente lección llegaremos a la última capa: Interface. Allí construiremos el `LoginViewModel` y la `LoginView` con SwiftUI, conectando todo el flujo desde la UI hasta el Domain.
 
----
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## 🔨 Checkpoint Xcode — Infrastructure en el proyecto real
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/03-infrastructure.md`.
+Acabas de construir el adaptador de red y el stub. Ahora ves cómo el scaffold los implementa, incluyendo decisiones de producción que la lección simplificó.
 
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+**Paso 1 — Localiza `FeatureLoginData` en Xcode**
 
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
+En `Sources/FeatureLoginData/` hay dos archivos:
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
+| Tu implementación (lección) | Scaffold | Diferencia principal |
+|---|---|---|
+| `StubAuthGateway` (struct) | `InMemoryAuthRepository.swift` | Es un **`actor`** (thread-safe) con latencia configurable |
+| `RemoteAuthGateway` | `AuthHTTPRepository.swift` | Guarda sesión en `SessionStore` tras autenticar; DTOs privados |
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+**Paso 2 — Diferencia importante: `InMemoryAuthRepository` es un `actor`**
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+Abre `InMemoryAuthRepository.swift`. El scaffold usa `actor` en lugar de `struct` porque en producción varios tasks pueden llamar a `authenticate` concurrentemente. El `actor` serializa el acceso. Esta es la diferencia entre código que funciona en demos y código que aguanta producción. La lección empieza con `struct` para simplificar el aprendizaje del patrón — la evolucion al `actor` es el siguiente paso natural.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+**Paso 3 — Ejecuta los tests de integración de Infrastructure**
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDataIntegrationTests
+```
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+Verde. Estos tests verifican exactamente los escenarios de tu lección: autenticación exitosa, credenciales inválidas, error de red.
 
-Lectura semantica minima de este diagrama:
+**Paso 4 — Estado acumulado del proyecto en Xcode**
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+Hasta aquí, el scaffold tiene compilando y con tests en verde:
+
+- ✅ `FeatureLoginDomain` — Value Objects, UseCase, protocolo `AuthRepository`
+- ✅ `FeatureLoginData` — `InMemoryAuthRepository` + `AuthHTTPRepository`
+- ⏳ `FeatureLoginUI` — siguiente lección
+- ⏳ `AppComposition` — lección 06
+
+---
+
+## Qué sigue
+
+La siguiente lección, [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md), construye el `LoginViewModel` y la `LoginView` — la capa más externa de la feature que conecta la UI con el `LoginUseCase`.
 

@@ -58,7 +58,7 @@ flowchart LR
     POLICY --> ROUTE["AppDestination valida"]
     ROUTE --> COORD["AppCoordinator"]
     COORD --> FEATURE["FeatureRouter propietario"]
-```text
+```
 
 Esto desacopla origen de intención y destino final.
 
@@ -84,7 +84,7 @@ struct ProductID: Hashable, Sendable {
         self.rawValue = rawValue
     }
 }
-```text
+```
 
 Por qué tipado fuerte:
 
@@ -118,7 +118,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```text
+```
 
 ### Ejemplo realista
 
@@ -150,7 +150,7 @@ struct DeepLinkParser: Sendable {
         }
     }
 }
-```text
+```
 
 Parser solo interpreta URL. No decide auth ni navegación final.
 
@@ -184,7 +184,7 @@ struct NavigationPolicy: Sendable {
         }
     }
 }
-```text
+```
 
 Ventaja enterprise:
 
@@ -250,7 +250,7 @@ final class AppCoordinator: ObservableObject {
         }
     }
 }
-```text
+```
 
 ---
 
@@ -278,7 +278,7 @@ sequenceDiagram
         POL-->>COORD: allow
         COORD->>NAV: route = productDetail(123)
     end
-```text
+```
 
 ---
 
@@ -298,7 +298,7 @@ stateDiagram-v2
 
     ProductDetail --> Catalog: back
     Settings --> Catalog: back
-```text
+```
 
 Esta máquina de estados evita comportamientos “mágicos” difíciles de depurar.
 
@@ -342,7 +342,7 @@ struct CatalogRouter: FeatureRouter {
         }
     }
 }
-```text
+```
 
 Supuesto: este patrón se activa cuando el coordinador supere complejidad razonable. En una app muy pequeña puede ser demasiado pronto.
 
@@ -400,7 +400,7 @@ final class AppCoordinatorNavigationTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 }
-```text
+```
 
 Nota: `path` vacío/append puede variar según implementación de root screen; lo importante es mantener contrato verificable.
 
@@ -441,7 +441,7 @@ No definir política produce navegación errática.
 Button("Ir al producto") {
     path.append("product-123")
 }
-```text
+```
 
 Problemas:
 
@@ -564,45 +564,54 @@ Cuando la navegación es plataforma, añadir una nueva feature no implica tocar 
 - `LoginViewModel` no importa `FeatureCatalogUI` ni `FeatureCatalogDomain`.
 - La navegación se resuelve en `AppComposition` mediante un closure o coordinador, no por import directo.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
-El patrón es: `LoginViewModel` recibe un closure `onLoginSuccess: (Session) -> Void`. El `AppComposition` conecta ese closure con la presentación de Catalog. El test verifica que al invocar el closure, se activa la navegación esperada. Esto permite que Login y Catalog evolucionen independientemente: si mañana Catalog cambia su pantalla inicial, Login no se entera.
+```swift
+// En AppCompositionTests / SmokeCatalogFlowTests.swift
+
+@MainActor
+final class LoginToCatalogFlowTests: XCTestCase {
+
+    func test_loginSuccess_navigatesToCatalog_withoutDirectImport() {
+        let coordinator = AppCoordinator()
+
+        // Simular login exitoso emitiendo la sesión
+        let session = Session(token: "tok-abc", userId: "u-1")
+        coordinator.handleLoginSuccess(session: session)
+
+        // La pila de navegación debe contener el destino Catalog
+        XCTAssertEqual(coordinator.path.count, 1)
+        // LoginViewModel no necesita saber nada de Catalog:
+        // el coordinator es el único que conecta ambas features.
+    }
+
+    func test_loginViewModel_doesNotImportCatalog() {
+        // Verificar que el módulo FeatureLoginUI compila sin FeatureCatalogUI
+        // Este test es estructural: si LoginViewModel importara CatalogUI,
+        // el script check-dependencies.sh lo detectaría y CI fallaría.
+        // Aquí simplemente instanciamos LoginViewModel con un closure que no
+        // hace nada de Catalog, demostrando que la firma no lo requiere.
+        var navigated = false
+        let vm = LoginViewModel(
+            loginUseCase: LoginUseCaseStub(),
+            onLoginSucceeded: { _ in navigated = true }
+        )
+        // El ViewModel existe y compila; el closure es la única interfaz.
+        XCTAssertFalse(navigated)
+    }
+}
+```
+
+El patrón fundamental es: `LoginViewModel` recibe `onLoginSucceeded: (Session) -> Void`. La `AppComposition` conecta ese closure con la presentación de Catalog a través del `AppCoordinator`. El test de smoke verifica que al invocar el closure con una sesión válida, el coordinador navega a Catalog. Esto permite que Login y Catalog evolucionen completamente independientes: si mañana Catalog renombra su pantalla raíz, Login no compila diferente.
+
+**Resultado esperado**: el test de smoke pasa, `grep -r "import FeatureCatalog" Sources/FeatureLoginUI` devuelve 0 resultados, y el coordinador apila exactamente 1 destino tras `handleLoginSuccess`.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Versionado SPM →**](04-versionado-spm.md) — Cómo gestionar la modularización SPM del scaffold: targets, dependencias, versionado semántico y el grafo de dependencias como artefacto verificable.
 

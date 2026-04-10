@@ -2,7 +2,7 @@
 
 ## Proposito
 
-Este apendice muestra como los principios del curso (Clean Architecture, BDD/TDD, Value Objects, bounded contexts) se aplican a un dominio financiero real. No es una leccion completa — es un ejercicio de transferencia para que veas que la arquitectura no es especifica de un catalogo de productos.
+Este apendice muestra como los principios del curso (Clean Architecture, BDD/TDD, Value Objects, bounded contexts) se aplican a un dominio financiero real. No es una lección completa — es un ejercicio de transferencia para que veas que la arquitectura no es especifica de un catalogo de productos.
 
 ---
 
@@ -13,7 +13,7 @@ Un dominio bancario tiene:
 - **Invariantes estrictas** — un saldo no puede ser negativo (en cuenta corriente estandar).
 - **Value Objects ricos** — `Money`, `IBAN`, `TransactionID`.
 - **Consistencia critica** — un movimiento debe ser atomico.
-- **Auditoria obligatoria** — cada operacion debe ser trazable.
+- **Auditoria obligatoria** — cada operación debe ser trazable.
 - **Bounded contexts claros** — Cuentas, Transferencias, Notificaciones.
 
 Si puedes modelar esto con Clean Architecture, puedes modelar cualquier cosa.
@@ -88,7 +88,7 @@ struct TransactionID: Sendable, Equatable, Hashable {
         self.value = value
     }
 }
-```text
+```
 
 **Observa:** Los Value Objects validan en `init`, exactamente como `Email` y `Password` en el curso. `Money` no permite cantidades negativas. `IBAN` valida formato. La logica de negocio vive en el tipo, no dispersa en ViewModels.
 
@@ -125,7 +125,7 @@ enum MovementType: String, Sendable, Equatable {
     case credit
     case debit
 }
-```text
+```
 
 ### Errores de Domain
 
@@ -139,7 +139,7 @@ enum LedgerError: Error, Sendable, Equatable {
     case transferToSameAccount
     case connectivity
 }
-```text
+```
 
 ---
 
@@ -166,7 +166,7 @@ enum LedgerError: Error, Sendable, Equatable {
 - And la cuenta destino tiene saldo en USD
 - When el usuario intenta transferir
 - Then ve un error "Las monedas no coinciden"
-```text
+```
 
 ---
 
@@ -233,7 +233,7 @@ protocol AccountRepository: Sendable {
     func find(by iban: IBAN) async throws -> Account
     func save(_ account: Account) async throws
 }
-```text
+```
 
 ---
 
@@ -345,7 +345,7 @@ final class TransferFundsUseCaseTests: XCTestCase {
             "Debito y credito deben compartir el mismo TransactionID para trazabilidad")
     }
 }
-```text
+```
 
 ---
 
@@ -382,7 +382,7 @@ graph TD
 
 ## Mapping al curso
 
-| Concepto Banca | Equivalente en el curso | Leccion |
+| Concepto Banca | Equivalente en el curso | Lección |
 |---|---|---|
 | `Money` | `Price` | E1: Value Objects |
 | `IBAN` | `Email` | E1: Value Objects |
@@ -400,21 +400,4 @@ graph TD
 El dominio cambia (productos → cuentas bancarias), pero la arquitectura no. Value Objects validan en `init`, UseCases orquestan logica de negocio, repositories abstraen persistencia, y los bounded contexts acotan responsabilidades. Si entiendes el curso, puedes modelar un ledger bancario sin cambiar de framework ni de principios.
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/apendice-banca-ledger.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

@@ -1,18 +1,12 @@
 # Metodología BDD: especificación y descubrimiento
 
-## Dos prácticas complementarias que se necesitan mutuamente
+## Especificar el comportamiento antes de implementarlo
 
-En la lección anterior hablamos de principios abstractos: aclarar intención, lotes pequeños, tests como feedback, diseño modular. En esta lección vamos a convertir esos principios en una **metodología concreta** que vas a aplicar cada vez que construyas una feature en este curso. Esa metodología se compone de dos prácticas que trabajan juntas: BDD (Behavior-Driven Development) y TDD (Test-Driven Development).
+En la lección anterior establecimos los cuatro principios de ingeniería que guían el curso. Esta lección convierte el primero de ellos — aclarar la intención antes de codificar — en una práctica concreta: **BDD (Behavior-Driven Development)**.
 
-La relación entre ambas es muy sencilla de entender si piensas en las preguntas que responde cada una:
+BDD responde a la pregunta: **"¿Qué tiene que hacer el sistema?"** Define el comportamiento esperado en lenguaje que cualquiera puede leer y validar, incluido alguien que no sabe programar. Ocurre antes de escribir código y produce los escenarios que guían la implementación.
 
-BDD responde a la pregunta: **"¿Qué tiene que hacer el sistema?"** Se ocupa de definir el comportamiento esperado en lenguaje que cualquiera pueda entender, incluido alguien que no sabe programar. Es la práctica de especificación. Ocurre antes de escribir código.
-
-TDD responde a la pregunta: **"¿Cómo implemento eso con seguridad?"** Se ocupa de guiar la implementación paso a paso, escribiendo primero un test que describe un comportamiento concreto, luego el código mínimo que lo hace pasar, y luego limpiando el diseño. Es la práctica de implementación disciplinada.
-
-Sin BDD, no sabes exactamente qué construir. Puedes hacer TDD perfecto y construir algo que no es lo que se necesitaba. Sin TDD, sabes qué construir pero no tienes la disciplina ni la red de seguridad para hacerlo de forma incremental y confiable. Las dos prácticas juntas forman un flujo completo: primero defines qué, luego implementas con seguridad.
-
-Para que el estudio sea más ligero, esta metodología ahora está dividida en dos lecciones: aquí cubrimos la parte de **BDD** (especificación) y en la siguiente cubrimos la parte de **TDD** (implementación).
+La práctica complementaria — **TDD** — responde a "¿cómo implemento eso con seguridad?" y se cubre en la lección siguiente. Las dos forman el flujo completo: primero defines qué, luego implementas con disciplina.
 
 ---
 
@@ -33,7 +27,7 @@ Scenario: [Descripción breve de lo que se está probando]
   Given [un contexto inicial, un estado del sistema]
   When [ocurre una acción o un evento]
   Then [el resultado esperado, lo que debería pasar]
-```text
+```
 
 **Given** describe el estado inicial del mundo antes de que ocurra la acción. Es el contexto. "Dado que existe un usuario registrado con email user@example.com y un password válido". "Dado que el dispositivo no tiene conexión a internet".
 
@@ -79,7 +73,7 @@ Scenario: Login rechazado por password vacío
   When el usuario intenta construir las credenciales
   Then el sistema rechaza el password antes de intentar la autenticación
   And devuelve un error de tipo password vacío
-```text
+```
 
 ### Cómo se lee un escenario BDD paso a paso
 
@@ -92,7 +86,7 @@ Scenario: Login exitoso con credenciales válidas
   When el usuario envía sus credenciales
   Then el sistema autentica al usuario exitosamente
   And el sistema devuelve una sesión con un token de acceso
-```text
+```
 
 **Línea 1 — `Scenario:`** — Es el título. Describe en una frase corta qué estamos probando. Siempre empieza con `Scenario:`. Es como el título de una película: te dice de qué va sin darte todos los detalles.
 
@@ -130,7 +124,7 @@ graph TD
 
     style BDD fill:#f8f9fa,stroke:#6c757d
     style TEST fill:#d4edda,stroke:#28a745
-```text
+```
 
 Veamos la traducción completa del escenario del happy path:
 
@@ -147,7 +141,7 @@ When el usuario envía credenciales            let session = try await sut.execu
 
 Then autentica exitosamente                   XCTAssertEqual(session, expectedSession)
   And devuelve sesión con token               XCTAssertEqual(session.token, "valid-token")
-```text
+```
 
 Y la traducción de un sad path:
 
@@ -167,7 +161,7 @@ Then rechaza el email                         } catch {
   And devuelve error email inválido               XCTAssertEqual(error as? LoginUseCase.Error,
                                                       .invalidEmail)
                                               }
-```swift
+```
 
 **Regla de oro:** cada `Scenario` BDD se convierte en exactamente un `func test_...()` en Swift. Si tienes 5 escenarios, tienes 5 tests. El nombre del test describe el escenario: `test_execute_with_invalid_email_throws_invalidEmail`.
 
@@ -204,66 +198,9 @@ BDD **no** se aplica cuando estás haciendo un refactor interno que no cambia ni
 
 ---
 
-## Puente hacia TDD (siguiente lección)
+## Qué sigue
 
-Hasta aquí hemos resuelto el **qué** y el **por qué** de la feature con escenarios de comportamiento. Ese trabajo conecta directamente con el **Principio 1** de la lección de principios: aclarar la intención antes de codificar.
+Hasta aquí hemos resuelto el **qué** y el **por qué** de la feature con escenarios de comportamiento. En la siguiente lección pasamos al **cómo**: implementar cada comportamiento con TDD usando ciclos cortos Red-Green-Refactor.
 
-En la siguiente lección pasamos al **cómo**: implementar cada comportamiento con TDD usando ciclos cortos Red-Green-Refactor.
-
----
-
----
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/02-metodologia-bdd-tdd.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+La siguiente lección es [Metodología TDD: práctica Red-Green-Refactor](02-metodologia-tdd-practica.md).
 

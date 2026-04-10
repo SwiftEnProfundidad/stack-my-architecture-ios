@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## El control que necesitas sobre las tareas concurrentes
 
@@ -37,7 +37,7 @@ graph TD
     style UNSTRUCT fill:#fff3cd,stroke:#ffc107
     style SAFE fill:#d4edda,stroke:#28a745
     style RISK fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 **Regla enterprise:** siempre empieza con structured concurrency (`.task`, `async let`, `TaskGroup`). Solo usa `Task {}` cuando necesites lanzar trabajo desde un contexto síncrono (como un `Button` action) y no puedes usar `.task`. Nunca uses `Task.detached` salvo que tengas una razón documentada.
 
@@ -57,7 +57,7 @@ func loadData() {
     // Si `self` se desaloca, el Task sigue ejecutándose.
     // `self` podría ser retenido por el closure → memory leak.
 }
-```text
+```
 
 ### Diagrama: Task no estructurado vs .task de SwiftUI
 
@@ -75,7 +75,7 @@ sequenceDiagram
     Note over T: ⚠️ Task SIGUE ejecutando<br/>Nadie lo canceló<br/>self retenido → memory leak
     T->>T: loadProducts() termina
     Note over T: Resultado descartado<br/>o asignado a vista muerta
-```text
+```
 
 ```mermaid
 sequenceDiagram
@@ -91,7 +91,7 @@ sequenceDiagram
     V->>T: ✅ SwiftUI cancela automáticamente
     Note over T: Task.isCancelled = true<br/>Operación se detiene limpiamente
     Note over T: Sin memory leak<br/>Sin trabajo innecesario
-```text
+```
 
 La diferencia es fundamental para el trabajo diario: con `.task`, no necesitas pensar en cancelación. SwiftUI lo hace por ti. Con `Task {}`, eres responsable de cancelar manualmente, y **la mayoría de los desarrolladores olvidan hacerlo**.
 
@@ -113,7 +113,7 @@ func loadCatalogScreen() async throws -> (products: [Product], config: CatalogCo
     // Aquí esperamos a que ambas terminen.
     return try await (products, config)
 }
-```text
+```
 
 Sin `async let`, las operaciones serían secuenciales. El diagrama de Gantt lo hace evidente:
 
@@ -130,7 +130,7 @@ flowchart LR
     end
 
     ST -.->|"Ahorro con async let"| PT
-```text
+```
 
 ```swift
 // ❌ Secuencial: config espera a que products termine
@@ -142,7 +142,7 @@ let config = try await configService.loadCatalogConfig() // 200ms
 async let products = repository.loadAll()            // 500ms ─┐
 async let config = configService.loadCatalogConfig() // 200ms ─┤ en paralelo
 let result = try await (products, config)            //         └─ Total: 500ms
-```text
+```
 
 **Impacto enterprise:** en una pantalla que carga 5 recursos independientes (productos, config, usuario, banners, categorías), la diferencia entre secuencial y paralelo puede ser de 2 segundos vs 0.5 segundos. Esos 1.5 segundos son la diferencia entre un usuario que espera y uno que cierra la app.
 
@@ -167,7 +167,7 @@ sequenceDiagram
     
     F->>F: throws CatalogError.connectivity
     Note over F: Ambas tareas terminaron<br/>Error propagado al caller
-```text
+```
 
 Cuando una de las operaciones `async let` falla, Swift **cancela automáticamente las demás**. No hay trabajo innecesario, no hay resultados parciales que gestionar. Es todo-o-nada por defecto.
 
@@ -205,7 +205,7 @@ func loadImages(for products: [Product]) async -> [String: Data] {
         return images
     }
 }
-```text
+```
 
 ### Cómo funciona
 
@@ -241,7 +241,7 @@ sequenceDiagram
     
     Note over R: Resultado: { "A": data, "B": data }
     Note over G: Los resultados llegan en ORDEN DE FINALIZACIÓN<br/>no en orden de lanzamiento
-```text
+```
 
 **Detalle enterprise crucial:** los resultados no llegan en el orden en que lanzaste las tareas, sino en el orden en que terminan. Si necesitas mantener el orden original, usa el índice del array como clave o reconstruye el orden después.
 
@@ -279,7 +279,7 @@ func loadImages(for products: [Product], maxConcurrent: Int = 5) async -> [Strin
         return images
     }
 }
-```text
+```
 
 Este patrón mantiene siempre N tareas activas sin saturar la red o la CPU.
 
@@ -305,7 +305,7 @@ func loadAllImages(for products: [Product]) async throws -> [String: Data] {
     }
 }
 // Si cualquier imagen falla, todo el grupo falla y las demás tareas se cancelan.
-```text
+```
 
 ---
 
@@ -329,7 +329,7 @@ func loadProducts() async throws -> [Product] {
     
     return try parseProducts(from: data)
 }
-```text
+```
 
 ### Dónde verificar la cancelación
 
@@ -349,7 +349,7 @@ func processLargeDataset(_ items: [Item]) async throws -> [ProcessedItem] {
     
     return results
 }
-```text
+```
 
 ### El modifier `.task` de SwiftUI cancela automáticamente
 
@@ -370,7 +370,7 @@ struct CatalogView: View {
         }
     }
 }
-```text
+```
 
 Si el usuario navega fuera de `CatalogView`, SwiftUI cancela la tarea. Si `loadProducts()` verifica `Task.checkCancellation()` internamente, la operación se detiene limpiamente.
 
@@ -388,7 +388,7 @@ Si el usuario navega fuera de `CatalogView`, SwiftUI cancela la tarea. Si `loadP
 .task {
     await viewModel.loadProducts()
 }
-```text
+```
 
 Usa siempre `.task` en lugar de `Task {}` dentro de `onAppear`. Si necesitas reaccionar a cambios en un valor, usa `.task(id:)`:
 
@@ -398,7 +398,7 @@ Usa siempre `.task` en lugar de `Task {}` dentro de `onAppear`. Si necesitas rea
     // La tarea anterior se cancela automáticamente antes de lanzar la nueva.
     await viewModel.loadProducts(category: selectedCategory)
 }
-```text
+```
 
 ---
 
@@ -438,7 +438,7 @@ private func makeCatalogRepository(httpClient: any HTTPClient) -> some ProductRe
     let store = FileProductStore(directory: cacheDirectory)
     return CachedProductRepository(remote: remote, store: store)
 }
-```text
+```
 
 ---
 
@@ -459,7 +459,7 @@ for url in urls {
     let data = try await download(url)
     results.append(data)
 }
-```text
+```
 
 ### Error 2: usar Task {} cuando deberías usar .task
 
@@ -485,7 +485,7 @@ struct MyView: View {
             .task { await viewModel.load() }
     }
 }
-```text
+```
 
 ### Error 3: capturar variables mutables en addTask
 
@@ -523,61 +523,7 @@ await withTaskGroup(of: Product.self) { group in
 
 ---
 
----
+## Qué sigue
 
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/03-structured-concurrency.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Testing concurrente →**](04-testing-concurrente.md) — Cómo testear código async/await y actors sin race conditions en los tests: patrones, expectativas y trampas comunes.
 

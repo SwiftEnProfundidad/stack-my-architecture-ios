@@ -1,9 +1,7 @@
 # App Final Etapa 2: Login + Catalog Funcionando Juntos
 
-<!-- snippet-mapping-note:auto -->
-> **Nota de nomenclatura pedagógica**
-> Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual.
-> En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`.
+> **Nota de nomenclatura pedagógica:** Algunos snippets de esta lección usan `ProductRepository` como nombre conceptual. En el scaffold real (`apps/ios/ArchitectureKit`) el equivalente operativo es `CatalogRepository`. Consulta la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
+
 ## El cierre visual de la integración
 
 Has completado la Etapa 2: construiste la feature Catalog con sus 4 capas, implementaste navegación por eventos con `AppCoordinator`, y conectaste Login con Catalog mediante contratos desacoplados. Los tests pasan, la arquitectura es sólida.
@@ -35,7 +33,7 @@ graph TD
     
     style C fill:#e1f5fe
     style B fill:#fff3e0
-```text
+```
 
 El `AppCoordinator` es el centro de todo. Recibe eventos de las features y decide a qué pantalla navegar.
 
@@ -82,7 +80,7 @@ flowchart LR
     LREMOTE --o LGW
     CREMOTE --o CREPO
     CREMOTE --> CSTORE
-```text
+```
 
 Lectura semántica (la clave didáctica):
 
@@ -203,7 +201,7 @@ final class AppCoordinator {
         )
     }
 }
-```text
+```
 
 ---
 
@@ -256,7 +254,7 @@ struct StackMyArchitectureApp: App {
         )
     }
 }
-```text
+```
 
 **Cambios clave desde E1:**
 1. Ahora usamos `NavigationStack` con `path: $coordinator.navigationPath`
@@ -335,7 +333,7 @@ actor StubProductRepository: ProductRepository {
         ]
     }
 }
-```text
+```
 
 ---
 
@@ -388,7 +386,7 @@ class LoginViewModel {
         isLoading = false
     }
 }
-```text
+```
 
 ---
 
@@ -452,7 +450,7 @@ Tu app debe verse así:
 │  └───────────────────┘  │
 │                         │
 └─────────────────────────┘
-```text
+```
 
 **Catalog (después de login):**
 ```text
@@ -502,22 +500,7 @@ Pero primero, revisa los entregables de la Etapa 2.
 
 ---
 
----
+## Qué sigue
 
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `02-integracion/09-app-final-etapa-2.md`.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
+[**Entregables Etapa 2 →**](entregables-etapa-2.md) — Verifica que dominas integración de features, navegación por eventos, contratos, infra real y Composition Root antes de pasar a la Etapa 3: Evolución.
 

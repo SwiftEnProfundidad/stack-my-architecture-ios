@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Por qué esta etapa separa a un equipo “correcto” de un equipo “confiable”
 
@@ -62,7 +62,7 @@ flowchart LR
     end
 
     E2 --> E3
-```text
+```
 
 Mensaje clave para el alumno:
 - Ya no se trata solo de “añadir código”,
@@ -140,7 +140,7 @@ flowchart TD
     K --> O["Observabilidad"]
     O --> T["Testing avanzado"]
     T --> D["Decisión de trade-offs"]
-```text
+```
 
 El orden no es accidental: cada bloque prepara el siguiente.
 
@@ -184,7 +184,7 @@ Resultado esperado:
 - ViewModel gobierna estado,
 - vista representa estado, no reglas de negocio.
 
-## `windsurf-rules-ios` (si aplica al repositorio objetivo)
+## `ios-enterprise-rules` (si aplica al repositorio objetivo)
 
 Se aplica en:
 - mantener Clean Architecture bajo presión de cambios,
@@ -381,39 +381,9 @@ El foco es resiliencia útil y sostenible, no complejidad ornamental.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-3.md](../03-evolucion/entregables-etapa-3.md).
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+---
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+## Qué sigue
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Caching y offline →**](01-caching-offline.md) — La primera lección de esta etapa: estrategia remote-first con fallback a cache, TTL, y cómo el `CachedCatalogRepository` del scaffold implementa resiliencia sin que Domain se entere.
 

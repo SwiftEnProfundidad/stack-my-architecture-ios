@@ -1,14 +1,16 @@
 # Plantillas operativas (con ejemplos reales)
 
-Este documento no está pensado para “copiar y pegar sin pensar”. Está pensado para ayudarte a pasar de una idea vaga a una decisión técnica clara, trazable y defendible.
-
-La regla de uso es simple: cada plantilla debe producir un artefacto que otra persona pueda leer y responder con “entiendo el problema, la decisión y cómo validar si funcionó”.
+Cada plantilla aquí tiene un criterio de validez: el artefacto resultante debe poder ser leído por otra persona y respondido con “entiendo el problema, la decisión y cómo verificar si funcionó”. Si no cumple ese criterio, no está terminado.
 
 ---
 
-## 1) ADR template (Architecture Decision Record)
+## 1) ADR template (Architecture Decisión Record)
 
 ### Plantilla
+
+Autor:
+
+Estado: `propuesta` | `aceptada` | `rechazada` | `obsoleta`
 
 Contexto:
 
@@ -25,6 +27,10 @@ Métricas/criterios de éxito:
 Fecha de revisión:
 
 ### Ejemplo (navegación desacoplada)
+
+Autor: equipo iOS.
+
+Estado: `aceptada`
 
 Contexto:
 Login y Catálogo necesitan coordinar navegación sin acoplar features entre sí.
@@ -57,6 +63,14 @@ Fecha de revisión:
 
 ### Plantilla
 
+Autor:
+
+Estado: `borrador` | `en revisión` | `aceptado` | `rechazado`
+
+Stakeholders (quién aprueba):
+
+Fecha límite de decisión:
+
 Problema:
 
 Objetivo:
@@ -72,6 +86,14 @@ Plan de rollback:
 Riesgos abiertos:
 
 ### Ejemplo (introducir caché en catálogo)
+
+Autor: equipo iOS.
+
+Estado: `aceptado`
+
+Stakeholders (quién aprueba): tech lead iOS, product manager.
+
+Fecha límite de decisión: 2026-02-14.
 
 Problema:
 El catálogo tarda demasiado en redes inestables y no ofrece experiencia offline mínima.
@@ -102,42 +124,46 @@ Riesgo de datos obsoletos si el TTL queda mal calibrado.
 
 ## 3) PR Review checklist
 
+> Items marcados con **[B]** son bloqueantes: el PR no se mergea si están sin marcar. Items sin marca son mejoras deseables que pueden quedar como follow-up documentado.
+
 ### Plantilla
 
-- [ ] Arquitectura: límites y dependencias correctos.
-- [ ] Tests: cobertura suficiente del impacto.
-- [ ] Edge cases: fallos previsibles cubiertos.
+- [ ] **[B]** Arquitectura: límites y dependencias correctos.
+- [ ] **[B]** Tests: cobertura suficiente del impacto.
+- [ ] **[B]** Edge cases: fallos previsibles cubiertos.
 - [ ] Observabilidad: logs/métricas para diagnóstico.
-- [ ] Seguridad/privacidad: PII/secretos revisados.
+- [ ] **[B]** Seguridad/privacidad: PII/secretos revisados.
 - [ ] Plan de rollback documentado (si el cambio lo requiere).
 
 ### Ejemplo de uso (extracto)
 
-- [x] Arquitectura: sin imports cruzados entre features.
-- [x] Tests: unit + integration en verde para login y catálogo.
-- [x] Edge cases: expiración de sesión y fallo de red cubiertos.
-- [ ] Observabilidad: pendiente añadir evento estable para retry de catálogo.
-- [x] Seguridad/privacidad: logger redacta email/token.
+- [x] **[B]** Arquitectura: sin imports cruzados entre features.
+- [x] **[B]** Tests: unit + integration en verde para login y catálogo.
+- [x] **[B]** Edge cases: expiración de sesión y fallo de red cubiertos.
+- [ ] Observabilidad: pendiente añadir evento estable para retry de catálogo. *(no bloqueante — follow-up documentado en ticket #42)*
+- [x] **[B]** Seguridad/privacidad: logger redacta email/token.
 - [x] Plan de rollback: flag de caché documentado.
 
 Comentario final de revisión:
-“Aprobable tras añadir evento de observabilidad para retry; el resto de gates está correcto”.
+“Aprobable: todos los bloqueantes en verde. Observabilidad de retry queda como follow-up en #42”.
 
 ---
 
 ## 4) DoD template (Definition of Done)
 
+> Cada ítem incluye quién valida: el autor lo ejecuta, CI lo verifica automáticamente, o el revisor lo confirma en la PR.
+
 ### Plantilla
 
-Build:
+Build: *(valida: CI)*
 
-Tests:
+Tests: *(valida: CI + autor)*
 
-Quality gates:
+Quality gates: *(valida: CI)*
 
-Documentación:
+Documentación: *(valida: revisor)*
 
-Operación:
+Operación: *(valida: autor + revisor)*
 
 ### Ejemplo (feature Login)
 
@@ -160,6 +186,8 @@ Evento de fallo de login instrumentado sin PII.
 
 ## 5) Tabla de métricas before/after
 
+> `Before` y `After` deben incluir unidad (ms, %, pp, nº). `Delta` debe expresarse como porcentaje o puntos absolutos con signo. `Evidencia` debe ser verificable por un tercero (log, perfilado, dashboard).
+
 ### Plantilla
 
 | Métrica | Before | After | Delta | Evidencia |
@@ -179,114 +207,10 @@ Evento de fallo de login instrumentado sin PII.
 
 ## 6) Mobile Threat Model Lite
 
-Plantilla breve:
-
-Sistema/flujo evaluado:
-
-Activos críticos:
-
-Actores potenciales:
-
-Superficie de ataque:
-
-Amenazas priorizadas:
-
-Controles existentes:
-
-Controles faltantes:
-
-Riesgo residual aceptado:
-
-Fecha de revisión:
-
-Ejemplo completo (curso Login + Catálogo):
-
-- Sistema/flujo evaluado: autenticación de usuario, persistencia de sesión y navegación a catálogo con deep links.
-- Activos críticos: token de sesión, identificador de usuario, email (PII), trazas operativas.
-- Actores potenciales: atacante con dispositivo comprometido, actor con acceso a logs, app maliciosa que intenta invocar deep links.
-- Superficie de ataque:
-  - almacenamiento local de sesión,
-  - transporte de credenciales/token,
-  - eventos/logs con contexto de usuario,
-  - rutas de navegación/deep links.
-- Amenazas priorizadas:
-  - T1: exfiltración de token desde almacenamiento inseguro,
-  - T2: fuga de PII en logging/analytics,
-  - T3: acceso a pantallas protegidas vía deep link sin sesión válida.
-- Controles existentes:
-  - validación de credenciales y errores tipados en Domain/Application,
-  - contratos de navegación desacoplada con chequeo de sesión en coordinador,
-  - tests de integración en gateways/repositorios.
-- Controles faltantes:
-  - persistencia de sesión en Keychain (no UserDefaults),
-  - redacción automática de PII en logger,
-  - test automático de deep links protegidos en CI.
-- Riesgo residual aceptado: medio-bajo durante etapa formativa; no aceptable para release público sin completar controles faltantes.
-- Fecha de revisión: 2026-02-11.
-
-Referencia con ejemplo completo:
-[`00-core-mobile/08-seguridad-privacidad-threat-modeling.md`](08-seguridad-privacidad-threat-modeling.md)
+Plantilla y ejemplo completo en la lección dedicada: [Seguridad, privacidad y threat modeling](08-seguridad-privacidad-threat-modeling.md).
 
 ---
 
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
+## Qué sigue
 
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+La siguiente lección, [Crosswalk iOS ↔ Android](11-crosswalk-ios-android.md), mapea las responsabilidades de este track iOS a su equivalente en Android, para que puedas colaborar con equipos multiplataforma con un lenguaje técnico común.

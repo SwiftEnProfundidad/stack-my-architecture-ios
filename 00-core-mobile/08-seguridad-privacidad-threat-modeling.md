@@ -36,6 +36,8 @@ Diseña analítica con minimización de datos, consentimiento explícito cuando 
 
 ## Template: Mobile Threat Model Lite
 
+> Rellena los campos según los pasos de la sección siguiente. Cada campo vacío es una decisión pendiente, no un error del template.
+
 Sistema/flujo evaluado:
 
 Activos críticos:
@@ -106,73 +108,16 @@ Controles faltantes:
 - Redacción automática de PII en logger/analytics.
 - Rotación y revocación explícita de sesión con estrategia de fallback offline.
 - Test de integración para deep link protegido sin sesión válida.
+- Minimización de datos en analítica: solo eventos necesarios, sin identificadores de usuario en texto plano. Consentimiento explícito requerido antes de activar analítica de comportamiento (mentalidad GDPR aplicada al flujo de login).
 
 Riesgo residual aceptado:
-Se acepta riesgo temporal de no aplicar pinning de certificados mientras no haya operación madura de rotación/recuperación. Revisión obligatoria al primer incidente de red o cambio de backend.
+No se aplica pinning de certificados por decisión deliberada: sin infraestructura madura de rotación y recuperación, el pinning introduce más riesgo operativo que el que mitiga. Esta es la postura correcta en este contexto, no deuda técnica. Se reevalúa ante cambio de backend o primer incidente de red.
 
 Fecha de revisión:
 2026-06-30.
 
 ---
 
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
+## Qué sigue
 
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+La siguiente lección, [Dependency governance y supply chain](09-dependency-governance-supply-chain.md), traslada la misma mentalidad de riesgo a las dependencias externas: qué SDKs aceptas, bajo qué condiciones y con qué plan de salida.

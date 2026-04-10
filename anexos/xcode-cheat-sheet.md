@@ -111,7 +111,7 @@
 ```text
 Alt/Option + arrastrar selección
 → Selecciona en modo columna para editar múltiples líneas a la vez
-```text
+```
 
 **Ejemplo:** Quieres añadir `private` a 5 variables:
 ```swift
@@ -127,7 +127,7 @@ var age: Int
 private var name: String
 private var email: String
 private var age: Int
-```text
+```
 
 ### Búsqueda global vs local
 
@@ -155,7 +155,7 @@ Preferences → Text Editing → Editing
 ✅ Use escape key to show completions
 ✅ Automatically trim trailing whitespace
 ✅ Including whitespace-only lines
-```text
+```
 
 ### Key Bindings personalizados (opcional)
 

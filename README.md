@@ -6,19 +6,18 @@
 
 ## Core Mobile (iOS + Android)
 
-This is a Mobile Architecture framework: iOS depth + Android parity via shared decision-making, quality, operations, and governance.
+This is a Mobile Architecture framework: iOS depth + Android parity via shared decisión-making, quality, operations, and governance.
 
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Crosswalk iOS ↔ Android](00-core-mobile/11-crosswalk-ios-android.md)
-- [Roadmap V2 (práctico)](docs/management/roadmap-v2.md)
 - [Scaffold ejecutable iOS (SPM)](apps/ios/ArchitectureKit/README.md)
 - [Host App UI smoke (XCUITest)](apps/ios/ArchitectureHostApp/README.md)
 - [ADRs del scaffold](docs/adr)
 
 ## Final Rubric (iOS)
 
-- [Rúbrica de empleabilidad iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Rúbrica de empleabilidad iOS](05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md)
 
 ## HTML Hub
 
@@ -82,14 +81,15 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 ### Informe fundacional
 
 - [Informe completo del curso](00-informe/INFORME-CURSO.md)
-- [Decisiones tomadas](00-informe/DECISIONES-TOMADAS.md)
-- [Backlog técnico del repo (mantenimiento interno)](00-informe/TODO.md)
+- [Matriz de competencias](00-informe/MATRIZ-COMPETENCIAS.md)
+- [Rúbrica de gates por fase](00-informe/RUBRICA-GATES-POR-FASE.md)
+- [Scorecard de empleabilidad](00-informe/SCORECARD-EMPLEABILIDAD.md)
 - [Core Mobile: Introducción](00-core-mobile/00-introduccion.md)
 - [Core Mobile: Marco de decisiones](00-core-mobile/01-marco-de-decisiones.md)
 - [Core Mobile: Invariantes y contratos](00-core-mobile/02-invariantes-y-contratos.md)
 - [Core Mobile: Variabilidad y evolución](00-core-mobile/03-variabilidad-y-evolucion.md)
 - [Core Mobile: Calidad PR-ready](00-core-mobile/04-calidad-pr-ready.md)
-- [Core Mobile: Observabilidad y operación](00-core-mobile/05-observabilidad-operacion.md)
+- [Core Mobile: Observabilidad y operación](00-core-mobile/05-observabilidad-operación.md)
 - [Core Mobile: Release, rollback y flags](00-core-mobile/06-release-rollback-flags.md)
 - [Core Mobile: APIs, contratos y versionado](00-core-mobile/07-apis-contratos-versionado.md)
 - [Core Mobile: Seguridad y privacidad](00-core-mobile/08-seguridad-privacidad-threat-modeling.md)
@@ -119,23 +119,26 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 
 ### Etapa 2 — Mid: Integración y disciplina
 
-- [Introducción](02-integracion/00-introduccion.md)
+- [Introducción](02-integración/00-introduccion.md)
 - **Feature Catalog:**
-  - [Especificación BDD](02-integracion/01-feature-catalog/00-especificacion-bdd.md)
-  - [Domain](02-integracion/01-feature-catalog/01-domain.md)
-  - [Application](02-integracion/01-feature-catalog/02-application.md)
-  - [Infrastructure](02-integracion/01-feature-catalog/03-infrastructure.md)
-  - [Interface SwiftUI](02-integracion/01-feature-catalog/04-interface-swiftui.md)
-  - [ADR-002: Catalog](02-integracion/01-feature-catalog/ADR-002-catalog.md)
-- [Navegación por eventos](02-integracion/02-navegacion-eventos.md)
-- [Contratos entre features](02-integracion/03-contratos-features.md)
-- [Infraestructura real: Network](02-integracion/04-infra-real-network.md)
-- [Integration tests](02-integracion/05-integration-tests.md)
-- [Composition Root](02-integracion/06-composition-root.md)
-- [SwiftUI enterprise](02-integracion/07-swiftui-enterprise.md)
-- [Swift Concurrency enterprise](02-integracion/08-swift-concurrency-enterprise.md)
-- [App final Etapa 2](02-integracion/09-app-final-etapa-2.md)
-- [Entregables Etapa 2](02-integracion/entregables-etapa-2.md)
+  - [Especificación BDD](02-integración/01-feature-catalog/00-especificacion-bdd.md)
+  - [Domain](02-integración/01-feature-catalog/01-domain.md)
+  - [Application](02-integración/01-feature-catalog/02-application.md)
+  - [Infrastructure](02-integración/01-feature-catalog/03-infrastructure.md)
+  - [Interface SwiftUI](02-integración/01-feature-catalog/04-interface-swiftui.md)
+  - [ADR-002: Catalog](02-integración/01-feature-catalog/ADR-002-catalog.md)
+- [Navegación por eventos](02-integración/02-navegación-eventos.md)
+- [Contratos entre features](02-integración/03-contratos-features.md)
+- [Infraestructura real: Network](02-integración/04-infra-real-network.md)
+- [Integration tests](02-integración/05-integration-tests.md)
+- [Composition Root](02-integración/06-composition-root.md)
+- [SwiftUI enterprise (índice)](02-integracion/07-swiftui-enterprise.md)
+  - [Parte 1: Navegación, Modales e Interacción](02-integracion/07a-swiftui-enterprise-navegacion.md)
+  - [Parte 2: Composición, Rendimiento y APIs](02-integracion/07b-swiftui-enterprise-composicion.md)
+  - [Parte 3: Liquid Glass, Ejercicio y Cierre](02-integracion/07c-swiftui-enterprise-moderno.md)
+- [Swift Concurrency enterprise](02-integración/08-swift-concurrency-enterprise.md)
+- [App final Etapa 2](02-integración/09-app-final-etapa-2.md)
+- [Entregables Etapa 2](02-integración/entregables-etapa-2.md)
 
 ### Etapa 3 — Senior: Evolución y resiliencia
 
@@ -154,7 +157,7 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Introducción](04-arquitecto/00-introduccion.md)
 - [Bounded contexts](04-arquitecto/01-bounded-contexts.md)
 - [Reglas de dependencia y CI](04-arquitecto/02-reglas-dependencia-ci.md)
-- [Navegación y deep links como plataforma](04-arquitecto/03-navegacion-deeplinks.md)
+- [Navegación y deep links como plataforma](04-arquitecto/03-navegación-deeplinks.md)
 - [Versionado y SPM](04-arquitecto/04-versionado-spm.md)
 - [Guía de arquitectura](04-arquitecto/05-guia-arquitectura.md)
 - [Quality gates](04-arquitecto/06-quality-gates.md)
@@ -169,16 +172,22 @@ Ser capaz de diseñar, construir y evolucionar una base de código iOS de produc
 - [Testing concurrente](05-maestria/04-testing-concurrente.md)
 - [SwiftUI state moderno](05-maestria/05-swiftui-state-moderno.md)
 - [SwiftUI performance](05-maestria/06-swiftui-performance.md)
-- [Composición avanzada](05-maestria/07-composicion-avanzada.md)
+- [Composición avanzada](05-maestria/07-composición-avanzada.md)
 - [Memory leaks y diagnóstico](05-maestria/08-memory-leaks-y-diagnostico.md)
 - [Migración a Swift 6](05-maestria/09-migracion-swift6.md)
 - [Debugging en Xcode](05-maestria/10-debugging-xcode.md)
 - [Entrevista de arquitecto](05-maestria/11-entrevista-arquitecto.md)
 - [Arquitectura adaptativa](05-maestria/12-arquitectura-adaptativa.md)
 - [Entregables Etapa 5](05-maestria/entregables-etapa-5.md)
-- [Rúbrica final iOS](05-maestria/10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [Evidencias obligatorias iOS](05-maestria/10-rubrica-final/02-evidencias-obligatorias-ios.md)
-- [Checklist final de entrega](05-maestria/10-rubrica-final/03-checklist-entrega-para-entrevista.md)
+- [Rúbrica final iOS](05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Checklist final de entrega](05-maestria/rubrica-final/03-checklist-entrega-para-entrevista.md)
+
+### Etapa 6 — Proyecto Final
+
+- [Proyecto Final iOS — Delivery Enterprise](06-proyecto-final/00-proyecto-final-ios.md)
+- [Rúbrica y entrega](06-proyecto-final/01-rubrica-y-entrega.md)
+- [Guía paso a paso — 7 hitos con código y verificación](06-proyecto-final/02-guia-paso-a-paso.md)
 
 ### Anexos
 
@@ -230,7 +239,7 @@ Cuando la lección lo requiera, se aplica explícitamente:
 
 - `swift-concurrency`: decisiones de aislamiento, `Sendable`, cancelación y pruebas concurrentes.
 - `swiftui-expert-skill`: estado moderno, composición de vistas y performance medible.
-- `windsurf-rules-ios` (si aplica al repo objetivo): consistencia de estilo y gobernanza técnica del equipo.
+- `ios-enterprise-rules` (si aplica al repo objetivo): consistencia de estilo y gobernanza técnica del equipo.
 
 La meta no es “mencionar skills”, sino usarlas para tomar mejores decisiones y dejar evidencia de impacto.
 
@@ -243,21 +252,21 @@ La meta no es “mencionar skills”, sino usarlas para tomar mejores decisiones
 - No es usar `@MainActor` para silenciar warnings sin justificar límites.
 - No es adoptar modas; es construir un sistema coherente guiado por requisitos, tests y límites.
 
-## QA Pedagogico (auditoria automatizada)
+## QA Pedagógico
 
-Para ejecutar la auditoria completa del curso y generar informes consolidados:
+Para ejecutar la QA completa del curso:
 
 ```bash
 ./scripts/run-qa-audit-bundle.sh
 ```
 
-Artefactos principales en `00-informe/`:
+Artefacto versionado que sí se conserva en `00-informe/`:
 
-- `AUDITORIA-QA-INTEGRAL.md` y `AUDITORIA-QA-INTEGRAL.json`
-- `AUDITORIA-GUARDRAILS.md` y `AUDITORIA-GUARDRAILS.json`
-- `AUDITORIA-GUARDRAILS-BASELINE.json` (baseline de no regresion)
+- `AUDITORIA-GUARDRAILS-BASELINE.json` (baseline de no regresión)
 
-Guardrails actuales:
+El resto de informes de auditoría se generan localmente como salida de trabajo y ya no forman parte de la documentación estable versionada del curso.
 
-- Bloque tecnico base sin P1: snippets, enlaces, cierre y plantilla
-- Bloque pedagogico semantico sin regresion contra baseline: continuidad, saltos, mermaid y trazabilidad
+Guardrails vigentes:
+
+- Bloque técnico base sin P1: snippets, enlaces, cierre y plantilla
+- Bloque pedagógico semántico sin regresión contra baseline: continuidad, saltos, mermaid y trazabilidad

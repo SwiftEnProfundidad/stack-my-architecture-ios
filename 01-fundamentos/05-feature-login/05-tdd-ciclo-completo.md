@@ -6,6 +6,8 @@ A lo largo de las últimas cuatro lecciones hemos implementado la feature Login 
 
 Esta lección no tiene código nuevo. Es una lección de reflexión y consolidación. Si te la saltas, los siguientes capítulos funcionarán igual, pero entenderás menos el "por qué" detrás de cada decisión.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres que aparecen a lo largo de esta lección (y de toda la Feature Login) son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`, `AuthGateway` → `AuthRepository`, `LoginUseCase` → `AuthenticateUserUseCase`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ---
 
 ### Diagrama: mapa de tests por capa de la feature Login
@@ -31,18 +33,15 @@ graph TD
         UI1["LoginViewModelTests<br/>estado inicial, submit ok,<br/>email invalido msg, password msg,<br/>credenciales msg, conectividad msg,<br/>isLoading false, limpia error"]
     end
 
-    Domain --> Application --> Infrastructure
-    Application --> Interface
-
     style Domain fill:#d4edda,stroke:#28a745
     style Application fill:#cce5ff,stroke:#007bff
     style Infrastructure fill:#fff3cd,stroke:#ffc107
     style Interface fill:#ffe0cc,stroke:#fd7e14
-```text
+```
 
 **Total: 28 tests** para una sola feature. Todos se ejecutan en menos de 1 segundo.
 
-La relación entre cajas también importa: `Domain -> Application -> Infrastructure` indica profundidad técnica, mientras `Application -> Interface` confirma que el estado de UI depende del caso de uso y no al revés.
+Las cuatro capas son independientes en sus tests: cada una usa stubs de la capa inferior y no depende de ninguna implementación concreta exterior. El orden de implementación fue Domain → Application → Infrastructure → Interface, siguiendo la regla de dependencias del curso (las flechas de importación siempre apuntan hacia el centro, hacia el Domain).
 
 > **Nota:** Los 28 tests descritos aquí son el diseño conceptual completo de la feature Login. El scaffold SPM del repositorio (`apps/ios/ArchitectureKit`) consolida algunos de estos tests y tiene 26 tests totales incluyendo Login, Catalog y Composition. La diferencia se debe a que el scaffold agrupa ciertos escenarios en tests de integración de mayor nivel.
 
@@ -65,7 +64,7 @@ EmailTests
 PasswordTests
 ├── test_init_with_non_empty_string_creates_password_successfully
 └── test_init_with_empty_string_throws_empty
-```text
+```
 
 Siete tests. Se ejecutan en milisegundos. No necesitan simulador, ni red, ni base de datos. Son los tests más rápidos y más estables de todo el proyecto. Si fallan, sabes exactamente dónde está el problema: en la validación de un Value Object.
 
@@ -80,7 +79,7 @@ LoginUseCaseTests
 ├── test_execute_with_invalid_email_does_not_call_gateway
 ├── test_execute_with_rejected_credentials_throws_invalidCredentials
 └── test_execute_without_connectivity_throws_connectivity
-```text
+```
 
 Siete tests. También rápidos (usan un stub, no hacen red real). Verifican que el caso de uso orquesta correctamente: valida con Value Objects, delega al gateway, traduce errores. Si fallan, el problema está en la lógica de orquestación.
 
@@ -94,7 +93,7 @@ RemoteAuthGatewayTests
 ├── test_authenticate_on_network_error_throws_connectivity
 ├── test_authenticate_on_401_throws_invalidCredentials
 └── test_authenticate_on_500_throws_invalidCredentials
-```text
+```
 
 Seis tests. Usan un stub de HTTPClient. Verifican el mapping entre HTTP/JSON y los tipos del Domain. Si fallan, el problema está en la serialización, el parsing, o la traducción de status codes.
 
@@ -110,7 +109,7 @@ LoginViewModelTests
 ├── test_submit_with_connectivity_error_shows_connectivity_message
 ├── test_submit_sets_isLoading_to_false_after_completion
 └── test_submit_clears_previous_error_before_new_attempt
-```text
+```
 
 Ocho tests. Verifican que el ViewModel traduce correctamente el resultado del caso de uso a estado de UI.
 
@@ -156,7 +155,7 @@ graph LR
     style A fill:#cce5ff,stroke:#007bff
     style B fill:#fff3cd,stroke:#ffc107
     style C fill:#d4edda,stroke:#28a745
-```text
+```
 
 Veamos un ejemplo real anotado para que quede cristalino:
 
@@ -187,7 +186,7 @@ func test_execute_with_valid_credentials_returns_session() async throws {
     // Si session != expectedSession, el test falla con un mensaje claro
     XCTAssertEqual(session, expectedSession)
 }
-```text
+```
 
 **¿Por qué siempre en este orden?** Porque cuando un test falla, necesitas entender rápidamente qué pasó. Si todos los tests siguen el mismo orden, sabes exactamente dónde mirar:
 
@@ -214,7 +213,7 @@ func test_1() {
     let (sut, client) = try makeSUT(data: json, statusCode: 200)  // 1 línea
     // ...
 }
-```text
+```
 
 Tres beneficios concretos:
 
@@ -232,7 +231,7 @@ let stub = AuthGatewayStub(result: .success(session))
 
 // Quiero testear un error → configuro fallo
 let stub = AuthGatewayStub(result: .failure(.invalidCredentials))
-```text
+```
 
 Cada test crea su propio stub con su propia configuración. No hay estado compartido entre tests. Esto garantiza que cada test es **independiente**: puedes ejecutarlos en cualquier orden y el resultado es siempre el mismo.
 
@@ -249,13 +248,13 @@ client.receivedRequests      // → los URLRequest que el gateway envió
 client.receivedRequests.first?.url       // → la URL de la petición
 client.receivedRequests.first?.httpMethod // → "POST"
 client.receivedRequests.first?.httpBody   // → el JSON del body
-```text
+```
 
 Esto nos permite verificar no solo **qué resultado** devuelve el SUT, sino **cómo interactúa** con sus dependencias. Por ejemplo, verificar que el UseCase NO llama al gateway cuando el email es inválido:
 
 ```swift
 func test_execute_with_invalid_email_does_not_call_gateway() async {
-    let gateway = AuthGatewayStub(result: .success(anySession))
+    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e@e.com")))
     let sut = LoginUseCase(authGateway: gateway)
     
     _ = try? await sut.execute(email: "sin-arroba", password: "pass")
@@ -341,7 +340,7 @@ Estas son las lecciones que extraemos de la feature Login y que aplicaremos a ca
 
 Para cerrar, unas métricas que dan perspectiva:
 
-**Archivos de producción:** 12 (Email, Password, Credentials, Session, AuthError, LoginEvent, AuthGateway, LoginUseCase, RemoteAuthGateway, StubAuthGateway, LoginViewModel, LoginView + DTOs y HTTPClient)
+**Archivos de producción:** 15 (Domain: Email, Password, Credentials, Session, AuthError, LoginEvent — Application: AuthGateway, LoginUseCase — Infrastructure: RemoteAuthGateway, StubAuthGateway, HTTPClient, AuthRequest, AuthResponse — Interface: LoginViewModel, LoginView — App: CompositionRoot)
 
 **Archivos de test:** 5 (EmailTests, PasswordTests, LoginUseCaseTests, RemoteAuthGatewayTests, LoginViewModelTests + stubs)
 
@@ -355,60 +354,94 @@ Para cerrar, unas métricas que dan perspectiva:
 
 Esta es la primera feature completa del curso. Es pequeña (un formulario de login), pero contiene todos los patrones arquitectónicos que escalaremos a features más complejas. En la Etapa 2, cuando construyamos la feature Catalog, el proceso será exactamente el mismo: BDD → Domain → Application → Infrastructure → Interface. Solo cambiará el contenido, no el proceso.
 
----
 
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## 🔨 Checkpoint Xcode — AppComposition: la app arranca
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/05-feature-login/05-tdd-ciclo-completo.md`.
+Este es el checkpoint final de la Feature Login. Aquí conectas todas las capas y ves la app correr en el simulador.
 
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/AppComposition/AppCompositionRoot.swift
+```
 
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
+**Lee `AppCompositionRoot.swift` con atención:**
 
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
+```swift
+@MainActor
+public struct AppCompositionRoot {
+    public let navigation: NavigationStore
+    public let loginViewModel: LoginViewModel
+    public let catalogViewModel: CatalogViewModel?
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+    public init(
+        authRepository: any AuthRepository = InMemoryAuthRepository(),
+        catalogRepository: (any CatalogRepository)? = nil
+    ) {
+        let navigation = NavigationStore()
+        let loginUseCase = AuthenticateUserUseCase(repository: authRepository)
+        let loginViewModel = LoginViewModel(useCase: loginUseCase, navigator: navigation)
+        // ...
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+        self.navigation = navigation
+        self.loginViewModel = loginViewModel
+        self.catalogViewModel = catalogViewModel
+    }
+}
+```
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+**Lo que este único archivo demuestra:**
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Principio | Evidencia en el código |
+|---|---|
+| Un solo lugar conoce implementaciones concretas | Solo `AppCompositionRoot` importa `FeatureLoginData` (la implementación); `FeatureLoginUI` solo importa `FeatureLoginDomain` |
+| Sustitución sin cambiar la feature | `authRepository: any AuthRepository = InMemoryAuthRepository()` — en producción pasas `AuthHTTPRepository()`, sin tocar ni ViewModel ni UseCase |
+| `@MainActor` en la raíz | El ensamblado ocurre en el hilo principal; no hay riesgo de data races al inicializar ViewModels |
+| Inyección por constructor | No hay singletons ocultos ni locators de servicio; cada dependencia es visible en la firma |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+**Ejecuta la suite completa:**
 
-Lectura semantica minima de este diagrama:
+```bash
+cd apps/ios/ArchitectureKit
+swift test
+```
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+Resultado esperado: **todos los targets en verde**. Si algún target falla, el error te dice exactamente qué capa rompió el contrato.
+
+**Ahora abre la app en el simulador:**
+
+```bash
+# Desde Xcode: abre apps/ios/ArchitectureKit
+# Selecciona el scheme de la app (no el package)
+# Cmd+R — la app arranca, aparece la pantalla de login
+```
+
+Prueba el flujo completo:
+- Email inválido → el ViewModel muestra mensaje de error sin llegar al servidor
+- Credenciales correctas (definidas en `InMemoryAuthRepository`) → navegación al catálogo
+- Cierra y reabre → el estado inicial es limpio (sin sesión persistida en esta fase)
+
+**Resumen del progreso de la Feature Login:**
+
+| Capa | Archivos de producción | Tests |
+|---|---|---|
+| FeatureLoginDomain | `EmailAddress`, `Password`, `LoginError`, `UserSession`, `AuthRepository` | ✅ EmailTests, PasswordTests |
+| FeatureLoginData | `InMemoryAuthRepository`, `AuthHTTPRepository` | ✅ FeatureLoginDataIntegrationTests |
+| FeatureLoginUI | `LoginViewModel`, `LoginView` | ✅ FeatureLoginUITests |
+| AppComposition | `AppCompositionRoot` | ✅ AppCompositionTests |
+
+**Preguntas de consolidación:**
+
+1. Si mañana necesitas cambiar `InMemoryAuthRepository` por `AuthHTTPRepository` en producción, ¿cuántos archivos tocas? ¿Qué te dice eso sobre el diseño?
+2. `AppCompositionRoot` importa todos los módulos. ¿Por qué eso es correcto aquí y sería incorrecto en `FeatureLoginUI`?
+3. Los 28 tests pedagógicos de la lección se ejecutan en < 1 segundo. ¿Por qué no necesitan simulador? ¿Qué propiedad del diseño lo hace posible?
+
+Si los tests están en verde y la app arranca en el simulador, has completado la Feature Login al completo: especificación BDD → Domain → Application → Infrastructure → Interface → Composition → app corriendo. Esta es la secuencia que repetirás en cada feature del resto del curso.
+
+---
+
+## Qué sigue
+
+La siguiente lección, [ADR-001: Decisiones de arquitectura del Login](ADR-001-login.md), documenta formalmente las decisiones de diseño que tomamos durante la implementación y el razonamiento detrás de cada una.
 

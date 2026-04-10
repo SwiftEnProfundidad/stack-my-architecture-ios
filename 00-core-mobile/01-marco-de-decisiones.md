@@ -27,9 +27,11 @@ Usa este marco cuando la decisión afecta a más de un módulo, tiene coste de r
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, la decisión de usar navegación por eventos en lugar de `NavigationLink` directo se documentó en `ADR-001-login.md`. Las fuerzas eran: testabilidad del flujo de navegación (dura) vs simplicidad de `NavigationLink` (blanda). La alternativa descartada fue acoplar Login a Catalog vía import directo. La evidencia de validación fue que `LoginViewModelTests` verifica navegación sin instanciar SwiftUI. Consulta la Etapa 2 (`02-integracion/02-navegacion-eventos.md`) para ver la implementación completa.
+En `ArchitectureKit`, la decisión de usar navegación por eventos en lugar de `NavigationLink` directo quedó documentada en un ADR. Las fuerzas eran: testabilidad del flujo de navegación (dura) vs simplicidad de `NavigationLink` (blanda). La alternativa descartada fue acoplar Login a Catalog vía import directo. La evidencia de validación fue que los tests de navegación del Login se ejecutan sin instanciar SwiftUI.
 
-## Checklist 1 página: Architecture Decision Loop
+> **Nota:** No te preocupes si este ejemplo aún no tiene todo el contexto. Volverás a él cuando construyas el Login en Etapa 1 y la navegación en Etapa 2 — en ese momento tendrá sentido completo.
+
+## Checklist 1 página: Architecture Decisión Loop
 
 - [ ] Problema formulado en una frase verificable.
 - [ ] Restricciones duras identificadas y validadas.
@@ -46,55 +48,9 @@ En `ArchitectureKit`, la decisión de usar navegación por eventos en lugar de `
 
 Plataforma iOS/Android: migrar navegación de acoplamiento directo a coordinador/eventos. Restricción dura: no romper deep links existentes. Evidencia: tasa de rutas fallidas, cobertura de navegación y tiempo de onboarding de nueva feature.
 
+
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/01-marco-de-decisiones.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
+Este marco de decisión es la herramienta que aplicarás en cada ADR del curso. La primera vez que lo usarás formalmente será en **Etapa 1 — Junior**, al documentar la decisión de diseño del Login en el [ADR del Login](../01-fundamentos/05-feature-login/ADR-001-login.md).

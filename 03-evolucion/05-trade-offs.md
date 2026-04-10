@@ -36,7 +36,21 @@ flowchart TD
     EVA --> DEC["Decision actual"]
     DEC --> TRG["Trigger de reevaluacion"]
     TRG --> REV["Revision periodica o por incidente"]
-```text
+```
+
+Lectura del diagrama:
+
+→ **Contexto y objetivo → Supuestos explícitos**: antes de comparar opciones, hay que explicitar qué crees que es cierto hoy. "El backend no ofrece push invalidation" es un supuesto, no un hecho permanente. Si cambia, la decisión puede cambiar.
+
+→ **Supuestos → Opciones A/B/C**: solo cuando los supuestos son claros se pueden comparar opciones con honestidad. Sin supuestos explícitos, dos ingenieros pueden defender opciones distintas sin posibilidad de conversación racional.
+
+→ **Opciones → Evaluación beneficio/coste/riesgo**: cada opción se evalúa en las mismas tres dimensiones para que la comparación sea justa. El "beneficio" sin "coste" es marketing, no arquitectura.
+
+→ **Evaluación → Decisión actual**: "actual" es clave. No es "decisión final". Es la mejor opción para el contexto de hoy, con los supuestos de hoy.
+
+→ **Decisión → Trigger de reevaluación**: el trigger es la condición objetiva que invalida la decisión. Sin trigger, las decisiones arquitectónicas se vuelven inamovibles por inercia, no por mérito.
+
+→ **Trigger → Revisión**: el ciclo cierra. Arquitectura madura es un proceso de decisión explícito y revisable, no una colección de "así lo hicimos siempre".
 
 ---
 
@@ -445,45 +459,66 @@ Decidir también es renunciar. Documentar explícitamente a qué renuncias hoy e
 - El trigger de revisión es medible y accionable (no "cuando haya problemas").
 - La ficha es coherente con lo que dice el ADR existente.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
-La decisión de network-first prioriza frescura de datos sobre velocidad percibida. El coste es que la primera carga siempre paga latencia de red. La alternativa (cache-first) habría dado velocidad inmediata pero con riesgo de mostrar datos obsoletos sin que el usuario lo sepa. El trigger de revisión ("P95 > 2s") convierte una opinión ("es lento") en un dato accionable. Si se alcanza ese umbral, se evalúa cambiar a stale-while-revalidate o cache-first con indicador de frescura.
+**Ficha de trade-off completada:**
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+**Problema:** ¿Sirvo siempre desde cache (velocidad) o siempre desde red (frescura)?
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+**Opción elegida:** Network-first con fallback a cache cuando la red falla y el cache está dentro del TTL.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+**Coste aceptado:** La primera carga de catálogo siempre paga latencia de red, aunque exista cache válido. En conexiones lentas (3G, metro), el usuario espera más que con cache-first.
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+**Riesgo asumido:** Si la red es lenta pero disponible (responde en 3-5 segundos), el usuario espera más que si mostráramos el cache inmediatamente con refresco en background.
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+**Trigger de revisión:** Métricas de latencia P95 en carga de catálogo > 2 s durante 2 sprints consecutivos. Si se alcanza ese umbral, evaluar paso a stale-while-revalidate o cache-first con indicador visible de frescura.
 
-Lectura semantica minima de este diagrama:
+---
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+La razón de priorizar frescura sobre velocidad en esta etapa es que el catálogo incluye precios: mostrar un precio incorrecto —aunque sea por 5 minutos— tiene mayor impacto negativo que un tiempo de carga ligeramente mayor. El trigger cuantitativo ("P95 > 2s durante 2 sprints") convierte una opinión subjetiva en una señal objetiva que cualquier miembro del equipo puede medir.
+
+**Resultado esperado**: la ficha completada coincide en las 5 dimensiones con el ADR-007, y el trigger es una métrica que ya se recoge en el dashboard de observabilidad del proyecto.
+
+</details>
+
+---
+
+## Implementación en tu proyecto
+
+Esta lección es conceptual y metodológica — no hay código nuevo que añadir al scaffold. Su valor está en el proceso de decisión que documenta.
+
+### Aplicación práctica: revisar las decisiones del scaffold
+
+El scaffold tiene varias decisiones arquitectónicas implícitas que puedes analizar usando el marco de esta lección:
+
+1. **`CachedCatalogRepository` es `struct`, no `class`** — ¿por qué? Trade-off: `struct` es `Sendable` automático, pero no permite herencia. Para un repositorio sin estado mutable propio, `struct` es la elección correcta.
+
+2. **`ConnectivityChecking` como dependencia explícita** — ¿por qué no simplemente `try/catch`? Trade-off: la dependencia explícita permite tests deterministas sin simular errores de red. El coste es una dependencia extra en el constructor.
+
+3. **`CatalogError` tiene `offlineNoCache` y `staleCacheUnavailable` separados** — ¿por qué no un único `cacheError`? Trade-off: errores más específicos permiten UI más informativa (el usuario sabe si fue "sin red sin cache" o "cache demasiado vieja"). El coste es más casos en el `switch`.
+
+### Documentar tus propias decisiones
+
+Para cualquier decisión que tomes al adaptar el scaffold, escribe una entrada en `docs/adr/` siguiendo el formato del curso:
+
+```markdown
+## ADR-XXX: [Decisión]
+- Estado: Propuesto/Aprobado
+- Contexto: [por qué surge la necesidad]
+- Supuestos: [qué crees que es cierto hoy]
+- Decisión: [opción elegida y por qué]
+- Consecuencias: [ventajas y costes]
+- Trigger: [condición que obligaría a revisar]
+```
+
+Los ADRs existentes en `docs/adr/` del scaffold siguen este formato.
+
+---
+
+## Qué sigue
+
+[**Lección 17: SwiftData como store de cache →**](./06-swiftdata-store.md) — Cómo implementar `CatalogCacheStore` con SwiftData, los trade-offs concretos de usar un ORM vs persistencia directa, y los tests de integración con `ModelContainer`.
 

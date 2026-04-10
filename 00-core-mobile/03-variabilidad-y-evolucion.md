@@ -18,13 +18,13 @@ flowchart LR
         U["UI/copy"]
         F["Feature flags"]
     end
-    Estable -.->|"proteger"| Medio
-    Medio -.->|"adaptar"| Volátil
+    Estable -->|"proteger"| Medio
+    Medio -->|"adaptar"| Volátil
 ```
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, el Domain (`FeatureLoginDomain`, `FeatureCatalogDomain`) es zona estable: los Value Objects `Email`, `Password`, `Product` no cambian con frecuencia. La Infrastructure (`FeatureCatalogData`) es zona media: la política de cache (TTL, network-first) puede ajustarse. La UI (`FeatureCatalogUI`) es zona volátil: el layout de la lista de productos puede cambiar sin tocar Domain. Esta separación se aplica en la Etapa 3 (`03-evolucion/01-caching-offline.md`) cuando se introduce cache sin contaminar el core.
+En `ArchitectureKit`, el Domain (`FeatureLoginDomain`, `FeatureCatalogDomain`) es zona estable: los Value Objects `EmailAddress`, `Password`, `Product` no cambian con frecuencia. La Infrastructure (`FeatureCatalogData`) es zona media: la política de cache (TTL, network-first) puede ajustarse. La UI (`FeatureCatalogUI`) es zona volátil: el layout de la lista de productos puede cambiar sin tocar Domain. Esta separación se aplica en la Etapa 3 cuando se introduce cache sin contaminar el core: [Caching y offline](../03-evolucion/01-caching-offline.md).
 
 ## Cuándo sí / cuándo no
 
@@ -52,7 +52,7 @@ Aplica Strangler Pattern cuando el bloque legado es grande y crítico: enruta gr
 
 Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ventana de parada asumida.
 
-## Checklist: evolve without chaos
+## Checklist: evolucionar sin caos
 
 - [ ] Mapa de zonas de alta variabilidad actualizado.
 - [ ] Plan incremental con hitos reversibles.
@@ -62,55 +62,9 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 - [ ] Fecha de retiro del legado acordada.
 - [ ] Riesgos de operación revisados con equipo.
 
+
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/03-variabilidad-y-evolucion.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
-
+Clasificar variabilidad te prepara para el siguiente paso: garantizar que cada cambio, sea en zona estable o volátil, pasa un control de calidad antes de llegar a producción.

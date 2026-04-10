@@ -2,106 +2,39 @@
 
 ## Modelo mental
 
-Este crosswalk es un mapa de traducción entre los dos tracks del programa (iOS y Android). No compara frameworks ni lenguajes; compara responsabilidades profesionales. Un alumno que domina "integrate" en iOS puede dialogar con un compañero que domina "integrate" en Android porque ambos resuelven el mismo tipo de problema (conectar features sin acoplarlas), aunque las herramientas sean distintas.
+Este crosswalk mapea dos cosas: (1) la equivalencia de niveles de responsabilidad entre los tracks iOS y Android del programa, y (2) los conceptos técnicos equivalentes entre plataformas. Un alumno iOS que domina "integrate" puede dialogar con un compañero Android en el mismo nivel porque resuelven el mismo problema con herramientas distintas. Este documento les da el vocabulario común.
 
 ## Equivalencia de tracks por responsabilidad
 
-| Responsabilidad | iOS (este curso) | Android |
-|---|---|---|
-| **build** | Etapa 1: Fundamentos | Nivel 0 |
-| **integrate** | Etapa 2: Integración | Junior |
-| **operate** | Etapa 3: Evolución | Mid |
-| **govern** | Etapa 4: Arquitecto | Senior |
-| **optimize under constraints** | Etapa 5: Maestría | Maestría |
+Los niveles del track Android son los del programa Stack My Architecture Android. La equivalencia es por responsabilidad demostrable, no por nombre de carpeta.
 
-## Equivalencia funcional
-
-La equivalencia no se mide por nombres de carpetas. Se mide por responsabilidad demostrable:
-
-build → integrate → operate → govern → optimize under constraints
+| Responsabilidad | Entregable que la demuestra | iOS (este curso) | Android |
+|---|---|---|---|
+| **build** | Feature completa con tests y contratos de capa | Etapa 1: Fundamentos | Nivel 0 |
+| **integrate** | Features conectadas sin acoplamiento directo | Etapa 2: Integración | Junior |
+| **operate** | Sistema observable, con rollback y feature flags | Etapa 3: Evolución | Mid |
+| **govern** | ADRs, quality gates ejecutables, gestión de deuda | Etapa 4: Arquitecto | Senior |
+| **optimize under constraints** | Decisiones de rendimiento con evidencia medible | Etapa 5: Maestría | Maestría |
 
 Cada nivel implica que el anterior está consolidado. No se puede "govern" sin saber "integrate".
 
+## Crosswalk técnico: conceptos equivalentes iOS ↔ Android
+
+| Responsabilidad | iOS | Android |
+|---|---|---|
+| Navegación desacoplada | `Coordinator` + eventos de intención | `NavController` + `NavigationComponent` |
+| Contrato de feature | `protocol FeaturePort` | `interface` en módulo de dominio |
+| Lógica de negocio | `UseCase` (struct/actor) | `UseCase` (clase en dominio) |
+| Estado reactivo | `Combine` / `AsyncStream` | `StateFlow` / `SharedFlow` (Coroutines) |
+| Inyección de dependencias | Composition Root manual | `Hilt` / Composition Root manual |
+| Módulos y límites | `SPM targets` en `Package.swift` | `Gradle modules` |
+| Reglas de dependencia ejecutables | Swift Package Manager access control | `Forbidden dependency rules` en Gradle |
+| Persistencia local | `CoreData` / `SwiftData` | `Room` |
+| Concurrencia segura | `async/await` + `Actor` (Swift 6) | `Coroutines` + `suspend` + `Mutex` |
+| Observabilidad | `os_log` / `os_signpost` | `Timber` / `Logcat` estructurado |
+
 ---
 
-<!-- plantilla-pedagogica:auto -->
+## Qué sigue
 
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `00-core-mobile/11-crosswalk-ios-android.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- auto-gapfix:layered-mermaid -->
-## Diagrama de arquitectura por capas
-
-```mermaid
-flowchart LR
-  subgraph CORE["Core / Domain"]
-    direction TB
-    ENT[Entity]
-    POL[Policy]
-  end
-
-  subgraph APP["Application"]
-    direction TB
-    BOOT[Composition Root]
-    UC[UseCase]
-    PORT["FeaturePort (contrato)"]
-  end
-
-  subgraph UI["Interface"]
-    direction TB
-    VM[ViewModel]
-    VIEW[View]
-  end
-
-  subgraph INFRA["Infrastructure"]
-    direction TB
-    API[API Client]
-    STORE[Persistence Adapter]
-  end
-
-  VM --> UC
-  UC --> ENT
-  UC ==> PORT
-  BOOT -.-> PORT
-  BOOT -.-> API
-  BOOT -.-> STORE
-  PORT --o API
-  PORT --o STORE
-  UC --o VM
-
-  style CORE fill:#0f2338,stroke:#63a4ff,color:#dbeafe,stroke-width:2px
-  style APP fill:#2a1f15,stroke:#fb923c,color:#ffedd5,stroke-width:2px
-  style UI fill:#14262f,stroke:#93c5fd,color:#e0f2fe,stroke-width:2px
-  style INFRA fill:#2a1d34,stroke:#c084fc,color:#f3e8ff,stroke-width:2px
-
-  linkStyle 0 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 1 stroke:#f472b6,stroke-width:2.6px
-  linkStyle 2 stroke:#60a5fa,stroke-width:2.8px
-  linkStyle 3 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 4 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 5 stroke:#94a3b8,stroke-width:2px,stroke-dasharray:6 4
-  linkStyle 6 stroke:#86efac,stroke-width:2.6px
-  linkStyle 7 stroke:#86efac,stroke-width:2.6px
-  linkStyle 8 stroke:#86efac,stroke-width:2.6px
-```
-
-La lectura del diagrama sigue esta semantica:
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring o configuracion.
-3. `==>` contrato o abstraccion.
-4. `--o` salida o propagacion de resultado.
+La siguiente lección, [Paridad de Mobile Architect iOS ↔ Android](12-mobile-architect-parity-ios-android.md), define qué significa exactamente tener profundidad en iOS con paridad arquitectónica en Android, con criterios concretos para evaluación, contratación y coordinación de equipos.

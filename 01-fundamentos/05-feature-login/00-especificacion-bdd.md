@@ -6,6 +6,8 @@ Esta es la primera lección donde aplicamos BDD en la práctica. Vamos a sentarn
 
 Al terminar esta lección tendrás una especificación completa del Login: todos los casos posibles (éxito, errores, edge cases), los términos del dominio que usaremos en el código, las decisiones de diseño que los escenarios nos obligan a tomar, y una tabla de trazabilidad que conecta cada escenario con el test que lo verificará.
 
+> **Nota de nomenclatura lección ↔ scaffold:** Los términos del dominio que definimos aquí (`Email`, `Password`, `Session`, `AuthError`, `Credentials`) son los nombres pedagógicos del curso. En el scaffold `apps/ios/ArchitectureKit` algunos tienen nombres distintos: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+
 ### Recordatorio de principios
 
 ¿Recuerdas el **Principio 1** de [Principios de ingeniería](../01-principios-ingenieria.md)? "Aclarar la intención antes de codificar". Esta lección es exactamente esa práctica aplicada de forma operativa: primero definimos comportamiento, luego diseñamos, y solo después implementamos.
@@ -73,9 +75,9 @@ flowchart TD
     style ERR_PASS fill:#f8d7da,stroke:#dc3545
     style ERR_CREDS fill:#f8d7da,stroke:#dc3545
     style ERR_NET fill:#f8d7da,stroke:#dc3545
-```text
+```
 
-Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el codigo.
+Este mapa muestra **todos los caminos posibles** del Login. Cada rama es un escenario BDD que se traduce en un test. Si un camino no esta en este mapa, no deberia estar en el código.
 
 ---
 
@@ -101,7 +103,7 @@ Scenario: Login exitoso con credenciales válidas
   And el sistema devuelve la sesión al llamante
   And la sesión contiene un token de acceso
   And la sesión contiene el email del usuario autenticado
-```text
+```
 
 Este escenario es detallado a propósito. Fíjate en que no dice simplemente "el usuario hace login y funciona". Describe el flujo paso a paso: primero se valida localmente, luego se envía al servidor, luego se recibe la respuesta. Esto es importante porque nos dice el **orden** de las operaciones. La validación local ocurre antes de la llamada al servidor. Si la validación falla, el servidor nunca se entera.
 
@@ -118,9 +120,9 @@ Scenario: Login fallido porque el servidor rechaza las credenciales
   And el sistema valida que el password no está vacío (pasa)
   And el sistema envía las credenciales al servidor de autenticación
   And el servidor rechaza las credenciales
-  Then el sistema devuelve un error de tipo InvalidCredentials
+  And el sistema devuelve un error de tipo InvalidCredentials
   And no se crea ninguna sesión
-```text
+```
 
 Este escenario nos dice algo importante: las credenciales pueden ser válidas **localmente** (el email tiene formato correcto, el password no está vacío) pero inválidas **remotamente** (el servidor no las reconoce). Son dos niveles de validación diferentes: local (formato) y remota (autenticidad). El error `InvalidCredentials` viene del servidor, no de la validación local.
 
@@ -134,9 +136,9 @@ Scenario: Login fallido porque no hay conexión a internet
   And el sistema valida que el password no está vacío (pasa)
   And el sistema intenta enviar las credenciales al servidor
   And la conexión falla porque no hay internet
-  Then el sistema devuelve un error de tipo Connectivity
+  And el sistema devuelve un error de tipo Connectivity
   And no se crea ninguna sesión
-```text
+```
 
 Este escenario nos dice que el error de conectividad es diferente del error de credenciales inválidas. El usuario necesita saber si su password está mal o si simplemente no hay internet, porque la acción que debe tomar es diferente en cada caso. Por eso tenemos errores tipados y no un genérico "algo falló".
 
@@ -153,7 +155,7 @@ Scenario: Login rechazado porque el email no tiene formato válido
   And el sistema devuelve un error de tipo InvalidEmail
   And NO se envía ninguna petición al servidor
   And no se crea ninguna sesión
-```text
+```
 
 Este escenario es crucial porque define una decisión de diseño: la validación del formato del email ocurre **localmente, antes de intentar la autenticación remota**. No enviamos basura al servidor. Si el email no tiene arroba, lo rechazamos inmediatamente, sin gastar una petición de red. Esto mejora la experiencia del usuario (feedback instantáneo) y protege al servidor de peticiones inútiles.
 
@@ -166,7 +168,7 @@ Scenario: Login rechazado porque el password está vacío
   And el sistema devuelve un error de tipo EmptyPassword
   And NO se envía ninguna petición al servidor
   And no se crea ninguna sesión
-```text
+```
 
 Mismo principio que el anterior: no enviamos un password vacío al servidor. Lo rechazamos localmente.
 
@@ -179,9 +181,60 @@ Scenario: Login cancelado por el usuario mientras la autenticación está en pro
   Then el sistema cancela la petición de red en curso
   And no se devuelve ningún resultado (ni éxito ni error)
   And no se crea ninguna sesión
-```text
+```
 
 La cancelación es un caso que muchos tutoriales ignoran pero que en producción es fundamental. Si el usuario navega fuera de la pantalla de login mientras la petición está en vuelo, esa petición debe cancelarse. No tiene sentido procesar una respuesta que nadie va a ver. Y lo que es más importante: si no cancelas la petición, puedes acabar actualizando UI que ya no está en pantalla, lo que en el mejor de los casos desperdicia recursos y en el peor provoca un crash.
+
+### Escenarios de seguridad y sesión (Enterprise Edge Cases)
+
+Estos escenarios no aparecen en tutoriales básicos, pero son obligatorios en cualquier app de producción.
+
+```text
+Scenario: La sesión recibida del servidor no contiene token de acceso
+  Given el servidor responde con un payload que no incluye accessToken
+  When el sistema intenta construir una Session
+  Then el sistema devuelve un error de tipo malformedSession
+  And no se crea ninguna sesión
+  And NO se persiste nada en almacenamiento local
+```
+
+Este escenario protege la app de respuestas corruptas o inesperadas del backend. Una `Session` sin token es inválida por construcción — el Value Object no puede existir en ese estado.
+
+```text
+Scenario: El token de sesión expira durante el uso de la app
+  Given un usuario con sesión activa
+  And el accessToken de la sesión ha expirado
+  When el usuario intenta realizar una operación autenticada
+  Then el sistema detecta la expiración antes de enviar la petición
+  And el sistema devuelve un error de tipo sessionExpired
+  And la sesión se elimina del almacenamiento local
+  And se redirige al usuario a la pantalla de Login
+```
+
+La expiración del token es responsabilidad de la infraestructura: el adaptador HTTP debe detectar un 401 post-login y traducirlo a `sessionExpired`, no a `invalidCredentials`. Son errores semánticamente distintos.
+
+```text
+Scenario: El usuario intenta login con una cuenta bloqueada por intentos fallidos
+  Given un usuario cuya cuenta ha sido bloqueada por el servidor
+  When el usuario envía credenciales correctas
+  Then el servidor responde con un código de error de cuenta bloqueada
+  Then el sistema devuelve un error de tipo accountLocked
+  And el mensaje de error NO expone detalles internos del servidor
+  And no se crea ninguna sesión
+```
+
+El error de cuenta bloqueada debe distinguirse de credenciales incorrectas. El copy del mensaje al usuario es diferente: no "contraseña incorrecta" sino "cuenta temporalmente bloqueada, contacta soporte". El sistema nunca debe exponer en UI el mensaje crudo del servidor.
+
+```text
+Scenario: La sesión se almacena de forma segura tras un login exitoso
+  Given un login exitoso con sesión válida
+  When el sistema persiste la sesión
+  Then la sesión se almacena en Keychain (no en UserDefaults ni en fichero)
+  And el accessToken nunca aparece en logs
+  And la sesión persiste entre reinicios de la app
+```
+
+Este escenario documenta un **requisito de seguridad**: los tokens de sesión deben ir al Keychain, no a UserDefaults. UserDefaults no está cifrado y es accesible en backups no cifrados de iTunes.
 
 ---
 
@@ -221,14 +274,20 @@ El escenario de login exitoso dice "el sistema devuelve la sesión al llamante".
 
 Cada escenario debe poder rastrearse hasta un test automatizado. Esta tabla muestra qué test cubrirá cada escenario cuando los implementemos en las próximas lecciones:
 
-| Escenario | Nombre del test XCTest | Componente que se testea |
-|-----------|----------------------|--------------------------|
-| Login exitoso | `test_execute_with_valid_credentials_returns_session` | `LoginUseCaseTests` |
-| Credenciales rechazadas | `test_execute_with_rejected_credentials_returns_invalidCredentials` | `LoginUseCaseTests` |
-| Sin conectividad | `test_execute_without_connectivity_returns_connectivityError` | `LoginUseCaseTests` |
-| Email inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` |
-| Password vacío | `test_init_with_empty_string_throws_empty` | `PasswordTests` |
-| Cancelación | `test_execute_cancellation_does_not_return_result` | `LoginUseCaseTests` |
+| Escenario | Nombre del test XCTest | Componente | Etapa |
+|-----------|----------------------|------------|-------|
+| Login exitoso | `test_execute_with_valid_credentials_returns_session` | `LoginUseCaseTests` | 1 |
+| Credenciales rechazadas | `test_execute_with_rejected_credentials_returns_invalidCredentials` | `LoginUseCaseTests` | 1 |
+| Sin conectividad | `test_execute_without_connectivity_returns_connectivityError` | `LoginUseCaseTests` | 1 |
+| Email inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` | 1 |
+| Password vacío | `test_init_with_empty_string_throws_empty` | `PasswordTests` | 1 |
+| Cancelación | `test_execute_cancellation_does_not_return_result` | `LoginUseCaseTests` | 1 |
+| Sesión sin token | `test_session_init_without_token_throws_malformedSession` | `SessionTests` | 2 |
+| Token expirado | `test_adapter_on401_after_login_throws_sessionExpired` | `AuthAdapterTests` | 2 |
+| Cuenta bloqueada | `test_execute_on_account_locked_returns_accountLocked` | `LoginUseCaseTests` | 2 |
+| Persistencia segura | `test_session_is_stored_in_keychain_not_userdefaults` | `SessionRepositoryTests` | 3 |
+
+Los escenarios de **Etapa 2 y 3** los especificamos aquí porque aparecen en los escenarios de seguridad, pero sus tests no se implementan hasta que el stack tenga persistencia real y un adaptador HTTP completo. En Etapa 1 solo implementamos los seis primeros.
 
 Fíjate en los nombres de los tests. Siguen un patrón: `test_[método]_[condición]_[resultado esperado]`. Este patrón hace que al leer el nombre del test sepas exactamente qué escenario cubre sin necesidad de abrir el código. Es una convención que seguiremos en todo el curso.
 
@@ -239,10 +298,10 @@ Fíjate en los nombres de los tests. Siguen un patrón: `test_[método]_[condici
 Para visualizar el flujo completo, aquí tienes un diagrama de secuencia que muestra cómo interactúan los componentes:
 
 ```text
-┌──────────┐     ┌───────────────┐     ┌──────────────┐     ┌────────────┐
-│  Usuario │     │  LoginUseCase │     │ AuthGateway  │     │  Servidor  │
-│  (UI)    │     │ (Application) │     │   (Puerto)   │     │  (Remoto)  │
-└────┬─────┘     └───────┬───────┘     └──────┬───────┘     └─────┬──────┘
+┌──────────┐     ┌───────────────┐      ┌──────────────┐      ┌────────────┐
+│  Usuario │     │  LoginUseCase │      │ AuthGateway  │      │  Servidor  │
+│  (UI)    │     │ (Application) │      │   (Puerto)   │      │  (Remoto)  │
+└────┬─────┘     └───────┬───────┘      └──────┬───────┘      └─────┬──────┘
      │                   │                     │                    │
      │ envía email+pass  │                     │                    │
      │──────────────────>│                     │                    │
@@ -267,7 +326,7 @@ Para visualizar el flujo completo, aquí tienes un diagrama de secuencia que mue
      │                   │                     │ o timeout/error    │
      │                   │                     │<───────────────────│
      │                   │                     │                    │
-     │                   │ Session o AuthError  │                    │
+     │                   │ Session o AuthError │                    │
      │                   │<────────────────────│                    │
      │                   │                     │                    │
      │ Session o Error   │                     │                    │
@@ -287,43 +346,10 @@ Una lista completa de todos los comportamientos que el Login debe soportar. Un v
 
 En la siguiente lección empezaremos a implementar, empezando por la capa Domain: los Value Objects `Email` y `Password`, con TDD usando XCTest.
 
----
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+La siguiente lección, [Feature Login: Capa Domain](01-domain.md), implementa los primeros seis escenarios con TDD: los Value Objects `Email` y `Password` y los errores de dominio `AuthError`.
 

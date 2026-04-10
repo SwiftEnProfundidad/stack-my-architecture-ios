@@ -4,7 +4,7 @@
 
 En la lección anterior explicamos la teoría de cada pieza del stack. En esta lección vamos a materializarla en Xcode con una estructura Feature-First clara y lista para trabajar con TDD.
 
-Si todavía no creaste el proyecto base, vuelve primero a [Setup: Preparación del entorno](00-setup.md). Aquí **no** repetimos el asistente completo de creación ni la configuración inicial de Firebase; nos enfocamos en organizar el código con límites arquitectónicos correctos.
+Si todavía no creaste el proyecto base, vuelve primero a [Setup: Preparación del entorno](00-setup.md). Aquí **no** repetimos el asistente completo de creación; nos enfocamos en organizar el código con límites arquitectónicos correctos.
 
 ---
 
@@ -44,7 +44,7 @@ StackMyArchitecture/
 │       ├── Infrastructure/
 │       └── Interface/
 └── SharedKernel/
-```text
+```
 
 Vamos a explicar qué hace cada carpeta y por qué está donde está.
 
@@ -103,7 +103,7 @@ StackMyArchitectureTests/
 │       │   └── RemoteAuthGatewayTests.swift
 │       └── Helpers/
 │           └── AuthGatewayStub.swift
-```text
+```
 
 Fíjate en la carpeta `Helpers/`. Aquí vivirán los dobles de test (stubs, spies) que necesitemos. Un stub es una implementación falsa de un protocolo que devuelve valores predeterminados. Por ejemplo, `AuthGatewayStub` será una implementación de `AuthGateway` que podemos configurar para que devuelva un éxito o un error, sin hacer ninguna petición de red real.
 
@@ -139,10 +139,10 @@ Ahora que tienes la estructura, es importante que entiendas las reglas de depend
 
 ```mermaid
 graph TD
-    CR["Composition Root<br/>App/<br/>Importa TODO"] ..> UI["Interface<br/>import SwiftUI<br/>import Application"]
-    CR --> INFRA["Infrastructure<br/>import Foundation<br/>import Application"]
-    CR --> APP["Application<br/>import Domain<br/>NADA MAS"]
-    
+    CR["Composition Root<br/>App/<br/>Importa TODO"] -.-> UI["Interface<br/>import SwiftUI<br/>import Application"]
+    CR -.-> INFRA["Infrastructure<br/>import Foundation<br/>import Application"]
+    CR -.-> APP["Application<br/>import Domain<br/>NADA MAS"]
+
     UI --> APP
     INFRA --> APP
     APP --> DOMAIN["Domain<br/>Solo Swift puro<br/>SIN imports"]
@@ -158,7 +158,7 @@ graph TD
     style DOMAIN fill:#d4edda,stroke:#28a745
 ```
 
-Las flechas sólidas muestran las dependencias permitidas. Las punteadas con ❌ son las **prohibidas**. La regla fundamental: **las dependencias siempre apuntan hacia el centro (Domain)**. Nunca al revés. Domain no sabe que Application existe. Application no sabe que Infrastructure existe. Solo el Composition Root conoce todo.
+Las flechas **grises discontinuas** son wiring del Composition Root. Las **rosas sólidas** son dependencias directas permitidas. Las **rojas discontinuas** son las **prohibidas**. La regla fundamental: **las dependencias siempre apuntan hacia el centro (Domain)**. Nunca al revés. Domain no sabe que Application existe. Application no sabe que Infrastructure existe. Solo el Composition Root conoce todo.
 
 Si rompes esta regla (por ejemplo, si Domain importa Foundation para usar URLSession), el Domain deja de ser testeable sin infraestructura real. Y si Interface importa Infrastructure directamente, ya no puedes cambiar la implementación sin tocar la UI. Cada flecha prohibida que añades es deuda técnica que paga el equipo durante meses.
 
@@ -192,65 +192,11 @@ Al terminar esta lección tienes:
 
 Un proyecto Xcode llamado `StackMyArchitecture` con la estructura Feature-First completa. La carpeta `App/` para el Composition Root. La carpeta `Features/Login/` con las cuatro capas (Domain, Application, Infrastructure, Interface) y sus subcarpetas. La carpeta `SharedKernel/` vacía, esperando. El target de tests con estructura espejo. El proyecto configurado para Swift 6 strict concurrency.
 
-No tienes código de producción todavía. Eso viene en la siguiente lección, donde empezaremos por la especificación BDD de la feature de Login: los escenarios de comportamiento que definirán exactamente qué tiene que hacer el sistema antes de escribir ni una sola línea de Swift.
+No tienes código de producción todavía. Eso viene en la siguiente lección.
 
 ---
 
----
+## Qué sigue
 
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `01-fundamentos/04-estructura-feature-first.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+La siguiente lección, [Feature Login: Especificación BDD](05-feature-login/00-especificacion-bdd.md), abre el ciclo BDD→TDD con los escenarios de comportamiento que definirán exactamente qué tiene que hacer el Login antes de escribir ni una sola línea de Swift.
 

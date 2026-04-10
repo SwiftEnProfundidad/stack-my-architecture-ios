@@ -4,13 +4,13 @@
 
 Al terminar esta lección vas a saber integrar Firebase (Auth + Firestore) en una arquitectura Clean sin contaminar Domain ni Application. Sabras encapsular los SDKs de Firebase detrás de protocolos, testear la integración con emuladores, y gestionar entornos (dev/prod) de forma segura.
 
-En palabras simples: Firebase es un proveedor de servicios. Tu arquitectura no debe depender de el. Si mañana cambias a Supabase o a un backend propio, solo cambias un modulo.
+En palabras simples: Firebase es un proveedor de servicios. Tu arquitectura no debe depender de el. Si mañana cambias a Supabase o a un backend propio, solo cambias un módulo.
 
 ---
 
-## Definicion simple
+## Definición simple
 
-Firebase es una plataforma de Google que ofrece autenticacion, base de datos en tiempo real (Firestore), storage, y más. En este curso usamos dos servicios:
+Firebase es una plataforma de Google que ofrece autenticación, base de datos en tiempo real (Firestore), storage, y más. En este curso usamos dos servicios:
 
 - **Firebase Auth** — para autenticar usuarios (email/password).
 - **Cloud Firestore** — para almacenar y consultar datos (productos del catálogo).
@@ -53,7 +53,17 @@ graph LR
     style CORE fill:#d4edda,stroke:#28a745
     style INFRA fill:#fff3cd,stroke:#ffc107
     style SDK fill:#fce4ec,stroke:#e91e63
-```text
+```
+
+Lectura del diagrama:
+
+→ **CORE (verde)** es tu app: Domain define `Product`, `Session`, `Email` como tipos puros. Application orquesta con `LoginUseCase` y `LoadProductsUseCase`. Ninguno de los dos sabe que Firebase existe — solo conocen protocolos (`AuthGateway`, `ProductRepository`).
+
+→ **Infrastructure (amarillo)** traduce: `FirebaseAuthGateway` implementa `AuthGateway` llamando al SDK de Firebase Auth. `FirestoreProductRepository` implementa `ProductRepository` leyendo de Firestore. Cada uno convierte tipos de Firebase a tipos de Domain.
+
+→ **Firebase SDK (rojo)** es externo y reemplazable. Las flechas van de Infrastructure hacia el SDK, nunca al revés. Si mañana cambias Firebase por Supabase, solo reescribes los archivos amarillos.
+
+→ La dirección de las flechas confirma la Regla de Dependencia: Application depende de Domain (hacia dentro), Infrastructure depende de Application (implementa sus contratos). El SDK es un detalle de implementación que Domain no ve.
 
 ---
 
@@ -66,12 +76,54 @@ graph LR
 - Auth simple (email/password, Google, Apple Sign-In).
 - Datos relativamente simples (documentos JSON).
 
+```swift
+// ✅ Firebase encaja bien: autenticación + colección de productos simple
+// Un catálogo de productos es un caso ideal: lectura frecuente,
+// escrituras ocasionales (admin), datos en formato JSON plano.
+let db = Firestore.firestore()
+db.collection("products").getDocuments { snapshot, error in
+    // Traduce documentos Firestore → [ProductDTO] → [Product] de Domain
+    // Clean Architecture garantiza que Domain no sabe de este código.
+}
+```
+
 ### Cuando NO (o con precaucion)
 
 - Queries complejas con JOINs (Firestore es NoSQL, no tiene JOINs nativos).
 - Volumen muy alto de escrituras con consistencia transaccional fuerte.
 - Necesidad de control total sobre el servidor (Firestore es serverless).
 - Preocupacion por vendor lock-in (Firebase es propietario de Google).
+
+```swift
+// ❌ Firestore para queries relacionales — no está diseñado para esto
+// "Dame todos los pedidos de usuarios de Madrid que compraron en los últimos 7 días
+//  con valor total > 50€, ordenados por fecha de último acceso."
+// En SQL sería un JOIN + WHERE + GROUP BY.
+// En Firestore necesitas múltiples colecciones, índices compuestos y lógica en cliente.
+// El coste de lecturas escala muy rápido con este patrón.
+
+// ❌ Sin Clean Architecture: vendor lock-in directo en Application
+struct LoadProductsUseCase {
+    func execute() async throws -> [Product] {
+        // Firebase directamente en el caso de uso — impossible de migrar sin reescribir
+        let snapshot = try await Firestore.firestore().collection("products").getDocuments()
+        return snapshot.documents.compactMap { ... }
+    }
+}
+
+// ✅ Con Clean Architecture: Firebase solo en Infrastructure
+// Si mañana migras a Supabase o a tu propio REST, solo cambias este archivo:
+struct FirestoreProductRepository: ProductRepository {
+    func loadAll() async throws -> [Product] {
+        let snapshot = try await Firestore.firestore().collection("products").getDocuments()
+        return try snapshot.documents.map(FirestoreProductMapper.map)
+    }
+}
+// LoadProductsUseCase no cambia. Domain no cambia. UI no cambia.
+// El coste de cambiar de proveedor es reescribir un adaptador, no una reescritura de app.
+```
+
+La arquitectura limpia no protege de las limitaciones de Firestore, pero sí limita el daño a una capa cuando decides migrar.
 
 ---
 
@@ -104,7 +156,7 @@ struct StackMyArchitectureApp: App {
         }
     }
 }
-```text
+```
 
 **`FirebaseApp.configure()`** — Se llama UNA sola vez, al iniciar la app. Lee el `GoogleService-Info.plist` y configura los servicios. Esta es la UNICA linea de Firebase que vive fuera de Infrastructure.
 
@@ -154,14 +206,14 @@ struct FirebaseAuthGateway: AuthGateway, Sendable {
         }
     }
 }
-```swift
+```
 
 **Linea por linea:**
 
 - `struct FirebaseAuthGateway: AuthGateway, Sendable` — Implementa el mismo protocolo `AuthGateway` que usaba `RemoteAuthGateway`. El UseCase no sabe la diferencia.
 - `Auth.auth().signIn(withEmail:password:)` — Llama al SDK de Firebase Auth. Es `async` nativo en versiones recientes del SDK.
 - `credentials.email.value` — Usamos los Value Objects de Domain. Firebase recibe strings, pero nosotros ya validamos en el UseCase.
-- `mapAuthError` — Traduce errores tecnicos de Firebase a errores semanticos de Domain (`LoginError`). El UseCase nunca ve `AuthErrorCode`; solo ve `LoginError`.
+- `mapAuthError` — Traduce errores técnicos de Firebase a errores semánticos de Domain (`LoginError`). El UseCase nunca ve `AuthErrorCode`; solo ve `LoginError`.
 - `result.user.getIDToken()` — Obtiene el token JWT del usuario autenticado. Este token es el que se usa para autenticar peticiones a Firestore.
 
 **Principio clave:** El SDK de Firebase (`import FirebaseAuth`) SOLO aparece en este archivo. Ningun otro archivo del proyecto importa FirebaseAuth. Si quisieras migrar a otro proveedor de auth, solo reescribes este archivo.
@@ -205,7 +257,7 @@ struct FirestoreProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```text
+```
 
 **Linea por linea:**
 
@@ -243,7 +295,7 @@ struct FirestoreProductMapper {
         )
     }
 }
-```text
+```
 
 **Por que `[String: Any]`:** Firestore devuelve documentos como diccionarios sin tipo. El mapper extrae cada campo con `as?` y lanza error si falta o tiene tipo incorrecto. Es similar al `ProductDTO` de la infra HTTP, pero sin `Decodable` porque Firestore no usa `JSONDecoder`.
 
@@ -280,7 +332,7 @@ service cloud.firestore {
     }
   }
 }
-```text
+```
 
 **Linea por linea:**
 
@@ -310,7 +362,7 @@ firebase init emulators
 
 # Iniciar emuladores
 firebase emulators:start
-```text
+```
 
 ### Conectar la app a emuladores (solo en desarrollo)
 
@@ -334,9 +386,9 @@ struct FirebaseConfig {
         #endif
     }
 }
-```text
+```
 
-**`#if DEBUG`** — Solo activa emuladores en builds de debug. En producción, Firebase conecta con la nube automaticamente. Esto previene que un build de release accidentalmente use emuladores.
+**`#if DEBUG`** — Solo activa emuladores en builds de debug. En producción, Firebase conecta con la nube automáticamente. Esto previene que un build de release accidentalmente use emuladores.
 
 ---
 
@@ -371,7 +423,7 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```text
+```
 
 **Comparacion con Etapa 2:** Lo único que cambia es la linea de creación del gateway/repository:
 
@@ -395,7 +447,7 @@ products/
     price: 29.99                  (number)
     currency: "EUR"               (string)
     image_url: "https://..."      (string)
-```text
+```
 
 **Reglas de modelado para Firestore:**
 
@@ -423,7 +475,7 @@ StackMyArchitecture/
   Config/
     Dev/GoogleService-Info.plist
     Prod/GoogleService-Info.plist
-```text
+```
 
 En el Build Phase, un script copia el plist correcto:
 
@@ -433,7 +485,7 @@ if [ "${CONFIGURATION}" == "Debug" ]; then
 else
     cp "${PROJECT_DIR}/Config/Prod/GoogleService-Info.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/"
 fi
-```text
+```
 
 ---
 
@@ -469,7 +521,7 @@ final class FirebaseAuthGatewayIntegrationTests: XCTestCase {
         XCTAssertFalse(session.userId.isEmpty)
     }
 }
-```text
+```
 
 **Nota:** Estos tests requieren que los emuladores de Firebase esten corriendo (`firebase emulators:start`). Son más lentos que los unit tests con stubs, pero verifican la integración real con el SDK.
 
@@ -532,7 +584,7 @@ Solución: Verificar en Firebase Console que los documentos tienen la estructura
 - Alternativa: Supabase (Postgres + RLS), documentada en apendice
 - Consecuencias: setup rapido, plan gratuito generoso, vendor lock-in mitigado por encapsulacion; si migramos, solo cambian archivos de Infrastructure
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -571,59 +623,99 @@ Firebase es una herramienta poderosa para arrancar rápido. Pero su valor real e
 - `grep -r "import Firebase" Sources/FeatureCatalogDomain Sources/FeatureLoginDomain` devuelve 0 resultados.
 - El test de composición demuestra que el wiring es intercambiable.
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# 1. Verificar que no hay imports de Firebase en Domain/Application
+./scripts/check-dependencies.sh
+# Salida esperada: "Domain imports OK"
+
+grep -r "import Firebase" \
+  apps/ios/ArchitectureKit/Sources/FeatureCatalogDomain \
+  apps/ios/ArchitectureKit/Sources/FeatureLoginDomain 2>/dev/null
+# Salida esperada: 0 líneas (sin resultados)
+```
 
 ```swift
-// En AppCompositionTests
-func test_composition_worksWithStubRepository() async throws {
-    let stub = StubProductRepository(result: .success([
-        Product(name: "Test", price: Decimal(1.00))
-    ]))
-    // Si AppComposition acepta un ProductRepository genérico,
-    // este test compila y pasa sin Firebase en el grafo de dependencias.
-    let viewModel = CatalogViewModel(repository: stub)
-    await viewModel.load()
-    XCTAssertEqual(viewModel.products.count, 1)
+// Tests/AppCompositionTests/CompositionFirebaseEncapsulationTests.swift
+
+import XCTest
+@testable import AppComposition
+@testable import FeatureCatalogDomain
+
+final class CompositionFirebaseEncapsulationTests: XCTestCase {
+
+    // Verifica que AppComposition puede usar un stub en lugar de Firebase
+    func test_composition_worksWithStubRepository() async throws {
+        let expectedProduct = Product(id: "p-1", title: "Producto de prueba", price: 15.00)  // title, no name; Double, no Decimal
+        let stub = StubCatalogRepository(result: .success([expectedProduct]))
+
+        // Si AppComposition acepta un CatalogRepository genérico (protocolo),
+        // este test compila y pasa SIN Firebase en el grafo de dependencias.
+        let products = try await stub.fetchCatalog()  // fetchCatalog, no loadAll/execute
+
+        XCTAssertEqual(products.count, 1)
+        XCTAssertEqual(products.first?.title, "Producto de prueba")  // title, no name
+    }
 }
 ```
 
-La clave no es testear Firebase en sí, sino verificar que la arquitectura permite sustituirlo. Si este test compila y pasa, Firebase está correctamente encapsulado detrás de un protocolo.
+> **Nota scaffold:** El protocolo es `CatalogRepository` con `fetchCatalog()` (no `ProductRepository.loadAll()`). El `Product` usa `title: String` y `price: Double` (no `name`, no `Price(amount:currency:)`, no `imageURL`). El stub es `StubCatalogRepository`.
+
+La clave no es testear Firebase en sí, sino verificar que la arquitectura permite sustituirlo. Si el UseCase depende del protocolo `CatalogRepository` y no de `FirestoreProductRepository` directamente, este test compila sin necesidad de emuladores ni conexión. Firebase solo aparece en Infrastructure; Domain y Application no saben que existe.
+
+**Resultado esperado**: el script de dependencias pasa sin errores, el grep devuelve 0 líneas, y el test de composición compila y pasa con el repositorio stub (sin Firebase).
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+Firebase no forma parte del scaffold actual — el scaffold usa `InMemoryCatalogRemoteDataSource` y `InMemoryAuthRepository` como implementaciones por defecto. Esta lección documenta cómo añadir Firebase como proveedor real.
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+### Divergencias críticas respecto a los ejemplos del curso
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+| Lección | Scaffold real |
+|---|---|
+| `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` |
+| `AuthGateway.authenticate(_:)` | `AuthRepository.authenticate(credentials:) -> UserSession` |
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` con `Double` |
+| `Price(amount: Decimal, currency: String)` | `price: Double` — sin tipo `Price` |
+| `LoadProductsUseCase` | No hay UseCase separado — el ViewModel llama al repositorio directamente |
+| `FirestoreProductMapper` con `name`, `priceNumber`, `currency`, `imageURL` | Adaptar para mapear a `title: String` y `price: Double` |
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
+### Si quieres añadir Firebase al scaffold
+
+1. Crea un módulo `FeatureCatalogFirebase` (o añádelo a `FeatureCatalogData`)
+2. Implementa `CatalogRepository` con Firestore (equivalente a `FirestoreProductRepository` del curso)
+3. Implementa `AuthRepository` con Firebase Auth (equivalente a `FirebaseAuthGateway` del curso)
+4. En `AppCompositionRoot`, pasa las implementaciones Firebase en lugar de las `InMemory`:
+
+```swift
+// ✅ Cambio mínimo en Composition Root
+let catalogRepo = FirestoreCatalogRepository(db: Firestore.firestore())
+let authRepo = FirebaseAuthRepository()
+let root = AppCompositionRoot(authRepository: authRepo, catalogRepository: catalogRepo)
+```
+
+5. `FirebaseApp.configure()` va en el `init()` de `@main App` — es la única línea de Firebase fuera de Infrastructure
+
+### Modelo de datos Firestore adaptado al scaffold
+
 ```text
+products/
+  {productId}/
+    title: "Camiseta React"       (string)   ← no "name"
+    price: 29.99                   (number)   ← Double directo
+```
 
-Lectura semantica minima de este diagrama:
+No necesitas `currency` ni `image_url` porque el scaffold no los tiene en `Product`.
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+---
+
+## Qué sigue
+
+[**Checkpoint Etapa 3 →**](./checkpoint-y-bitacora-etapa-3.md) — Verifica que dominas cache, consistencia, observabilidad y backend antes de pasar a la Etapa 4: Arquitecto.
 

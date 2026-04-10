@@ -48,7 +48,19 @@ graph LR
     style APP fill:#cce5ff,stroke:#007bff
     style INFRA fill:#fff3cd,stroke:#ffc107
     style FW fill:#f8d7da,stroke:#dc3545
-```text
+```
+
+Lectura del diagrama:
+
+→ **Domain** (verde): `Product` y `Price` no saben que existe SwiftData. Son structs puros. Si mañana cambia la versión de SwiftData o se reemplaza por SQLite, Domain no cambia.
+
+→ **Application** (azul): `LoadCatalogUseCase` depende de `CatalogRepository` (protocolo). `CatalogCacheStore` (protocolo) define qué puede hacer el store sin decir cómo. Application no importa SwiftData.
+
+→ **Infrastructure** (amarillo): `CachedCatalogRepository` combina el protocolo `CatalogRepository` (remoto) con `CatalogCacheStore` (local). `SwiftDataCatalogCacheStore` implementa `CatalogCacheStore` usando SwiftData.
+
+→ **Framework** (rojo): `ModelContainer` y `ModelContext` son los únicos puntos que tocan disco. Están confinados a la clase que implementa el protocolo de store — una sola clase, un solo archivo.
+
+→ La dirección de las flechas confirma la Regla de Dependencia: Infrastructure depende de Framework (hacia abajo, hacia detalles), nunca al revés. Domain no tiene flechas salientes hacia Infrastructure ni Framework.
 
 **Regla crítica:** SwiftData solo aparece en Infrastructure. Domain y Application no importan SwiftData. Si ves `import SwiftData` en Domain, hay un error de arquitectura.
 
@@ -72,12 +84,50 @@ Piensa en el `ProductStore` como una caja en tu casa:
 - iOS 17+ como target mínimo (nuestro caso).
 - Equipo que quiere API moderna sin la complejidad de Core Data.
 
+```swift
+// ✅ Caso ideal para SwiftData: caché de catálogo estructurado con relaciones
+// Tienes varios ProductEntity con campos, necesitas queries por fecha,
+// y el modelo puede evolucionar con migraciones simples.
+@Model final class ProductEntity {
+    @Attribute(.unique) var productId: String
+    var name: String
+    var cachedAt: Date
+}
+// SwiftData gestiona el esquema, la persistencia y las queries.
+// Tú solo escribes el modelo y usas ModelContext para insertar/fetch.
+```
+
 ### Cuándo NO
 
 - Datos simples de key-value (usa `UserDefaults` o `@AppStorage`).
 - Archivos grandes (imágenes, videos) — usa `FileManager`.
 - Si necesitas soporte para iOS 16 o inferior — usa Core Data.
 - Si necesitas migraciones muy complejas con transformaciones de datos — Core Data da más control.
+
+```swift
+// ❌ SwiftData para datos que son simplemente key-value — sobreingeniería
+@Model final class LastSyncEntity {
+    var timestamp: Date   // Un solo campo, una sola instancia
+}
+// SwiftData levanta un ModelContainer entero para guardar una fecha.
+// ✅ Correcto para este caso:
+UserDefaults.standard.set(Date(), forKey: "lastCatalogSync")
+
+// ❌ SwiftData para imágenes descargadas
+@Model final class ProductImageEntity {
+    var imageData: Data   // 500KB por imagen × 1000 productos = 500MB en SQLite
+}
+// SwiftData no está optimizado para blobs grandes.
+// ✅ Correcto:
+let imageURL = cacheDirectory.appendingPathComponent("\(productId).jpg")
+try imageData.write(to: imageURL)  // FileManager gestiona archivos grandes mejor
+
+// ❌ SwiftData si el deployment target incluye iOS 16
+// @Model, ModelContainer y ModelContext son solo iOS 17+
+// El compilador fuerza el check pero el error aparece en runtime en iOS 16.
+// ✅ Correcto para compatibilidad iOS 16:
+// Usa NSPersistentContainer de Core Data, o JSON + FileManager para cache simple.
+```
 
 ---
 
@@ -116,7 +166,7 @@ final class ProductEntity {
         self.cachedAt = cachedAt
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -166,7 +216,7 @@ struct ProductEntityMapper {
         )
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -223,7 +273,7 @@ final class SwiftDataProductStore: ProductStore, @unchecked Sendable {
         try context.save()
     }
 }
-```text
+```
 
 **Línea por línea:**
 
@@ -280,7 +330,7 @@ extension CompositionRoot {
         return CatalogView(viewModel: viewModel)
     }
 }
-```text
+```
 
 **Punto crítico:** Comparado con el Composition Root de Etapa 2, lo único que cambia es el paso 4: insertamos `CachedProductRepository` como decorador entre el remoto y el UseCase. **El UseCase, el ViewModel y la View no cambian.** Eso demuestra que la arquitectura por capas funciona: puedes añadir cache sin tocar Domain, Application ni Interface.
 
@@ -394,7 +444,7 @@ final class SwiftDataProductStoreTests: XCTestCase {
         XCTAssertEqual(loaded?.timestamp, timestamp)
     }
 }
-```text
+```
 
 **Explicacion de cada test:**
 
@@ -420,7 +470,7 @@ final class SwiftDataProductStoreTests: XCTestCase {
 - Alternativa rechazada: Core Data (mayor complejidad sin beneficio para nuestro volumen de datos)
 - Consecuencias: API simple, migraciones automaticas, menor boilerplate; si necesitamos soporte iOS < 17 o migraciones complejas, reevaluamos
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -462,62 +512,115 @@ SwiftData es una herramienta, no una arquitectura. Lo que importa no es que uses
 - Los tests usan `isStoredInMemoryOnly: true` para no contaminar disco.
 - El precio `Decimal` se preserva sin pérdida de precisión (no `Double`).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-func test_roundTrip_preservesDecimalAndSpecialChars() async throws {
-    let store = SwiftDataCatalogCacheStore(inMemory: true)
-    let products = [Product(name: "Café ☕", price: Decimal(19.99))]
-    let now = Date()
+// Tests/FeatureCatalogPersistenceSwiftDataTests/SwiftDataCatalogCacheStoreTests.swift
 
-    try await store.save(products, timestamp: now)
-    let result = try await store.load()
+import XCTest
+import SwiftData
+@testable import FeatureCatalogPersistenceSwiftData
+import FeatureCatalogDomain
 
-    XCTAssertNotNil(result)
-    XCTAssertEqual(result?.products.first?.name, "Café ☕")
-    XCTAssertEqual(result?.products.first?.price, Decimal(19.99))
-    XCTAssertEqual(result?.timestamp.timeIntervalSince1970,
-                   now.timeIntervalSince1970, accuracy: 1.0)
+final class SwiftDataCatalogCacheStoreRoundTripTests: XCTestCase {
+
+    private func makeStore() throws -> SwiftDataCatalogCacheStore {
+        try SwiftDataCatalogCacheStore(inMemory: true)  // Conveniente init del scaffold
+    }
+
+    // Test 1: round-trip completo — save → load preserva título, precio, timestamp
+    func test_roundTrip_preservesTitlePriceAndTimestamp() async throws {
+        let store = try makeStore()
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let products = [
+            Product(id: "p-1", title: "Café ☕", price: 19.99)  // title (no name), Double (no Decimal)
+        ]
+
+        try await store.save(products: products, timestamp: now)  // etiquetas explícitas
+        let result = try await store.load()
+
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.products.first?.title, "Café ☕")
+        XCTAssertEqual(result?.products.first?.price, 19.99, accuracy: 0.001)
+        XCTAssertEqual(
+            result?.timestamp.timeIntervalSince1970,
+            now.timeIntervalSince1970,
+            accuracy: 1.0
+        )
+    }
+
+    // Test 2: clear() vacía el store
+    func test_clear_makesLoadReturnNil() async throws {
+        let store = try makeStore()
+        let products = [Product(id: "p-2", title: "Widget", price: 9.99)]
+        try await store.save(products: products, timestamp: Date())
+
+        try await store.clear()  // try await, no solo await
+
+        let result = try await store.load()
+        XCTAssertNil(result, "Tras clear(), load() debe devolver nil")
+    }
 }
 ```
 
-El test verifica que SwiftData no corrompe `Decimal` al persistir (un error común si se usa `Double` internamente). Si el mapper `ProductEntity → Product` pierde precisión, este test lo detecta.
+> **Nota scaffold:** El scaffold usa `price: Double` (no `Decimal`). Los tests usan `XCTAssertEqual(price, 19.99, accuracy: 0.001)` porque `Double` puede tener imprecisión de punto flotante. La decisión de usar `Double` en lugar de `Decimal` es un trade-off del scaffold: simplicidad sobre precisión máxima — aceptable para un catálogo de productos, no para un sistema de pagos.
+
+**Resultado esperado**: ambos tests pasan con `swift test --filter SwiftDataCatalog`, sin tocar disco (gracias a `inMemory: true`).
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+### El scaffold ya tiene `SwiftDataCatalogCacheStore` listo
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+Archivo: `Sources/FeatureCatalogPersistenceSwiftData/SwiftDataCatalogCacheStore.swift`
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+No necesitas escribir `SwiftDataProductStore` desde cero. El scaffold ya tiene la implementación completa con el patrón correcto.
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+### Divergencias críticas respecto a los ejemplos del curso
 
-Lectura semantica minima de este diagrama:
+| Lección | Scaffold real |
+|---|---|
+| `ProductEntity` con `name`, `priceAmount`, `priceCurrency`, `imageURLString` | `CatalogProductEntity` con `title`, `price: Double` — sin `imageURL` |
+| `ProductEntityMapper` struct separado | Sin mapper — conversión inline en `load()` y `save()` |
+| `price: Decimal` en tests | `price: Double` en scaffold |
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` con `Double` |
+| `store.save(products, timestamp: now)` | `store.save(products: products, timestamp: now)` — etiquetas explícitas |
+| `await store.clear()` | `try await store.clear()` — puede lanzar error |
+| `CachedProducts` | `CachedCatalog` |
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+### Por qué el scaffold no tiene `ProductEntityMapper`
+
+La lección separa el mapper para ilustrar el patrón. El scaffold lo evita porque el modelo es tan simple (`id`, `title`, `price: Double`) que la conversión inline en `load()` y `save()` es más legible que un mapper extra:
+
+```swift
+// ✅ Scaffold — conversión inline legible
+let products = entities.map { Product(id: $0.productId, title: $0.title, price: $0.price) }
+
+// Sería overkill un mapper para esto
+```
+
+Si el modelo fuera más complejo (con relaciones, tipos custom, URLs, Decimals), un mapper separado sería justificado.
+
+### Wiring en `AppCompositionRoot`
+
+El scaffold ya tiene `makeCatalogRepositoryWithSwiftData()` en `AppCompositionRoot`:
+
+```swift
+// Sources/AppComposition/AppCompositionRoot.swift
+public init(authRepository: any AuthRepository = InMemoryAuthRepository(),
+            catalogRepository: (any CatalogRepository)? = nil) {
+    // Si catalogRepository es nil, usa el remoto en memoria
+    // Para SwiftData: pasar CachedCatalogRepository(remote:cache:connectivity:)
+}
+```
+
+---
+
+## Qué sigue
+
+[**Lección 18: Backend Firebase →**](./07-backend-firebase.md) — Integrar Firebase como fuente de datos remota: `FirestoreProductRepository` implementando `CatalogRemoteDataSource`, autenticación con Firebase Auth, y los trade-offs de depender de un BaaS.
 

@@ -31,7 +31,7 @@ La búsqueda es tu mejor amiga. No navegues por menús, busca directo:
 
 ```text
 Cmd + K → "Observable" → Enter
-```text
+```
 
 ### 2. Entiende la estructura de una página de API
 
@@ -41,7 +41,7 @@ https://developer.apple.com/documentation/swiftui/observable
                     │           │          └── Símbolo específico
                     │           └── Framework
                     └── Plataforma
-```text
+```
 
 ### 3. Las 5 secciones clave de toda página de documentación
 
@@ -62,7 +62,7 @@ Cuando abres la doc de cualquier tipo (clase, struct, protocolo), busca en este 
 
 5. Relationships (Related Documentation)
    → Protocolos conformados, clases relacionadas
-```text
+```
 
 ---
 
@@ -90,7 +90,7 @@ Apple usa iconos para comunicar información rápida:
 
 ```text
 Cmd + K → "@Observable" → Seleccionar "Observable"
-```text
+```
 
 ### Paso 2: Leer Overview
 
@@ -98,7 +98,7 @@ Cmd + K → "@Observable" → Seleccionar "Observable"
 "A property wrapper type that supports observing changes to a property."
 
 → Esto dice: "Esto detecta cambios en propiedades"
-```text
+```
 
 ### Paso 3: Encontrar el ejemplo de código
 
@@ -108,7 +108,7 @@ class Person {
     var name: String
     var age: Int
 }
-```text
+```
 
 **Análisis:**
 - La clase debe marcarse con `@Observable`
@@ -119,7 +119,7 @@ class Person {
 
 ```text
 → wrappedValue: The underlying observable instance
-```text
+```
 
 **Conclusión:** Si el ViewModel está marcado con `@Observable` pero la UI no cambia, probablemente:
 1. No es `@MainActor`
@@ -139,7 +139,7 @@ func data(for request: URLRequest) async throws -> (Data, URLResponse)
           │              │                    └── Efectos (async throws)
           │              └── Parámetros
           └── Nombre del método
-```text
+```
 
 **Pero el Discussion es donde está el oro:**
 
@@ -148,7 +148,7 @@ Discussion:
 "This method returns immediately, but the associated loading ..."
 
 → Aquí explica el comportamiento real, edge cases, cuándo usarlo vs alternativas
-```text
+```
 
 ---
 
@@ -176,7 +176,7 @@ Download → Abre en Xcode → Navega a:
 README.md        → Qué hace, requisitos, cómo ejecutar
 Source Code/     → Código organizado
 Configuration/   → Settings, entitlements
-```text
+```
 
 ### Cómo aprender de un sample (ejemplo: Scrumdinger)
 
@@ -243,7 +243,7 @@ let result = foo(bar: 42)  // "Hello, 42"
 
 ### ❌ No revisar version availability
 
-```swift
+```
 // No verificar iOS version:
 @State var text: String
 
@@ -253,7 +253,7 @@ let result = foo(bar: 42)  // "Hello, 42"
 
 ### ❌ Copiar sin entender
 
-```swift
+```
 // Copiado de Stack Overflow:
 someAsyncFunction { [weak self] in
     self?.doSomething()

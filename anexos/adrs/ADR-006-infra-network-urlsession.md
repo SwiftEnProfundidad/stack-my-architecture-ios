@@ -36,8 +36,13 @@ Conectar con red real manteniendo límites de Clean Architecture.
 
 ### Opción B: Crear wrapper propio complejo sobre URLSession
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Control total sobre el comportamiento de red: reintentos, circuit breakers, timeouts personalizados sin depender de convenciones ajenas
+  - Sin dependencias externas de SPM; el binario final no incluye código de terceros para networking
+- **Contras:**
+  - Requiere implementar manualmente funcionalidades ya resueltas (manejo de redirects, autenticación de desafíos TLS, serialización multipart); coste de desarrollo alto
+  - Mayor superficie de bugs propios en código crítico de red; las pruebas deben cubrir casos extremos que Alamofire y URLSession ya gestionan
+  - Sube significativamente la curva de aprendizaje para un alumno junior que aún no domina URLSession en profundidad
 
 ### Opción C: Infraestructura real mínima (elegida)
 
@@ -59,7 +64,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [04-infra-real-network](../../02-integracion/04-infra-real-network.md) para el código completo.
+Ver la lección [04-infra-real-network](../../02-integración/04-infra-real-network.md) para el código completo.
 
 ---
 
@@ -85,28 +90,8 @@ Ver la lección [04-infra-real-network](../../02-integracion/04-infra-real-netwo
 
 ## Referencias
 
-- [Lección relacionada](../../02-integracion/04-infra-real-network.md)
+- [Lección relacionada](../../02-integración/04-infra-real-network.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-006-infra-network-urlsession.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Por qué existe esta etapa y por qué no es opcional
 
@@ -68,7 +68,7 @@ flowchart LR
     M --> S["Senior\nEvoluciona"]
     S --> A["Arquitecto\nGobierna"]
     A --> X["Maestría\nOpera bajo presión real"]
-```text
+```
 
 ---
 
@@ -117,7 +117,7 @@ Evidencia esperada:
 - Diagnóstico con `_printChanges()` cuando toque.
 - Refactor de vistas calientes con datos de impacto.
 
-### Skill: `windsurf-rules-ios` (si aplica al proyecto real)
+### Skill: `ios-enterprise-rules` (si aplica al proyecto real)
 
 Se usa como guía de consistencia de equipo en todas las lecciones donde haya decisiones de estilo, arquitectura y concurrencia.
 
@@ -137,7 +137,7 @@ flowchart TD
     C --> E["Evidencia verificable"]
     E --> R["Ritual diario enterprise"]
     R --> L
-```text
+```
 
 Este ciclo se repite hasta que el comportamiento técnico correcto deja de ser esfuerzo consciente y se vuelve segunda naturaleza.
 
@@ -185,7 +185,7 @@ graph TD
     style COMPOSITION fill:#fff3cd,stroke:#ffc107
     style DIAGNOSTICS fill:#f8d7da,stroke:#dc3545
     style MIGRATION fill:#e2d5f1,stroke:#6f42c1
-```text
+```
 
 ### Qué problema enterprise resuelve cada bloque
 
@@ -217,7 +217,7 @@ graph LR
 
     style Problems fill:#f8d7da,stroke:#dc3545
     style Solutions fill:#d4edda,stroke:#28a745
-```text
+```
 
 ```text
 05-maestria/
@@ -271,9 +271,9 @@ El objetivo es que las skills no queden asociadas a "leer un capítulo", sino a 
 
 La etapa 5 no se considera cerrada solo por completar lecciones. El cierre formal exige pasar la rúbrica final iOS y presentar el paquete de evidencias.
 
-- [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md)
-- [Evidencias obligatorias iOS](10-rubrica-final/02-evidencias-obligatorias-ios.md)
-- [Checklist de entrevista (5 minutos)](10-rubrica-final/03-checklist-entrega-para-entrevista.md)
+- [Rúbrica de empleabilidad iOS](rubrica-final/01-rubrica-empleabilidad-ios.md)
+- [Evidencias obligatorias iOS](rubrica-final/02-evidencias-obligatorias-ios.md)
+- [Checklist de entrevista (5 minutos)](rubrica-final/03-checklist-entrega-para-entrevista.md)
 
 Regla de aprobación: cumplir umbral de puntuación, no activar hard blockers y entregar evidencia verificable para decisiones críticas.
 
@@ -311,43 +311,8 @@ Eso es exactamente lo que diferencia a alguien que "sabe conceptos" de alguien q
 
 Ahora sí: pasa a `01-isolation-domains.md` y estúdialo con el contrato anterior en mano. No lo leas como capítulo aislado; léelo como la primera pieza del sistema operativo mental que necesitas para trabajar a nivel arquitecto.
 
-> **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](10-rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](10-rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
+> **Al terminar todas las lecciones de esta etapa**, consulta la [Rúbrica de empleabilidad iOS](rubrica-final/01-rubrica-empleabilidad-ios.md) y el [Checklist de entrega para entrevista](rubrica-final/03-checklist-entrega-para-entrevista.md) para evaluar tu nivel y preparar tu portafolio.
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
 

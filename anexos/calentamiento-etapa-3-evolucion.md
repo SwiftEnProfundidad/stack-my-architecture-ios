@@ -6,7 +6,7 @@ meta_leccion:
   tiempo_practica: "15 min"
   dificultad: 2
   prerequisitos:
-    - "02-integracion/entregables-etapa-2.md"
+    - "02-integración/entregables-etapa-2.md"
   si_te_atascas: "#mini-ejercicio"
 <!-- /sma:meta:v1 -->
 

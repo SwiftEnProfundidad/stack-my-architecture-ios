@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## El árbol de decisión que todo desarrollador iOS necesita
 
@@ -33,7 +33,7 @@ class CatalogViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 }
-```text
+```
 
 Problemas:
 - **Cualquier** cambio en **cualquier** `@Published` property invalida **todas** las vistas que observan este objeto. Si `isLoading` cambia, una vista que solo lee `products` se re-renderiza innecesariamente.
@@ -50,7 +50,7 @@ final class CatalogViewModel {
     var isLoading = false
     var errorMessage: String?
 }
-```text
+```
 
 Ventajas:
 - SwiftUI solo re-renderiza las vistas que **leen** la propiedad que cambió. Si `isLoading` cambia, una vista que solo lee `products` no se re-renderiza.
@@ -87,7 +87,7 @@ graph TB
 
     style Legacy fill:#f8d7da,stroke:#dc3545
     style Modern fill:#d4edda,stroke:#28a745
-```text
+```
 
 En un ViewModel con 10 propiedades y 15 vistas observando, `ObservableObject` causa **150 re-evaluaciones de body** por cada cambio en cualquier propiedad. `@Observable` causa **solo las necesarias**: las vistas que realmente leen la propiedad que cambió. En una app enterprise con pantallas complejas, esta diferencia se traduce en frame drops visibles.
 
@@ -124,7 +124,7 @@ flowchart TD
     style LET fill:#d4edda,stroke:#28a745
     style BINDING fill:#cce5ff,stroke:#007bff
     style BINDABLE fill:#cce5ff,stroke:#007bff
-```text
+```
 
 **Regla de oro del flowchart:** empieza siempre por la rama derecha (`let`). Solo sube de complejidad si la vista necesita más. El 60% de las propiedades de una vista deberían ser `let`. Si tienes más `@State` que `let`, probablemente estás poniendo demasiada responsabilidad en la vista.
 
@@ -160,7 +160,7 @@ struct LoginView: View {
         }
     }
 }
-```text
+```
 
 **Reglas:**
 - Siempre `private`. Si no es `private`, es una señal de que debería ser `let`, `@Binding`, o `@Bindable`.
@@ -177,7 +177,7 @@ struct CatalogView: View {
         }
     }
 }
-```text
+```
 
 ### `let` — read-only desde el padre
 
@@ -194,7 +194,7 @@ struct ProductRow: View {
         }
     }
 }
-```text
+```
 
 Es la opción más simple y la que deberías usar por defecto. Solo cambia a `@Binding` o `@Bindable` si la vista **necesita modificar** el dato.
 
@@ -219,7 +219,7 @@ struct SettingsView: View {
         ToggleRow(title: "Notifications", isOn: $notificationsEnabled)
     }
 }
-```text
+```
 
 **Error común:** usar `@Binding` cuando la vista solo lee:
 
@@ -235,7 +235,7 @@ struct DisplayView: View {
     let title: String
     var body: some View { Text(title) }
 }
-```text
+```
 
 ### `@Bindable` — la vista necesita $bindings de un @Observable inyectado
 
@@ -270,7 +270,7 @@ struct ProfileView: View {
         EditProfileView(profile: profile)
     }
 }
-```text
+```
 
 `@Bindable` es el equivalente moderno de `@ObservedObject` para `@Observable`. Lo usas cuando:
 1. El objeto viene de fuera (no lo crea la vista).
@@ -311,7 +311,7 @@ struct ProfileButton: View {
         }
     }
 }
-```text
+```
 
 **No uses `@EnvironmentObject`** (legacy). Usa `.environment()` con `@Observable` directamente.
 
@@ -339,7 +339,7 @@ struct ParentView: View {
         }
     }
 }
-```text
+```
 
 `@State` retiene su valor entre re-renderizados. Cuando el padre pasa un nuevo valor, `@State` lo ignora porque ya tiene su propio valor almacenado. Ese es su propósito: mantener estado local.
 
@@ -354,7 +354,7 @@ struct ChildView: View {
         Text(item.name) // Se actualiza cuando el padre cambia
     }
 }
-```text
+```
 
 **Prevención:** marca siempre `@State` como `private`. Si un `@State` no es `private`, significa que aparece en el initializer generado, lo que invita a pasar valores desde fuera.
 
@@ -375,7 +375,7 @@ final class LoginViewModel {
     var errorMessage: String?
     // ...
 }
-```text
+```
 
 Y en la vista:
 
@@ -392,7 +392,7 @@ struct LoginView: View {
         }
     }
 }
-```text
+```
 
 ### Etapa 2: CatalogView con navegación
 
@@ -417,6 +417,8 @@ struct ProductRow: View {
     // ...
 }
 ```
+
+> **Nota scaffold:** En el scaffold real el campo es `product.title` (no `product.name`). Usa `product.title` en todos los snippets del proyecto donde hagas referencia al nombre del producto.
 
 ---
 
@@ -452,61 +454,7 @@ En el código del curso, verifica que usamos las APIs modernas:
 
 ---
 
----
+## Qué sigue
 
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/05-swiftui-state-moderno.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**SwiftUI Performance →**](06-swiftui-performance.md) — Cómo medir y optimizar renders de SwiftUI: `Self._printChanges()`, POD views, LazyVStack, y eliminación de invalidaciones innecesarias.
 

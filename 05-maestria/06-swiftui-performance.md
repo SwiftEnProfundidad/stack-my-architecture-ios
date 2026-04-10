@@ -2,9 +2,9 @@
 
 ## Ruta scaffold relacionada
 
-- `apps/ios/ArchitectureKit/Sources/` para implementacion de codigo real de esta leccion.
-- `apps/ios/ArchitectureKit/Tests/` para validacion y regresion de contratos.
-- `apps/ios/ArchitectureHostApp/` cuando la leccion impacta navegacion/UI integrada.
+- `apps/ios/ArchitectureKit/Sources/` para implementación de código real de esta lección.
+- `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
+- `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
 ## Por qué tu vista se re-renderiza 47 veces cuando solo cambió un Bool
 
@@ -37,7 +37,7 @@ flowchart LR
     style EVAL fill:#f8d7da,stroke:#dc3545
     style RENDER fill:#d4edda,stroke:#28a745
     style SKIP fill:#f8f9fa,stroke:#6c757d
-```text
+```
 
 El coste real está en el paso "Re-evalúa body": aunque SwiftUI no actualice la pantalla, ya gastó CPU evaluando el body y todas sus subvistas. En una lista con 50 `ProductRow`, eso son 51 evaluaciones de body por un solo cambio de `isLoading`.
 
@@ -63,7 +63,7 @@ graph TD
     style PR2 fill:#f8d7da,stroke:#dc3545
     style PR3 fill:#f8d7da,stroke:#dc3545
     style PRN fill:#f8d7da,stroke:#dc3545
-```text
+```
 
 Un solo cambio de `isLoading` causó N+4 evaluaciones de body. Si ninguna de esas vistas usa `isLoading`, todas fueron innecesarias. Este es el **invalidation storm** que causa frame drops en apps enterprise con pantallas complejas.
 
@@ -89,7 +89,7 @@ graph LR
 
     style POD fill:#d4edda,stroke:#28a745
     style NonPOD fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 SwiftUI usa dos mecanismos de diffing: `memcmp` (comparación de memoria byte a byte, extremadamente rápido) para vistas POD, y reflexión (introspección de propiedades, más lento) para vistas con property wrappers. En una lista con 1000 items, la diferencia es medible.
 
@@ -113,14 +113,14 @@ struct CatalogView: View {
         }
     }
 }
-```text
+```
 
 Output en consola:
 ```text
 CatalogView: _viewModel changed.
 CatalogView: _viewModel changed.
 CatalogView: @self changed.
-```text
+```
 
 Si ves que `_viewModel changed` aparece cuando solo cambió `isLoading` y tu vista no usa `isLoading`, tienes un problema de dependencias demasiado amplias.
 
@@ -152,11 +152,11 @@ struct ProductRow: View {
     let product: Product
     
     var body: some View {
-        Text(product.name)
+        Text(product.title)
             .foregroundStyle(viewModel.theme.primaryColor)
     }
 }
-```text
+```
 
 ```swift
 // ✅ Correcto: ProductRow recibe solo lo que necesita
@@ -178,11 +178,11 @@ struct ProductRow: View {
     let primaryColor: Color // ← Solo lo que necesita
     
     var body: some View {
-        Text(product.name)
+        Text(product.title)
             .foregroundStyle(primaryColor)
     }
 }
-```text
+```
 
 Con `@Observable`, SwiftUI trackea qué propiedades lee cada vista. Pero pasar el objeto completo crea una dependencia implícita que puede sorprenderte cuando añadas nuevas propiedades al ViewModel.
 
@@ -209,7 +209,7 @@ struct ProductRow: View {
         }
     }
 }
-```text
+```
 
 ```swift
 // Non-POD view: tiene @State → diffing más lento (reflexión)
@@ -222,7 +222,7 @@ struct ProductRow: View {
         // ...
     }
 }
-```text
+```
 
 ### Patrón avanzado: wrapper POD + inner con estado
 
@@ -245,7 +245,7 @@ private struct ProductRowContent: View {
     
     var body: some View {
         VStack {
-            Text(product.name)
+            Text(product.title)
             if isExpanded {
                 Text(product.description)
             }
@@ -253,7 +253,7 @@ private struct ProductRowContent: View {
         .onTapGesture { isExpanded.toggle() }
     }
 }
-```text
+```
 
 El padre (`ProductRow`) usa `memcmp` para decidir si re-evaluar. Solo si `product` cambió, se re-evalúa `ProductRowContent`.
 
@@ -290,14 +290,14 @@ struct OrderRow: View {
         Text(Self.dateFormatter.string(from: order.date))
     }
 }
-```text
+```
 
 Lo mismo aplica para ordenamientos, filtros, y transformaciones de datos:
 
 ```swift
 // ❌ Anti-patrón: ordena el array en cada evaluación de body
 var body: some View {
-    List(products.sorted { $0.name < $1.name }) { product in
+    List(products.sorted { $0.title < $1.name }) { product in
         ProductRow(product: product)
     }
 }
@@ -309,7 +309,7 @@ final class CatalogViewModel {
     private(set) var products: [Product] = []
     
     var sortedProducts: [Product] {
-        products.sorted { $0.name < $1.name }
+        products.sorted { $0.title < $1.name }
     }
 }
 
@@ -319,7 +319,7 @@ var body: some View {
         ProductRow(product: product)
     }
 }
-```text
+```
 
 ---
 
@@ -339,7 +339,7 @@ SwiftUI **no compara valores antes de triggear actualizaciones**. Si asignas el 
         self.currentValue = value
     }
 }
-```text
+```
 
 Esto es especialmente importante en **hot paths**: código que se ejecuta frecuentemente, como scroll handlers o gesture recognizers:
 
@@ -356,7 +356,7 @@ Esto es especialmente importante en **hot paths**: código que se ejecuta frecue
         shouldShowTitle = shouldShow // Solo 2 actualizaciones: al cruzar y al volver
     }
 }
-```text
+```
 
 ---
 
@@ -382,7 +382,7 @@ ScrollView {
         }
     }
 }
-```text
+```
 
 `LazyVStack` solo crea las vistas que son visibles en pantalla (más un pequeño buffer). A medida que el usuario scrollea, crea las nuevas y descarta las que salen de pantalla.
 
@@ -455,55 +455,7 @@ Antes de considerar una vista "terminada":
 
 ---
 
----
+## Qué sigue
 
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `05-maestria/06-swiftui-performance.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
-
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Composición avanzada →**](07-composicion-avanzada.md) — Decoradores, interceptores y el patrón de composición en la Composition Root: cómo extender comportamiento sin modificar código existente (OCP en acción).
 

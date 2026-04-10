@@ -36,8 +36,13 @@ Integración entre Login y Catalog sin invadir internals de cada uno.
 
 ### Opción B: Import directo de implementaciones entre features
 
-- **Pros:** [Beneficios de esta opción]
-- **Contras:** [Desventajas significativas]
+- **Pros:**
+  - Acceso inmediato a todos los métodos y datos de la feature importada sin definir contratos
+  - Menos archivos intermedios; el código entre features se conecta directamente
+- **Contras:**
+  - Crea dependencias circulares: si Login importa Catalog y Catalog importa Login, el compilador falla
+  - Un cambio interno en una feature (renombrar un método, cambiar un tipo) rompe todas las features que la importan
+  - Imposible compilar o testear una feature de forma aislada; el grafo de dependencias se convierte en un monolito oculto
 
 ### Opción C: Contratos entre features por eventos/modelos mínimos (elegida)
 
@@ -59,7 +64,7 @@ Descartamos las opciones A y B por los problemas de acoplamiento y complejidad q
 
 ### Implementación en el curso
 
-Ver la lección [03-contratos-features](../../02-integracion/03-contratos-features.md) para el código completo.
+Ver la lección [03-contratos-features](../../02-integración/03-contratos-features.md) para el código completo.
 
 ---
 
@@ -85,28 +90,8 @@ Ver la lección [03-contratos-features](../../02-integracion/03-contratos-featur
 
 ## Referencias
 
-- [Lección relacionada](../../02-integracion/03-contratos-features.md)
+- [Lección relacionada](../../02-integración/03-contratos-features.md)
 - [Template ADR](./TEMPLATE-ADR.md)
 
 ---
-
-<!-- plantilla-pedagogica:auto -->
-
-## Refuerzo pedagogico
-Contexto: normalizacion automatica para `anexos/adrs/ADR-005-contratos-features.md`.
-
-### Objetivo
-- Define el resultado concreto esperado al finalizar esta leccion.
-
-### Prerrequisitos
-- Revisa la leccion anterior inmediata y confirma los conceptos base antes de continuar.
-
-### Practica guiada
-- Aplica un cambio pequeno y verificable en el scaffold relacionado con esta leccion.
-
-### Validacion
-- Checklist rapido:
-  - [ ] Entiendo la decision tecnica principal de la leccion.
-  - [ ] He ejecutado una comprobacion minima (test/build/script) asociada.
-  - [ ] Puedo explicar el trade-off clave con mis palabras.
 

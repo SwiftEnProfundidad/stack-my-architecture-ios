@@ -17,6 +17,33 @@ En versión simple: cache no es guardar datos, cache es gestionar confianza en e
 
 No existe “consistencia perfecta” gratis en móvil. Existe consistencia elegida conscientemente según coste/riesgo.
 
+```swift
+// ❌ Sin política de consistencia — devuelve cache siempre, aunque tenga 3 días
+func fetchCatalog() async throws -> [Product] {
+    if let cached = try? await store.load() {
+        return cached.products  // ¿Cuándo caducó? Nadie lo sabe
+    }
+    return try await remote.fetchProducts()
+}
+
+// ✅ Con política explícita — la regla es visible y testeable
+func fetchCatalog() async throws -> [Product] {
+    do {
+        let fresh = try await remote.fetchProducts()
+        try? await store.save(products: fresh, timestamp: now())
+        return fresh
+    } catch {
+        guard let cached = try? await store.load() else { throw error }
+        switch policy.freshness(now: now(), lastUpdatedAt: cached.timestamp) {
+        case .fresh:    return cached.products
+        case .stale:    throw error  // Cache vieja: honestidad primero
+        }
+    }
+}
+```
+
+La diferencia: en el primer caso la “política” es implícita (devolver siempre). En el segundo es explícita, testeable, y documentada.
+
 ---
 
 ## Modelo mental: fecha de caducidad + contexto
@@ -39,7 +66,17 @@ flowchart TD
     NET -->|"No"| POLICY{"Politica negocio"}
     POLICY -->|"Permite stale"| SHOW["Mostrar con aviso"]
     POLICY -->|"No permite"| FAIL["Error + retry"]
-```text
+```
+
+Lectura del diagrama:
+
+→ **Dato en cache → ¿Edad < TTL?**: la primera pregunta siempre es sobre frescura. Un dato que acaba de guardarse hace 30 segundos y tiene TTL de 5 minutos es "Usable" directamente, sin ir a red.
+
+→ **Stale → ¿Red disponible?**: cuando el dato ha expirado, la decisión se desdobla según conectividad. Con red: refrescar. Sin red: depende de la política de negocio.
+
+→ **Sin red → Política de negocio**: este es el nodo clave del diseño. La pregunta no es técnica — es de producto. "¿Prefiero mostrar un dato viejo con aviso, o bloquear al usuario hasta que haya red?" La respuesta depende del contexto: Catalog puede permitir stale; Payments no.
+
+→ **Mostrar con aviso** vs **Error + retry**: ambas son respuestas válidas. La trampa es la tercera opción implícita: mostrar datos viejos sin avisar. Eso es lo que este diseño explícitamente descarta.
 
 ---
 
@@ -140,7 +177,7 @@ enum Freshness: Sendable, Equatable {
     case fresh
     case stale(age: TimeInterval)
 }
-```text
+```
 
 La política devuelve estado semántico, no solo booleano. Esto mejora decisiones en Application/UI.
 
@@ -196,7 +233,7 @@ struct CachedProductRepository: ProductRepository, Sendable {
         }
     }
 }
-```text
+```
 
 Aquí se ve un principio clave:
 
@@ -218,7 +255,7 @@ enum CatalogScreenState: Sendable, Equatable {
     case loaded(products: [Product], freshness: Freshness)
     case error(CatalogError)
 }
-```text
+```
 
 No siempre necesitas mostrar “actualizado hace X minutos”, pero el estado debe poder representarlo para casos de producto exigentes.
 
@@ -250,20 +287,91 @@ Esta trazabilidad evita decisiones ambiguas cuando aparecen incidencias.
 
 ## TDD de política de consistencia
 
-### Red
+El TDD de consistencia tiene tres focos: la política (matemática del TTL), el repositorio (integración del patrón), y los edge cases (exactamente en el límite).
 
-- test de `FreshnessPolicy` con timestamps exactos;
-- test de fallback cache válido;
-- test de rechazo cache expirado.
+### Paso 1 — Tests de `FreshnessPolicy` (pura, sin IO)
 
-### Green
+```swift
+// Test: age < TTL → fresh
+func test_freshness_isFresh_whenWithinTTL() {
+    let policy = FreshnessPolicy(maxAge: 300)
+    let now = Date(timeIntervalSince1970: 1000)
+    let last = Date(timeIntervalSince1970: 800)  // 200s atrás
+    XCTAssertEqual(policy.freshness(now: now, lastUpdatedAt: last), .fresh)
+}
 
-- implementar mínima lógica TTL.
+// Test: age > TTL → stale
+func test_freshness_isStale_whenBeyondTTL() {
+    let policy = FreshnessPolicy(maxAge: 300)
+    let now = Date(timeIntervalSince1970: 1301)
+    let last = Date(timeIntervalSince1970: 1000)  // 301s atrás
+    guard case .stale = policy.freshness(now: now, lastUpdatedAt: last) else {
+        return XCTFail("Expected .stale")
+    }
+}
+```
 
-### Refactor
+Estos tests pasan en milisegundos porque `FreshnessPolicy` es pura — sin IO, sin red, sin store.
 
-- extraer `Clock` y eliminar dependencia de tiempo real;
-- simplificar ramas de repositorio sin perder semántica.
+### Paso 2 — Implementación mínima
+
+```swift
+struct FreshnessPolicy: Sendable {
+    let maxAge: TimeInterval
+    func freshness(now: Date, lastUpdatedAt: Date) -> Freshness {
+        now.timeIntervalSince(lastUpdatedAt) <= maxAge ? .fresh : .stale(age: now.timeIntervalSince(lastUpdatedAt))
+    }
+}
+```
+
+### Paso 3 — Extraer reloj inyectable
+
+El reloj inyectado es lo que hace posible que los tests de repositorio sean deterministas. Sin él, necesitarías `Task.sleep` en los tests (lento y frágil):
+
+```swift
+// En vez de: let now = Date()
+// Usar: let currentTime = clock.now()
+struct FixedClock: Clock, @unchecked Sendable {
+    let date: Date
+    func now() -> Date { date }
+}
+```
+
+### Paso 4 — Tests de integración cache + repositorio
+
+```swift
+// Fallback válido: cache fresca cuando falla la red
+func test_loadsFromCache_whenRemoteFailsAndCacheIsFresh() async throws {
+    let policy = FreshnessPolicy(maxAge: 300)
+    let clock = FixedClock(date: Date(timeIntervalSince1970: 1000))
+    let store = CatalogCacheStoreStub(
+        cached: CachedCatalog(
+            products: [Product(id: "p1", title: "Widget", price: 9.99)],
+            timestamp: Date(timeIntervalSince1970: 800)  // 200s atrás < 300s TTL
+        )
+    )
+    let sut = makeSUT(remoteError: CatalogError.network, store: store, policy: policy, clock: clock)
+    let result = try await sut.fetchCatalog()
+    XCTAssertEqual(result.map(\.id), ["p1"])
+}
+
+// Sin fallback: cache expirada cuando falla la red → propaga error
+func test_throwsError_whenRemoteFailsAndCacheIsStale() async {
+    let policy = FreshnessPolicy(maxAge: 300)
+    let clock = FixedClock(date: Date(timeIntervalSince1970: 2000))
+    let store = CatalogCacheStoreStub(
+        cached: CachedCatalog(products: [], timestamp: Date(timeIntervalSince1970: 1000))
+        // 1000s atrás >> 300s TTL → stale
+    )
+    let sut = makeSUT(remoteError: CatalogError.network, store: store, policy: policy, clock: clock)
+    do {
+        _ = try await sut.fetchCatalog()
+        XCTFail("Expected error")
+    } catch {
+        XCTAssertTrue(error is CatalogError)
+    }
+}
+```
 
 ---
 
@@ -313,7 +421,7 @@ final class CachedProductRepositoryConsistencyTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.loadAll())
     }
 }
-```text
+```
 
 ---
 
@@ -341,7 +449,7 @@ actor InMemoryProductStore: ProductStore {
         cached
     }
 }
-```text
+```
 
 No metas `@MainActor` en almacenamiento por “silenciar warnings”. Aisla donde corresponde.
 
@@ -397,7 +505,7 @@ Corrección:
 - Decisión: aplicar network-first con fallback a cache solo cuando politica de frescura lo permita
 - Consecuencias: mejor resiliencia sin ocultar stale data expirada
 - Fecha: 2026-02-07
-```text
+```
 
 ---
 
@@ -457,59 +565,83 @@ La tabla no sustituye métricas reales, pero ayuda a arrancar con criterio expl�
 - El invalidador no conoce SwiftData ni detalles de persistencia.
 - La invalidación es explícita (no depende de timing ni de TTL expirado).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
 
 ```swift
-func test_invalidate_forcesNextLoadFromRemote() async throws {
-    let products = [Product(name: "Widget", price: Decimal(9.99))]
-    let store = InMemoryProductStore()
-    try await store.save(products, timestamp: Date())
+// Sources/FeatureCatalogData/CacheInvalidator.swift
 
-    let invalidator = TTLCacheInvalidator(store: store)
-    await invalidator.invalidate()
+protocol CacheInvalidator: Sendable {
+    func invalidate() async throws
+}
 
-    let cached = try await store.load()
-    XCTAssertNil(cached, "Tras invalidar, el store debe estar vacío")
+struct StoreCacheInvalidator: CacheInvalidator, Sendable {
+    private let store: any CatalogCacheStore  // Scaffold: CatalogCacheStore, no ProductStore
+
+    init(store: any CatalogCacheStore) {
+        self.store = store
+    }
+
+    func invalidate() async throws {
+        try await store.clear()  // Scaffold tiene clear() — más semántico que save([])
+    }
+}
+
+// Tests/FeatureCatalogDataTests/CacheInvalidatorTests.swift
+
+final class StoreCacheInvalidatorTests: XCTestCase {
+
+    func test_invalidate_clearsStore() async throws {
+        let store = InMemoryCatalogCacheStore()
+        let products = [Product(id: "p-1", title: "Widget", price: 9.99)]  // title, no name
+        try await store.save(products: products, timestamp: Date())
+
+        let invalidator = StoreCacheInvalidator(store: store)
+        try await invalidator.invalidate()
+
+        let cached = try await store.load()
+        XCTAssertNil(cached, "Tras invalidar, el store debe estar vacío")
+    }
 }
 ```
 
-La razón de separar invalidación en su propio protocolo es que permite componer distintas estrategias (por TTL, por evento, por push notification) sin modificar el repositorio de cache.
+> **Nota scaffold:** El protocolo es `CatalogCacheStore` (no `ProductStore`), tiene `clear()` explícito, y `save` usa etiqueta `products:timestamp:`. El modelo usa `title: String` (no `name`) y `price: Double`.
+
+La razón de separar la invalidación en su propio protocolo: permite componer distintas estrategias sin modificar el repositorio de cache — por TTL expirado, por evento push del backend, o por acción explícita del usuario ("actualizar catálogo").
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Implementación en tu proyecto
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
+### Archivos del scaffold
 
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
+| Archivo | Qué contiene |
+|---|---|
+| `Sources/FeatureCatalogData/CatalogDataContracts.swift` | `CatalogCacheStore` con `load()`, `save(products:timestamp:)`, `clear()` |
+| `Sources/FeatureCatalogData/CachedCatalogRepository.swift` | La política de consistencia ya implementada |
+| `Sources/FeatureCatalogData/InMemoryCatalogStores.swift` | Stubs en memoria para tests de política |
 
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
+### Divergencias respecto a los ejemplos del curso
 
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
+| Lección | Scaffold real |
+|---|---|
+| `ProductStore` | `CatalogCacheStore` |
+| `store.save(_:timestamp:)` | `store.save(products:timestamp:)` — etiquetas explícitas |
+| `store.save([], timestamp: .distantPast)` para invalidar | `store.clear()` — método semántico explícito |
+| `product.name` | `product.title` |
+| `Price(amount:currency:)` | `Double` — precio simple |
+| `CachedProducts` | `CachedCatalog` |
+| `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` |
 
-Lectura semantica minima de este diagrama:
+### La `FreshnessPolicy` como struct independiente
 
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+El scaffold integra la política de frescura directamente en `CachedCatalogRepository` como lógica interna (método `isValid`). Extraerla a un `FreshnessPolicy` struct separado (como muestra esta lección) es una refactorización válida que mejora la testeabilidad de la política en aislamiento. Si lo haces, recuerda que el scaffold ya tiene `ttlSeconds` como parámetro del constructor.
+
+---
+
+## Qué sigue
+
+[**Lección 14: Observabilidad →**](./03-observabilidad.md) — Cómo saber qué está pasando en producción: métricas de carga, cache hits, y errores sin afectar la lógica de negocio.
 

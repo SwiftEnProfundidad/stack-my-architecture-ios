@@ -61,7 +61,7 @@ flowchart LR
     style G4 fill:#cce5ff,stroke:#007bff
     style G5 fill:#fff3cd,stroke:#ffc107
     style MERGE fill:#d4edda,stroke:#28a745
-```text
+```
 
 Los gates verdes son **bloqueantes**: si fallan, la PR no puede hacer merge. Los azules son bloqueantes pero con excepciones documentadas. Los amarillos son **informativos**: alertan pero no bloquean.
 
@@ -94,7 +94,7 @@ graph TD
     style Local fill:#d4edda,stroke:#28a745
     style CI_PR fill:#cce5ff,stroke:#007bff
     style Release fill:#fff3cd,stroke:#ffc107
-```text
+```
 
 ---
 
@@ -430,7 +430,28 @@ Trigger para pasar de B a C:
 - Puedes explicar en una frase qué protege cada gate.
 - Identificas al menos un gate que podría añadirse (con justificación de qué riesgo mitiga).
 
-**Solución razonada:**
+<details>
+<summary>Solución de referencia</summary>
+
+```bash
+# Desde apps/ios/ArchitectureKit/
+
+# Gate 1: dependencias arquitectónicas
+./scripts/check-dependencies.sh
+# Salida esperada: "Domain imports OK" + "Feature cross-imports OK"
+
+# Gate 2: tests unitarios
+swift test
+# Salida esperada: resumen con todos los test suites en verde
+
+# Gate 3: baseline de rendimiento
+./scripts/check-performance-baseline.sh
+# Salida esperada: tiempos de carga < umbral definido (p.ej. < 200ms)
+
+# Gate 4: cobertura por capa
+./scripts/quality-gates.sh
+# Salida esperada: porcentaje de cobertura por módulo
+```
 
 | Gate | Protege | Riesgo que mitiga |
 |------|---------|-------------------|
@@ -439,43 +460,15 @@ Trigger para pasar de B a C:
 | `check-performance-baseline.sh` | Latencia de carga | Regresiones de rendimiento |
 | `quality-gates.sh` | Cobertura mínima por capa | Código sin protección de tests |
 
-Un gate que podría añadirse es verificación de strict concurrency (`-strict-concurrency=complete`), que protege contra data races. Otro candidato es tamaño de binario, que protege contra dependencias pesadas inadvertidas.
+Un gate que podría añadirse es verificación de strict concurrency (`-strict-concurrency=complete`), que detecta data races en tiempo de compilación. Otro candidato es tamaño de binario (`otool -l` o `bloaty`), que protege contra dependencias pesadas añadidas inadvertidamente.
+
+**Resultado esperado**: los 4 scripts terminan con código de salida 0 y la tabla anterior completa con tus propias frases de justificación.
+
+</details>
 
 ---
 
-<!-- semantica-flechas:auto -->
-## Semantica de flechas aplicada a esta arquitectura
+## Qué sigue
 
-```mermaid
-flowchart LR
-    subgraph APP["App / Composition module"]
-        CR["CompositionRoot"]
-        COORD["AppCoordinator"]
-    end
-
-    subgraph FEATURE["Feature module"]
-        VM["FeatureViewModel"]
-        UC["UseCase"]
-        PORT["Repository protocol"]
-    end
-
-    subgraph INFRA["Infrastructure module"]
-        ADAPTER["RemoteRepository adapter"]
-        STORE["LocalStore"]
-    end
-
-    CR -.-> COORD
-    CR -.-> ADAPTER
-    VM --> UC
-    UC ==> PORT
-    ADAPTER --o PORT
-    ADAPTER --> STORE
-```text
-
-Lectura semantica minima de este diagrama:
-
-1. `-->` dependencia directa en runtime.
-2. `-.->` wiring y configuracion de ensamblado.
-3. `==>` dependencia contra contrato/abstraccion.
-4. `--o` salida/propagacion desde implementacion concreta.
+[**Checkpoint Etapa 4 →**](checkpoint-y-bitacora-etapa-4.md) — Verifica que dominas bounded contexts, reglas de dependencia, deep links, SPM y quality gates antes de pasar a la Etapa 5: Maestría.
 

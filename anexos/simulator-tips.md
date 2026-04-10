@@ -48,14 +48,14 @@ Features → Location
 ├── City Bicycle Ride (Simula movimiento)
 ├── City Run       (Movimiento más rápido)
 └── Freeway Drive  (Simula conducir)
-```text
+```
 
 **Ejercicio:** En E2 (Catalog), simula que estás en Tokyo:
 ```text
 Features → Location → Custom Location
 Latitude: 35.6762
 Longitude: 139.6503
-```text
+```
 
 ### 2. Apariencia (Dark Mode, Dynamic Type)
 
@@ -65,15 +65,15 @@ Features → Appearance
 ├── Light
 ├── Dark
 └── Automatically (sigue el sistema macOS)
-```text
+```
 
 **Probar Dynamic Type (tamaños de fuente):**
 ```text
 Settings app (en simulador) → Display & Brightness → Text Size
 → Arrastra a "Accessibility Sizes" para probar XXXL
-```text
+```
 
-**Por qué importa:** Tu app debe verse bien en todas las configuraciones de accesibilidad.
+**Por qué importa:** Tu app debe verse bien en todas las configuraciónes de accesibilidad.
 
 ### 3. Shake Gesture (Cmd + Ctrl + Z)
 
@@ -82,7 +82,7 @@ Settings app (en simulador) → Display & Brightness → Text Size
 ```text
 Device → Shake
 → o atajo: Cmd + Ctrl + Z
-```text
+```
 
 **Usos comunes:**
 - React Native: Abre debugger
@@ -95,14 +95,14 @@ Device → Shake
 ```text
 Device → Screenshot (Cmd + S)
 → Se guarda en Desktop por defecto
-```text
+```
 
 **Screen Recording:**
 ```text
 Simulator app → File → Record Screen
 ├── Start Recording
 └── Stop Recording (guarda como .mov)
-```text
+```
 
 **Para qué usarlo:**
 - Documentar bugs con video
@@ -118,7 +118,7 @@ Features → Face ID / Touch ID
 ├── Enrolled (como si estuviera configurado)
 ├── Matching Face (autenticación exitosa)
 └── Non-matching Face (autenticación fallida)
-```text
+```
 
 **Escenario de prueba:**
 1. En tu app de Login, añade autenticación biométrica
@@ -131,7 +131,7 @@ Features → Face ID / Touch ID
 
 ```text
 Device → Simulate Memory Warning
-```text
+```
 
 **Por qué importa:** Tu app debe liberar recursos cuando el sistema está bajo presión. Si no lo hace, el sistema la matará.
 
@@ -141,7 +141,7 @@ Device → Simulate Memory Warning
 Window → Devices & Simulators → Simulators → [Tu simulador]
 → Botón con icono de "settings" en el simulador seleccionado
 → Device Conditions
-```text
+```
 
 **Condiciones disponibles:**
 - 100% Loss (sin red - prueba offline)
@@ -160,7 +160,7 @@ Window → Devices & Simulators → Simulators → [Tu simulador]
 ```bash
 # En Terminal, abrir simuladores adicionales
 open -n /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app
-```text
+```
 
 **Usos:**
 - Verificar layout en iPhone SE (pequeño) y iPhone 15 Pro Max (grande) al mismo tiempo
@@ -230,7 +230,7 @@ Muchos desarrolladores ignoran accesibilidad. Apple sí la revisa en App Store.
 ```text
 Settings app → Accessibility → VoiceOver → ON
 → O atajo triple-click en side button (configurar primero)
-```text
+```
 
 **Navegación con VoiceOver activado:**
 - Deslizar derecha: Siguiente elemento
@@ -250,7 +250,7 @@ Settings app → Accessibility → VoiceOver → ON
 ```text
 Xcode → Open Developer Tool → Accessibility Inspector
 → Te muestra el árbol de accesibilidad en tiempo real
-```text
+```
 
 ---
 
@@ -261,7 +261,7 @@ Xcode → Open Developer Tool → Accessibility Inspector
 ```bash
 # En Terminal, ver logs del simulador
 xcrun simctl spawn booted log stream --level debug
-```text
+```
 
 ### Instalar certificados/rutas para testing
 
@@ -271,14 +271,14 @@ xcrun simctl location booted start --gpx /path/to/route.gpx
 
 # Cambiar fotos del simulador
 # Arrastrar imágenes a Photos app en simulador
-```text
+```
 
 ### Resetear simulador (si se comporta raro)
 
 ```text
 Device → Erase All Content and Settings
 → O: xcrun simctl erase <device_id>
-```text
+```
 
 **Cuándo usarlo:**
 - Datos corruptos en la app
@@ -329,7 +329,7 @@ xcrun simctl location "iPhone 15 Pro" set 37.7749,-122.4194
 
 ---
 
-> **Consejo final:** Dedica 10% de tu tiempo de desarrollo a probar en el simulador con configuraciones "edge case" (Dark mode, Dynamic Type XL, landscape, sin red). Ese 10% evitará el 90% de bugs reportados por usuarios.
+> **Consejo final:** Dedica 10% de tu tiempo de desarrollo a probar en el simulador con configuraciónes "edge case" (Dark mode, Dynamic Type XL, landscape, sin red). Ese 10% evitará el 90% de bugs reportados por usuarios.
 
 ---
 
