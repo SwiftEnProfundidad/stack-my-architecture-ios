@@ -509,6 +509,19 @@ actor ProductStore {
 | **@unchecked Sendable** | Nada (confianza manual) | Riesgo de bugs silenciosos | Solo test doubles, con documentación |
 | **Locks/Queues** | Data races (sincronización manual) | Complejidad, riesgo de deadlocks | Evitar. Preferir actors. |
 
+## 🔭 Explora el scaffold — Actor como repositorio
+
+```bash
+# InMemoryAuthRepository es actor, no struct
+cat apps/ios/ArchitectureKit/Sources/FeatureLoginData/InMemoryAuthRepository.swift
+
+# AuthHTTPRepository es struct (stateless, no necesita actor)
+grep "^public struct\|^public actor" apps/ios/ArchitectureKit/Sources/FeatureLoginData/AuthHTTPRepository.swift
+```
+
+`InMemoryAuthRepository` usa `actor` porque mantiene estado mutable (la sesión en memoria). `AuthHTTPRepository` usa `struct` porque es stateless — cada llamada es independiente. Esta es la decisión de diseño que describe esta lección: `actor` cuando hay estado compartido, `struct` cuando no.
+
+
 ---
 
 ## Qué sigue

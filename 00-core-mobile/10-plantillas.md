@@ -209,6 +209,19 @@ Evento de fallo de login instrumentado sin PII.
 
 Plantilla y ejemplo completo en la lección dedicada: [Seguridad, privacidad y threat modeling](08-seguridad-privacidad-threat-modeling.md).
 
+
+## 🔭 Explora el scaffold — Plantillas en acción
+
+```bash
+# ADR de Login: plantilla aplicada en el scaffold
+cat 01-fundamentos/05-feature-login/ADR-001-login.md
+
+# Especificación BDD: plantilla de escenarios aplicada
+cat 01-fundamentos/05-feature-login/00-especificacion-bdd.md | head -40
+```
+
+Estos dos archivos son las plantillas de esta lección aplicadas a un caso real. El ADR documenta la decisión arquitectónica; el BDD documenta el comportamiento esperado. Juntos son la evidencia que hace una PR revisable.
+
 ---
 
 ## Qué sigue

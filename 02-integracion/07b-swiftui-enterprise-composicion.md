@@ -663,6 +663,24 @@ final class CatalogViewModel { ... }
 
 ---
 
+## 🔭 Explora el scaffold — Composición SwiftUI
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogUI/CatalogView.swift
+#           Sources/FeatureLoginUI/LoginView.swift
+```
+
+Ambas vistas usan `@Observable` + `@State` — el patrón moderno que describe esta lección. Busca si hay `.onTapGesture` en las filas del `CatalogView`; si los encuentras, el ejercicio de esta lección (reemplazarlos por `Button`) es aplicable directamente. La composición de vistas en el scaffold sigue el principio de una responsabilidad por vista.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogUITests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Parte 3: Liquid Glass, APIs modernas iOS 26 y ejercicio completo →**](./07c-swiftui-enterprise-moderno.md) — Las APIs de iOS 26 (`.glassEffect`, materiales, `MeshGradient`), tabla completa de deprecaciones, y el ejercicio guiado que integra todo lo aprendido en las tres partes.

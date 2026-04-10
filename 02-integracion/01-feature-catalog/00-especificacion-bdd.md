@@ -392,6 +392,22 @@ func retry() async {
 
 ---
 
+## 🔭 Explora el scaffold — Especificación BDD en tests reales
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Tests/FeatureCatalogDomainTests/
+```
+
+Los tests del scaffold son la especificación BDD convertida en código ejecutable. Cada escenario del documento que acabas de leer tiene su equivalente en `FeatureCatalogDomainTests`. Compara los nombres de los métodos de test con los escenarios BDD — deben corresponderse uno a uno.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDomainTests
+```
+
+---
+
 ## Qué sigue
 
 Con esta especificación cerrada, ya se puede implementar con TDD sin improvisar comportamiento.

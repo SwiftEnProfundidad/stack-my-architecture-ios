@@ -518,6 +518,25 @@ Los ADRs existentes en `docs/adr/` del scaffold siguen este formato.
 
 ---
 
+## 🔭 Explora el scaffold — Trade-offs reales en el código
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Compara:
+# Sources/FeatureLoginData/InMemoryAuthRepository.swift  (in-memory, sin red)
+# Sources/FeatureLoginData/AuthHTTPRepository.swift       (red real, más complejo)
+```
+
+Estos dos archivos son el ejemplo más claro de trade-off en el scaffold: `InMemoryAuthRepository` es simple, testeable en aislamiento y suficiente para desarrollo. `AuthHTTPRepository` es complejo, requiere red y es el que va a producción. Ambos conforman el mismo protocolo `AuthRepository`. Ese es el trade-off que documenta esta lección.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDataTests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Lección 17: SwiftData como store de cache →**](./06-swiftdata-store.md) — Cómo implementar `CatalogCacheStore` con SwiftData, los trade-offs concretos de usar un ORM vs persistencia directa, y los tests de integración con `ModelContainer`.

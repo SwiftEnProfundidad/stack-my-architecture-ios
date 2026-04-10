@@ -95,3 +95,21 @@ No se evalúa volumen de código; se evalúa criterio más evidencia.
 Cuando completes esta rúbrica, actualiza también los entregables de maestría para dejar la trazabilidad completa de salida:
 
 - [`../05-maestria/entregables-etapa-5.md`](../05-maestria/entregables-etapa-5.md)
+
+## 🔨 Checkpoint Xcode — Lista de verificación de entrega
+
+```bash
+# Ejecuta todos los gates antes de entregar
+cd apps/ios/ArchitectureKit
+
+# Gate 1: Dependencias
+grep -rn "^import SwiftUI\|^import UIKit" Sources/FeatureLoginDomain Sources/FeatureCatalogDomain 2>/dev/null || echo "✅ Gate 1: Domain puro"
+
+# Gate 2: Tests unitarios
+swift test 2>&1 | tail -5
+
+# Gate 5: Swift 6 strict concurrency
+swift build 2>&1 | grep -c "error:" || echo "✅ Gate 5: Sin errores de concurrencia"
+```
+
+Ejecuta estos tres comandos y adjunta la salida en tu entrega. Si los tres terminan sin errores, tu proyecto cumple los requisitos técnicos mínimos de la rúbrica.

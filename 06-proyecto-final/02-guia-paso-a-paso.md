@@ -415,3 +415,15 @@ ls docs/final-project/
 - [ ] `docs/final-project/` tiene todos los artefactos.
 - [ ] La rúbrica de `01-rubrica-y-entrega.md` está autocompletada.
 - [ ] La rúbrica de empleabilidad `../05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md` revisada.
+
+## 🔨 Checkpoint Xcode — Verificación por fase
+
+```bash
+# Al final de cada fase, confirma que los tests siguen en verde
+cd apps/ios/ArchitectureKit && swift test
+
+# Verifica que no añadiste dependencias ilegales en Domain
+grep -rn "^import" Sources/FeatureLoginDomain Sources/FeatureCatalogDomain | grep -v "Foundation\|Testing" || echo "✅ Domain sin dependencias ilegales"
+```
+
+Ejecuta estos dos comandos al terminar cada fase de la guía. Si los tests fallan, no avances a la siguiente fase: encuentra el error primero. El progreso rápido con tests rotos es deuda técnica que se paga cara al final.

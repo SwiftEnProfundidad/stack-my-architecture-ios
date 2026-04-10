@@ -402,6 +402,16 @@ Fix: Normalizar el email en el init.
 
 **Recuerda:** El debugging es una habilidad que mejora con la práctica. Cada bug que arreglas te hace mejor para el siguiente.
 
+## 🔭 Explora el scaffold — Debugging con accessibilityIdentifier
+
+```bash
+# Todos los elementos de LoginView tienen accessibilityIdentifier
+grep "accessibilityIdentifier" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginView.swift
+```
+
+Los `accessibilityIdentifier` no son solo para tests de UI — son también puntos de anclaje para el debugger y para herramientas de inspección como Xcode Accessibility Inspector. Cuando un elemento no responde en el simulador, el identificador te permite localizarlo exactamente en el árbol de vistas.
+
+
 ---
 
 ## Qué sigue

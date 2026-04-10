@@ -866,6 +866,40 @@ Busca en `Tests/FeatureCatalogDataTests/` los tests de `CachedCatalogRepository`
 
 ---
 
+## 🔨 Checkpoint Xcode — CachedCatalogRepository
+
+El scaffold implementa el repositorio con cache que acabas de estudiar, con una dependencia adicional: `ConnectivityChecking` para distinguir offline real de error de red.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogData/CachedCatalogRepository.swift
+#           Sources/FeatureCatalogData/InMemoryCatalogStores.swift
+#           Sources/FeatureCatalogData/CatalogDataContracts.swift
+```
+
+**Diferencias clave entre la lección y el scaffold:**
+
+| Lección | Scaffold real |
+|---|---|
+| `final class CachedCatalogRepository` con `@unchecked Sendable` | `struct CachedCatalogRepository` — `Sendable` automático sin `@unchecked` |
+| Sin `ConnectivityChecking` | `ConnectivityChecking` como dependencia — control explícito del estado de red en tests |
+| `CachedProducts` | `CachedCatalog` — naming consistente con el dominio |
+| `store.save([], timestamp: .distantPast)` para invalidar | `store.clear()` — método semántico explícito |
+| `CatalogObservability` no integrado | `.record(CatalogFetchMetric(...))` en cada operación — observabilidad integrada |
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDataTests
+```
+
+**Preguntas de reflexión:**
+1. El scaffold usa `struct` en lugar de `final class` para `CachedCatalogRepository`. ¿Por qué `struct` es preferible aquí y cuándo `class` sería necesario?
+2. `ConnectivityChecking` es una dependencia inyectada. ¿Qué ventaja tiene frente a llamar directamente a `NWPathMonitor` dentro del repositorio?
+3. Los 5 escenarios de test de la lección (happy path, fallback válido, fallback expirado, sin cache, TTL en límite) deberían existir en `FeatureCatalogDataTests`. Ábrelos y verifica cuáles están. ¿Falta alguno?
+
+---
+
+
 ## Qué sigue
 
 [**Lección 13: Consistencia e invalidación →**](./02-consistencia.md) — Cuándo y cómo invalidar el cache sin romper la UX: invalidación por evento, por tiempo, por política de dominio.

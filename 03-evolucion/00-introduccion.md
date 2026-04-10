@@ -381,6 +381,19 @@ El foco es resiliencia útil y sostenible, no complejidad ornamental.
 
 - Revisa y completa los entregables oficiales aqui: [entregables-etapa-3.md](../03-evolucion/entregables-etapa-3.md).
 
+## 🔭 Explora el scaffold — La capa de caché ya construida
+
+```bash
+# CachedCatalogRepository: el corazón de la Etapa 3
+cat apps/ios/ArchitectureKit/Sources/FeatureCatalogData/CachedCatalogRepository.swift | head -40
+
+# SwiftData como implementación del store
+ls apps/ios/ArchitectureKit/Sources/FeatureCatalogPersistenceSwiftData/
+```
+
+La Etapa 3 añade offline-first sobre la Feature Catalog. El scaffold ya tiene `CachedCatalogRepository` con TTL y `SwiftDataCatalogCacheStore` — son la referencia de producción para los patrones que aprenderás en esta etapa.
+
+
 ---
 
 ## Qué sigue

@@ -707,6 +707,39 @@ public actor DefaultCatalogRemoteDataSource: CatalogRemoteDataSource {
 
 ---
 
+## 🔨 Checkpoint Xcode — FeatureCatalogData
+
+La capa de datos del scaffold es más rica que el ejemplo de la lección: incluye cache, observabilidad y conectividad como dependencias explícitas.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogData/CachedCatalogRepository.swift
+#           Sources/FeatureCatalogData/DefaultCatalogRemoteDataSource.swift
+#           Sources/FeatureCatalogData/CatalogDataContracts.swift
+```
+
+**Diferencias clave entre la lección y el scaffold:**
+
+| Lección | Scaffold real |
+|---|---|
+| `CatalogRemoteRepository` (struct) | `DefaultCatalogRemoteDataSource` — `actor` para thread-safety automático |
+| Repositorio accede red directamente | `CachedCatalogRepository` decora un `CatalogRemoteDataSource` + `CatalogCacheStore` |
+| Sin contratos explícitos de datos | `CatalogDataContracts.swift` define `CatalogRemoteDataSource`, `CatalogCacheStore`, `CatalogObservability` |
+| `InMemoryProductRepository` | `InMemoryCatalogStores.swift` — stubs en memoria para tests |
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDataTests
+```
+
+**Preguntas de reflexión:**
+1. `DefaultCatalogRemoteDataSource` es un `actor`. ¿Qué ventaja tiene frente a `struct + @unchecked Sendable` para una fuente de datos remota?
+2. `CatalogDataContracts.swift` agrupa todos los protocolos de la capa de datos. ¿Por qué es útil tener un único punto de definición de contratos en lugar de distribuirlos por cada archivo?
+3. El scaffold separa `CatalogRemoteDataSource` de `CatalogRepository`. ¿Qué ocurre si cambias el proveedor de red? ¿Cuántos archivos necesitas tocar?
+
+---
+
+
 ## Qué sigue
 
 Con Infrastructure construida y testeada, la feature Catalog tiene Domain, Application e Infrastructure completos. El siguiente paso es conectar todo esto a la interfaz de usuario.

@@ -654,6 +654,24 @@ XCTAssertFalse(metrics.first?.cacheHit ?? true)
 
 ---
 
+## 🔭 Explora el scaffold — CatalogObservability
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogData/CatalogDataContracts.swift
+# Busca: CatalogObservability, CatalogFetchMetric, NoOpCatalogObservability
+```
+
+`CatalogObservability` está definido en `CatalogDataContracts.swift` junto al resto de protocolos de la capa de datos. El scaffold usa un `NoOpCatalogObservability` por defecto — exactamente el patrón Null Object de esta lección. La implementación de test usa `InMemoryCatalogObservability` para capturar métricas en tests sin efectos secundarios.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDataTests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Lección 15: Tests avanzados →**](./04-tests-avanzados.md) — Más allá del happy path: tests de integración que usan las capas reales, property-based testing, y cómo testear observabilidad como contrato.

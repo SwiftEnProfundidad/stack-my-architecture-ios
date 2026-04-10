@@ -430,6 +430,17 @@ Hay muchas confusiones comunes sobre ambas prácticas. Vamos a aclararlas para q
 
 ---
 
+## 🔭 Explora el scaffold — El ciclo TDD en tests reales
+
+Ejecuta los tests del Domain y observa el resultado:
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDomainTests --verbose
+```
+
+Para cada test que ves pasar, alguien siguió exactamente el ciclo Red-Green-Refactor que acabas de aprender: escribió el test (Red), escribió el mínimo código para que pasara (Green), limpió (Refactor). El resultado final — código limpio con tests verdes — es lo que ahora tienes en pantalla.
+
 ---
 
 ## Qué sigue

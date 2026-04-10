@@ -415,6 +415,21 @@ Si falta cualquiera, el cierre está incompleto.
 - [ ] Puedo justificar decisiones de aislamiento/concurrencia en coordinación y UI.
 - [ ] Puedo argumentar trade-offs con criterio de negocio y mantenimiento.
 
+## 🔭 Explora el scaffold — Feature Catalog ya implementada
+
+```bash
+# La Feature Catalog espeja exactamente la Feature Login
+ls apps/ios/ArchitectureKit/Sources/FeatureCatalogDomain/
+ls apps/ios/ArchitectureKit/Sources/FeatureCatalogData/
+ls apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/
+
+# Los dos bounded contexts ensamblados
+grep "Catalog\|Login" apps/ios/ArchitectureKit/Sources/AppComposition/AppCompositionRoot.swift
+```
+
+La Etapa 2 construye la Feature Catalog aplicando exactamente los mismos patrones de la Etapa 1. El scaffold ya la tiene completa — úsala como referencia mientras construyes la tuya.
+
+
 ---
 
 ## Qué sigue

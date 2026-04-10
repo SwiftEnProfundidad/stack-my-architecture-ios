@@ -546,6 +546,38 @@ public struct AppCompositionRoot {
 
 ---
 
+## 🔨 Checkpoint Xcode — AppCompositionRoot
+
+El Composition Root del scaffold es el único lugar donde todas las capas se ensamblan. Abrirlo revela el cableado completo de la app.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/AppComposition/AppCompositionRoot.swift
+#           Tests/AppCompositionTests/AppCompositionRootTests.swift
+```
+
+**Observaciones clave del scaffold:**
+
+| Concepto | Scaffold real |
+|---|---|
+| Repositorio por defecto | `InMemoryAuthRepository()` — funciona sin servidor, listo para reemplazar con `AuthHTTPRepository` en Etapa 3 |
+| Inyección de catálogo | `catalogRepository: (any CatalogRepository)? = nil` — opcional, permite lanzar la app solo con Login |
+| Coordinador de navegación | `NavigationStore` que conforma `LoginNavigating` — el `LoginViewModel` recibe el protocolo, no la clase concreta |
+| SwiftData | `makeCatalogRepositoryWithSwiftData()` — función factory que encapsula el ensamblaje del store persistente |
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test
+```
+
+**Preguntas de reflexión:**
+1. `AppCompositionRoot` recibe `authRepository` como parámetro en lugar de crearlo internamente. ¿Cómo simplifica esto los tests del Composition Root?
+2. ¿Por qué `CatalogViewModel` es opcional en el scaffold? ¿Qué problema arquitectónico resuelve esa decisión?
+3. Si necesitaras añadir una tercera feature (por ejemplo, `FeatureProfile`), ¿qué es lo mínimo que tendrías que añadir al `AppCompositionRoot`?
+
+---
+
+
 ## Qué sigue
 
 Con el Composition Root ensamblando Login y Catalog, la app tiene un flujo funcional de punta a punta. Los siguientes pasos profundizan en dos áreas: cómo construir interfaces SwiftUI más sofisticadas para empresa, y cómo manejar la concurrencia a escala enterprise.

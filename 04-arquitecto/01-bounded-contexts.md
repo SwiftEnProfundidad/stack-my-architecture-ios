@@ -517,6 +517,22 @@ Los dos contextos comparten `CoreDomain` (tipos base compartidos mínimos) pero 
 
 </details>
 
+## 🔭 Explora el scaffold — Bounded contexts en Package.swift
+
+```bash
+# Los dos bounded contexts del scaffold
+grep -E "FeatureLogin|FeatureCatalog" apps/ios/ArchitectureKit/Package.swift
+
+# Verifica que Login no importa Catalog y viceversa
+grep -r "import FeatureCatalog" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/ 2>/dev/null || echo "OK: cero imports"
+grep -r "import FeatureLogin" apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/ 2>/dev/null || echo "OK: cero imports"
+
+# El único punto de unión entre ambos contextos
+cat apps/ios/ArchitectureKit/Sources/AppComposition/AppCompositionRoot.swift
+```
+
+`AppCompositionRoot` importa ambas features — es el único archivo donde los dos bounded contexts se conocen. Todo lo demás está aislado por compilador.
+
 ---
 
 ## Qué sigue

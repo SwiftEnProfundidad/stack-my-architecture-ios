@@ -446,6 +446,19 @@ Antes de mergear cualquier PR:
 | **Leaks Instrument** | Memory leaks no detectados por tests | Profiling pre-release |
 | **`Self._printChanges()`** | Re-renderizados innecesarios de SwiftUI | Debug durante desarrollo |
 
+## 🔭 Explora el scaffold — Sin retain cycles por diseño
+
+```bash
+# LoginViewModel no tiene referencias a la View — flujo unidireccional
+grep "weak\|LoginView" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginViewModel.swift
+
+# El navigator es un protocolo, no una referencia fuerte a AppCompositionRoot
+grep "navigator" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginViewModel.swift
+```
+
+`LoginViewModel` no tiene referencia a `LoginView` — la View observa el ViewModel, no al revés. Los retain cycles típicos ocurren cuando A retiene B y B retiene A. Aquí la dependencia es unidireccional: View→ViewModel→UseCase→Repository. Sin ciclos, sin leaks.
+
+
 ---
 
 ## Qué sigue

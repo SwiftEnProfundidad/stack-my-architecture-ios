@@ -609,6 +609,21 @@ El patrón fundamental es: `LoginViewModel` recibe `onLoginSucceeded: (Session) 
 
 </details>
 
+## 🔭 Explora el scaffold — Navegación desacoplada en AppComposition
+
+```bash
+# NavigationStore — el coordinador de navegación del scaffold
+find apps/ios/ArchitectureKit/Sources -name "NavigationStore.swift" | xargs cat
+
+# AppContracts — los protocolos de navegación que usan las features
+ls apps/ios/ArchitectureKit/Sources/AppContracts/
+
+# LoginViewModel recibe el navigator por inyección, no por import directo de Catalog
+grep "navigator" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginViewModel.swift
+```
+
+`LoginViewModel` llama a `navigator?.goToCatalog()` a través de un protocolo de `AppContracts`. No importa `FeatureCatalogUI`. La navegación entre features pasa por contratos — exactamente el patrón que describe esta lección.
+
 ---
 
 ## Qué sigue

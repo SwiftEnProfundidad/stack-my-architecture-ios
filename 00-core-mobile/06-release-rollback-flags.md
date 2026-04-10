@@ -40,6 +40,16 @@ Diseña kill-switch para desactivar funciones críticas con seguridad, auditabil
 - [ ] Monitoreo reforzado para ventana de lanzamiento.
 - [ ] Comunicación de release preparada.
 
+
+## 🔭 Explora el scaffold — Feature flags en Infrastructure
+
+```bash
+# Busca cualquier feature flag o toggle en el scaffold
+grep -rn "featureFlag\|FeatureFlag\|isEnabled\|toggle" apps/ios/ArchitectureKit/Sources/ 2>/dev/null || echo "No hay feature flags aún — son una extensión natural del scaffold"
+```
+
+El scaffold actual no implementa feature flags — eso es deliberado para el nivel Junior/Mid. Cuando llegues a Etapa 3 (Senior), añadirás un mecanismo de flags sobre `InfraPersistence` sin tocar Domain ni Application.
+
 ---
 
 ## Qué sigue

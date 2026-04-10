@@ -573,6 +573,22 @@ func loadData(viewModel: ViewModel) async {
 | **@MainActor** | Actor global del hilo principal | En ViewModels y cualquier código que toque la UI |
 | **SWIFT_STRICT_CONCURRENCY** | Flag del compilador | Siempre en `complete` |
 
+## 🔭 Explora el scaffold — Aislamiento en código real
+
+```bash
+# @MainActor en ViewModel — garantía de hilo principal por compilador
+grep "@MainActor" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginViewModel.swift
+
+# actor en repositorio — serialización automática de acceso concurrente
+grep "^public actor\|^actor" apps/ios/ArchitectureKit/Sources/FeatureLoginData/InMemoryAuthRepository.swift
+
+# Sendable en Domain — pueden cruzar fronteras de actor sin riesgo
+grep ": Sendable" apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/UserSession.swift
+```
+
+`@MainActor` en UI, `actor` en Data, `Sendable` en Domain: el compilador Swift 6 verifica los tres en tiempo de compilación. No hay data races posibles si los tres patrones están presentes.
+
+
 ---
 
 ## Qué sigue

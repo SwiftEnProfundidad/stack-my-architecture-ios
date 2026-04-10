@@ -706,6 +706,21 @@ Este portfolio demuestra que no solo aplicas patrones, **piensas como arquitecto
 
 > *"La arquitectura no es seguir recetas. Es entender qué estás cocinando, por qué, para quién, y bajo qué constraints. Las recetas son útiles, pero el chef adaptativo sabe cuándo improvisar."*
 
+## 🔭 El scaffold como punto de partida para tu arquitectura
+
+```bash
+# Todo lo que has construido a lo largo del curso
+swift package show-dependencies apps/ios/ArchitectureKit/Package.swift 2>/dev/null ||   (cd apps/ios/ArchitectureKit && swift package show-dependencies)
+
+# Resumen final: targets, tests, líneas de código
+echo "Targets:" && grep -c ".target(" apps/ios/ArchitectureKit/Package.swift
+echo "Archivos Swift (producción):" && find apps/ios/ArchitectureKit/Sources -name "*.swift" | wc -l
+echo "Archivos Swift (tests):" && find apps/ios/ArchitectureKit/Tests -name "*.swift" | wc -l
+```
+
+Este scaffold no es el destino — es el punto de partida. La arquitectura adaptativa significa que puedes añadir `FeatureNotifications`, `FeatureProfile`, o `FeaturePayments` siguiendo exactamente el mismo patrón: Domain → Data → UI → AppComposition. El curso te ha dado el sistema, no la respuesta.
+
+
 ---
 
 ## Qué sigue

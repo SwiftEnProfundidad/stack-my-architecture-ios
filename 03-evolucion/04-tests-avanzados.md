@@ -580,6 +580,18 @@ Sin `ConnectivityChecking`, tendrías que simular errores de red para testear el
 
 ---
 
+## 🔭 Explora el scaffold — Tests avanzados en todos los targets
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --verbose
+```
+
+La salida verbose muestra todos los targets ejecutándose: `FeatureCatalogDomainTests`, `FeatureCatalogDataTests`, `FeatureCatalogPersistenceTests`, `FeatureLoginDataTests`, `AppCompositionTests`. Identifica cuáles son unit tests puros, cuáles integration tests, y cuáles usan `ConnectivityChecking` como herramienta de control de escenarios de red.
+
+---
+
+
 ## Qué sigue
 
 [**Lección 16: Trade-offs de arquitectura →**](./05-trade-offs.md) — Cómo tomar decisiones de arquitectura con criterio: cuándo añadir una capa, cuándo no, y cómo documentar las decisiones para que el equipo no las revierta sin entenderlas.

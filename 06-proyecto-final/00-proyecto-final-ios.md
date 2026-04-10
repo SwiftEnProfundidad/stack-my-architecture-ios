@@ -134,3 +134,21 @@ Y usa como soporte:
 - [`05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md`](../05-maestria/rubrica-final/01-rubrica-empleabilidad-ios.md)
 - [`05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md`](../05-maestria/rubrica-final/02-evidencias-obligatorias-ios.md)
 - [`05-maestria/rubrica-final/03-checklist-entrega-para-entrevista.md`](../05-maestria/rubrica-final/03-checklist-entrega-para-entrevista.md)
+
+## 🔨 Checkpoint Xcode — Verifica el punto de partida del proyecto final
+
+```bash
+# El scaffold completo debe estar en verde antes de empezar
+cd apps/ios/ArchitectureKit && swift test
+
+# Revisa el estado de todos los módulos
+swift package show-dependencies
+
+# Gate de dependencias: confirma que no hay violaciones
+grep -rn "^import SwiftUI\|^import UIKit" Sources/FeatureLoginDomain Sources/FeatureCatalogDomain 2>/dev/null || echo "✅ Domain puro"
+```
+
+**Criterios de partida para el proyecto final:**
+- `swift test` termina con todos los tests en verde
+- No hay violaciones de dependencias en Domain
+- Tienes Xcode abierto con el Package.swift del scaffold

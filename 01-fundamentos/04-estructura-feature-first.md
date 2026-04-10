@@ -196,6 +196,49 @@ No tienes código de producción todavía. Eso viene en la siguiente lección.
 
 ---
 
+## 🔨 Checkpoint Xcode — Lee la estructura Feature-First en el scaffold real
+
+La lección describe la estructura en abstracto. Ahora verifica cómo la implementa el scaffold.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+```
+
+**Mira el `Package.swift` y localiza cada target:**
+
+| Concepto lección | Target en Package.swift | Qué contiene |
+|---|---|---|
+| `Features/Login/Domain/` | `FeatureLoginDomain` | `EmailAddress`, `Password`, `LoginError`, `UserSession`, `AuthRepository` |
+| `Features/Login/Application/` | (dentro de `FeatureLoginDomain`) | `AuthenticateUserUseCase` — en este scaffold el UseCase vive en Domain |
+| `Features/Login/Infrastructure/` | `FeatureLoginData` | `InMemoryAuthRepository`, `AuthHTTPRepository` |
+| `Features/Login/Interface/` | `FeatureLoginUI` | `LoginViewModel`, `LoginView` |
+| `App/` (Composition Root) | `AppComposition` | `AppCompositionRoot` — único lugar que importa todas las capas |
+| `SharedKernel/` | `CoreDomain`, `InfraHTTP`, `InfraPersistence` | Tipos compartidos entre features |
+
+**Observa las dependencias declaradas en `Package.swift`:**
+
+```swift
+.target(name: "FeatureLoginUI",
+    dependencies: ["FeatureLoginDomain", "AppContracts"]),
+// FeatureLoginUI NO importa FeatureLoginData.
+// La UI no sabe qué implementación de red existe.
+```
+
+Esto es la regla de dependencias unidireccional que acabas de aprender, expresada en código de producción. Si alguien intentara importar `FeatureLoginData` desde `FeatureLoginUI`, el compilador lo rechazaría.
+
+**Navega los directorios para confirmar la estructura:**
+
+```bash
+ls apps/ios/ArchitectureKit/Sources/
+# FeatureLoginDomain/  FeatureLoginData/  FeatureLoginUI/
+# FeatureCatalogDomain/  FeatureCatalogData/  FeatureCatalogUI/
+# AppComposition/  CoreDomain/  InfraHTTP/  InfraPersistence/
+```
+
+Una carpeta por target. Cada carpeta es una unidad de compilación independiente con sus dependencias declaradas explícitamente en el `Package.swift`.
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [Feature Login: Especificación BDD](05-feature-login/00-especificacion-bdd.md), abre el ciclo BDD→TDD con los escenarios de comportamiento que definirán exactamente qué tiene que hacer el Login antes de escribir ni una sola línea de Swift.

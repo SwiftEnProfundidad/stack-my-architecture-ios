@@ -68,6 +68,20 @@ Para evitar sobrecarga visual en el mapa global, aquí tienes dos vistas de deta
 
 ![Diagrama de arquitectura Catalog (detalle)](../assets/architecture-ios-catalog-detail-v4.png)
 
+
+## 🔭 Explora el scaffold — El árbol del repositorio
+
+```bash
+# Desde la raíz del repo iOS
+ls -1
+
+# Los dos artefactos principales de aprendizaje
+ls apps/ios/ArchitectureKit/Sources/
+ls 01-fundamentos/ | head -10
+```
+
+Este Core Mobile describe los principios que aplican a todo lo que construirás. El scaffold `apps/ios/ArchitectureKit/` es su implementación concreta: puedes usar estos comandos para orientarte antes de entrar en cada etapa.
+
 ---
 
 ## Qué sigue

@@ -452,6 +452,22 @@ En el código del curso, verifica que usamos las APIs modernas:
 
 **Regla de oro:** empieza siempre con `let`. Solo cambia a `@Binding` si la vista necesita **modificar**. Solo cambia a `@State` si la vista **crea** el dato. Solo usa `@Bindable` si necesitas `$bindings` para un `@Observable` inyectado.
 
+## 🔭 Explora el scaffold — @Observable en LoginView y CatalogView
+
+```bash
+# LoginViewModel usa @Observable, no ObservableObject
+grep "@Observable\|ObservableObject\|@Published" \
+  apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginViewModel.swift \
+  apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/CatalogViewModel.swift
+
+# LoginView usa @Bindable, no @StateObject ni @ObservedObject
+grep "@Bindable\|@StateObject\|@ObservedObject" \
+  apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginView.swift
+```
+
+Cero `@Published`, cero `ObservableObject`. El scaffold usa `@Observable` (Swift 5.9+) que notifica cambios de forma granular — solo las vistas que leen una propiedad específica se re-renderizan cuando esa propiedad cambia. Con `ObservableObject`, cualquier `@Published` que cambie re-renderiza toda la vista.
+
+
 ---
 
 ## Qué sigue

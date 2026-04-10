@@ -744,6 +744,24 @@ O más sencillo: usa `NavigationStack` sin `path` explícito y delega la navegac
 
 ---
 
+## 🔭 Explora el scaffold — Navegación SwiftUI enterprise
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogUI/CatalogView.swift
+#           Sources/AppContracts/NavigationContracts.swift
+```
+
+El scaffold implementa `NavigationStack` con `AppRoute` como tipo de ruta. Observa cómo `LoginNavigating` desacopla la vista de Login del `NavigationStore` concreto: la vista solo llama `navigator?.goToCatalog()`, sin saber qué hay detrás. El ejercicio de búsqueda al final de esta lección se aplica directamente sobre `CatalogView.swift`.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogUITests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Parte 2: Composición y Rendimiento →**](./07b-swiftui-enterprise-composicion.md) — `@ViewBuilder`, `LazyVStack`, `GeometryReader`, listas grandes con identidad estable, y cómo evitar re-renders innecesarios.

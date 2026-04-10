@@ -417,6 +417,50 @@ sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
 ¿Por qué crees que es importante dominar el entorno (Terminal, Git, Xcode) antes de escribir código de arquitectura? Piensa en una situación donde no conocieras estas herramientas: ¿qué pasaría si te pidieran "haz commit de tus cambios" y no supieras qué significa?
 
+---
+
+## 🔨 Checkpoint Xcode — Verifica que el entorno funciona
+
+Antes de seguir al siguiente módulo, comprueba que tienes el scaffold real compilando y con tests en verde. Si no lo has hecho, este es el momento.
+
+**Paso 1 — Clona o localiza el repositorio del scaffold**
+
+```bash
+# Si todavía no lo tienes:
+git clone https://github.com/SwiftEnProfundidad/stack-my-architecture-ios.git
+cd stack-my-architecture-ios
+```
+
+**Paso 2 — Abre el paquete SPM en Xcode**
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+```
+
+Xcode abrirá el paquete. Verás en el navegador izquierdo la lista de targets: `CoreDomain`, `FeatureLoginDomain`, `FeatureLoginData`, `FeatureLoginUI`, `AppComposition`, y más. Cada target es una capa o una feature del curso.
+
+**Paso 3 — Ejecuta todos los tests desde Terminal**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test
+```
+
+Resultado esperado: todos los tests en verde, sin errores de compilación. Si algo falla, usa las soluciones de troubleshooting de la sección anterior de esta lección.
+
+**Paso 4 — Verifica la versión de Swift**
+
+```bash
+swift --version
+# Esperado: Swift 6.x
+xcodebuild -version
+# Esperado: Xcode 16.x o superior
+```
+
+Si los tests pasan y Xcode abre el paquete sin errores, tu entorno está listo para todo el curso.
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [Principios de ingeniería](01-principios-ingenieria.md), establece los fundamentos de diseño sobre los que se construye todo el curso: separación de responsabilidades, contratos explícitos y dependencias controladas.

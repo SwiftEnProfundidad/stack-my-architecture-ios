@@ -357,25 +357,41 @@ Una vez que la app corre en el simulador:
 
 ---
 
-## Checkpoint: ¿Funciona?
+## 🔨 Checkpoint Xcode — La app real en el simulador
 
-Antes de continuar, verifica:
+Has construido tu propia versión pedagógica. Ahora abre el scaffold y verifica que la misma arquitectura produce una app funcional con tests en verde.
 
-- [ ] La app compila sin errores (`Cmd + B`)
-- [ ] La app se ejecuta en el simulador (`Cmd + R`)
-- [ ] Veo el formulario de login con dos campos y un botón
-- [ ] Puedo escribir email y password
-- [ ] Al pulsar el botón, aparece un spinner de carga
-- [ ] Con datos válidos, veo el mensaje de éxito en consola
-- [ ] Con datos inválidos, veo un mensaje de error en la UI
+**Paso 1 — Suite completa en verde**
 
-**Si todo está ✅, felicidades.** Tu arquitectura limpia está funcionando. El Domain valida, el Use Case orquesta, el Gateway simula la red, y la Interface muestra todo al usuario.
+```bash
+cd apps/ios/ArchitectureKit
+swift test
+```
+
+Todos los targets pasan. Este es el punto de llegada de la Etapa 1: una feature completa con 4 capas, cada una testada de forma independiente.
+
+**Paso 2 — Abre el scheme de la app en Xcode**
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+```
+
+En Xcode: selecciona el scheme `AppComposition` (o el scheme de la app si existe) → `Cmd + R`. La pantalla de login aparece en el simulador.
+
+**Paso 3 — Verifica el flujo completo**
+
+- [ ] Formulario de login visible con dos campos y un botón
+- [ ] Email inválido → mensaje de error sin llamar al servidor
+- [ ] Credenciales correctas (definidas en `InMemoryAuthRepository`) → pantalla de catálogo
+- [ ] `Cmd + U` → todos los tests en verde
 
 **Si algo falla:**
-- Revisa los imports
-- Verifica los targets de cada archivo
-- Comprueba que los nombres de archivos coincidan con las referencias
-- Mira la consola de errores de Xcode (`Cmd + Shift + Y`)
+- Revisa que el simulador seleccionado sea iOS 17+ o macOS 14+
+- `Product > Clean Build Folder` (`Cmd + Shift + K`) y vuelve a compilar
+- Comprueba que `Package.swift` resolvió todas las dependencias (File > Packages > Resolve)
+- Mira la consola de errores (`Cmd + Shift + Y`)
+
+**Si todo está ✅, has completado la Etapa 1.** Domain valida, UseCase orquesta, Repository simula la red, ViewModel traduce estado, AppCompositionRoot ensambla todo.
 
 ---
 

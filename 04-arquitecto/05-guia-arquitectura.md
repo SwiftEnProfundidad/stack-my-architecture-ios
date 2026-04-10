@@ -480,6 +480,21 @@ Este ejercicio no produce código nuevo; entrena la habilidad de mantener docume
 
 </details>
 
+## 🔭 Explora el scaffold — Los ADRs como documentación viva
+
+```bash
+# ADRs del scaffold — decisiones de arquitectura documentadas
+ls apps/ios/ArchitectureKit/ | grep -i adr 2>/dev/null
+ls 01-fundamentos/05-feature-login/ADR-001-login.md
+ls 02-integracion/01-feature-catalog/ADR-002-catalog.md
+
+# Contrasta la guía con el Package.swift real
+diff <(grep "name:" apps/ios/ArchitectureKit/Package.swift | sed 's/.*"\(.*\)".*/\1/') \
+     <(echo "CoreDomain AppContracts InfraHTTP InfraPersistence FeatureLoginDomain FeatureLoginData FeatureLoginUI FeatureCatalogDomain FeatureCatalogData FeatureCatalogPersistenceSwiftData FeatureCatalogUI AppComposition" | tr ' ' '\n') 2>/dev/null || true
+```
+
+Los ADRs del curso son la guía de arquitectura en miniatura: cada decisión tiene contexto, alternativas consideradas y consecuencias. Cuando el código diverge de un ADR, es el ADR el que debe actualizarse — no el código si la decisión sigue siendo válida.
+
 ---
 
 ## Qué sigue

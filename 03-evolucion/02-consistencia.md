@@ -641,6 +641,24 @@ El scaffold integra la política de frescura directamente en `CachedCatalogRepos
 
 ---
 
+## 🔭 Explora el scaffold — Política de consistencia y TTL
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogData/CachedCatalogRepository.swift
+#           Sources/FeatureCatalogData/InMemoryCatalogStores.swift
+```
+
+Busca el método `isValid` (o equivalente) en `CachedCatalogRepository` — ahí vive la política de frescura del scaffold. El TTL es un parámetro del constructor, no una constante. Compara con la tabla de divergencias de esta lección: `store.clear()` es el equivalente semántico de `store.save([], timestamp: .distantPast)`.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDataTests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Lección 14: Observabilidad →**](./03-observabilidad.md) — Cómo saber qué está pasando en producción: métricas de carga, cache hits, y errores sin afectar la lógica de negocio.

@@ -310,6 +310,21 @@ Cada pieza tiene su razón de ser. Si quitas una, las demás se debilitan. Por e
 
 ---
 
+## 🔭 Explora el scaffold — El stack en acción
+
+```bash
+# SPM: el Package.swift declara todos los módulos y sus dependencias
+head -30 apps/ios/ArchitectureKit/Package.swift
+
+# XCTest: así se ve un test real del curso
+ls apps/ios/ArchitectureKit/Tests/
+
+# SwiftUI: la View de Login
+cat apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginView.swift | head -20
+```
+
+El `Package.swift` es la columna vertebral del stack: sin CocoaPods, sin archivos `.xcconfig`, sin configuración de build manual. Solo Swift, SPM y XCTest. Todo lo que leerás en este curso construye sobre esos tres pilares.
+
 ---
 
 ## Qué sigue

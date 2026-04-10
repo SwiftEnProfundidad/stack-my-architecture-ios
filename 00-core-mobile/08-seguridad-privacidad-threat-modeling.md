@@ -116,6 +116,16 @@ No se aplica pinning de certificados por decisión deliberada: sin infraestructu
 Fecha de revisión:
 2026-06-30.
 
+
+## 🔭 Explora el scaffold — Manejo seguro de credenciales
+
+```bash
+# El scaffold nunca persiste credenciales en disco
+grep -rn "UserDefaults\|Keychain\|token\|password" apps/ios/ArchitectureKit/Sources/ | grep -v "DTO\|UserSession" | head -10 || echo "✅ No hay credenciales persistidas fuera de InMemoryAuthRepository"
+```
+
+`InMemoryAuthRepository` guarda la sesión en memoria (no en disco), lo que elimina riesgos de filtración por backup o acceso directo a archivos. En producción, la migración a Keychain mantiene el mismo contrato de `AuthRepository` — solo cambia la implementación en Infrastructure.
+
 ---
 
 ## Qué sigue

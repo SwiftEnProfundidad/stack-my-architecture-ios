@@ -315,4 +315,14 @@ Ahora sí: pasa a `01-isolation-domains.md` y estúdialo con el contrato anterio
 
 ---
 
+## 🔭 Explora el scaffold — El estado del scaffold en Etapa 5
 
+```bash
+# Vista completa de targets en el scaffold
+cd apps/ios/ArchitectureKit && swift package show-dependencies
+
+# Todos los tests de todas las features
+swift test --verbose 2>&1 | grep -E "Test Suite|passed|failed"
+```
+
+En Etapa 5 el scaffold está completo: Login + Catalog con Domain, Data y UI separados, quality gates funcionando y concurrencia con Swift 6. Las lecciones de esta etapa trabajan sobre ese scaffold completo — los checkpoints te pedirán añadir optimizaciones, métricas y refactors avanzados encima de lo ya construido.

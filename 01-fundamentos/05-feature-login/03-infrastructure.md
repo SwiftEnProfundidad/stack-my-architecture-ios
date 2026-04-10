@@ -12,7 +12,7 @@ El **`RemoteAuthGateway`**, que implementa el protocolo `AuthGateway` llamando a
 
 Todo con tests XCTest.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `AuthGateway` → `AuthRepository`, `RemoteAuthGateway` → `RemoteAuthRepository`, `StubAuthGateway` → `StubAuthRepository`, `Session` → `UserSession`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `AuthGateway` → `AuthRepository`, `RemoteAuthGateway` → `AuthHTTPRepository`, `StubAuthGateway` → `InMemoryAuthRepository`, `Session` → `UserSession`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -165,6 +165,10 @@ struct RemoteAuthGateway: AuthGateway, Sendable {
             throw AuthError.invalidCredentials
         }
         
+        // Nota pedagógica: aquí usamos Session(token:email:) por simplicidad.
+        // En el scaffold real, el servidor devuelve un campo `user_id` y la sesión
+        // se construye como UserSession(userId: dto.userId, token: dto.token).
+        // No hay campo `email` en UserSession — el userId viene del servidor, no del cliente.
         return Session(token: token, email: credentials.email.value)
     }
 }

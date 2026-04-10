@@ -349,6 +349,21 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
 | 6 | Migrar `@unchecked Sendable` a actors | Gradualmente, un tipo a la vez |
 | 7 | Considerar `defaultIsolation` para módulos UI | Swift 6.2+ |
 
+## 🔭 Explora el scaffold — Swift 6 compliant desde el principio
+
+```bash
+cd apps/ios/ArchitectureKit
+
+# Compila con strict concurrency — debe ser cero errores
+swift build 2>&1 | grep -c "error:" || echo "✅ 0 errores de concurrencia"
+
+# Confirma swift-tools-version 6.0 en Package.swift
+head -1 Package.swift
+```
+
+El scaffold fue diseñado con Swift 6 desde el inicio: `Sendable` en todos los tipos de Domain, `actor` donde hay estado compartido, `@MainActor` en ViewModels. No hay warnings de concurrencia suprimidos con `@unchecked Sendable` innecesarios ni `nonisolated(unsafe)`. La migración descrita en esta lección ya está aplicada.
+
+
 ---
 
 ## Qué sigue

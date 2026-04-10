@@ -620,6 +620,39 @@ public init(authRepository: any AuthRepository = InMemoryAuthRepository(),
 
 ---
 
+## 🔨 Checkpoint Xcode — FeatureCatalogPersistenceSwiftData
+
+El scaffold tiene la implementación completa de `SwiftDataCatalogCacheStore` lista para explorar.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogPersistenceSwiftData/SwiftDataCatalogCacheStore.swift
+```
+
+**Observaciones clave del scaffold:**
+
+| Concepto | Implementación en scaffold |
+|---|---|
+| Modelo SwiftData | `@Model final class CatalogProductEntity` — `productId`, `title`, `price`, `cachedAt` |
+| Conformancia | `SwiftDataCatalogCacheStore: CatalogCacheStore, @unchecked Sendable` |
+| Inicialización | `init(container:)` para tests con `ModelContainer` custom; `init(inMemory:)` para conveniencia |
+| Carga | `FetchDescriptor<CatalogProductEntity>` — crea `ModelContext` por operación |
+| Guardado | Borra todo con `context.delete(model:)` y reinserta — estrategia de reemplazo completo |
+| Borrado | `clear()` — método semántico, equivalente a `save([], timestamp: .distantPast)` |
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogPersistenceTests
+```
+
+**Preguntas de reflexión:**
+1. `SwiftDataCatalogCacheStore` usa `@unchecked Sendable`. ¿Por qué es necesario aquí si `ModelContext` no es `Sendable` por defecto?
+2. El scaffold crea un `ModelContext` nuevo por operación en lugar de reutilizarlo. ¿Qué problema evita este patrón en un entorno con múltiples llamadas concurrentes?
+3. `init(inMemory: Bool)` permite crear el store en memoria para tests sin necesitar un archivo SQLite real. ¿Qué tests de `FeatureCatalogPersistenceTests` usan `inMemory: true`?
+
+---
+
+
 ## Qué sigue
 
 [**Lección 18: Backend Firebase →**](./07-backend-firebase.md) — Integrar Firebase como fuente de datos remota: `FirestoreProductRepository` implementando `CatalogRemoteDataSource`, autenticación con Firebase Auth, y los trade-offs de depender de un BaaS.

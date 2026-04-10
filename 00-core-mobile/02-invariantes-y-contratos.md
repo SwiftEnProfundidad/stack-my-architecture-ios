@@ -52,6 +52,16 @@ Los E2E validan recorrido completo y experiencia de usuario; son más caros y de
 Guía pragmática: protege reglas con unit/contract, wiring con integration y valor de negocio crítico con E2E.
 
 
+
+## 🔭 Explora el scaffold — Invariantes en tests de Domain
+
+```bash
+# Los invariantes del Domain de Login están protegidos por estos tests
+grep -r "func test_" apps/ios/ArchitectureKit/Tests/FeatureLoginDomainTests/ | head -10
+```
+
+Cada método `test_execute_with_*` protege un invariante del caso de uso: happy path, credenciales inválidas, error de red. Si uno falla, el invariante está roto.
+
 ---
 
 ## Qué sigue

@@ -176,6 +176,18 @@ Tu ejercicio es escribir tu propia "narrativa natural" respondiendo estas pregun
 
 Practica estas narrativas hasta que fluyan naturalmente, sin sonar memorizadas. La autenticidad es más convincente que la perfección.
 
+## 🔭 El scaffold como portfolio técnico
+
+```bash
+# Estadísticas del proyecto — algo concreto que mencionar en entrevista
+find apps/ios/ArchitectureKit/Sources -name "*.swift" | wc -l
+find apps/ios/ArchitectureKit/Tests -name "*.swift" | wc -l
+cd apps/ios/ArchitectureKit && swift test 2>&1 | grep -E "tests.*passed"
+```
+
+En una entrevista técnica, poder decir "construí un package SPM con N targets, M archivos de producción y K tests, todos pasando con Swift 6 strict concurrency" es mucho más concreto que describir patrones en abstracto. El scaffold es tu evidencia.
+
+
 ---
 
 ## Qué sigue

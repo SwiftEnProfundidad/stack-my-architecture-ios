@@ -8,7 +8,7 @@ Ahora llegamos a la capa más externa: la Interface. Esta es la capa que el usua
 
 La regla fundamental de esta capa es: **no contiene lógica de negocio**. La vista no valida emails. No decide si el login fue exitoso. No traduce errores. Solo muestra lo que el ViewModel le dice y envía las acciones del usuario al ViewModel. Es la capa más "tonta" del sistema, y eso es exactamente lo que queremos.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `LoginUseCase` → `AuthenticateUserUseCase`, `Session` → `UserSession`. `LoginViewModel` y `LoginView` mantienen el mismo nombre. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `LoginUseCase` → `AuthenticateUserUseCase`, `LoginUseCase.Error` → `LoginError` (enum independiente en Domain), `Session` → `UserSession`. `LoginViewModel` y `LoginView` mantienen el mismo nombre. Diferencias de implementación clave: el scaffold usa `@Observable @MainActor` (no `ObservableObject`), `Phase` enum en lugar de `isLoading: Bool`, y `@Bindable` en la View. El Checkpoint Xcode al final de esta lección explica cada diferencia en detalle. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 

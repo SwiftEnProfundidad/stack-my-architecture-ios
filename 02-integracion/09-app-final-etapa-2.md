@@ -500,6 +500,39 @@ Pero primero, revisa los entregables de la Etapa 2.
 
 ---
 
+## 🔨 Checkpoint Xcode — App completa Etapa 2
+
+Has llegado al final de la Etapa 2. La app del scaffold tiene Login y Catalog funcionando de extremo a extremo. Compruébalo en dos pasos.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/AppComposition/AppCompositionRoot.swift
+# Observa: InMemoryAuthRepository + CatalogViewModel opcionales ensamblados
+```
+
+**Verificación completa:**
+
+| Check | Qué verificar |
+|---|---|
+| Tests en verde | Todos los targets compilan y los tests pasan |
+| Login → Catalog | El flujo de navegación funciona sin errores de runtime |
+| Navegación Back | Volver desde Catalog a Login funciona |
+| Sin estado contradictorio | `isLoading` y `errorMessage` no están activos simultáneamente |
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test
+# Después: Cmd+R en Xcode para ejecutar la app en simulador
+```
+
+**Preguntas de reflexión:**
+1. ¿Cuántos archivos habría que tocar para reemplazar `InMemoryAuthRepository` por un repositorio real con `URLSession`? Lista los archivos concretos.
+2. Si el test de la app falla al navegar a Catalog, ¿en qué capa buscarías primero el problema y por qué?
+3. ¿Qué añadirías al `AppCompositionRoot` para poder lanzar la app en modo "demo" con datos predefinidos sin tocar las capas de Domain o Application?
+
+---
+
+
 ## Qué sigue
 
 [**Entregables Etapa 2 →**](entregables-etapa-2.md) — Verifica que dominas integración de features, navegación por eventos, contratos, infra real y Composition Root antes de pasar a la Etapa 3: Evolución.

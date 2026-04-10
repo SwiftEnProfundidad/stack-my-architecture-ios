@@ -711,6 +711,25 @@ Si un cambio de proveedor HTTP obliga a tocar UseCases o Domain, no cambiaste in
 
 ---
 
+## 🔭 Explora el scaffold — Infraestructura de red real
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureLoginData/AuthHTTPRepository.swift  (patrón de ref.)
+#           Sources/FeatureCatalogData/DefaultCatalogRemoteDataSource.swift
+#           Sources/InfraHTTP/  (cliente HTTP compartido)
+```
+
+`AuthHTTPRepository` en `FeatureLoginData` y `DefaultCatalogRemoteDataSource` en `FeatureCatalogData` siguen el mismo patrón de la lección: adaptan el cliente HTTP al protocolo de dominio. La infra compartida vive en `InfraHTTP` — ninguna feature accede a `URLSession` directamente.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDataTests
+```
+
+---
+
+
 ## Qué sigue
 
 La siguiente lección pone a prueba lo construido hasta aquí: [Lección 10: Tests de integración](05-integration-tests.md), donde se verifica la colaboración real entre capas usando el `URLSessionHTTPClient` y el `CompositionRoot` ensamblados en esta lección.

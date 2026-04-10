@@ -349,6 +349,37 @@ En la siguiente lección empezaremos a implementar, empezando por la capa Domain
 
 ---
 
+## 🔨 Checkpoint Xcode — Conecta la especificación BDD con el scaffold
+
+Antes de escribir código, localiza en el scaffold dónde viven los tests que implementan los escenarios que acabas de especificar.
+
+```bash
+# Explora los archivos de test del scaffold
+ls apps/ios/ArchitectureKit/Tests/
+```
+
+**Tabla de trazabilidad BDD → archivo de test en el scaffold:**
+
+| Escenario BDD | Target de test en scaffold | Qué verifica |
+|---|---|---|
+| Email inválido / válido | `FeatureLoginDomainTests` | `EmailAddress` — validación de formato |
+| Password vacío / válido | `FeatureLoginDomainTests` | `Password` — invariante de no-vacío |
+| Credenciales rechazadas | `FeatureLoginDomainTests` | `AuthenticateUserUseCase` con stub de fallo |
+| Sin conectividad | `FeatureLoginDomainTests` | UseCase captura error de red |
+| Login exitoso | `FeatureLoginDomainTests` | UseCase devuelve `UserSession` |
+| Integración de red | `FeatureLoginDataIntegrationTests` | `AuthHTTPRepository` contra HTTP stub |
+
+**Ejecuta para ver que los escenarios ya están cubiertos:**
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDomainTests
+```
+
+Verde. Los 6 escenarios BDD de esta lección tienen tests pasando. En las lecciones siguientes construirás el código que hace pasar esos tests — aquí ya ves el destino final.
+
+---
+
 ## Qué sigue
 
 La siguiente lección, [Feature Login: Capa Domain](01-domain.md), implementa los primeros seis escenarios con TDD: los Value Objects `Email` y `Password` y los errores de dominio `AuthError`.

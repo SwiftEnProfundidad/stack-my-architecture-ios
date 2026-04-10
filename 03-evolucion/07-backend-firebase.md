@@ -715,6 +715,24 @@ No necesitas `currency` ni `image_url` porque el scaffold no los tiene en `Produ
 
 ---
 
+## 🔭 Explora el scaffold — El patrón base para cualquier backend
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureLoginData/AuthHTTPRepository.swift
+#           Sources/FeatureCatalogData/DefaultCatalogRemoteDataSource.swift
+```
+
+`AuthHTTPRepository` es el patrón exacto que aplicarías para crear `FirebaseAuthRepository`: conforma un protocolo de dominio, encapsula el cliente externo, y mapea errores del SDK externo a `LoginError`. El Composition Root no sabe si el backend es URLSession, Firebase, o cualquier otro — solo conoce el protocolo. Ese es el diseño que hace posible el swap de backend sin tocar Domain ni Application.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDataTests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Checkpoint Etapa 3 →**](./checkpoint-y-bitacora-etapa-3.md) — Verifica que dominas cache, consistencia, observabilidad y backend antes de pasar a la Etapa 4: Arquitecto.

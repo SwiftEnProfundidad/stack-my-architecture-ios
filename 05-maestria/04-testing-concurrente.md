@@ -450,6 +450,21 @@ Antes de dar por terminado un test de código async, verifica:
 | **TaskGroup en tests** | Verificar thread safety bajo carga | 100+ operaciones concurrentes contra un actor |
 | **trackForMemoryLeaks** | Detectar retain cycles automáticamente | `addTeardownBlock` + `[weak instance]` en todo `makeSUT` |
 
+## 🔭 Explora el scaffold — Tests async en verde
+
+```bash
+cd apps/ios/ArchitectureKit
+
+# Ejecuta los tests que verifican código async
+swift test --filter FeatureLoginDomainTests --verbose 2>&1 | grep "test_"
+
+# Todos los tests son async throws — el runtime de XCTest gestiona la concurrencia
+grep "func test_" Tests/FeatureLoginDomainTests/*.swift 2>/dev/null | head -10
+```
+
+Todos los tests del scaffold son `async throws`. XCTest ejecuta cada test en su propio contexto async. El patrón `makeSUT` devuelve el SUT ya configurado — no hay estado compartido entre tests, lo que elimina la clase entera de bugs de concurrencia en tests.
+
+
 ---
 
 ## Qué sigue

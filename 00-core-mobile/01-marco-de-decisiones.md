@@ -49,6 +49,16 @@ En `ArchitectureKit`, la decisión de usar navegación por eventos en lugar de `
 Plataforma iOS/Android: migrar navegación de acoplamiento directo a coordinador/eventos. Restricción dura: no romper deep links existentes. Evidencia: tasa de rutas fallidas, cobertura de navegación y tiempo de onboarding de nueva feature.
 
 
+
+## 🔭 Explora el scaffold — Los ADRs como decisiones documentadas
+
+```bash
+# ADR de Login — el primer ADR del scaffold
+cat 01-fundamentos/05-feature-login/ADR-001-login.md
+```
+
+Este ADR aplica exactamente el marco de esta lección: contexto, decisión, alternativas y consecuencias. Es el primer ejemplo real del curso de cómo documentar una bifurcación arquitectónica.
+
 ---
 
 ## Qué sigue

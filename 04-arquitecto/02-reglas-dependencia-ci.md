@@ -476,6 +476,21 @@ El script recorre con `find` todos los archivos `.swift` bajo `*/Domain/*` y apl
 
 </details>
 
+## 🔭 Explora el scaffold — La regla de dependencias aplicada
+
+```bash
+# Domain no importa SwiftUI ni UIKit — compruébalo
+grep -rn "^import SwiftUI\|^import UIKit" \
+  apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/ \
+  apps/ios/ArchitectureKit/Sources/FeatureCatalogDomain/ \
+  2>/dev/null || echo "OK: cero violaciones"
+
+# AppComposition SÍ puede importar todo — es el único que debe hacerlo
+grep "^import" apps/ios/ArchitectureKit/Sources/AppComposition/AppCompositionRoot.swift
+```
+
+Estas dos comprobaciones son el equivalente manual de los quality gates de CI. En un proyecto real, este `grep` viviría en un script de pre-commit o en el pipeline de CI — exactamente como describe esta lección.
+
 ---
 
 ## Qué sigue

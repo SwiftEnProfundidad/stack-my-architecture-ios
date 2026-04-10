@@ -63,6 +63,19 @@ Evita reescrituras big-bang salvo sistemas pequeños con riesgo controlado y ven
 - [ ] Riesgos de operación revisados con equipo.
 
 
+
+## 🔭 Explora el scaffold — Zonas estables vs volátiles
+
+```bash
+# Zona estable: Domain puro (sin dependencias externas)
+cat apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/LoginUseCase.swift
+
+# Zona volátil: Infrastructure (implementación concreta de red)
+cat apps/ios/ArchitectureKit/Sources/FeatureLoginData/AuthHTTPRepository.swift
+```
+
+`LoginUseCase` es zona estable: raramente cambia. `AuthHTTPRepository` es zona volátil: cambia cuando cambia la API. Esa separación es la variabilidad controlada que describe esta lección.
+
 ---
 
 ## Qué sigue

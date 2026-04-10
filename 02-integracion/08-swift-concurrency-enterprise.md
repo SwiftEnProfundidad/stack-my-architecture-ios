@@ -1054,6 +1054,25 @@ public actor DefaultCatalogRemoteDataSource: CatalogRemoteDataSource {
 
 ---
 
+## 🔭 Explora el scaffold — Swift Concurrency enterprise
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureLoginData/InMemoryAuthRepository.swift
+#           Sources/FeatureCatalogData/DefaultCatalogRemoteDataSource.swift
+#           Sources/FeatureCatalogUI/CatalogViewModel.swift
+```
+
+`InMemoryAuthRepository` es un `actor` — el patrón base de concurrencia segura del scaffold. `DefaultCatalogRemoteDataSource` también es `actor`. En `CatalogViewModel`, verifica que `load()` cancela la tarea anterior antes de crear una nueva — ese es el patrón de cancelación estructurada que cierra esta lección.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDomainTests
+```
+
+---
+
+
 ## Qué sigue
 
 Esta lección cierra la **Etapa 2: Integración**. El siguiente paso es la **Etapa 3: Producción**, donde la app se enfrenta a condiciones reales: sin red, con cache, con observabilidad, y con tests avanzados que van más allá del happy path.

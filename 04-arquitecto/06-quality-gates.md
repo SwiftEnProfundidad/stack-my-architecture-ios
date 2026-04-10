@@ -466,6 +466,23 @@ Un gate que podría añadirse es verificación de strict concurrency (`-strict-c
 
 </details>
 
+## 🔭 Explora el scaffold — Quality gate manual
+
+```bash
+cd apps/ios/ArchitectureKit
+
+# Gate 1: dependencias — Domain no importa frameworks de UI
+grep -rn "^import SwiftUI\|^import UIKit" Sources/FeatureLoginDomain Sources/FeatureCatalogDomain 2>/dev/null || echo "✅ Gate 1: sin violaciones de dependencia"
+
+# Gate 2: compilación estricta Swift 6
+swift build 2>&1 | grep -E "error:|warning:" | wc -l
+
+# Gate 3: todos los tests en verde
+swift test 2>&1 | tail -5
+```
+
+Estos tres comandos son los quality gates mínimos antes de cualquier merge. Si los tres pasan en verde, el código cumple los invariantes arquitectónicos del scaffold.
+
 ---
 
 ## Qué sigue

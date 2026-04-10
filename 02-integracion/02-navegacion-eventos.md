@@ -778,6 +778,24 @@ Los closures de esta lección son más simples de leer (menos boilerplate) y má
 
 ---
 
+## 🔭 Explora el scaffold — Navegación por eventos
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/AppContracts/NavigationContracts.swift
+#           Sources/AppComposition/NavigationStore.swift (si existe)
+```
+
+El scaffold define `AppRoute` como enum (`login`, `catalog`) y `LoginNavigating` como protocolo `@MainActor`. Compara `NavigationContracts.swift` con los closures de coordinación de la lección: el protocolo es más explícito sobre el contrato, el closure es más simple de leer. Ambos logran el mismo desacoplamiento.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter AppCompositionTests
+```
+
+---
+
+
 ## Qué sigue
 
 Con el coordinador en marcha, Login y Catalog colaboran sin conocerse. El siguiente paso es definir qué tipos se comparten entre features y cómo evitar que ese espacio compartido se convierta en un cajón de sastre.

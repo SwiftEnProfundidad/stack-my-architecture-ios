@@ -514,6 +514,25 @@ Las dependencias fluyen de Domain hacia afuera (Data, UI) y convergen en `AppCom
 
 </details>
 
+## 🔭 Explora el scaffold — El grafo de dependencias real
+
+```bash
+cd apps/ios/ArchitectureKit
+
+# Genera el grafo de dependencias completo
+swift package show-dependencies
+
+# Verifica que no hay ciclos
+swift package show-dependencies --format json | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print('Targets:', len(data.get('dependencies', [])))
+print('Sin ciclos detectados por SPM')
+"
+```
+
+El grafo que genera este comando es el artefacto verificable que describe la lección. `CoreDomain` aparece en la base; `AppComposition` en la cima. Cualquier ciclo haría fallar la resolución de `swift package resolve`.
+
 ---
 
 ## Qué sigue

@@ -521,6 +521,19 @@ await withTaskGroup(of: Product.self) { group in
 | **.task** (SwiftUI) | Trabajo asíncrono ligado al ciclo de vida de la vista | Automática al desaparecer la vista |
 | **.task(id:)** (SwiftUI) | Trabajo que reacciona a cambios en un valor | Automática: cancela anterior, lanza nueva |
 
+## 🔭 Explora el scaffold — Structured concurrency en la View
+
+```bash
+# LoginView lanza submit() con Task{}
+grep -A3 "Button" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginView.swift
+
+# submit() es async — el ViewModel no bloquea el hilo principal
+grep "func submit" apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginViewModel.swift
+```
+
+`Task { await viewModel.submit() }` en el botón es structured concurrency en acción: la tarea tiene ciclo de vida acotado al botón, se cancela si la vista desaparece con `.task`, y no bloquea el hilo principal. El `@MainActor` del ViewModel garantiza que las mutaciones de estado ocurren en el hilo correcto.
+
+
 ---
 
 ## Qué sigue

@@ -55,6 +55,18 @@ Establece política de deprecación con ventana temporal y comunicación anticip
 - [ ] Compatibilidad backward evaluada.
 - [ ] Plan de deprecación y fecha límite.
 
+
+## 🔭 Explora el scaffold — Contrato DTO y versioning
+
+```bash
+# El DTO define el contrato de la API externa
+cat apps/ios/ArchitectureKit/Sources/FeatureLoginData/LoginResponseDTO.swift
+
+# Si existiera v2, el parser estaría en Infrastructure — Domain no cambiaría
+```
+
+`LoginResponseDTO` es el contrato con el servidor. Cualquier cambio breaking en la API (renombrar campos, cambiar tipos) se absorbe en este archivo sin tocar `LoginUseCase` ni `UserSession`. Eso es versionado de contratos en práctica.
+
 ---
 
 ## Qué sigue

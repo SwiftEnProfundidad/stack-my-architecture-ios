@@ -340,6 +340,22 @@ El curso está dividido en cinco etapas que progresan en complejidad sin saltos.
 
 - Revisa y completa los [entregables de la Etapa 1](entregables-etapa-1.md).
 
+
+## 🔨 Checkpoint Xcode — Abre el scaffold antes de empezar
+
+```bash
+# Clona el repo si no lo tienes aún
+# git clone <repo-url>
+
+# Abre el paquete SPM en Xcode
+open apps/ios/ArchitectureKit/Package.swift
+
+# Verifica que todo compila y los tests pasan
+cd apps/ios/ArchitectureKit && swift test
+```
+
+Antes de leer las lecciones de esta etapa, ejecuta `swift test` y comprueba que los tests pasan en verde. Eso confirma que tu entorno funciona y tienes el punto de partida correcto. Cada checkpoint a lo largo de la Etapa 1 te pedirá que añadas código al scaffold y verifiques que los tests siguen en verde.
+
 ---
 
 ## Qué sigue

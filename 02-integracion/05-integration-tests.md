@@ -747,6 +747,24 @@ Un equipo junior suele confiar demasiado en unit tests y un equipo cansado suele
 
 ---
 
+## 🔭 Explora el scaffold — Tests de integración reales
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Tests/FeatureLoginDataIntegrationTests/
+#           Tests/FeatureCatalogDataTests/
+```
+
+Los tests de integración del scaffold usan stubs en memoria (`InMemoryAuthRepository`, `InMemoryCatalogStores`) en lugar de mocks de `URLSession`. Esto hace los tests deterministas y sin dependencia temporal. Compara los nombres de los métodos de test con los escenarios del checklist de calidad de esta lección.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureLoginDataIntegrationTests
+```
+
+---
+
+
 ## Qué sigue
 
 La siguiente lección ensambla todo lo construido hasta aquí: [Lección 11: Composition Root](06-composition-root.md), donde se conectan UseCase, Repository, HTTPClient y Coordinator en el único lugar que tiene permiso para hacerlo — el Composition Root.

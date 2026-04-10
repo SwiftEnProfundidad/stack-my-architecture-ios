@@ -53,6 +53,19 @@ Usa esta plantilla como campo de texto en tu PR o ticket. Rellénala antes de ma
 Regla central: evidence over opinion.
 
 
+
+## 🔭 Explora el scaffold — Los quality gates del scaffold
+
+```bash
+# Gate de dependencias: Domain no importa infraestructura
+grep -rn "^import" apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/ | grep -v "Foundation\|Testing" || echo "✅ Domain puro"
+
+# Gate de tests: todos los tests en verde
+cd apps/ios/ArchitectureKit && swift test 2>&1 | tail -3
+```
+
+Estos dos comandos son los gates de PR mínimos del scaffold: dependencias limpias y tests en verde. Si los dos pasan, el código es PR-ready según los criterios de esta lección.
+
 ---
 
 ## Qué sigue

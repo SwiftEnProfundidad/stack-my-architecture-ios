@@ -186,6 +186,26 @@ En las siguientes lecciones vamos a ver cómo estos principios se materializan e
 
 ---
 
+## 🔭 Explora el scaffold — Principios en código real
+
+Antes de seguir, abre el scaffold y observa cómo cada principio de esta lección aparece de forma concreta.
+
+```bash
+# Principio 1 — Separación de responsabilidades
+ls apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/
+# Solo tipos de negocio: EmailAddress, Password, LoginError, UserSession, AuthRepository
+
+# Principio 2 — Contratos explícitos (protocolo como puerto)
+grep -rn "protocol AuthRepository" apps/ios/ArchitectureKit/Sources/
+# Está en Domain — la interfaz no depende de la implementación
+
+# Principio 3 — Dependencias controladas (Package.swift)
+grep "FeatureLoginUI" apps/ios/ArchitectureKit/Package.swift
+# FeatureLoginUI solo importa FeatureLoginDomain, nunca FeatureLoginData
+```
+
+No necesitas entender el código todavía. Solo observa cómo los principios tienen forma física en el proyecto: cada directorio, cada línea del `Package.swift`, cada protocolo es uno de estos principios materializado.
+
 ---
 
 ## Qué sigue

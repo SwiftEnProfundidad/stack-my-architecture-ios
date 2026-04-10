@@ -324,6 +324,23 @@ No migres todo el scaffold a Liquid Glass — es una feature de presentación. A
 
 ---
 
+## 🔭 Explora el scaffold — @Observable y APIs modernas
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogUI/CatalogViewModel.swift
+```
+
+`CatalogViewModel` ya usa `@Observable @MainActor` — el patrón que reemplaza `ObservableObject + @Published`. Compara la declaración con la tabla de migraciones de esta lección. El scaffold no tiene `@StateObject` ni `@ObservedObject`; si los ves en algún lugar, es candidato a modernización.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogUITests
+```
+
+---
+
+
 ## Qué sigue
 
 [**Lección 11: Swift Concurrency Enterprise →**](./08-swift-concurrency-enterprise.md) — `async/await` avanzado, `actor`, `TaskGroup`, cancelación estructurada, y cómo gestionar concurrencia en una app completa con múltiples features ejecutando en paralelo.

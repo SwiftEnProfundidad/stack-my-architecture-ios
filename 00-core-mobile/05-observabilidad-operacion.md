@@ -76,6 +76,16 @@ Comunicación interna/externa:
 
 Acciones preventivas posteriores:
 
+
+## 🔭 Explora el scaffold — Puntos de observabilidad
+
+```bash
+# Busca los puntos donde el scaffold registra errores y eventos
+grep -rn "Logger\|os_log\|print" apps/ios/ArchitectureKit/Sources/ | grep -v ".swift:#" | head -15
+```
+
+Los puntos donde el scaffold emite logs son exactamente los puntos de observabilidad de esta lección: errores de autenticación, fallos de red, transiciones de estado. En producción, estos logs serán los primeros datos disponibles cuando algo falle.
+
 ---
 
 ## Qué sigue

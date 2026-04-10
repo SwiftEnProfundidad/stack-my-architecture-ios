@@ -453,6 +453,19 @@ Antes de considerar una vista "terminada":
 - [ ] **¿@State es `private`?** Si no es `private`, probablemente debería ser `let` o `@Binding`.
 - [ ] **¿Las vistas de lista son POD?** Solo `let` de value types para diffing rápido.
 
+## 🔭 Explora el scaffold — Patrones de rendimiento en CatalogView
+
+```bash
+# CatalogView y su estructura de composición
+cat apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/CatalogView.swift
+
+# ¿Los tipos del Domain son value types? (clave para diffing eficiente en List)
+grep "^public struct" apps/ios/ArchitectureKit/Sources/FeatureCatalogDomain/Product.swift
+```
+
+`Product` es `struct` — SwiftUI puede hacer diffing eficiente en `List` porque los value types tienen igualdad por valor. Si fuera `class`, SwiftUI compararía referencias y re-renderizaría más de lo necesario.
+
+
 ---
 
 ## Qué sigue

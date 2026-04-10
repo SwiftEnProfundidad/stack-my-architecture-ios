@@ -33,6 +33,19 @@ Cada nivel implica que el anterior está consolidado. No se puede "govern" sin s
 | Concurrencia segura | `async/await` + `Actor` (Swift 6) | `Coroutines` + `suspend` + `Mutex` |
 | Observabilidad | `os_log` / `os_signpost` | `Timber` / `Logcat` estructurado |
 
+
+## 🔭 Explora el scaffold — Equivalencias en el código iOS
+
+```bash
+# Swift Concurrency: async/await en Infrastructure
+grep -n "async\|await\|Actor\|actor" apps/ios/ArchitectureKit/Sources/FeatureLoginData/AuthHTTPRepository.swift
+
+# Protocol como puerto: equivalente a interface en Android
+grep -n "protocol" apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/AuthRepository.swift
+```
+
+El `protocol AuthRepository` de iOS es el equivalente exacto de la `interface AuthRepository` en Android. La implementación (`AuthHTTPRepository`) es la que varía por plataforma — el contrato es el mismo. Eso es la paridad arquitectónica de la que habla esta lección.
+
 ---
 
 ## Qué sigue

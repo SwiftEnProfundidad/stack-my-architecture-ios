@@ -121,9 +121,11 @@ Ocho tests. Verifican que el ViewModel traduce correctamente el resultado del ca
 
 Si miras la secuencia en la que escribimos los tests y el código, verás un patrón claro: los tests no solo verificaron el código, sino que **guiaron las decisiones de diseño**.
 
-### Los tests nos obligaron a crear el tipo `LoginUseCase.Error`
+### Los tests nos obligaron a crear un tipo de error unificado para el UseCase
 
-Cuando escribimos el test de email inválido en el `LoginUseCaseTests`, podríamos haber dejado que el error `Email.ValidationError.invalidFormat` se propagara directamente a la UI. El test habría pasado. Pero decidimos que el test pidiera un `LoginUseCase.Error.invalidEmail`, porque eso es lo que tiene sentido desde la perspectiva de la feature. Esa decisión nos obligó a crear el enum `LoginUseCase.Error` y a hacer traducción de errores.
+Cuando escribimos el test de email inválido en el `LoginUseCaseTests`, podríamos haber dejado que el error `Email.ValidationError.invalidFormat` se propagara directamente a la UI. El test habría pasado. Pero decidimos que el test pidiera un error propio del caso de uso (en la lección, `LoginUseCase.Error.invalidEmail`), porque eso es lo que tiene sentido desde la perspectiva de la feature. Esa decisión nos obligó a crear un enum de errores y a hacer traducción de errores.
+
+> **Nomenclatura scaffold:** En el scaffold `apps/ios/ArchitectureKit`, este enum de errores no es un tipo anidado en el UseCase — es el enum independiente `LoginError` definido en `FeatureLoginDomain/LoginError.swift`. El principio es el mismo (unificar errores de la feature en un solo tipo), pero el scaffold lo ubica en Domain directamente en lugar de en el UseCase. Ambas estrategias son válidas; el scaffold elige la ubicación en Domain para que todas las capas puedan importarlo sin crear dependencias circulares.
 
 Sin TDD, probablemente habríamos dejado que los errores internos se propagaran, y habríamos descubierto el problema de acoplamiento meses después cuando alguien cambiara la validación del email y la UI se rompiera.
 

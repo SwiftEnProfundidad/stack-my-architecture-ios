@@ -392,6 +392,19 @@ Si no cumple estos criterios, probablemente aún debe quedarse como convención 
 
 Al cerrar Arquitecto, el siguiente salto es optimización fina de concurrencia, rendimiento y operaciones avanzadas. El objetivo de esta etapa no es competir con Etapa 5, sino dejar una plataforma lo bastante sólida para que esas optimizaciones sean seguras y acumulativas.
 
+## 🔭 Explora el scaffold — La madurez del proyecto
+
+```bash
+# El Package.swift como mapa del sistema completo
+cat apps/ios/ArchitectureKit/Package.swift
+
+# Todos los tests pasando — la base sobre la que construye Etapa 4
+cd apps/ios/ArchitectureKit && swift test 2>&1 | tail -5
+```
+
+Al entrar en Etapa 4, el scaffold tiene 2 features completas (Login, Catalog), infraestructura compartida, y AppComposition ensamblando todo. Esta etapa añade la capa de gobierno: reglas que protegen automáticamente que la arquitectura no degrada con el tiempo.
+
+
 ---
 
 ## Qué sigue

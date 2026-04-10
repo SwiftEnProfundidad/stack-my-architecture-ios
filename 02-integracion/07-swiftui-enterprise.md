@@ -23,3 +23,16 @@ Esta lección cubre 18 patrones SwiftUI enterprise con código detallado. Dividi
 ---
 
 Puedes leer las tres partes en orden o saltar directamente a la sección que necesites.
+
+---
+
+## 🔭 Explora el scaffold — SwiftUI enterprise en LoginView y CatalogView
+
+```bash
+# Patrones SwiftUI en las vistas del scaffold
+cat apps/ios/ArchitectureKit/Sources/FeatureLoginUI/LoginView.swift
+cat apps/ios/ArchitectureKit/Sources/FeatureCatalogUI/CatalogView.swift
+```
+
+Las vistas del scaffold son las implementaciones de referencia para los patrones enterprise que describe esta lección: composición de vistas pequeñas, `@Bindable` en lugar de `@ObservedObject`, y accesibilidad incorporada con `accessibilityIdentifier`.
+

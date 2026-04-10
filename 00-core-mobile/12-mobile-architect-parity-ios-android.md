@@ -90,6 +90,18 @@ La señal profesional de este perfil es clara: profundidad de ejecución en iOS 
 
 Bajo este marco, el valor del Mobile Architect no se mide por cantidad de código en dos plataformas, sino por calidad de decisiones, disciplina de evidencia y capacidad de sostener resultados técnicos bajo escrutinio.
 
+
+## 🔭 Explora el scaffold — Arquitectura que escala a Android
+
+```bash
+# La capa Domain no tiene ningún import específico de iOS
+grep -n "^import" apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/LoginUseCase.swift
+
+# Solo Foundation/Testing — sin UIKit, sin SwiftUI, sin AppKit
+```
+
+Si Domain solo importa `Foundation`, el mismo caso de uso podría existir en un módulo Kotlin Multiplatform o en una librería Android sin modificaciones conceptuales. Esa es la paridad arquitectónica que permite a un Mobile Architect trabajar en los dos ecosistemas.
+
 ---
 
 ## Qué sigue

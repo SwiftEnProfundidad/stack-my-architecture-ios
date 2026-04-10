@@ -898,6 +898,24 @@ Además, un buen contrato sirve como herramienta de onboarding: un junior puede 
 
 ---
 
+## 🔭 Explora el scaffold — Contratos entre features
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/AppContracts/NavigationContracts.swift
+# Busca: AppRoute, LoginNavigating
+```
+
+`AppContracts` es el shared kernel del scaffold: solo contiene `AppRoute` y `LoginNavigating`. Este target mínimo demuestra el principio de superficie compartida reducida — si algo no es verdaderamente cross-feature, no entra aquí. Compara con el checklist de revisión de contratos de esta lección.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter AppCompositionTests
+```
+
+---
+
+
 ## Qué sigue
 
 La siguiente lección conecta los contratos con la red real: [Lección 9: Infraestructura real — URLSession y HTTPClient](04-infra-real-network.md), donde se implementa el `URLSessionHTTPClient` mencionado en lecciones anteriores y se integra en el `CompositionRoot`.

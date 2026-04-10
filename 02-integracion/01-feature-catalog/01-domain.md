@@ -745,6 +745,39 @@ Los tests del scaffold viven en `Tests/FeatureCatalogDomainTests/`. Ábrelos par
 
 ---
 
+## 🔨 Checkpoint Xcode — FeatureCatalogDomain
+
+El scaffold implementa exactamente el Domain que acabas de estudiar. Antes de continuar, ábrelo y verifica que reconoces cada tipo que has aprendido a diseñar.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogDomain/Product.swift
+#           Sources/FeatureCatalogDomain/CatalogRepository.swift
+#           Sources/FeatureCatalogDomain/CatalogError.swift
+```
+
+**Diferencias clave entre la lección y el scaffold:**
+
+| Lección | Scaffold real |
+|---|---|
+| `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` — sin `imageURL`, `Double` en lugar de `Decimal` |
+| `ProductRepository` | `CatalogRepository` — prefijo de feature consistente en todo el scaffold |
+| `LoadProductsUseCase` | `LoadCatalogUseCase` — misma responsabilidad, nomenclatura alineada con el target |
+| `CatalogError.notFound` | Revisa `CatalogError.swift` — los casos reflejan errores reales de negocio |
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDomainTests
+```
+
+**Preguntas de reflexión:**
+1. `Product` usa `Double` para el precio en lugar de `Decimal`. ¿Qué trade-off implica esta decisión y en qué tipo de app sería un problema real?
+2. Los tests de `FeatureCatalogDomainTests` no necesitan ninguna dependencia externa. ¿Por qué es importante que el Domain sea testeable en aislamiento?
+3. ¿Qué pasaría si añadieras un campo `imageURL: URL?` a `Product`? ¿Qué capas tendrías que tocar y cuáles no deberían cambiar?
+
+---
+
+
 ## Qué sigue
 
 Con el Domain de Catalog definido y testeado, el siguiente paso es construir el caso de uso que orquesta la carga de productos respetando los contratos de esta capa.

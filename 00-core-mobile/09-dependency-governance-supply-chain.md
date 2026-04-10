@@ -51,6 +51,19 @@ La [lección anterior sobre threat modeling](08-seguridad-privacidad-threat-mode
 - [ ] Inventario de dependencias con owner.
 - [ ] Revisión periódica de dependencias huérfanas.
 
+
+## 🔭 Explora el scaffold — Dependencias del Package.swift
+
+```bash
+# El scaffold tiene cero dependencias externas de terceros
+grep "\.package(url:" apps/ios/ArchitectureKit/Package.swift || echo "✅ Sin dependencias de terceros — solo SPM local"
+
+# Todas las dependencias son targets internos del mismo paquete
+grep "dependencies:" apps/ios/ArchitectureKit/Package.swift | head -10
+```
+
+El scaffold no tiene ninguna dependencia externa de terceros. Esa es una decisión de gobernanza deliberada: minimizar la superficie de supply chain desde el inicio. Cuando se añada una dependencia real, deberá justificarse en un ADR.
+
 ---
 
 ## Qué sigue

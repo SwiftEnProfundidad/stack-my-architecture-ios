@@ -198,6 +198,22 @@ BDD **no** se aplica cuando estás haciendo un refactor interno que no cambia ni
 
 ---
 
+## 🔭 Explora el scaffold — Los escenarios BDD convertidos en tests
+
+Busca en el scaffold el archivo de especificación BDD de la Feature Login:
+
+```bash
+# La especificación BDD que inspiró los tests
+cat 01-fundamentos/05-feature-login/00-especificacion-bdd.md | grep "Escenario:"
+
+# Los tests que implementan esos escenarios
+ls apps/ios/ArchitectureKit/Tests/
+```
+
+Cada `test_execute_with_*` en `FeatureLoginDomainTests` es un escenario BDD traducido a XCTest. El nombre del test es el escenario en inglés técnico; el nombre en Given/When/Then es el escenario en lenguaje de negocio. Son lo mismo, expresado en dos idiomas distintos para dos audiencias distintas.
+
+---
+
 ## Qué sigue
 
 Hasta aquí hemos resuelto el **qué** y el **por qué** de la feature con escenarios de comportamiento. En la siguiente lección pasamos al **cómo**: implementar cada comportamiento con TDD usando ciclos cortos Red-Green-Refactor.

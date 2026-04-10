@@ -428,6 +428,16 @@ La composición avanzada te permite:
 
 > **💡 SOLID en acción:** Este patrón es la manifestación práctica del *Open/Closed Principle* (OCP). Cuando necesitas añadir logging, no modificas el repositorio existente (cerrado a modificación), creas un nuevo `LoggingRepository` que envuelve al original (abierto a extensión). El caso de uso ni sabe que ahora hay logging.
 
+## 🔭 Explora el scaffold — Composición en AppCompositionRoot
+
+```bash
+# AppCompositionRoot: composición por constructor, no por singleton
+cat apps/ios/ArchitectureKit/Sources/AppComposition/AppCompositionRoot.swift
+```
+
+`AppCompositionRoot.init()` compone el grafo de objetos completo: `AuthenticateUserUseCase` recibe `AuthRepository`, `LoginViewModel` recibe el UseCase y el navigator. Cada dependencia es explícita en la firma del constructor. El patrón Decorator que describe esta lección se aplica aquí: puedes envolver cualquier `AuthRepository` con un `LoggingAuthRepository` sin tocar ni el UseCase ni el ViewModel.
+
+
 ---
 
 ## Qué sigue

@@ -797,6 +797,40 @@ Esta refactorización es un ejercicio excelente porque no cambia el comportamien
 
 ---
 
+## 🔨 Checkpoint Xcode — FeatureCatalogUI
+
+El scaffold usa `@Observable` y propiedades independientes de estado. La lección enseña el enum `State` como evolución. Aquí las dos implementaciones se ven cara a cara.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogUI/CatalogViewModel.swift
+#           Sources/FeatureCatalogUI/CatalogView.swift
+```
+
+**Diferencias clave entre la lección y el scaffold:**
+
+| Lección | Scaffold real |
+|---|---|
+| `enum State { loading, loaded([Product]), error(String) }` | Propiedades independientes: `isLoading`, `products`, `errorMessage` |
+| `@Observable @MainActor` | `@Observable @MainActor` — mismo patrón moderno |
+| `product.name` | `product.title` |
+| `private(set) var state: State` | `private(set) var isLoading`, `var products`, `var errorMessage` |
+
+El compilador no puede detectar estados contradictorios con propiedades independientes (`isLoading = true` y `errorMessage != nil` simultáneamente). El enum `State` elimina esa clase de bugs en tiempo de compilación.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogUITests
+```
+
+**Preguntas de reflexión:**
+1. Refactoriza `CatalogViewModel` del scaffold para usar `enum State`. ¿Cuántos tests necesitas actualizar y por qué?
+2. Con `@Observable`, `CatalogView` se re-renderiza solo cuando las propiedades que observa cambian. ¿Hay diferencia de rendimiento entre propiedades independientes y un enum `State`?
+3. ¿Por qué `@MainActor` es necesario en `CatalogViewModel` y no solo en las propiedades que actualizan la UI?
+
+---
+
+
 ## Qué sigue
 
 Con las cuatro capas de Catalog completadas (Domain, Application, Infrastructure, Interface), el siguiente paso es el ADR consolidado de toda la feature y la conexión con el sistema de navegación por eventos.

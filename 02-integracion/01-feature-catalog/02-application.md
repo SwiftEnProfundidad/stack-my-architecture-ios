@@ -803,6 +803,40 @@ El patrón es idéntico al que enseña esta lección. Los únicos cambios son de
 
 ---
 
+## 🔨 Checkpoint Xcode — LoadCatalogUseCase
+
+El scaffold tiene el UseCase de Catalog ya implementado. Compáralo con el que acabas de construir en esta lección.
+
+```bash
+open apps/ios/ArchitectureKit/Package.swift
+# Navega a: Sources/FeatureCatalogDomain/LoadCatalogUseCase.swift
+#           Sources/FeatureCatalogDomain/CatalogRepository.swift
+```
+
+**Diferencias de nomenclatura entre la lección y el scaffold:**
+
+| Lección | Scaffold real |
+|---|---|
+| `LoadProductsUseCase` | `LoadCatalogUseCase` |
+| `ProductRepository` | `CatalogRepository` |
+| `loadAll()` | `fetchCatalog()` |
+| `ProductError` | `CatalogError` |
+
+El patrón estructural es idéntico: el UseCase recibe el puerto como dependencia en el `init`, delega la ejecución y traduce errores. Solo cambian los nombres para seguir la convención del target `FeatureCatalogDomain`.
+
+```bash
+cd apps/ios/ArchitectureKit
+swift test --filter FeatureCatalogDomainTests
+```
+
+**Preguntas de reflexión:**
+1. `LoadCatalogUseCase` no tiene lógica de caching — solo delega en el repositorio. ¿Dónde vive la lógica de cache en el scaffold y por qué no está en el UseCase?
+2. El UseCase recibe `any CatalogRepository` (existential). ¿Qué implicación tiene esto en Swift 6 con `Sendable`?
+3. Si necesitaras añadir paginación, ¿modificarías el UseCase o el repositorio? ¿Por qué?
+
+---
+
+
 ## Qué sigue
 
 Con Application definida y testeada, el siguiente paso es construir el adaptador que conecta el puerto con la red real.
