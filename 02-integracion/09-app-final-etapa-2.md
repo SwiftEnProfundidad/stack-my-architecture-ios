@@ -335,54 +335,70 @@ actor StubProductRepository: ProductRepository {
 
 ## Paso 4: Asegurar que LoginViewModel usa LoginNavigating
 
-Verifica que tu `LoginViewModel` tenga el navigator:
+Verifica que tu `LoginViewModel` coincida con el scaffold. Dos diferencias clave respecto a Etapa 1: usa `Phase` en lugar de `isLoading: Bool`, y delega navegación al `navigator` en lugar de un closure:
 
 ```swift
-// En Features/Login/Interface/LoginViewModel.swift
-
+// En FeatureLoginUI/LoginViewModel.swift
+import AppContracts
+import FeatureLoginDomain
+import Observation
 
 @Observable
-class LoginViewModel {
+@MainActor
+public final class LoginViewModel {
+
+    // Phase sustituye a isLoading: Bool — más expresivo y sin estados inconsistentes
+    public enum Phase: Equatable {
+        case idle
+        case loading
+        case authenticated
+    }
+
+    public var email: String = ""
+    public var password: String = ""
+    public private(set) var phase: Phase = .idle
+    public private(set) var errorMessage: String?
+
     private let useCase: AuthenticateUserUseCase
+    // weak + any: correcto en Swift 6 cuando el protocolo es class-constrained (:AnyObject)
     private weak var navigator: (any LoginNavigating)?
-    
-    var email: String = ""
-    var password: String = ""
-    var isLoading: Bool = false
-    var errorMessage: String?
-    
-    init(
-        useCase: AuthenticateUserUseCase,
-        navigator: any LoginNavigating
-    ) {
+
+    public init(useCase: AuthenticateUserUseCase, navigator: any LoginNavigating) {
         self.useCase = useCase
         self.navigator = navigator
     }
-    
-    func submit() async {
-        isLoading = true
+
+    public func submit() async {
+        guard phase != .loading else { return }
+        phase = .loading
         errorMessage = nil
-        
+
         do {
-            let emailVO = try Email(value: email)
-            let passwordVO = try Password(value: password)
-            let credentials = Credentials(email: emailVO, password: passwordVO)
-            
-            _ = try await useCase.execute(credentials: credentials)
-            
-            // ÉXITO: Delegamos la navegación al navigator
-            navigator?.goToCatalog()
-            
+            // AuthenticateUserUseCase crea los Value Objects internamente
+            _ = try await useCase.execute(email: email, password: password)
+            phase = .authenticated
+            navigator?.goToCatalog()  // LoginNavigating lleva al Coordinator
         } catch let error as LoginError {
-            errorMessage = error.localizedDescription
+            phase = .idle
+            errorMessage = Self.map(error: error)
         } catch {
-            errorMessage = "Error desconocido"
+            phase = .idle
+            errorMessage = "Se produjo un error inesperado."
         }
-        
-        isLoading = false
+    }
+
+    private static func map(error: LoginError) -> String {
+        switch error {
+        case .invalidEmail:      return "Email inválido."
+        case .invalidPassword:   return "Password inválido (mínimo 8 caracteres)."
+        case .invalidCredentials: return "Credenciales inválidas."
+        case .network:           return "No se pudo conectar. Reintenta."
+        }
     }
 }
 ```
+
+> **Por qué `Phase` y no `isLoading: Bool`:** un Bool puede estar en estado `isLoading = false` antes o después de un error — no distingues. Un enum `Phase` hace imposible ese estado ambiguo: `.idle`, `.loading` y `.authenticated` son mutuamente excluyentes por diseño.
 
 ---
 
