@@ -57,9 +57,9 @@ Esto es un cambio enorme para la industria iOS y lo vamos a abrazar completament
 Por ejemplo, nuestro caso de uso de Login necesita llamar a un servidor para autenticar al usuario. Esa llamada es asíncrona (puede tardar 1 segundo, o 10, o no responder nunca). Con `async/await`, el código se ve así:
 
 ```swift
-func execute(email: String, password: String) async throws -> Session {
+func execute(email: String, password: String) async throws -> UserSession {
     let credentials = try Credentials(email: email, password: password)
-    return try await authGateway.authenticate(credentials: credentials)
+    return try await authRepository.authenticate(credentials: credentials)
 }
 ```
 
@@ -142,22 +142,22 @@ Sources/
 │   ├── Login/
 │   │   ├── Domain/
 │   │   │   ├── Models/
-│   │   │   │   ├── Email.swift
+│   │   │   │   ├── EmailAddress.swift
 │   │   │   │   ├── Password.swift
 │   │   │   │   ├── Credentials.swift
-│   │   │   │   └── Session.swift
+│   │   │   │   └── UserSession.swift
 │   │   │   ├── Errors/
-│   │   │   │   └── AuthError.swift
+│   │   │   │   └── LoginError.swift
 │   │   │   └── Events/
 │   │   │       └── LoginEvent.swift
 │   │   ├── Application/
 │   │   │   ├── Ports/
-│   │   │   │   └── AuthGateway.swift
+│   │   │   │   └── AuthRepository.swift
 │   │   │   └── UseCases/
-│   │   │       └── LoginUseCase.swift
+│   │   │       └── AuthenticateUserUseCase.swift
 │   │   ├── Infrastructure/
-│   │   │   ├── RemoteAuthGateway.swift
-│   │   │   └── StubAuthGateway.swift
+│   │   │   ├── AuthHTTPRepository.swift
+│   │   │   └── InMemoryAuthRepository.swift
 │   │   └── Interface/
 │   │       ├── LoginViewModel.swift
 │   │       └── LoginView.swift
@@ -200,11 +200,11 @@ Esto no es una idea nueva ni exclusiva de Clean Architecture. Hexagonal Architec
 
 Cada feature en nuestro proyecto tiene exactamente cuatro capas:
 
-**Domain** es el corazón de la feature. Contiene las reglas de negocio puras: Value Objects (como `Email` y `Password`), entidades (como `User`), errores del dominio (como `AuthError`), eventos (como `LoginEvent`), e invariantes (reglas que siempre deben cumplirse, como "un email debe tener formato válido"). El Domain no importa SwiftUI, ni Foundation (salvo lo mínimo imprescindible), ni ningún framework externo. Es puro Swift. Esto lo hace trivialmente testeable y completamente independiente del entorno.
+**Domain** es el corazón de la feature. Contiene las reglas de negocio puras: Value Objects (como `EmailAddress` y `Password`), entidades (como `User`), errores del dominio (como `LoginError`), eventos (como `LoginEvent`), e invariantes (reglas que siempre deben cumplirse, como "un email debe tener formato válido"). El Domain no importa SwiftUI, ni Foundation (salvo lo mínimo imprescindible), ni ningún framework externo. Es puro Swift. Esto lo hace trivialmente testeable y completamente independiente del entorno.
 
-**Application** contiene los casos de uso. Un caso de uso orquesta una operación de negocio: recibe datos, los valida (usando el Domain), delega operaciones externas a través de puertos (protocolos), y devuelve un resultado. El Application define los **puertos**: protocolos que describen qué servicios necesita el caso de uso (por ejemplo, `AuthGateway` para autenticar). El Application no sabe quién implementa esos puertos. Solo sabe que existen.
+**Application** contiene los casos de uso. Un caso de uso orquesta una operación de negocio: recibe datos, los valida (usando el Domain), delega operaciones externas a través de puertos (protocolos), y devuelve un resultado. El Application define los **puertos**: protocolos que describen qué servicios necesita el caso de uso (por ejemplo, `AuthRepository` para autenticar). El Application no sabe quién implementa esos puertos. Solo sabe que existen.
 
-**Infrastructure** implementa los puertos definidos por Application. Es donde vive el código que habla con el mundo real: peticiones HTTP, persistencia en disco, acceso a APIs de sistema. `RemoteAuthGateway` (que llama a un servidor real) y `StubAuthGateway` (que devuelve datos falsos) son ambos implementaciones del mismo puerto `AuthGateway`. La infraestructura depende de Application (conoce el protocolo del puerto), pero Application no depende de Infrastructure (no sabe si la implementación es remota, local, o un fake).
+**Infrastructure** implementa los puertos definidos por Application. Es donde vive el código que habla con el mundo real: peticiones HTTP, persistencia en disco, acceso a APIs de sistema. `AuthHTTPRepository` (que llama a un servidor real) y `InMemoryAuthRepository` (que devuelve datos falsos) son ambos implementaciones del mismo puerto `AuthRepository`. La infraestructura depende de Application (conoce el protocolo del puerto), pero Application no depende de Infrastructure (no sabe si la implementación es remota, local, o un fake).
 
 **Interface** es la capa de presentación. Contiene las vistas SwiftUI y los ViewModels que adaptan los datos del caso de uso al formato que necesita la UI. La Interface depende de Application (llama a los casos de uso), pero no depende directamente de Infrastructure (no sabe si detrás hay un servidor real o un stub).
 
@@ -234,13 +234,13 @@ En este curso no vamos a aplicar DDD completo (no vamos a hacer event sourcing n
 
 **Lenguaje ubicuo** es el vocabulario compartido entre negocio y desarrollo. Los mismos términos aparecen en los escenarios BDD, en el código Swift, en los tests, y en las conversaciones de equipo. Cuando escribimos un escenario que dice "Given un usuario con credenciales válidas", nuestro código tiene un tipo `Credentials`. No `LoginData`, no `AuthPayload`, no `UserCredentialInfo`. `Credentials`, que es lo que dice el escenario y lo que diría alguien de producto.
 
-**Value Objects** son tipos sin identidad, definidos por sus valores. `Email("user@example.com")` es igual a otro `Email("user@example.com")` porque tienen el mismo valor. No tienen un `id` que los distinga. Son inmutables y se validan en la construcción: si el objeto existe, es válido.
+**Value Objects** son tipos sin identidad, definidos por sus valores. `EmailAddress("user@example.com")` es igual a otro `EmailAddress("user@example.com")` porque tienen el mismo valor. No tienen un `id` que los distinga. Son inmutables y se validan en la construcción: si el objeto existe, es válido.
 
 **Entidades** son tipos con identidad. Un `User` con `id: "abc123"` es diferente de otro `User` con `id: "xyz789"`, aunque tengan el mismo nombre y email. La identidad persiste a lo largo del tiempo: el usuario puede cambiar su email, pero sigue siendo el mismo usuario.
 
 **Domain Events** son hechos que ya ocurrieron y que son relevantes para el negocio. `LoginSucceeded` es un evento: ya pasó, es un hecho, no se puede deshacer. Los eventos permiten desacoplar features: Login emite `LoginSucceeded`, y el sistema de navegación escucha ese evento y decide qué hacer. Login no sabe qué pasa después del login.
 
-**Invariantes** son reglas que siempre deben cumplirse. "Un email debe tener formato válido" es un invariante. "Una contraseña no puede estar vacía" es otro. Los invariantes se protegen en la construcción de los Value Objects y entidades: si intentas crear un `Email` con formato inválido, el constructor lanza un error. No se puede crear un `Email` inválido. Nunca.
+**Invariantes** son reglas que siempre deben cumplirse. "Un email debe tener formato válido" es un invariante. "Una contraseña no puede estar vacía" es otro. Los invariantes se protegen en la construcción de los Value Objects y entidades: si intentas crear un `EmailAddress` con formato inválido, el constructor lanza un error. No se puede crear un `EmailAddress` inválido. Nunca.
 
 ---
 
@@ -272,9 +272,9 @@ Esto lo implementaremos en detalle en la Etapa 2, cuando tengamos dos features (
 
 El Composition Root es el lugar donde todas las piezas del sistema se ensamblan. Es el único sitio de toda la aplicación que conoce las implementaciones concretas de todos los componentes. Es el "director de orquesta" que mencionamos en la lección de principios.
 
-Vive en el punto de entrada de la app (el módulo `App/`, donde está `@main`), y su responsabilidad es crear las features con todas sus dependencias inyectadas. Cuando la app arranca, el Composition Root decide: "para el AuthGateway de Login voy a usar `RemoteAuthGateway` con `URLSession`". Ni Login ni el caso de uso ni el ViewModel saben esto. Solo el Composition Root lo sabe.
+Vive en el punto de entrada de la app (el módulo `App/`, donde está `@main`), y su responsabilidad es crear las features con todas sus dependencias inyectadas. Cuando la app arranca, el Composition Root decide: "para el AuthRepository de Login voy a usar `AuthHTTPRepository` con `URLSession`". Ni Login ni el caso de uso ni el ViewModel saben esto. Solo el Composition Root lo sabe.
 
-¿Por qué esto es importante? Porque si quieres cambiar el `RemoteAuthGateway` por un `StubAuthGateway` (para desarrollo sin servidor), cambias **una sola línea** en el Composition Root. Nada más. Ningún otro archivo del proyecto cambia. Eso es bajo acoplamiento en acción.
+¿Por qué esto es importante? Porque si quieres cambiar el `AuthHTTPRepository` por un `InMemoryAuthRepository` (para desarrollo sin servidor), cambias **una sola línea** en el Composition Root. Nada más. Ningún otro archivo del proyecto cambia. Eso es bajo acoplamiento en acción.
 
 Y para SwiftUI Previews, puedes crear un Composition Root alternativo que inyecte stubs en todas partes, de forma que tus previews funcionen sin servidor, sin red, y de forma instantánea.
 

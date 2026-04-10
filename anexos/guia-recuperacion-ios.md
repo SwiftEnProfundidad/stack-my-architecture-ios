@@ -91,7 +91,7 @@ struct MiModel: Sendable {
 ```swift
 #Preview {
     LoginView(viewModel: LoginViewModel(  // ✅ Inyecta dependencias
-        useCase: MockLoginUseCase()  // Usa mock, no el real
+        useCase: MockAuthenticateUserUseCase()  // Usa mock, no el real
     ))
 }
 ```
@@ -119,7 +119,7 @@ struct LoginView: View {
 ```swift
 // En tu test
 let stubClient = HTTPClientStub(result: .success(mockData))
-let repository = RemoteAuthRepository(httpClient: stubClient)  // ✅ Inyecta stub
+let repository = AuthHTTPRepository(httpClient: stubClient)  // ✅ Inyecta stub
 ```
 
 2. NUNCA uses `URLSession.shared` directamente:

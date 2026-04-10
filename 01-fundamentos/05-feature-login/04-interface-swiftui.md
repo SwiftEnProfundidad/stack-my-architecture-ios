@@ -8,7 +8,7 @@ Ahora llegamos a la capa más externa: la Interface. Esta es la capa que el usua
 
 La regla fundamental de esta capa es: **no contiene lógica de negocio**. La vista no valida emails. No decide si el login fue exitoso. No traduce errores. Solo muestra lo que el ViewModel le dice y envía las acciones del usuario al ViewModel. Es la capa más "tonta" del sistema, y eso es exactamente lo que queremos.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `LoginUseCase` → `AuthenticateUserUseCase`, `LoginUseCase.Error` → `LoginError` (enum independiente en Domain), `Session` → `UserSession`. `LoginViewModel` y `LoginView` mantienen el mismo nombre. Diferencias de implementación clave: el scaffold usa `@Observable @MainActor` (no `ObservableObject`), `Phase` enum en lugar de `isLoading: Bool`, y `@Bindable` en la View. El Checkpoint Xcode al final de esta lección explica cada diferencia en detalle. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de equivalencias con el scaffold:** Los nombres de esta lección coinciden exactamente con el scaffold `apps/ios/ArchitectureKit` (`LoginViewModel`, `LoginView`, `AuthenticateUserUseCase`, `LoginError`, `UserSession`). Las diferencias son de **implementación**, no de nomenclatura: el scaffold usa `@Observable @MainActor` con un enum `Phase` (`.idle`, `.loading`, `.authenticated`) en lugar de `isLoading: Bool`, y `@Bindable` en la View. El Checkpoint Xcode al final de esta lección explica cada diferencia en detalle.
 
 ### Recordatorio de principios
 
@@ -23,7 +23,7 @@ sequenceDiagram
     participant User as Usuario
     participant View as LoginView
     participant VM as LoginViewModel
-    participant UC as LoginUseCase
+    participant UC as AuthenticateUserUseCase
 
     User->>View: Escribe email
     View->>VM: email = user@test.com Bindable
@@ -40,9 +40,9 @@ sequenceDiagram
     VM->>UC: await execute email, password
     
     alt Login exitoso
-        UC-->>VM: Session token abc
-        VM->>VM: onLoginSucceeded session
-        Note over View: Navegacion controlada<br/>por closure externo
+        UC-->>VM: UserSession token abc
+        VM->>VM: navigator?.goToCatalog()
+        Note over View: Navegacion delegada<br/>al coordinator via LoginNavigating
     end
     
     alt Login fallido
@@ -53,7 +53,7 @@ sequenceDiagram
     end
 ```
 
-La vista **no sabe nada** de `LoginUseCase`, ni de `AuthGateway`, ni de `Email`, ni de `Password`. Solo conoce strings (`email`, `password`, `errorMessage`) y booleans (`isLoading`). **Esa es la separación de responsabilidades en acción.**
+La vista **no sabe nada** de `AuthenticateUserUseCase`, ni de `AuthRepository`, ni de `EmailAddress`, ni de `Password`. Solo conoce strings (`email`, `password`, `errorMessage`) y booleans (`isLoading`). **Esa es la separación de responsabilidades en acción.**
 
 ### Diagrama: qué sabe cada componente
 
@@ -62,17 +62,17 @@ graph TD
     subgraph View["LoginView - lo que ve el usuario"]
         V1["Sabe: email, password, isLoading, errorMessage"]
         V2["NO sabe: como se valida un email"]
-        V3["NO sabe: que es AuthGateway"]
+        V3["NO sabe: que es AuthRepository"]
         V4["NO sabe: a donde navegar despues"]
     end
 
     subgraph ViewModel["LoginViewModel - el puente"]
-        VM1["Sabe: LoginUseCase, estado de la UI"]
+        VM1["Sabe: AuthenticateUserUseCase, estado de la UI"]
         VM2["NO sabe: como se autentica"]
         VM3["NO sabe: que vista lo muestra"]
     end
 
-    subgraph UseCase["LoginUseCase - la logica"]
+    subgraph UseCase["AuthenticateUserUseCase - la logica"]
         UC1["Sabe: validar y delegar"]
         UC2["NO sabe: quien lo llama"]
         UC3["NO sabe: que pasa con el resultado"]
@@ -92,6 +92,14 @@ graph TD
 El ViewModel es el puente entre el caso de uso y la vista. Su responsabilidad es triple: almacenar el estado que la vista necesita mostrar (email, password, loading, error), invocar el caso de uso cuando el usuario pulsa el botón, y traducir el resultado del caso de uso a un formato que la vista pueda mostrar directamente (strings de error, flags booleanos).
 
 ```swift
+// StackMyArchitecture/Features/Login/Interface/LoginNavigating.swift
+
+protocol LoginNavigating: AnyObject {
+    @MainActor func goToCatalog()
+}
+```
+
+```swift
 // StackMyArchitecture/Features/Login/Interface/LoginViewModel.swift
 
 import SwiftUI
@@ -104,15 +112,15 @@ final class LoginViewModel {
     var isLoading = false
     var errorMessage: String?
     
-    private let login: LoginUseCase
-    private let onLoginSucceeded: @MainActor (Session) -> Void
+    private let useCase: AuthenticateUserUseCase
+    private weak var navigator: (any LoginNavigating)?
     
     init(
-        login: LoginUseCase,
-        onLoginSucceeded: @MainActor @escaping (Session) -> Void
+        useCase: AuthenticateUserUseCase,
+        navigator: any LoginNavigating
     ) {
-        self.login = login
-        self.onLoginSucceeded = onLoginSucceeded
+        self.useCase = useCase
+        self.navigator = navigator
     }
     
     func submit() async {
@@ -120,9 +128,9 @@ final class LoginViewModel {
         errorMessage = nil
         
         do {
-            let session = try await login.execute(email: email, password: password)
-            onLoginSucceeded(session)
-        } catch let error as LoginUseCase.Error {
+            _ = try await useCase.execute(email: email, password: password)
+            navigator?.goToCatalog()
+        } catch let error as LoginError {
             errorMessage = Self.message(for: error)
         } catch {
             errorMessage = "Error inesperado. Inténtalo de nuevo."
@@ -131,7 +139,7 @@ final class LoginViewModel {
         isLoading = false
     }
     
-    private static func message(for error: LoginUseCase.Error) -> String {
+    private static func message(for error: LoginError) -> String {
         switch error {
         case .invalidEmail:
             return "El email no tiene un formato válido."
@@ -164,9 +172,9 @@ final class LoginViewModel {
 
 `var errorMessage: String?` — El mensaje de error que se muestra al usuario. Es `Optional` (`String?`) porque la mayor parte del tiempo no hay error (es `nil`). Solo tiene valor cuando algo falla.
 
-`private let login: LoginUseCase` — La dependencia del UseCase. Es `private` porque nadie fuera del ViewModel necesita acceder al UseCase. Es `let` (constante) porque no cambia después de la creación.
+`private let useCase: AuthenticateUserUseCase` — La dependencia del UseCase. Es `private` porque nadie fuera del ViewModel necesita acceder al UseCase. Es `let` (constante) porque no cambia después de la creación.
 
-`private let onLoginSucceeded: @MainActor (Session) -> Void` — El closure que se llama cuando el login es exitoso. El ViewModel no sabe qué hace este closure. Solo sabe que debe llamarlo con la sesión. En la app real, el Composition Root le inyecta un closure que navega a la siguiente pantalla. En los tests, le inyecta un closure que captura la sesión para verificarla.
+`private weak var navigator: (any LoginNavigating)?` — La dependencia de navegación. Es `weak` porque el coordinador (que implementa `LoginNavigating`) es dueño del ViewModel a través del Composition Root — tenerlo `strong` crearía un ciclo de retención. El tipo `any LoginNavigating` permite inyectar cualquier objeto que conforme el protocolo: el coordinador real en producción, o un `LoginNavigatorSpy` en tests.
 
 **El método `submit()` paso a paso:**
 
@@ -174,8 +182,8 @@ final class LoginViewModel {
 flowchart TD
     START["Usuario pulsa Submit"] --> LOADING["isLoading = true<br/>errorMessage = nil"]
     LOADING --> TRY["try await login.execute<br/>email, password"]
-    TRY -->|"Exito"| SUCCESS["onLoginSucceeded session<br/>Navega a la siguiente pantalla"]
-    TRY -->|"LoginUseCase.Error"| KNOWN["errorMessage = mensaje especifico<br/>Email invalido / Password vacio /<br/>Credenciales incorrectas / Sin conexion"]
+    TRY -->|"Exito"| SUCCESS["navigator?.goToCatalog()<br/>Navega a la siguiente pantalla"]
+    TRY -->|"LoginError"| KNOWN["errorMessage = mensaje especifico<br/>Email invalido / Password vacio /<br/>Credenciales incorrectas / Sin conexion"]
     TRY -->|"Otro error"| UNKNOWN["errorMessage = Error inesperado"]
     SUCCESS --> DONE["isLoading = false"]
     KNOWN --> DONE
@@ -193,13 +201,13 @@ flowchart TD
 
 `do { let session = try await login.execute(...) }` — Ejecuta el UseCase. `try` porque puede lanzar errores. `await` porque es asíncrono (el UseCase llama al gateway que simula una petición de red). Si todo va bien, `session` contiene la sesión del servidor.
 
-`onLoginSucceeded(session)` — Si llegamos aquí, el login fue exitoso. Llamamos al closure para notificar al exterior. El Composition Root decidirá qué hacer (normalmente, navegar a Home).
+`navigator?.goToCatalog()` — Si llegamos aquí, el login fue exitoso. Llamamos al navigator para que realice la navegación. El navigator (`any LoginNavigating`) no sabe nada de HTTP ni de Domain; solo sabe navegar. En producción será el coordinador. En tests, un spy que registra si se llamó.
 
-`catch let error as LoginUseCase.Error` — Si el UseCase lanzó un error, lo capturamos y verificamos si es un `LoginUseCase.Error` (un error conocido y tipado). `as` intenta convertir el error genérico al tipo específico. Si la conversión funciona, entramos en este bloque.
+`catch let error as LoginError` — Si el UseCase lanzó un error, lo capturamos y verificamos si es un `LoginError` (un error conocido y tipado). `as` intenta convertir el error genérico al tipo específico. Si la conversión funciona, entramos en este bloque.
 
 `Self.message(for: error)` — Traducimos el error de negocio a un string legible por humanos. `Self` (con S mayúscula) se refiere al tipo `LoginViewModel`, no a la instancia `self`.
 
-`catch { errorMessage = "Error inesperado..." }` — Si el error NO es un `LoginUseCase.Error` (por ejemplo, un error del sistema que no anticipamos), mostramos un mensaje genérico. Este `catch` sin tipo es el "catch-all" de Swift: captura cualquier error que no fue capturado por los `catch` anteriores.
+`catch { errorMessage = "Error inesperado..." }` — Si el error NO es un `LoginError` (por ejemplo, un error del sistema que no anticipamos), mostramos un mensaje genérico. Este `catch` sin tipo es el "catch-all" de Swift: captura cualquier error que no fue capturado por los `catch` anteriores.
 
 `isLoading = false` — Siempre, sin importar si el login fue exitoso o falló, ponemos isLoading en false. El spinner desaparece. Fíjate en que esta línea está **fuera** del `do/catch`, así que se ejecuta en todos los casos.
 
@@ -219,15 +227,15 @@ El ViewModel muta propiedades (`email`, `password`, `isLoading`, `errorMessage`)
 
 Recuerda la regla del curso: `@MainActor` está justificado aquí porque el ViewModel genuinamente necesita ejecutarse en el main thread (muta estado de UI). No lo estamos usando para silenciar warnings.
 
-### Por qué `onLoginSucceeded` es un closure
+### Por qué usamos el protocolo `LoginNavigating`
 
-Cuando el login es exitoso, el ViewModel llama a `onLoginSucceeded(session)`. Este closure no lo define el ViewModel; se lo inyecta el Composition Root. El ViewModel no sabe qué pasa después del login. No sabe que se navega a Home. No sabe nada de navegación. Solo dice "el login fue exitoso, aquí tienes la sesión" y otro componente decide qué hacer.
+Cuando el login es exitoso, el ViewModel llama a `navigator?.goToCatalog()`. El protocolo `LoginNavigating` define el contrato de navegación: el ViewModel dice "navega al catálogo" sin saber qué coordinador o vista se encarga de ello.
 
-Esto es la navegación por eventos que describimos en las lecciones de fundamentos. La feature Login es completamente independiente de lo que ocurre después. Si mañana quieres que después del login se vaya a una pantalla de onboarding en lugar de Home, cambias el closure en el Composition Root. Login no se entera.
+Esto es la navegación por contrato. La feature Login es completamente independiente de lo que ocurre después. Si mañana quieres que después del login se vaya a una pantalla de onboarding en lugar de Catalog, implementas otro `LoginNavigating` en el Composition Root. Login no se entera. Además, el patrón de protocolo (en lugar de closure) hace la intención explícita y testeable con un simple spy.
 
 ### Por qué la traducción de errores a strings está en el ViewModel
 
-El método `message(for:)` traduce cada caso de `LoginUseCase.Error` a un string legible por el usuario. Esta traducción vive en el ViewModel porque es una responsabilidad de **presentación**, no de negocio. El Domain sabe que las credenciales son inválidas. La Application sabe que eso es un `LoginUseCase.Error.invalidCredentials`. Pero el texto "Email o contraseña incorrectos." es un detalle de presentación que solo le importa a la UI.
+El método `message(for:)` traduce cada caso de `LoginError` a un string legible por el usuario. Esta traducción vive en el ViewModel porque es una responsabilidad de **presentación**, no de negocio. El Domain sabe que las credenciales son inválidas. La Application sabe que eso es un `LoginError.invalidCredentials`. Pero el texto "Email o contraseña incorrectos." es un detalle de presentación que solo le importa a la UI.
 
 Si el día de mañana necesitas localizar la app a otros idiomas, solo cambias estos strings en el ViewModel (o los mueves a un sistema de localización). Ni el Domain ni la Application cambian.
 
@@ -308,12 +316,12 @@ Vamos a repasar cada parte:
 
 El ViewModel se puede testear sin UI, sin SwiftUI, sin renderizar nada. Solo necesitamos un stub del caso de uso y verificar que el ViewModel actualiza su estado correctamente.
 
-Pero hay un detalle: el ViewModel depende de `LoginUseCase`, que es un struct (no un protocolo). ¿Cómo lo stubbeamos? No necesitamos stubear el UseCase directamente. `LoginUseCase` depende de `AuthGateway` (que sí es un protocolo), así que inyectamos un `AuthGatewayStub` en el caso de uso y controlamos el comportamiento desde ahí. Es como una cadena: controlamos el stub del gateway, el gateway controla lo que hace el UseCase, y el UseCase controla lo que hace el ViewModel.
+Pero hay un detalle: el ViewModel depende de `AuthenticateUserUseCase`, que es un struct (no un protocolo). ¿Cómo lo stubbeamos? No necesitamos stubear el UseCase directamente. `AuthenticateUserUseCase` depende de `AuthRepository` (que sí es un protocolo), así que inyectamos un `AuthRepositoryStub` en el caso de uso y controlamos el comportamiento desde ahí. Es como una cadena: controlamos el stub del gateway, el gateway controla lo que hace el UseCase, y el UseCase controla lo que hace el ViewModel.
 
 ```mermaid
 graph LR
-    TEST["Test"] -.->|"crea y configura"| STUB["AuthGatewayStub<br/>tu decides que devuelve"]
-    STUB -.->|"se inyecta en"| UC["LoginUseCase"]
+    TEST["Test"] -.->|"crea y configura"| STUB["AuthRepositoryStub<br/>tu decides que devuelve"]
+    STUB -.->|"se inyecta en"| UC["AuthenticateUserUseCase"]
     UC -.->|"se inyecta en"| VM["LoginViewModel<br/>el SUT"]
 
     style TEST fill:#cce5ff,stroke:#007bff
@@ -328,19 +336,26 @@ graph LR
 import XCTest
 @testable import StackMyArchitecture
 
+// MARK: - Test Doubles
+
+final class LoginNavigatorSpy: LoginNavigating {
+    private(set) var goToCatalogCallCount = 0
+    func goToCatalog() { goToCatalogCallCount += 1 }
+}
+
 @MainActor
 final class LoginViewModelTests: XCTestCase {
     
     // MARK: - Helpers
     
     private func makeSUT(
-        gatewayResult: Result<Session, AuthError> = .success(Session(token: "t", email: "e")),
-        onLoginSucceeded: @MainActor @escaping (Session) -> Void = { _ in }
-    ) -> (sut: LoginViewModel, gateway: AuthGatewayStub) {
-        let gateway = AuthGatewayStub(result: gatewayResult)
-        let useCase = LoginUseCase(authGateway: gateway)
-        let sut = LoginViewModel(login: useCase, onLoginSucceeded: onLoginSucceeded)
-        return (sut, gateway)
+        gatewayResult: Result<UserSession, LoginError> = .success(UserSession(token: "t", email: "e"))
+    ) -> (sut: LoginViewModel, repository: AuthRepositoryStub, navigator: LoginNavigatorSpy) {
+        let gateway = AuthRepositoryStub(result: gatewayResult)
+        let useCase = AuthenticateUserUseCase(repository: gateway)
+        let navigator = LoginNavigatorSpy()
+        let sut = LoginViewModel(useCase: useCase, navigator: navigator)
+        return (sut, gateway, navigator)
     }
 ```
 
@@ -348,17 +363,17 @@ final class LoginViewModelTests: XCTestCase {
 
 `@MainActor final class LoginViewModelTests` — Toda la clase de tests está marcada con `@MainActor`. ¿Por qué? Porque el ViewModel que testeamos es `@MainActor`, y para acceder a sus propiedades necesitamos estar en el mismo actor. Sin este atributo, los tests no compilarían.
 
-`gatewayResult: Result<Session, AuthError> = .success(...)` — El primer parámetro del makeSUT te permite configurar qué devuelve el gateway. Si no pasas nada, devuelve éxito por defecto. Esto simplifica los tests que no se preocupan por el resultado del gateway (como el test del estado inicial).
+`gatewayResult: Result<UserSession, LoginError> = .success(...)` — El primer parámetro del makeSUT te permite configurar qué devuelve el gateway. Si no pasas nada, devuelve éxito por defecto. Esto simplifica los tests que no se preocupan por el resultado del gateway (como el test del estado inicial).
 
-`onLoginSucceeded: @MainActor @escaping (Session) -> Void = { _ in }` — El segundo parámetro es el closure que se llama cuando el login es exitoso. Por defecto es un closure vacío que ignora la sesión (`{ _ in }` significa "recibe algo pero no hago nada con ello"). En el test del happy path, lo sustituiremos por un closure que captura la sesión para verificarla.
+`LoginNavigatorSpy()` — El spy de navegación. Es un doble de test que implementa `LoginNavigating` y registra cuántas veces se llamó a `goToCatalog()`. Al devolver `navigator` en la tupla, cada test puede verificar si la navegación fue disparada.
 
-Dentro de makeSUT, se crean los tres componentes en cadena: stub → useCase → viewModel. Cada uno se inyecta en el siguiente.
+Dentro de makeSUT, se crean cuatro componentes: stub → useCase → spy → viewModel. Cada uno se inyecta en el siguiente.
 
 ```swift
     // MARK: - Initial State
     
     func test_init_starts_with_empty_fields_and_no_error() {
-        let (sut, _) = makeSUT()
+        let (sut, _, _) = makeSUT()
         
         XCTAssertEqual(sut.email, "")
         XCTAssertEqual(sut.password, "")
@@ -371,7 +386,7 @@ Dentro de makeSUT, se crean los tres componentes en cadena: stub → useCase →
 
 Este test verifica que cuando creas un ViewModel nuevo, su estado es correcto: email vacío, password vacío, no está cargando, y no hay ningún mensaje de error. Parece trivial, pero documenta un requisito: "cuando el usuario abre la pantalla de Login, no debe ver ningún error ni estado de carga". Si alguien cambiara accidentalmente el valor inicial de `isLoading` a `true`, este test lo detectaría inmediatamente.
 
-`let (sut, _) = makeSUT()` — Creamos el ViewModel. El `_` descarta el gateway porque en este test no nos importa (no vamos a llamar a submit, así que el gateway no se usa). Usamos los valores por defecto de makeSUT.
+`let (sut, _, _) = makeSUT()` — Creamos el ViewModel. El `_` descarta el gateway porque en este test no nos importa (no vamos a llamar a submit, así que el gateway no se usa). Usamos los valores por defecto de makeSUT.
 
 `XCTAssertFalse(sut.isLoading)` — Verifica que `isLoading` es `false`. Es como `XCTAssertEqual(sut.isLoading, false)` pero más legible.
 
@@ -380,32 +395,29 @@ Este test verifica que cuando creas un ViewModel nuevo, su estado es correcto: e
 ```swift
     // MARK: - Happy Path
     
-    func test_submit_with_valid_credentials_calls_onLoginSucceeded() async {
-        let expectedSession = Session(token: "abc", email: "user@example.com")
-        var receivedSession: Session?
-        let (sut, _) = makeSUT(
-            gatewayResult: .success(expectedSession),
-            onLoginSucceeded: { receivedSession = $0 }
+    func test_submit_with_valid_credentials_navigates_to_catalog() async {
+        let (sut, _, navigator) = makeSUT(
+            gatewayResult: .success(UserSession(token: "abc", email: "user@example.com"))
         )
         sut.email = "user@example.com"
         sut.password = "pass123"
         
         await sut.submit()
         
-        XCTAssertEqual(receivedSession, expectedSession)
+        XCTAssertEqual(navigator.goToCatalogCallCount, 1)
         XCTAssertNil(sut.errorMessage)
     }
 ```
 
 **Explicación del test del happy path (el más interesante):**
 
-Este test verifica que cuando el usuario escribe credenciales válidas y pulsa submit, el ViewModel llama al closure `onLoginSucceeded` con la sesión correcta.
+Este test verifica que cuando el usuario escribe credenciales válidas y pulsa submit, el ViewModel llama a `navigator.goToCatalog()`.
 
-`var receivedSession: Session?` — Creamos una variable que actuará como **trampa** para capturar la sesión. Empieza en `nil`. Si el closure se ejecuta, dejará de ser `nil`.
+`let (sut, _, navigator) = makeSUT(...)` — Desestructuramos la tupla para obtener el spy de navegación. El `_` descarta el gateway porque en este test no necesitamos inspeccionarlo directamente.
 
-`onLoginSucceeded: { receivedSession = $0 }` — Este closure es la trampa: cuando el ViewModel lo llame, guardará la sesión recibida en `receivedSession`. `$0` es la forma abreviada de Swift para referirse al primer parámetro del closure (la sesión). Es equivalente a escribir `{ session in receivedSession = session }`.
+`XCTAssertEqual(navigator.goToCatalogCallCount, 1)` — Verificamos que `goToCatalog()` fue llamado exactamente una vez. El `LoginNavigatorSpy` registra cada llamada. Si el ViewModel no llamó al navigator (por un bug en el flujo), el contador será 0 y el test fallará.
 
-**¿Por qué usamos un closure como trampa en vez de un spy?** Porque `onLoginSucceeded` no es un protocolo — es un closure inyectado. No podemos crear un "spy de closure", pero podemos crear un closure que captura una variable local. Es la misma idea: registrar lo que se recibió para verificarlo después.
+**¿Por qué un spy y no un closure?** Porque `LoginNavigating` es un protocolo, y los protocolos admiten spies. El spy hace la intención explícita: estamos verificando un comportamiento ("se llamó a goToCatalog"), no capturando un valor.
 
 `sut.email = "user@example.com"` y `sut.password = "pass123"` — Simulamos que el usuario escribió en los campos de texto. En la app real, esto lo haría SwiftUI a través de los bindings. En el test, lo hacemos directamente.
 
@@ -419,7 +431,7 @@ Este test verifica que cuando el usuario escribe credenciales válidas y pulsa s
     // MARK: - Error Display
     
     func test_submit_with_invalid_email_shows_email_error_message() async {
-        let (sut, _) = makeSUT()
+        let (sut, _, _) = makeSUT()
         sut.email = "invalid"
         sut.password = "pass123"
         
@@ -433,15 +445,15 @@ Este test verifica que cuando el usuario escribe credenciales válidas y pulsa s
 
 Este test verifica un sad path: cuando el usuario escribe un email sin arroba y pulsa submit, el ViewModel muestra un mensaje de error específico.
 
-`sut.email = "invalid"` — Simulamos un email sin arroba. El Value Object `Email` rechazará este string.
+`sut.email = "invalid"` — Simulamos un email sin arroba. El Value Object `EmailAddress` rechazará este string.
 
-Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway por defecto (que devuelve éxito). ¿Por qué? Porque el error ocurre **antes** de llegar al gateway. El UseCase intenta crear un `Email` con "invalid", el `Email` lanza `ValidationError.invalidFormat`, el UseCase lo traduce a `LoginUseCase.Error.invalidEmail`, y el ViewModel lo traduce al string "El email no tiene un formato válido." El gateway ni se entera porque nunca se llega a llamar.
+Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway por defecto (que devuelve éxito). ¿Por qué? Porque el error ocurre **antes** de llegar al gateway. El UseCase intenta crear un `EmailAddress` con "invalid", el `EmailAddress` lanza `ValidationError.invalidFormat`, el UseCase lo traduce a `LoginError.invalidEmail`, y el ViewModel lo traduce al string "El email no tiene un formato válido." El gateway ni se entera porque nunca se llega a llamar.
 
 `XCTAssertEqual(sut.errorMessage, "El email no tiene un formato válido.")` — Verificamos que el ViewModel tradujo el error al mensaje correcto. Si el mensaje fuera diferente (un typo, por ejemplo), el test fallaría.
 
 ```swift
     func test_submit_with_empty_password_shows_password_error_message() async {
-        let (sut, _) = makeSUT()
+        let (sut, _, _) = makeSUT()
         sut.email = "user@example.com"
         sut.password = ""
         
@@ -451,7 +463,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
     }
     
     func test_submit_with_rejected_credentials_shows_credentials_error() async {
-        let (sut, _) = makeSUT(gatewayResult: .failure(.invalidCredentials))
+        let (sut, _, _) = makeSUT(gatewayResult: .failure(.invalidCredentials))
         sut.email = "user@example.com"
         sut.password = "wrong"
         
@@ -461,7 +473,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
     }
     
     func test_submit_with_connectivity_error_shows_connectivity_message() async {
-        let (sut, _) = makeSUT(gatewayResult: .failure(.connectivity))
+        let (sut, _, _) = makeSUT(gatewayResult: .failure(.connectivity))
         sut.email = "user@example.com"
         sut.password = "pass123"
         
@@ -473,7 +485,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
     // MARK: - Loading State
     
     func test_submit_sets_isLoading_to_false_after_completion() async {
-        let (sut, _) = makeSUT()
+        let (sut, _, _) = makeSUT()
         sut.email = "user@example.com"
         sut.password = "pass123"
         
@@ -485,7 +497,7 @@ Fíjate en que **no configuramos el gateway para que falle**. Usamos el gateway 
     // MARK: - Error Clearing
     
     func test_submit_clears_previous_error_before_new_attempt() async {
-        let (sut, _) = makeSUT(gatewayResult: .failure(.invalidCredentials))
+        let (sut, _, _) = makeSUT(gatewayResult: .failure(.invalidCredentials))
         sut.email = "user@example.com"
         sut.password = "wrong"
         
@@ -506,27 +518,29 @@ Fíjate en que los tests del ViewModel son `@MainActor`. Esto es necesario porqu
 
 Los tests verifican:
 
-Que el estado inicial es correcto (campos vacíos, no loading, sin error). Que un login exitoso llama al closure `onLoginSucceeded` con la sesión correcta. Que cada tipo de error se traduce al mensaje correcto en español. Que `isLoading` vuelve a `false` después de completar. Que el error anterior se limpia al intentar de nuevo.
+Que el estado inicial es correcto (campos vacíos, no loading, sin error). Que un login exitoso llama a `navigator.goToCatalog()` exactamente una vez. Que cada tipo de error se traduce al mensaje correcto en español. Que `isLoading` vuelve a `false` después de completar. Que el error anterior se limpia al intentar de nuevo.
 
 ---
 
 ## La Preview con Stub
 
-Una de las grandes ventajas de nuestra arquitectura es que las previews de SwiftUI funcionan sin servidor, sin red, y de forma instantánea. Esto es posible porque podemos inyectar el `StubAuthGateway` en lugar del gateway real:
+Una de las grandes ventajas de nuestra arquitectura es que las previews de SwiftUI funcionan sin servidor, sin red, y de forma instantánea. Esto es posible porque podemos inyectar el `InMemoryAuthRepository` en lugar del gateway real:
 
 ```swift
 // StackMyArchitecture/Features/Login/Interface/LoginView+Preview.swift
+
+private final class PreviewNavigator: LoginNavigating {
+    func goToCatalog() { print("Preview: login exitoso — navegando a Catalog") }
+}
 
 #Preview("Login - Happy Path") {
     NavigationStack {
         LoginView(
             viewModel: LoginViewModel(
-                login: LoginUseCase(
-                    authGateway: StubAuthGateway(delayNanoseconds: 1_000_000_000)
+                useCase: AuthenticateUserUseCase(
+                    authRepository: InMemoryAuthRepository(delayNanoseconds: 1_000_000_000)
                 ),
-                onLoginSucceeded: { session in
-                    print("Preview: login exitoso con \(session.email)")
-                }
+                navigator: PreviewNavigator()
             )
         )
     }
@@ -536,10 +550,10 @@ Una de las grandes ventajas de nuestra arquitectura es que las previews de Swift
 El stub tiene un delay de 1 segundo para que puedas ver el estado de loading en la preview. Si quieres probar el estado de error, puedes crear un stub que siempre falle:
 
 ```swift
-struct FailingAuthGateway: AuthGateway, Sendable {
-    func authenticate(credentials: Credentials) async throws -> Session {
+struct FailingAuthRepository: AuthRepository, Sendable {
+    func authenticate(credentials: Credentials) async throws -> UserSession {
         try await Task.sleep(nanoseconds: 500_000_000)
-        throw AuthError.invalidCredentials
+        throw LoginError.invalidCredentials
     }
 }
 
@@ -547,8 +561,8 @@ struct FailingAuthGateway: AuthGateway, Sendable {
     NavigationStack {
         LoginView(
             viewModel: LoginViewModel(
-                login: LoginUseCase(authGateway: FailingAuthGateway()),
-                onLoginSucceeded: { _ in }
+                useCase: AuthenticateUserUseCase(repository: FailingAuthRepository()),
+                navigator: PreviewNavigator()
             )
         )
     }
@@ -571,29 +585,27 @@ import SwiftUI
 @MainActor
 struct CompositionRoot {
     
-    func makeLoginView(
-        onLoginSucceeded: @MainActor @escaping (Session) -> Void
-    ) -> LoginView {
+    func makeLoginView(navigator: any LoginNavigating) -> LoginView {
         let httpClient = URLSessionHTTPClient()
         let baseURL = URL(string: "https://api.example.com")!
-        let gateway = RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)
-        let useCase = LoginUseCase(authGateway: gateway)
+        let gateway = AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)
+        let useCase = AuthenticateUserUseCase(repository: gateway)
         let viewModel = LoginViewModel(
-            login: useCase,
-            onLoginSucceeded: onLoginSucceeded
+            useCase: useCase,
+            navigator: navigator
         )
         return LoginView(viewModel: viewModel)
     }
 }
 ```
 
-El Composition Root es el **único lugar** que conoce las implementaciones concretas. Es el único que sabe que `AuthGateway` se implementa con `RemoteAuthGateway`, que `HTTPClient` se implementa con `URLSessionHTTPClient`, y que la URL del servidor es `https://api.example.com`.
+El Composition Root es el **único lugar** que conoce las implementaciones concretas. Es el único que sabe que `AuthRepository` se implementa con `AuthHTTPRepository`, que `HTTPClient` se implementa con `URLSessionHTTPClient`, y que el navigator es el coordinador de la app.
 
 Si quieres cambiar a un stub para desarrollo local, cambias una línea:
 
 ```swift
 // Para desarrollo sin servidor:
-let gateway = StubAuthGateway()
+let gateway = InMemoryAuthRepository()
 ```
 
 Si quieres apuntar a staging:
@@ -618,17 +630,14 @@ struct StackMyArchitectureApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                compositionRoot.makeLoginView { session in
-                    print("Login exitoso: \(session.email)")
-                    // Aquí el coordinador navegaría a Home
-                }
+                compositionRoot.makeLoginView(navigator: appCoordinator)
             }
         }
     }
 }
 ```
 
-En la Etapa 2, cuando tengamos un coordinador de navegación, el closure `onLoginSucceeded` no hará un simple `print`: le dirá al coordinador que navegue a la siguiente pantalla. Pero por ahora, esto es suficiente para verificar que todo el flujo funciona de punta a punta.
+En la Etapa 2, el `appCoordinator` implementará `LoginNavigating` y decidirá a qué pantalla ir. El ViewModel solo llama a `navigator?.goToCatalog()` — no sabe que el coordinador hace `path.append(.catalog)` por debajo.
 
 ---
 
@@ -644,29 +653,29 @@ Para que veas cómo todas las capas trabajan juntas, vamos a trazar el flujo com
 
 4. El ViewModel llama a `login.execute(email: "user@example.com", password: "pass123")`.
 
-5. El `LoginUseCase` intenta crear un `Email("user@example.com")`. El Value Object valida el formato: tiene arroba, tiene punto en el dominio. Es válido. Se crea el `Email`.
+5. El `AuthenticateUserUseCase` intenta crear un `EmailAddress("user@example.com")`. El Value Object valida el formato: tiene arroba, tiene punto en el dominio. Es válido. Se crea el `EmailAddress`.
 
-6. El `LoginUseCase` intenta crear un `Password("pass123")`. El Value Object verifica que no está vacío. No lo está. Se crea el `Password`.
+6. El `AuthenticateUserUseCase` intenta crear un `Password("pass123")`. El Value Object verifica que no está vacío. No lo está. Se crea el `Password`.
 
-7. El `LoginUseCase` crea un `Credentials(email: email, password: password)`.
+7. El `AuthenticateUserUseCase` crea un `Credentials(email: email, password: password)`.
 
-8. El `LoginUseCase` llama a `authGateway.authenticate(credentials: credentials)`. En producción, esto llega al `RemoteAuthGateway`.
+8. El `AuthenticateUserUseCase` llama a `authRepository.authenticate(credentials: credentials)`. En producción, esto llega al `AuthHTTPRepository`.
 
-9. El `RemoteAuthGateway` construye un `URLRequest` con método POST, URL `https://api.example.com/auth/login`, header `Content-Type: application/json`, y body `{"email":"user@example.com","password":"pass123"}`.
+9. El `AuthHTTPRepository` construye un `URLRequest` con método POST, URL `https://api.example.com/auth/login`, header `Content-Type: application/json`, y body `{"email":"user@example.com","password":"pass123"}`.
 
-10. El `RemoteAuthGateway` llama a `httpClient.execute(request)`. La petición HTTP viaja al servidor.
+10. El `AuthHTTPRepository` llama a `httpClient.execute(request)`. La petición HTTP viaja al servidor.
 
 11. El servidor verifica las credenciales, genera un token, y responde con status 200 y body `{"token":"abc-123","email":"user@example.com"}`.
 
-12. El `RemoteAuthGateway` recibe la respuesta. Status code 200: OK. Parsea el JSON con `JSONDecoder`. Extrae el token. Crea y devuelve `Session(token: "abc-123", email: "user@example.com")`.
+12. El `AuthHTTPRepository` recibe la respuesta. Status code 200: OK. Parsea el JSON con `JSONDecoder`. Extrae el token. Crea y devuelve `UserSession(token: "abc-123", email: "user@example.com")`.
 
-13. El `LoginUseCase` recibe la `Session` del gateway y la devuelve al llamante (el ViewModel).
+13. El `AuthenticateUserUseCase` recibe la `UserSession` del gateway y la devuelve al llamante (el ViewModel).
 
-14. El ViewModel recibe la `Session`. Llama a `onLoginSucceeded(session)`, que es el closure que el Composition Root inyectó. En producción, esto le dirá al coordinador que navegue a Home.
+14. El ViewModel recibe la `UserSession` del UseCase. Llama a `navigator?.goToCatalog()`. El coordinador (que implementa `LoginNavigating`) hace `path.append(.catalog)` y SwiftUI navega a la pantalla del catálogo.
 
 15. El ViewModel pone `isLoading = false`. SwiftUI detecta el cambio y re-renderiza: el botón vuelve a mostrar "Iniciar sesión" en lugar del `ProgressView`.
 
-Trece componentes involucrados (usuario, vista, viewmodel, caso de uso, email VO, password VO, credentials, gateway, http client, request DTO, response DTO, session, closure de navegación), pero cada uno con una responsabilidad clara y bien definida. Si cualquiera de ellos falla, sabes exactamente dónde mirar porque cada capa tiene sus propios tests.
+Trece componentes involucrados (usuario, vista, viewmodel, caso de uso, email VO, password VO, credentials, gateway, http client, request DTO, response DTO, session, navigator/coordinador), pero cada uno con una responsabilidad clara y bien definida. Si cualquiera de ellos falla, sabes exactamente dónde mirar porque cada capa tiene sus propios tests.
 
 ---
 
@@ -674,11 +683,11 @@ Trece componentes involucrados (usuario, vista, viewmodel, caso de uso, email VO
 
 Con esta lección hemos completado la implementación de la feature Login de punta a punta. Repasemos lo que tenemos:
 
-**Domain:** Value Objects `Email` y `Password` con validación en construcción. `Credentials`, `Session`, `AuthError`, `LoginEvent`. Tests XCTest para los Value Objects.
+**Domain:** Value Objects `EmailAddress` y `Password` con validación en construcción. `Credentials`, `UserSession`, `LoginError`, `LoginEvent`. Tests XCTest para los Value Objects.
 
-**Application:** Protocolo `AuthGateway` (el puerto). `LoginUseCase` que orquesta validación local, delegación al gateway, y traducción de errores. Tests XCTest con stub para todos los escenarios BDD.
+**Application:** Protocolo `AuthRepository` (el puerto). `AuthenticateUserUseCase` que orquesta validación local, delegación al gateway, y traducción de errores. Tests XCTest con stub para todos los escenarios BDD.
 
-**Infrastructure:** `RemoteAuthGateway` que implementa el puerto con HTTP/JSON. `StubAuthGateway` para desarrollo sin servidor. DTOs separados. Protocolo `HTTPClient`. Tests de contrato XCTest.
+**Infrastructure:** `AuthHTTPRepository` que implementa el puerto con HTTP/JSON. `InMemoryAuthRepository` para desarrollo sin servidor. DTOs separados. Protocolo `HTTPClient`. Tests de contrato XCTest.
 
 **Interface:** `LoginViewModel` con `@Observable` y `@MainActor`. `LoginView` en SwiftUI. Tests XCTest del ViewModel. Previews funcionales con stub.
 
@@ -692,7 +701,7 @@ En la siguiente lección haremos un resumen del ciclo TDD completo que acabamos 
 
 ## Error copy orientado al usuario
 
-El `LoginViewModel` ya implementa la traducción correcta: el método `message(for:)` convierte cada caso de `LoginUseCase.Error` a un string legible en español, sin exponer detalles técnicos al usuario.
+El `LoginViewModel` ya implementa la traducción correcta: el método `message(for:)` convierte cada caso de `LoginError` a un string legible en español, sin exponer detalles técnicos al usuario.
 
 Esta separación es importante por principio: **nunca pases directamente el mensaje del servidor a la UI**. Si el backend cambia su formato de error, tu app mostraría mensajes extraños o incluso podría exponer información sensible.
 
@@ -732,7 +741,7 @@ Este patrón requiere:
 ```swift
 import LocalAuthentication
 
-func attemptBiometricLogin() async throws -> Session? {
+func attemptBiometricLogin() async throws -> UserSession? {
     let context = LAContext()
     var authError: NSError?
     

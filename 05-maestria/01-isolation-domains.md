@@ -74,9 +74,9 @@ graph TB
 
     subgraph Nonisolated["⚪ Dominio: Nonisolated"]
         direction TB
-        LUC["LoginUseCase (struct)"]
+        LUC["AuthenticateUserUseCase (struct)"]
         LPUC["LoadProductsUseCase (struct)"]
-        RAG["RemoteAuthGateway (struct)"]
+        RAG["AuthHTTPRepository (struct)"]
         RPR["RemoteProductRepository (struct)"]
         P["Product (struct)"]
         E["Email (struct)"]
@@ -212,7 +212,7 @@ struct Product: Sendable {
 }
 
 // ✅ Sendable automáticamente: enum con associated values Sendable
-enum AuthError: Error, Sendable {
+enum LoginError: Error, Sendable {
     case connectivity
     case invalidCredentials
 }
@@ -296,11 +296,11 @@ final class FileProductStore: ProductStore, @unchecked Sendable {
 
 Ahora que entiendes isolation domains y Sendable, revisemos decisiones que tomamos en etapas anteriores:
 
-### ¿Por qué `RemoteAuthGateway` es un struct?
+### ¿Por qué `AuthHTTPRepository` es un struct?
 
 ```swift
 // Etapa 1: Infrastructure
-struct RemoteAuthGateway: AuthGateway, Sendable {
+struct AuthHTTPRepository: AuthRepository, Sendable {
     private let httpClient: any HTTPClient
     private let baseURL: URL
     // ...
@@ -395,15 +395,15 @@ flowchart TD
 | `Email` | struct | No | Todos | `Sendable` auto | Value type |
 | `Password` | struct | No | Todos | `Sendable` auto | Value type |
 | `Price` | struct | No | Todos | `Sendable` auto | Value type |
-| `AuthError` | enum | No | Todos | `Sendable` auto | Enum sin associated values mutables |
+| `LoginError` | enum | No | Todos | `Sendable` auto | Enum sin associated values mutables |
 | `Credentials` | struct | No | Todos | `Sendable` auto | Value type |
 | `Session` | struct | No | Todos | `Sendable` auto | Value type |
 | `AuthRequest` | struct | No | Infra | `Sendable` auto | DTO |
 | `AuthResponse` | struct | No | Infra | `Sendable` auto | DTO |
-| `RemoteAuthGateway` | struct | No | Application | `Sendable` auto | Inmutable, `let` properties |
-| `StubAuthGateway` | struct | No | Tests/Previews | `Sendable` auto | Inmutable |
+| `AuthHTTPRepository` | struct | No | Application | `Sendable` auto | Inmutable, `let` properties |
+| `InMemoryAuthRepository` | struct | No | Tests/Previews | `Sendable` auto | Inmutable |
 | `RemoteProductRepository` | struct | No | Application | `Sendable` auto | Inmutable |
-| `LoginUseCase` | struct | No | ViewModel | `Sendable` auto | Inmutable |
+| `AuthenticateUserUseCase` | struct | No | ViewModel | `Sendable` auto | Inmutable |
 | `LoadProductsUseCase` | struct | No | ViewModel | `Sendable` auto | Inmutable |
 | `APIConfiguration` | class | No (`let`) | Todos | `final class: Sendable` | Inmutable después de init |
 | `LoginViewModel` | class | Sí | Solo UI | `@MainActor` | SwiftUI lee desde Main Thread |

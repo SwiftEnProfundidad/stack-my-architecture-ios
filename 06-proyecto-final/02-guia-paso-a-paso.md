@@ -126,7 +126,7 @@ final class PlaceOrderUseCaseTests: XCTestCase {
 
     func test_execute_withEmptyCart_throwsEmptyCartError() async {
         let sut = PlaceOrderUseCase(cart: StubCartRepository(items: []),
-                                    gateway: StubPaymentGateway())
+                                    repository: StubPaymentGateway())
         await XCTAssertThrowsError(try await sut.execute(paymentToken: "tok_test")) { error in
             XCTAssertEqual(error as? CheckoutError, .emptyCart)
         }
@@ -135,7 +135,7 @@ final class PlaceOrderUseCaseTests: XCTestCase {
     func test_execute_withValidCart_returnsOrder() async throws {
         let items = [try CartItem(productId: "P1", quantity: 2)]
         let sut = PlaceOrderUseCase(cart: StubCartRepository(items: items),
-                                    gateway: StubPaymentGateway(result: .success(Order.stub)))
+                                    repository: StubPaymentGateway(result: .success(Order.stub)))
         let order = try await sut.execute(paymentToken: "tok_test")
         XCTAssertEqual(order.status, .confirmed)
     }
@@ -269,7 +269,7 @@ final class CheckoutViewModel {
 func makeCheckoutViewModel(onOrderConfirmed: @escaping (Order) -> Void) -> CheckoutViewModel {
     let gateway = RemotePaymentGateway(httpClient: httpClient)
     let cart = RemoteCartRepository(httpClient: httpClient)
-    let useCase = PlaceOrderUseCase(cart: cart, gateway: gateway)
+    let useCase = PlaceOrderUseCase(cart: cart, repository: gateway)
     return CheckoutViewModel(placeOrder: useCase, onOrderConfirmed: onOrderConfirmed)
 }
 ```

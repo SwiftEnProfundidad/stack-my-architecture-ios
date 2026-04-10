@@ -51,9 +51,9 @@ flowchart LR
 
     subgraph LOGIN["Login feature module"]
         LVM["LoginViewModel"]
-        LUC["LoginUseCase"]
-        LGW["AuthGateway (protocol)"]
-        LREMOTE["RemoteAuthGateway"]
+        LUC["AuthenticateUserUseCase"]
+        LGW["AuthRepository (protocol)"]
+        LREMOTE["AuthHTTPRepository"]
     end
 
     subgraph CATALOG["Catalog feature module"]
@@ -85,13 +85,13 @@ flowchart LR
 Lectura semántica (la clave didáctica):
 
 1. `-->` dependencia directa en runtime:
-   `LoginViewModel --> LoginUseCase`, `CatalogViewModel --> LoadProductsUseCase`, `RemoteProductRepository --> LocalProductStore`.
+   `LoginViewModel --> AuthenticateUserUseCase`, `CatalogViewModel --> LoadProductsUseCase`, `RemoteProductRepository --> LocalProductStore`.
 2. `-.->` wiring/configuración:
    `CompositionRoot` no “ejecuta negocio”; **construye e inyecta** `AppCoordinator` y adapters.
 3. `==>` contrato/abstracción:
-   los use cases apuntan a puertos (`AuthGateway`, `ProductRepository`) y no a implementaciones concretas.
+   los use cases apuntan a puertos (`AuthRepository`, `ProductRepository`) y no a implementaciones concretas.
 4. `--o` salida/propagación:
-   los adapters concretos satisfacen y propagan el contrato hacia el core (`RemoteAuthGateway --o AuthGateway`, `RemoteProductRepository --o ProductRepository`).
+   los adapters concretos satisfacen y propagan el contrato hacia el core (`AuthHTTPRepository --o AuthRepository`, `RemoteProductRepository --o ProductRepository`).
 
 Si en un diagrama de arquitectura de la app ves estas flechas mezcladas sin criterio, casi siempre hay acoplamiento oculto.
 
@@ -237,7 +237,7 @@ struct StackMyArchitectureApp: App {
     // MARK: - Factory methods
     
     private func makeLoginViewModel() -> LoginViewModel {
-        let stubGateway = StubAuthGateway(
+        let stubGateway = InMemoryAuthRepository(
             behaviour: .successAfterDelay(
                 token: "demo-token",
                 delay: .seconds(1)
@@ -245,12 +245,8 @@ struct StackMyArchitectureApp: App {
         )
         
         return LoginViewModel(
-            loginUseCase: LoginUseCase(gateway: stubGateway),
-            onLoginSucceeded: { [coordinator] session in
-                // Cuando login tiene éxito, navegamos a catalog
-                print("✅ Login exitoso: \(session.token)")
-                coordinator.navigate(to: .catalog)
-            }
+            useCase: AuthenticateUserUseCase(repository: stubGateway),
+            navigator: coordinator  // AppCoordinator implementa LoginNavigating
         )
     }
 }
@@ -259,7 +255,7 @@ struct StackMyArchitectureApp: App {
 **Cambios clave desde E1:**
 1. Ahora usamos `NavigationStack` con `path: $coordinator.navigationPath`
 2. Añadimos `.navigationDestination(for: AppDestination.self)` para manejar navegación
-3. El `onLoginSucceeded` ahora llama a `coordinator.navigate(to: .catalog)`
+3. El `AppCoordinator` implementa `LoginNavigating`, `navigator?.goToCatalog()` dispara `path.append(.catalog)`
 
 ---
 
@@ -337,18 +333,18 @@ actor StubProductRepository: ProductRepository {
 
 ---
 
-## Paso 4: Asegurar que LoginViewModel emite el evento
+## Paso 4: Asegurar que LoginViewModel usa LoginNavigating
 
-Verifica que tu `LoginViewModel` tenga el closure `onLoginSucceeded`:
+Verifica que tu `LoginViewModel` tenga el navigator:
 
 ```swift
 // En Features/Login/Interface/LoginViewModel.swift
 
-@MainActor
+
 @Observable
 class LoginViewModel {
-    private let loginUseCase: LoginUseCase
-    private let onLoginSucceeded: (Session) -> Void
+    private let useCase: AuthenticateUserUseCase
+    private weak var navigator: (any LoginNavigating)?
     
     var email: String = ""
     var password: String = ""
@@ -356,11 +352,11 @@ class LoginViewModel {
     var errorMessage: String?
     
     init(
-        loginUseCase: LoginUseCase,
-        onLoginSucceeded: @escaping (Session) -> Void
+        useCase: AuthenticateUserUseCase,
+        navigator: any LoginNavigating
     ) {
-        self.loginUseCase = loginUseCase
-        self.onLoginSucceeded = onLoginSucceeded
+        self.useCase = useCase
+        self.navigator = navigator
     }
     
     func submit() async {
@@ -372,12 +368,12 @@ class LoginViewModel {
             let passwordVO = try Password(value: password)
             let credentials = Credentials(email: emailVO, password: passwordVO)
             
-            let session = try await loginUseCase.execute(credentials: credentials)
+            _ = try await useCase.execute(credentials: credentials)
             
-            // ÉXITO: Emitimos el evento al coordinador
-            onLoginSucceeded(session)
+            // ÉXITO: Delegamos la navegación al navigator
+            navigator?.goToCatalog()
             
-        } catch let error as AuthError {
+        } catch let error as LoginError {
             errorMessage = error.localizedDescription
         } catch {
             errorMessage = "Error desconocido"
@@ -422,7 +418,7 @@ class LoginViewModel {
 | Problema | Causa probable | Solución |
 |----------|---------------|----------|
 | "NavigationPath not found" | iOS 16+ requerido | Verifica deployment target ≥ iOS 16 |
-| No navega después de login | Closure no llamado | Revisa que `onLoginSucceeded(session)` se ejecute |
+| No navega después de login | Navigator nil o no llamado | Verifica que el AppCoordinator implemente `LoginNavigating` y se pase al ViewModel |
 | Catalog vacío | Stub no tiene datos | Verifica que `StubProductRepository` devuelva productos |
 | Imágenes no cargan | URL inválida | Usa URLs de picsum.photos o placeholders locales |
 | "Cannot find 'AppCoordinator'" | Archivo no en target | Selecciona archivo → Inspector → Target membership |

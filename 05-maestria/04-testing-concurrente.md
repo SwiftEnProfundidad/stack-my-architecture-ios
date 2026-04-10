@@ -376,13 +376,13 @@ private func makeSUT(
     statusCode: Int = 200,
     file: StaticString = #filePath,
     line: UInt = #line
-) throws -> (sut: RemoteAuthGateway, client: HTTPClientStub) {
+) throws -> (sut: AuthHTTPRepository, client: HTTPClientStub) {
     let client = HTTPClientStub(data: data, statusCode: statusCode)
-    let sut = RemoteAuthGateway(httpClient: client, baseURL: baseURL)
+    let sut = AuthHTTPRepository(httpClient: client, baseURL: baseURL)
     
     // ✅ Verificar que ni el SUT ni el client tienen memory leaks
     trackForMemoryLeaks(client, file: file, line: line)
-    // RemoteAuthGateway es un struct, no se puede trackear (no es AnyObject).
+    // AuthHTTPRepository es un struct, no se puede trackear (no es AnyObject).
     // Solo se trackean clases.
     
     return (sut, client)

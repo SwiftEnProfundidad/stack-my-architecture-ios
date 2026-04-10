@@ -2,27 +2,27 @@
 
 ## El caso de uso que orquesta todo el flujo
 
-En la lección anterior construimos la capa Domain: los Value Objects `Email` y `Password`, los errores `AuthError`, los eventos `LoginEvent`, y el modelo `Session`. Todo puro, sin dependencias externas, testeado con XCTest.
+En la lección anterior construimos la capa Domain: los Value Objects `EmailAddress` y `Password`, los errores `LoginError`, los eventos `LoginEvent`, y el modelo `UserSession`. Todo puro, sin dependencias externas, testeado con XCTest.
 
 Ahora subimos una capa. La capa Application contiene los **casos de uso**, que son las operaciones de negocio completas. Un caso de uso recibe datos crudos (los strings que el usuario escribió), los valida usando el Domain, delega operaciones externas a través de un protocolo (un "puerto"), y devuelve un resultado.
 
 En esta lección vamos a construir dos cosas:
 
-El **puerto** `AuthGateway`, que es el protocolo que define la interfaz de autenticación. El caso de uso sabe que necesita "algo que pueda autenticar credenciales", pero no sabe (ni le importa) si es un servidor real, un fake, o un mock.
+El **puerto** `AuthRepository`, que es el protocolo que define la interfaz de autenticación. El caso de uso sabe que necesita "algo que pueda autenticar credenciales", pero no sabe (ni le importa) si es un servidor real, un fake, o un mock.
 
-El **caso de uso** `LoginUseCase`, que orquesta el flujo completo: valida email, valida password, construye credenciales, delega autenticación, y traduce errores.
+El **caso de uso** `AuthenticateUserUseCase`, que orquesta el flujo completo: valida email, valida password, construye credenciales, delega autenticación, y traduce errores.
 
 Todo con TDD usando XCTest, un test a la vez.
 
-> **Nota de nomenclatura y diseño lección ↔ scaffold:** En esta lección usamos `AuthGateway` y `LoginUseCase`. En el scaffold SPM (`apps/ios/ArchitectureKit`) los equivalentes son `AuthRepository` y `AuthenticateUserUseCase`. Pero la diferencia va más allá del nombre:
+> **Nota de nomenclatura y diseño lección ↔ scaffold:** En esta lección usamos `AuthRepository` y `AuthenticateUserUseCase`. En el scaffold SPM (`apps/ios/ArchitectureKit`) los equivalentes son `AuthRepository` y `AuthenticateUserUseCase`. Pero la diferencia va más allá del nombre:
 >
 > | Lección | Scaffold | Qué cambia |
 > |---|---|---|
-> | `AuthGateway` (protocol) | `AuthRepository` | Solo nombre |
-> | `LoginUseCase` con `LoginUseCase.Error` (4 casos) | `AuthenticateUserUseCase` **sin error propio** | El scaffold no necesita traducción de errores porque ya usa `LoginError` unificado |
-> | `LoginUseCase.execute` con 3 bloques `do/catch` para traducir | `execute` con 2 líneas limpias: `try EmailAddress(email)`, `try Password(password)` | La traducción de errores es innecesaria con enum unificado |
-> | `AuthGatewayStub` — `class` con `@unchecked Sendable` | `AuthRepositoryStub` — `actor` (Sendable por definición) | El scaffold usa `actor` como patrón más seguro para stubs |
-> | Devuelve `Session` | Devuelve `UserSession` | Campos diferentes (ver nota en [01-domain](01-domain.md)) |
+> | `AuthRepository` (protocol) | `AuthRepository` | Solo nombre |
+> | `AuthenticateUserUseCase` con `LoginError` (4 casos) | `AuthenticateUserUseCase` **sin error propio** | El scaffold no necesita traducción de errores porque ya usa `LoginError` unificado |
+> | `AuthenticateUserUseCase.execute` con 3 bloques `do/catch` para traducir | `execute` con 2 líneas limpias: `try EmailAddress(email)`, `try Password(password)` | La traducción de errores es innecesaria con enum unificado |
+> | `AuthRepositoryStub` — `class` con `@unchecked Sendable` | `AuthRepositoryStub` — `actor` (Sendable por definición) | El scaffold usa `actor` como patrón más seguro para stubs |
+> | Devuelve `UserSession` | Devuelve `UserSession` | Campos diferentes (ver nota en [01-domain](01-domain.md)) |
 >
 > **¿Por qué la lección enseña error translation?** Porque es un patrón fundamental en Clean Architecture que necesitarás en sistemas donde las capas internas tienen tipos de error distintos a la API pública de la feature. En el scaffold, como todos los errores son `LoginError` desde el principio, la traducción es innecesaria. La lección te enseña el patrón general; el scaffold muestra el caso pragmático donde ese patrón se simplifica.
 >
@@ -33,7 +33,7 @@ Todo con TDD usando XCTest, un test a la vez.
 Antes de implementar el caso de uso, conecta esta lección con [Principios de ingeniería](../01-principios-ingenieria.md):
 
 - **¿Recuerdas el Principio 1?** Primero dejamos claro qué orquesta el caso de uso y qué no debe hacer.
-- **Principio 4 (bajo acoplamiento):** por eso introducimos `AuthGateway` como puerto en lugar de acoplar `LoginUseCase` a red directa.
+- **Principio 4 (bajo acoplamiento):** por eso introducimos `AuthRepository` como puerto en lugar de acoplar `AuthenticateUserUseCase` a red directa.
 
 ---
 
@@ -41,17 +41,17 @@ Antes de implementar el caso de uso, conecta esta lección con [Principios de in
 
 Un puerto/protocolo es simplemente un protocolo Swift que define una interfaz que el caso de uso necesita pero que no implementa. Es la materialización del principio de inversión de dependencias que explicamos en lecciones anteriores.
 
-Piensa en ello así: el `LoginUseCase` necesita autenticar credenciales contra un servidor. Pero si el caso de uso llamara directamente a `URLSession`, estaría acoplado a la red. No podrías testearlo sin un servidor real. No podrías hacer previews sin conexión. No podrías cambiar de URLSession a otra librería sin modificar el caso de uso.
+Piensa en ello así: el `AuthenticateUserUseCase` necesita autenticar credenciales contra un servidor. Pero si el caso de uso llamara directamente a `URLSession`, estaría acoplado a la red. No podrías testearlo sin un servidor real. No podrías hacer previews sin conexión. No podrías cambiar de URLSession a otra librería sin modificar el caso de uso.
 
 La solución es definir un protocolo/puerto que diga "necesito algo que pueda recibir credenciales y devolver una sesión o un error". El caso de uso depende de este protocolo/puerto, no de una implementación concreta. Y la implementación concreta (que vive en la capa Infrastructure) implementa ese protocolo/puerto. Es como el enchufe y la bombilla que mencionamos en la lección de principios: la interfaz estándar que permite cambiar una pieza sin afectar a la otra.
 
-### El protocolo AuthGateway
+### El protocolo AuthRepository
 
 ```swift
-// StackMyArchitecture/Features/Login/Application/Ports/AuthGateway.swift
+// StackMyArchitecture/Features/Login/Application/Ports/AuthRepository.swift
 
-protocol AuthGateway: Sendable {
-    func authenticate(credentials: Credentials) async throws -> Session
+protocol AuthRepository: Sendable {
+    func authenticate(credentials: Credentials) async throws -> UserSession
 }
 ```
 
@@ -59,33 +59,33 @@ Vamos a analizar cada aspecto de esta declaración, porque cada palabra está ah
 
 **`protocol`** — es un protocolo/puerto, no una clase ni un struct. Esto es fundamental: define una interfaz sin implementación. Cualquier tipo que conforme este protocolo/puerto puede ser usado por el caso de uso.
 
-**`AuthGateway`** — el nombre usa el lenguaje ubicuo del dominio. No es `NetworkService`, ni `APIClient`, ni `AuthManager`. Es un "gateway de autenticación": una puerta de entrada al servicio de autenticación, sea cual sea su implementación.
+**`AuthRepository`** — el nombre usa el lenguaje ubicuo del dominio. No es `NetworkService`, ni `APIClient`, ni `AuthManager`. Es un "gateway de autenticación": una puerta de entrada al servicio de autenticación, sea cual sea su implementación.
 
 **`: Sendable`** — el protocolo es `Sendable` porque en Swift 6 con strict concurrency, cualquier tipo que se use en contextos async debe ser `Sendable`. Las implementaciones de este protocolo van a ser llamadas desde funciones `async`, así que necesitamos garantizar que son seguras para concurrencia.
 
 **`func authenticate(credentials: Credentials)`** — recibe un `Credentials` (que ya sabemos que es válido, porque los Value Objects se validaron en la construcción). No recibe strings crudos. ¿Por qué? Porque la responsabilidad de validar los datos de entrada es del caso de uso, no del gateway. Cuando los datos llegan al gateway, ya están validados.
 
-**`async throws -> Session`** — la operación es asíncrona (requiere una petición de red o similar) y puede fallar. Si falla, lanza un error. Si tiene éxito, devuelve una `Session`.
+**`async throws -> UserSession`** — la operación es asíncrona (requiere una petición de red o similar) y puede fallar. Si falla, lanza un error. Si tiene éxito, devuelve una `UserSession`.
 
 Fíjate en lo que este protocolo **no** dice: no dice nada de URLs, ni de HTTP, ni de JSON, ni de tokens de autorización. Solo dice "dame credenciales, te devuelvo una sesión o un error". Los detalles de cómo se implementa eso son responsabilidad de la capa Infrastructure, que veremos en la siguiente lección.
 
 ---
 
-## Diagrama: el flujo completo del LoginUseCase
+## Diagrama: el flujo completo del AuthenticateUserUseCase
 
 Antes de implementar, visualiza qué hace el caso de uso paso a paso:
 
 ```mermaid
 sequenceDiagram
     participant Caller as ViewModel
-    participant UC as LoginUseCase
+    participant UC as AuthenticateUserUseCase
     participant Domain as Domain
-    participant GW as AuthGateway
+    participant GW as AuthRepository
 
     Caller->>UC: execute email y password
     
-    UC->>Domain: try Email user@test.com
-    Domain-->>UC: Email valido
+    UC->>Domain: try EmailAddress user@test.com
+    Domain-->>UC: EmailAddress valido
     
     UC->>Domain: try Password Pass1234
     Domain-->>UC: Password valido
@@ -96,18 +96,18 @@ sequenceDiagram
     UC->>GW: await authenticate credentials
     
     alt Exito
-        GW-->>UC: Session token abc123
-        UC-->>Caller: success Session
+        GW-->>UC: UserSession token abc123
+        UC-->>Caller: success UserSession
     end
     
     alt Credenciales incorrectas
-        GW-->>UC: throws AuthError.invalidCredentials
-        UC-->>Caller: throws AuthError.invalidCredentials
+        GW-->>UC: throws LoginError.invalidCredentials
+        UC-->>Caller: throws LoginError.invalidCredentials
     end
     
     alt Sin conexión
-        GW-->>UC: throws AuthError.connectivity
-        UC-->>Caller: throws AuthError.connectivity
+        GW-->>UC: throws LoginError.connectivity
+        UC-->>Caller: throws LoginError.connectivity
     end
 ```
 
@@ -123,44 +123,44 @@ No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. E
 ```mermaid
 graph LR
     subgraph Test["En TESTS - rapido, determinista"]
-        UC1["LoginUseCase"] ==>|"protocolo"| STUB["AuthGatewayStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
+        UC1["AuthenticateUserUseCase"] ==>|"protocolo"| STUB["AuthRepositoryStub<br/>Devuelve lo que<br/>tu configures<br/>0ms"]
     end
 
     subgraph Prod["En PRODUCCION - real"]
-        UC2["LoginUseCase"] ==>|"protocolo"| REMOTE["RemoteAuthGateway<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
+        UC2["AuthenticateUserUseCase"] ==>|"protocolo"| REMOTE["AuthHTTPRepository<br/>Llama al servidor<br/>real por HTTP<br/>500ms+"]
     end
 
     style Test fill:#d4edda,stroke:#28a745
     style Prod fill:#cce5ff,stroke:#007bff
 ```
 
-El mismo `LoginUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthGateway` (su protocolo/puerto). **Esto es inyección de dependencias en acción.**
+El mismo `AuthenticateUserUseCase` funciona con ambos. No sabe si detrás hay un stub o un servidor real. Solo sabe que tiene un `AuthRepository` (su protocolo/puerto). **Esto es inyección de dependencias en acción.**
 
 ---
 
-## Construyendo el LoginUseCase con TDD
+## Construyendo el AuthenticateUserUseCase con TDD
 
-Ahora viene la parte más importante de esta lección: implementar el caso de uso con TDD. Vamos a necesitar un doble de test (un stub) del protocolo/puerto `AuthGateway` para poder testear el caso de uso sin depender de infraestructura real. Lo construiremos conforme lo necesitemos.
+Ahora viene la parte más importante de esta lección: implementar el caso de uso con TDD. Vamos a necesitar un doble de test (un stub) del protocolo/puerto `AuthRepository` para poder testear el caso de uso sin depender de infraestructura real. Lo construiremos conforme lo necesitemos.
 
-### Primero: el doble de test (AuthGatewayStub)
+### Primero: el doble de test (AuthRepositoryStub)
 
-Para testear el `LoginUseCase` de forma aislada, necesitamos una implementación falsa de `AuthGateway` que podamos configurar para devolver lo que necesitemos en cada test. A esto se le llama un **stub**: un doble de test que devuelve valores predeterminados.
+Para testear el `AuthenticateUserUseCase` de forma aislada, necesitamos una implementación falsa de `AuthRepository` que podamos configurar para devolver lo que necesitemos en cada test. A esto se le llama un **stub**: un doble de test que devuelve valores predeterminados.
 
 ```swift
-// StackMyArchitectureTests/Features/Login/Helpers/AuthGatewayStub.swift
+// StackMyArchitectureTests/Features/Login/Helpers/AuthRepositoryStub.swift
 
 import XCTest
 @testable import StackMyArchitecture
 
-final class AuthGatewayStub: AuthGateway, @unchecked Sendable {
-    private let result: Result<Session, AuthError>
+final class AuthRepositoryStub: AuthRepository, @unchecked Sendable {
+    private let result: Result<UserSession, LoginError>
     private(set) var receivedCredentials: Credentials?
     
-    init(result: Result<Session, AuthError>) {
+    init(result: Result<UserSession, LoginError>) {
         self.result = result
     }
     
-    func authenticate(credentials: Credentials) async throws -> Session {
+    func authenticate(credentials: Credentials) async throws -> UserSession {
         receivedCredentials = credentials
         return try result.get()
     }
@@ -171,13 +171,13 @@ final class AuthGatewayStub: AuthGateway, @unchecked Sendable {
 
 **Explicación línea por línea** (en la [Metodología TDD](../02-metodologia-tdd-practica.md) explicamos los tipos de dobles de test: stub, spy, mock):**
 
-`final class AuthGatewayStub: AuthGateway, @unchecked Sendable` — Es una clase, no un struct. ¿Por qué? Porque necesitamos **mutabilidad**: cuando el UseCase llame a `authenticate`, queremos guardar las credenciales que recibió (eso es mutar la propiedad `receivedCredentials`). Los structs no permiten eso fácilmente en funciones de protocolo. `: AuthGateway` significa que conforma el protocolo — es decir, tiene el mismo método `authenticate` que el AuthGateway real. Esto es clave: el UseCase no sabe si recibe un stub o el real, porque ambos conforman el mismo protocolo. `@unchecked Sendable` le dice al compilador "confía en mí, este tipo es seguro para concurrencia". En producción evitamos `@unchecked`, pero en tests es aceptable porque cada test se ejecuta de forma aislada.
+`final class AuthRepositoryStub: AuthRepository, @unchecked Sendable` — Es una clase, no un struct. ¿Por qué? Porque necesitamos **mutabilidad**: cuando el UseCase llame a `authenticate`, queremos guardar las credenciales que recibió (eso es mutar la propiedad `receivedCredentials`). Los structs no permiten eso fácilmente en funciones de protocolo. `: AuthRepository` significa que conforma el protocolo — es decir, tiene el mismo método `authenticate` que el AuthRepository real. Esto es clave: el UseCase no sabe si recibe un stub o el real, porque ambos conforman el mismo protocolo. `@unchecked Sendable` le dice al compilador "confía en mí, este tipo es seguro para concurrencia". En producción evitamos `@unchecked`, pero en tests es aceptable porque cada test se ejecuta de forma aislada.
 
-`private let result: Result<Session, AuthError>` — El stub se configura en el constructor con el resultado que queremos que devuelva. `Result` es un tipo de Swift que puede ser `.success(valor)` o `.failure(error)`. Si queremos testear el caso feliz: `.success(session)`. Si queremos testear un error: `.failure(.invalidCredentials)`. Esto nos da **control total** sobre lo que "responde" el gateway en cada test.
+`private let result: Result<UserSession, LoginError>` — El stub se configura en el constructor con el resultado que queremos que devuelva. `Result` es un tipo de Swift que puede ser `.success(valor)` o `.failure(error)`. Si queremos testear el caso feliz: `.success(session)`. Si queremos testear un error: `.failure(.invalidCredentials)`. Esto nos da **control total** sobre lo que "responde" el gateway en cada test.
 
 `private(set) var receivedCredentials: Credentials?` — Esta propiedad es la parte **spy** del stub. Registra las credenciales que el stub recibió cuando fue llamado. `private(set)` significa que solo el propio stub puede cambiar su valor (en `authenticate`), pero desde fuera del stub puedes leerlo. Es `Optional` (`Credentials?`) porque empieza en `nil` (nadie ha llamado al stub todavía). Si después de ejecutar el test `receivedCredentials` sigue siendo `nil`, significa que el gateway **nunca fue llamado**. Esto es útil para verificar que el UseCase NO llama al gateway cuando el email es inválido.
 
-`func authenticate(credentials: Credentials) async throws -> Session` — Este método tiene exactamente la misma firma que el protocolo `AuthGateway`. El compilador nos obliga: si no implementamos este método con esta firma exacta, no conformamos el protocolo y no compila.
+`func authenticate(credentials: Credentials) async throws -> UserSession` — Este método tiene exactamente la misma firma que el protocolo `AuthRepository`. El compilador nos obliga: si no implementamos este método con esta firma exacta, no conformamos el protocolo y no compila.
 
 `receivedCredentials = credentials` — **Registra** las credenciales que recibió. Esto es lo que hace que sea un spy, no solo un stub.
 
@@ -190,17 +190,17 @@ Este es el test del escenario BDD "Login exitoso con credenciales válidas". Es 
 **Red:**
 
 ```swift
-// StackMyArchitectureTests/Features/Login/Application/LoginUseCaseTests.swift
+// StackMyArchitectureTests/Features/Login/Application/AuthenticateUserUseCaseTests.swift
 
 import XCTest
 @testable import StackMyArchitecture
 
-final class LoginUseCaseTests: XCTestCase {
+final class AuthenticateUserUseCaseTests: XCTestCase {
     
     func test_execute_with_valid_credentials_returns_session() async throws {
-        let expectedSession = Session(token: "valid-token", email: "user@example.com")
-        let gateway = AuthGatewayStub(result: .success(expectedSession))
-        let sut = LoginUseCase(authGateway: gateway)
+        let expectedSession = UserSession(token: "valid-token", email: "user@example.com")
+        let gateway = AuthRepositoryStub(result: .success(expectedSession))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         let session = try await sut.execute(email: "user@example.com", password: "pass123")
         
@@ -225,11 +225,11 @@ graph LR
 
 **Fase ARRANGE (preparar el escenario):**
 
-`let expectedSession = Session(token: "valid-token", email: "user@example.com")` — Creamos la sesión que esperamos recibir como resultado. La creamos nosotros para poder compararla después en el assert. "valid-token" y "user@example.com" son valores inventados para el test — no importa qué valores sean, lo que importa es que el resultado coincida con lo que configuramos.
+`let expectedSession = UserSession(token: "valid-token", email: "user@example.com")` — Creamos la sesión que esperamos recibir como resultado. La creamos nosotros para poder compararla después en el assert. "valid-token" y "user@example.com" son valores inventados para el test — no importa qué valores sean, lo que importa es que el resultado coincida con lo que configuramos.
 
-`let gateway = AuthGatewayStub(result: .success(expectedSession))` — Creamos el stub del gateway y le decimos: "cuando te pidan autenticar, devuelve éxito con esta sesión". Esto simula que el servidor acepta las credenciales y devuelve un token válido. Es como programar a un actor: "cuando te pregunten, di esta frase".
+`let gateway = AuthRepositoryStub(result: .success(expectedSession))` — Creamos el stub del gateway y le decimos: "cuando te pidan autenticar, devuelve éxito con esta sesión". Esto simula que el servidor acepta las credenciales y devuelve un token válido. Es como programar a un actor: "cuando te pregunten, di esta frase".
 
-`let sut = LoginUseCase(authGateway: gateway)` — Creamos el componente que queremos testear: el `LoginUseCase`. Le **inyectamos** el stub como dependencia. `sut` significa "System Under Test" (sistema bajo prueba). Es una convención universal en testing para dejar claro cuál es el objeto que estamos testeando. Siempre que veas `sut` en un test, sabes que es el protagonista.
+`let sut = AuthenticateUserUseCase(repository: gateway)` — Creamos el componente que queremos testear: el `AuthenticateUserUseCase`. Le **inyectamos** el stub como dependencia. `sut` significa "System Under Test" (sistema bajo prueba). Es una convención universal en testing para dejar claro cuál es el objeto que estamos testeando. Siempre que veas `sut` en un test, sabes que es el protagonista.
 
 **Fase ACT (ejecutar la acción):**
 
@@ -241,58 +241,58 @@ graph LR
 
 **¿Qué demuestra este test?** Que cuando le pasamos un email válido y un password válido al UseCase, y el gateway responde con éxito, el UseCase nos devuelve la sesión correcta. Es el escenario BDD del "camino feliz" traducido a código ejecutable.
 
-Ejecutamos. No compila porque `LoginUseCase` no existe. Eso es nuestro rojo.
+Ejecutamos. No compila porque `AuthenticateUserUseCase` no existe. Eso es nuestro rojo.
 
 **Green:** Implementamos lo mínimo:
 
 ```swift
-// StackMyArchitecture/Features/Login/Application/UseCases/LoginUseCase.swift
+// StackMyArchitecture/Features/Login/Application/UseCases/AuthenticateUserUseCase.swift
 
-struct LoginUseCase: Sendable {
-    private let authGateway: any AuthGateway
+struct AuthenticateUserUseCase: Sendable {
+    private let authRepository: any AuthRepository
     
-    init(authGateway: any AuthGateway) {
-        self.authGateway = authGateway
+    init(authRepository: any AuthRepository) {
+        self.authRepository = authRepository
     }
     
-    func execute(email: String, password: String) async throws -> Session {
-        let validEmail = try Email(email)
+    func execute(email: String, password: String) async throws -> UserSession {
+        let validEmail = try EmailAddress(email)
         let validPassword = try Password(password)
         let credentials = Credentials(email: validEmail, password: validPassword)
-        return try await authGateway.authenticate(credentials: credentials)
+        return try await authRepository.authenticate(credentials: credentials)
     }
 }
 ```
 
-**Explicación línea por línea del LoginUseCase:**
+**Explicación línea por línea del AuthenticateUserUseCase:**
 
-`struct LoginUseCase: Sendable` — Es un struct, no una clase. ¿Por qué? Porque el UseCase no tiene estado mutable. Solo tiene una referencia al gateway (que es `let`, constante). Los structs son más ligeros que las clases y no necesitan gestión de memoria (ARC). `Sendable` le dice al compilador que este tipo es seguro para concurrencia (puede usarse desde funciones `async` sin problemas).
+`struct AuthenticateUserUseCase: Sendable` — Es un struct, no una clase. ¿Por qué? Porque el UseCase no tiene estado mutable. Solo tiene una referencia al gateway (que es `let`, constante). Los structs son más ligeros que las clases y no necesitan gestión de memoria (ARC). `Sendable` le dice al compilador que este tipo es seguro para concurrencia (puede usarse desde funciones `async` sin problemas).
 
-`private let authGateway: any AuthGateway` — La dependencia del UseCase. Es un **protocolo** (`AuthGateway`), no un tipo concreto. La palabra `any` es obligatoria en Swift 5.7+ para indicar que es un "existential type" (un tipo que puede ser cualquier cosa que conforme el protocolo). Esto es la clave de la **inyección de dependencias**: el UseCase no sabe si el gateway es real (llama a un servidor) o un stub (devuelve datos fijos). Solo sabe que tiene un método `authenticate`.
+`private let authRepository: any AuthRepository` — La dependencia del UseCase. Es un **protocolo** (`AuthRepository`), no un tipo concreto. La palabra `any` es obligatoria en Swift 5.7+ para indicar que es un "existential type" (un tipo que puede ser cualquier cosa que conforme el protocolo). Esto es la clave de la **inyección de dependencias**: el UseCase no sabe si el gateway es real (llama a un servidor) o un stub (devuelve datos fijos). Solo sabe que tiene un método `authenticate`.
 
-`init(authGateway: any AuthGateway)` — El constructor recibe el gateway como parámetro. No lo crea él. Esto es **inyección de dependencias por constructor**: alguien de fuera (el Composition Root o el test) le pasa la dependencia. Si el UseCase creara su propia dependencia (`let gateway = RemoteAuthGateway()`), no podríamos testearlo sin un servidor real.
+`init(authRepository: any AuthRepository)` — El constructor recibe el gateway como parámetro. No lo crea él. Esto es **inyección de dependencias por constructor**: alguien de fuera (el Composition Root o el test) le pasa la dependencia. Si el UseCase creara su propia dependencia (`let gateway = AuthHTTPRepository()`), no podríamos testearlo sin un servidor real.
 
-`func execute(email: String, password: String) async throws -> Session` — La interfaz pública del UseCase. Recibe strings crudos (lo que el usuario escribió en la UI), y devuelve una `Session` o lanza un error. `async` porque la autenticación es asíncrona (requiere una petición de red). `throws` porque puede fallar (email inválido, sin conexión, credenciales rechazadas).
+`func execute(email: String, password: String) async throws -> UserSession` — La interfaz pública del UseCase. Recibe strings crudos (lo que el usuario escribió en la UI), y devuelve una `UserSession` o lanza un error. `async` porque la autenticación es asíncrona (requiere una petición de red). `throws` porque puede fallar (email inválido, sin conexión, credenciales rechazadas).
 
-`let validEmail = try Email(email)` — Intenta crear un Value Object `Email` a partir del string crudo. Si el string no tiene formato de email (no tiene @), el `Email.init` lanza `Email.ValidationError.invalidFormat`. El `try` propaga ese error hacia arriba. **Si esta línea falla, las siguientes no se ejecutan.** El gateway nunca se llama. Esto es importante: validamos ANTES de hacer la petición de red.
+`let validEmail = try EmailAddress(email)` — Intenta crear un Value Object `EmailAddress` a partir del string crudo. Si el string no tiene formato de email (no tiene @), el `EmailAddress.init` lanza `EmailAddress.ValidationError.invalidFormat`. El `try` propaga ese error hacia arriba. **Si esta línea falla, las siguientes no se ejecutan.** El gateway nunca se llama. Esto es importante: validamos ANTES de hacer la petición de red.
 
 `let validPassword = try Password(password)` — Lo mismo para el password. Si está vacío, `Password.init` lanza `Password.ValidationError.empty`.
 
 `let credentials = Credentials(email: validEmail, password: validPassword)` — Creamos el tipo `Credentials` que agrupa email y password validados. Si llegamos hasta aquí, sabemos con certeza que tanto el email como el password son válidos. No necesitamos volver a validar nunca más.
 
-`return try await authGateway.authenticate(credentials: credentials)` — Delegamos al gateway. `try` porque el gateway puede lanzar `AuthError.connectivity` o `AuthError.invalidCredentials`. `await` porque es asíncrono. El gateway devuelve una `Session` que nosotros devolvemos directamente al que nos llamó (el ViewModel).
+`return try await authRepository.authenticate(credentials: credentials)` — Delegamos al gateway. `try` porque el gateway puede lanzar `LoginError.connectivity` o `LoginError.invalidCredentials`. `await` porque es asíncrono. El gateway devuelve una `UserSession` que nosotros devolvemos directamente al que nos llamó (el ViewModel).
 
 **El flujo completo en un diagrama:**
 
 ```mermaid
 flowchart TD
-    INPUT["execute email: String, password: String"] --> V1["try Email email"]
+    INPUT["execute email: String, password: String"] --> V1["try EmailAddress email"]
     V1 -->|"Invalido"| ERR1["throws invalidEmail"]
     V1 -->|"Valido"| V2["try Password password"]
     V2 -->|"Vacio"| ERR2["throws emptyPassword"]
     V2 -->|"Valido"| CRED["Credentials email, password"]
     CRED --> GW["await gateway.authenticate credentials"]
-    GW -->|"Exito"| OK["return Session"]
+    GW -->|"Exito"| OK["return UserSession"]
     GW -->|"Red falla"| ERR3["throws connectivity"]
     GW -->|"Rechazado"| ERR4["throws invalidCredentials"]
 
@@ -315,8 +315,8 @@ Este test verifica un aspecto diferente: que el caso de uso pasa al gateway las 
 
 ```swift
 func test_execute_sends_validated_credentials_to_gateway() async throws {
-    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     _ = try await sut.execute(email: "user@example.com", password: "pass123")
     
@@ -327,7 +327,7 @@ func test_execute_sends_validated_credentials_to_gateway() async throws {
 
 Ejecutamos. Pasa sin cambios. Las credenciales ya se pasan correctamente. El test tiene valor documental: deja explícito que el caso de uso transforma los strings de entrada en Value Objects validados antes de pasarlos al gateway.
 
-### Iteración 3: Email inválido devuelve error
+### Iteración 3: EmailAddress inválido devuelve error
 
 Ahora testeamos el primer sad path: qué pasa cuando el email no tiene formato válido.
 
@@ -335,31 +335,31 @@ Ahora testeamos el primer sad path: qué pasa cuando el email no tiene formato v
 
 ```swift
 func test_execute_with_invalid_email_throws_invalidEmail() async {
-    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     do {
         _ = try await sut.execute(email: "invalid-email", password: "pass123")
         XCTFail("Expected error but succeeded")
     } catch {
-        XCTAssertTrue(error is Email.ValidationError)
+        XCTAssertTrue(error is EmailAddress.ValidationError)
     }
 }
 ```
 
-Ejecutamos. Pasa, porque `Email("invalid-email")` ya lanza `Email.ValidationError.invalidFormat` y nuestro `execute` propaga el error con `try`. Pero hay un problema: el error que recibe el llamante es `Email.ValidationError.invalidFormat`, que es un tipo interno del Domain. ¿Queremos que la UI tenga que conocer los tipos internos de validación del Domain? No. Queremos que el caso de uso traduzca ese error a un error propio, más limpio.
+Ejecutamos. Pasa, porque `EmailAddress("invalid-email")` ya lanza `EmailAddress.ValidationError.invalidFormat` y nuestro `execute` propaga el error con `try`. Pero hay un problema: el error que recibe el llamante es `EmailAddress.ValidationError.invalidFormat`, que es un tipo interno del Domain. ¿Queremos que la UI tenga que conocer los tipos internos de validación del Domain? No. Queremos que el caso de uso traduzca ese error a un error propio, más limpio.
 
 Vamos a modificar el test para pedir un error del caso de uso, no del Domain:
 
 ```swift
 func test_execute_with_invalid_email_throws_invalidEmail() async {
-    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     do {
         _ = try await sut.execute(email: "invalid-email", password: "pass123")
-        XCTFail("Expected LoginUseCase.Error.invalidEmail but succeeded")
-    } catch let error as LoginUseCase.Error {
+        XCTFail("Expected LoginError.invalidEmail but succeeded")
+    } catch let error as LoginError {
         XCTAssertEqual(error, .invalidEmail)
     } catch {
         XCTFail("Unexpected error type: \(error)")
@@ -367,16 +367,16 @@ func test_execute_with_invalid_email_throws_invalidEmail() async {
 }
 ```
 
-Ejecutamos. Falla porque `LoginUseCase.Error` no existe y el caso de uso no traduce errores.
+Ejecutamos. Falla porque `LoginError` no existe y el caso de uso no traduce errores.
 
 **Green:** Añadimos el tipo de error y la traducción:
 
 ```swift
-struct LoginUseCase: Sendable {
-    private let authGateway: any AuthGateway
+struct AuthenticateUserUseCase: Sendable {
+    private let authRepository: any AuthRepository
     
-    init(authGateway: any AuthGateway) {
-        self.authGateway = authGateway
+    init(authRepository: any AuthRepository) {
+        self.authRepository = authRepository
     }
     
     enum Error: Swift.Error, Equatable, Sendable {
@@ -386,10 +386,10 @@ struct LoginUseCase: Sendable {
         case connectivity
     }
     
-    func execute(email: String, password: String) async throws -> Session {
-        let validEmail: Email
+    func execute(email: String, password: String) async throws -> UserSession {
+        let validEmail: EmailAddress
         do {
-            validEmail = try Email(email)
+            validEmail = try EmailAddress(email)
         } catch {
             throw Error.invalidEmail
         }
@@ -404,8 +404,8 @@ struct LoginUseCase: Sendable {
         let credentials = Credentials(email: validEmail, password: validPassword)
         
         do {
-            return try await authGateway.authenticate(credentials: credentials)
-        } catch let authError as AuthError {
+            return try await authRepository.authenticate(credentials: credentials)
+        } catch let authError as LoginError {
             switch authError {
             case .invalidCredentials: throw Error.invalidCredentials
             case .connectivity: throw Error.connectivity
@@ -417,7 +417,7 @@ struct LoginUseCase: Sendable {
 
 Ejecutamos. Todos los tests pasan (incluido el test del happy path, que sigue funcionando).
 
-Fíjate en lo que ha pasado: el test nos obligó a introducir un tipo `LoginUseCase.Error` y a hacer traducción de errores. Esto es TDD guiando el diseño. Sin el test que pidió explícitamente un `LoginUseCase.Error`, podríamos haber dejado que los errores internos del Domain se propagaran a la UI, lo cual sería un acoplamiento incorrecto.
+Fíjate en lo que ha pasado: el test nos obligó a introducir un tipo `LoginError` y a hacer traducción de errores. Esto es TDD guiando el diseño. Sin el test que pidió explícitamente un `LoginError`, podríamos haber dejado que los errores internos del Domain se propagaran a la UI, lo cual sería un acoplamiento incorrecto.
 
 ### Iteración 4: Password vacío devuelve error
 
@@ -425,13 +425,13 @@ Fíjate en lo que ha pasado: el test nos obligó a introducir un tipo `LoginUseC
 
 ```swift
 func test_execute_with_empty_password_throws_emptyPassword() async {
-    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     do {
         _ = try await sut.execute(email: "user@example.com", password: "")
-        XCTFail("Expected LoginUseCase.Error.emptyPassword but succeeded")
-    } catch let error as LoginUseCase.Error {
+        XCTFail("Expected LoginError.emptyPassword but succeeded")
+    } catch let error as LoginError {
         XCTAssertEqual(error, .emptyPassword)
     } catch {
         XCTFail("Unexpected error type: \(error)")
@@ -439,7 +439,7 @@ func test_execute_with_empty_password_throws_emptyPassword() async {
 }
 ```
 
-Ejecutamos. Pasa sin cambios, porque la implementación ya traduce `Password.ValidationError` a `LoginUseCase.Error.emptyPassword`.
+Ejecutamos. Pasa sin cambios, porque la implementación ya traduce `Password.ValidationError` a `LoginError.emptyPassword`.
 
 ### Iteración 5: No se llama al gateway si el email es inválido
 
@@ -449,8 +449,8 @@ Este test verifica un comportamiento que los escenarios BDD requieren explícita
 
 ```swift
 func test_execute_with_invalid_email_does_not_call_gateway() async {
-    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     _ = try? await sut.execute(email: "invalid-email", password: "pass123")
     
@@ -458,7 +458,7 @@ func test_execute_with_invalid_email_does_not_call_gateway() async {
 }
 ```
 
-Ejecutamos. Pasa sin cambios, porque el `try Email(email)` falla antes de llegar a `authGateway.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
+Ejecutamos. Pasa sin cambios, porque el `try EmailAddress(email)` falla antes de llegar a `authRepository.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
 
 ### Iteración 6: Credenciales rechazadas por el servidor
 
@@ -468,13 +468,13 @@ Ahora testeamos los errores que vienen del gateway (no de la validación local).
 
 ```swift
 func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
-    let gateway = AuthGatewayStub(result: .failure(.invalidCredentials))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .failure(.invalidCredentials))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     do {
         _ = try await sut.execute(email: "user@example.com", password: "wrong")
-        XCTFail("Expected LoginUseCase.Error.invalidCredentials but succeeded")
-    } catch let error as LoginUseCase.Error {
+        XCTFail("Expected LoginError.invalidCredentials but succeeded")
+    } catch let error as LoginError {
         XCTAssertEqual(error, .invalidCredentials)
     } catch {
         XCTFail("Unexpected error type: \(error)")
@@ -482,7 +482,7 @@ func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
 }
 ```
 
-Ejecutamos. Pasa sin cambios, porque la implementación ya captura `AuthError.invalidCredentials` y lo traduce a `LoginUseCase.Error.invalidCredentials`.
+Ejecutamos. Pasa sin cambios, porque la implementación ya captura `LoginError.invalidCredentials` y lo traduce a `LoginError.invalidCredentials`.
 
 ### Iteración 7: Sin conectividad
 
@@ -490,13 +490,13 @@ Ejecutamos. Pasa sin cambios, porque la implementación ya captura `AuthError.in
 
 ```swift
 func test_execute_without_connectivity_throws_connectivity() async {
-    let gateway = AuthGatewayStub(result: .failure(.connectivity))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .failure(.connectivity))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     do {
         _ = try await sut.execute(email: "user@example.com", password: "pass123")
-        XCTFail("Expected LoginUseCase.Error.connectivity but succeeded")
-    } catch let error as LoginUseCase.Error {
+        XCTFail("Expected LoginError.connectivity but succeeded")
+    } catch let error as LoginError {
         XCTAssertEqual(error, .connectivity)
     } catch {
         XCTFail("Unexpected error type: \(error)")
@@ -510,16 +510,16 @@ Ejecutamos. Pasa. Todos los escenarios BDD están cubiertos.
 
 ## El código final completo
 
-### LoginUseCase (producción)
+### AuthenticateUserUseCase (producción)
 
 ```swift
-// StackMyArchitecture/Features/Login/Application/UseCases/LoginUseCase.swift
+// StackMyArchitecture/Features/Login/Application/UseCases/AuthenticateUserUseCase.swift
 
-struct LoginUseCase: Sendable {
-    private let authGateway: any AuthGateway
+struct AuthenticateUserUseCase: Sendable {
+    private let authRepository: any AuthRepository
     
-    init(authGateway: any AuthGateway) {
-        self.authGateway = authGateway
+    init(authRepository: any AuthRepository) {
+        self.authRepository = authRepository
     }
     
     enum Error: Swift.Error, Equatable, Sendable {
@@ -529,10 +529,10 @@ struct LoginUseCase: Sendable {
         case connectivity
     }
     
-    func execute(email: String, password: String) async throws -> Session {
-        let validEmail: Email
+    func execute(email: String, password: String) async throws -> UserSession {
+        let validEmail: EmailAddress
         do {
-            validEmail = try Email(email)
+            validEmail = try EmailAddress(email)
         } catch {
             throw Error.invalidEmail
         }
@@ -547,8 +547,8 @@ struct LoginUseCase: Sendable {
         let credentials = Credentials(email: validEmail, password: validPassword)
         
         do {
-            return try await authGateway.authenticate(credentials: credentials)
-        } catch let authError as AuthError {
+            return try await authRepository.authenticate(credentials: credentials)
+        } catch let authError as LoginError {
             switch authError {
             case .invalidCredentials: throw Error.invalidCredentials
             case .connectivity: throw Error.connectivity
@@ -558,22 +558,22 @@ struct LoginUseCase: Sendable {
 }
 ```
 
-### LoginUseCaseTests (tests completos)
+### AuthenticateUserUseCaseTests (tests completos)
 
 ```swift
-// StackMyArchitectureTests/Features/Login/Application/LoginUseCaseTests.swift
+// StackMyArchitectureTests/Features/Login/Application/AuthenticateUserUseCaseTests.swift
 
 import XCTest
 @testable import StackMyArchitecture
 
-final class LoginUseCaseTests: XCTestCase {
+final class AuthenticateUserUseCaseTests: XCTestCase {
     
     // MARK: - Happy Path
     
     func test_execute_with_valid_credentials_returns_session() async throws {
-        let expectedSession = Session(token: "valid-token", email: "user@example.com")
-        let gateway = AuthGatewayStub(result: .success(expectedSession))
-        let sut = LoginUseCase(authGateway: gateway)
+        let expectedSession = UserSession(token: "valid-token", email: "user@example.com")
+        let gateway = AuthRepositoryStub(result: .success(expectedSession))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         let session = try await sut.execute(email: "user@example.com", password: "pass123")
         
@@ -581,8 +581,8 @@ final class LoginUseCaseTests: XCTestCase {
     }
     
     func test_execute_sends_validated_credentials_to_gateway() async throws {
-        let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-        let sut = LoginUseCase(authGateway: gateway)
+        let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         _ = try await sut.execute(email: "user@example.com", password: "pass123")
         
@@ -593,13 +593,13 @@ final class LoginUseCaseTests: XCTestCase {
     // MARK: - Validation Errors
     
     func test_execute_with_invalid_email_throws_invalidEmail() async {
-        let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-        let sut = LoginUseCase(authGateway: gateway)
+        let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         do {
             _ = try await sut.execute(email: "invalid-email", password: "pass123")
-            XCTFail("Expected LoginUseCase.Error.invalidEmail but succeeded")
-        } catch let error as LoginUseCase.Error {
+            XCTFail("Expected LoginError.invalidEmail but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .invalidEmail)
         } catch {
             XCTFail("Unexpected error type: \(error)")
@@ -607,13 +607,13 @@ final class LoginUseCaseTests: XCTestCase {
     }
     
     func test_execute_with_empty_password_throws_emptyPassword() async {
-        let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-        let sut = LoginUseCase(authGateway: gateway)
+        let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         do {
             _ = try await sut.execute(email: "user@example.com", password: "")
-            XCTFail("Expected LoginUseCase.Error.emptyPassword but succeeded")
-        } catch let error as LoginUseCase.Error {
+            XCTFail("Expected LoginError.emptyPassword but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .emptyPassword)
         } catch {
             XCTFail("Unexpected error type: \(error)")
@@ -621,8 +621,8 @@ final class LoginUseCaseTests: XCTestCase {
     }
     
     func test_execute_with_invalid_email_does_not_call_gateway() async {
-        let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e")))
-        let sut = LoginUseCase(authGateway: gateway)
+        let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e")))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         _ = try? await sut.execute(email: "invalid-email", password: "pass123")
         
@@ -632,13 +632,13 @@ final class LoginUseCaseTests: XCTestCase {
     // MARK: - Gateway Errors
     
     func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
-        let gateway = AuthGatewayStub(result: .failure(.invalidCredentials))
-        let sut = LoginUseCase(authGateway: gateway)
+        let gateway = AuthRepositoryStub(result: .failure(.invalidCredentials))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         do {
             _ = try await sut.execute(email: "user@example.com", password: "wrong")
-            XCTFail("Expected LoginUseCase.Error.invalidCredentials but succeeded")
-        } catch let error as LoginUseCase.Error {
+            XCTFail("Expected LoginError.invalidCredentials but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .invalidCredentials)
         } catch {
             XCTFail("Unexpected error type: \(error)")
@@ -646,13 +646,13 @@ final class LoginUseCaseTests: XCTestCase {
     }
     
     func test_execute_without_connectivity_throws_connectivity() async {
-        let gateway = AuthGatewayStub(result: .failure(.connectivity))
-        let sut = LoginUseCase(authGateway: gateway)
+        let gateway = AuthRepositoryStub(result: .failure(.connectivity))
+        let sut = AuthenticateUserUseCase(repository: gateway)
         
         do {
             _ = try await sut.execute(email: "user@example.com", password: "pass123")
-            XCTFail("Expected LoginUseCase.Error.connectivity but succeeded")
-        } catch let error as LoginUseCase.Error {
+            XCTFail("Expected LoginError.connectivity but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .connectivity)
         } catch {
             XCTFail("Unexpected error type: \(error)")
@@ -669,9 +669,9 @@ final class LoginUseCaseTests: XCTestCase {
 |----------------|------------|-----------|
 | Login exitoso | `test_execute_with_valid_credentials_returns_session` | Verifica que se devuelve la sesión |
 | Credenciales correctas llegan al gateway | `test_execute_sends_validated_credentials_to_gateway` | Verifica que se pasan los Value Objects |
-| Email inválido | `test_execute_with_invalid_email_throws_invalidEmail` | Verifica el error tipado |
+| EmailAddress inválido | `test_execute_with_invalid_email_throws_invalidEmail` | Verifica el error tipado |
 | Password vacío | `test_execute_with_empty_password_throws_emptyPassword` | Verifica el error tipado |
-| Email inválido no contacta servidor | `test_execute_with_invalid_email_does_not_call_gateway` | Verifica que el gateway NO fue invocado |
+| EmailAddress inválido no contacta servidor | `test_execute_with_invalid_email_does_not_call_gateway` | Verifica que el gateway NO fue invocado |
 | Servidor rechaza credenciales | `test_execute_with_rejected_credentials_throws_invalidCredentials` | Verifica traducción de error |
 | Sin conectividad | `test_execute_without_connectivity_throws_connectivity` | Verifica traducción de error |
 
@@ -679,15 +679,15 @@ final class LoginUseCaseTests: XCTestCase {
 
 ## Por qué el caso de uso tiene sus propios errores
 
-Una decisión de diseño que merece una explicación más profunda es por qué `LoginUseCase` define su propio enum `Error` en lugar de propagar directamente los errores del Domain y la Infrastructure.
+Una decisión de diseño que merece una explicación más profunda es por qué `AuthenticateUserUseCase` define su propio enum `Error` en lugar de propagar directamente los errores del Domain y la Infrastructure.
 
-El motivo es que el caso de uso actúa como **frontera de la feature**. Es la interfaz pública que la capa Interface (la UI) consume. Si la UI tuviera que manejar `Email.ValidationError.invalidFormat` y `Password.ValidationError.empty` y `AuthError.invalidCredentials` y `AuthError.connectivity`, tendría que conocer los tipos internos del Domain. Eso sería acoplamiento entre la UI y el Domain.
+El motivo es que el caso de uso actúa como **frontera de la feature**. Es la interfaz pública que la capa Interface (la UI) consume. Si la UI tuviera que manejar `EmailAddress.ValidationError.invalidFormat` y `Password.ValidationError.empty` y `LoginError.invalidCredentials` y `LoginError.connectivity`, tendría que conocer los tipos internos del Domain. Eso sería acoplamiento entre la UI y el Domain.
 
-En su lugar, el caso de uso traduce todos los errores posibles a un conjunto unificado de errores (`LoginUseCase.Error`) que tiene sentido desde la perspectiva de la feature como un todo. La UI solo necesita conocer `LoginUseCase.Error`, que es limpio, completo, y no expone detalles internos.
+En su lugar, el caso de uso traduce todos los errores posibles a un conjunto unificado de errores (`LoginError`) que tiene sentido desde la perspectiva de la feature como un todo. La UI solo necesita conocer `LoginError`, que es limpio, completo, y no expone detalles internos.
 
-Si mañana cambiamos la validación del email (por ejemplo, añadiendo un nuevo caso de error `Email.ValidationError.disposableProvider`), el caso de uso puede decidir cómo traducir ese nuevo error sin que la UI se entere. Quizá lo traduce a `.invalidEmail` como los demás, quizá añade un nuevo caso a `LoginUseCase.Error`. Pero la decisión se toma aquí, no en la UI.
+Si mañana cambiamos la validación del email (por ejemplo, añadiendo un nuevo caso de error `EmailAddress.ValidationError.disposableProvider`), el caso de uso puede decidir cómo traducir ese nuevo error sin que la UI se entere. Quizá lo traduce a `.invalidEmail` como los demás, quizá añade un nuevo caso a `LoginError`. Pero la decisión se toma aquí, no en la UI.
 
-> **Contraste scaffold:** El scaffold toma un camino distinto pero igualmente válido. En vez de tener errores anidados por VO (`Email.ValidationError`) y luego traducirlos, usa un `LoginError` unificado desde el principio. Así el `AuthenticateUserUseCase` del scaffold no necesita traducción — los errores que lanzan `EmailAddress` y `Password` ya son `LoginError.invalidEmail` y `LoginError.invalidPassword`. Resultado: el caso de uso del scaffold son **4 líneas** sin `do/catch`.
+> **Contraste scaffold:** El scaffold toma un camino distinto pero igualmente válido. En vez de tener errores anidados por VO (`EmailAddress.ValidationError`) y luego traducirlos, usa un `LoginError` unificado desde el principio. Así el `AuthenticateUserUseCase` del scaffold no necesita traducción — los errores que lanzan `EmailAddress` y `Password` ya son `LoginError.invalidEmail` y `LoginError.invalidPassword`. Resultado: el caso de uso del scaffold son **4 líneas** sin `do/catch`.
 >
 > Ambos diseños son correctos. El de esta lección es más **explícito y extensible** (cada capa tiene su vocabulario de errores). El del scaffold es más **pragmático** (un enum unificado para 4 casos). Lo importante es que entiendas el trade-off: la traducción de errores añade claridad semántica a costa de verbosidad.
 
@@ -695,7 +695,7 @@ Si mañana cambiamos la validación del email (por ejemplo, añadiendo un nuevo 
 
 ## Por qué el caso de uso es un struct y no una clase
 
-El `LoginUseCase` es un `struct`, no un `class`. Esto puede parecer inusual si vienes de otros frameworks donde los servicios y use cases son clases singleton. Pero en nuestro caso, el `struct` es la opción correcta:
+El `AuthenticateUserUseCase` es un `struct`, no un `class`. Esto puede parecer inusual si vienes de otros frameworks donde los servicios y use cases son clases singleton. Pero en nuestro caso, el `struct` es la opción correcta:
 
 El caso de uso **no tiene estado mutable**. Recibe sus dependencias en el `init` y las guarda como `let`. No hay ninguna propiedad que cambie después de la construcción. Un struct inmutable es más seguro, más eficiente, y más fácil de razonar que una clase.
 
@@ -703,7 +703,7 @@ El caso de uso es `Sendable` automáticamente (porque es un struct con propiedad
 
 Si el caso de uso fuera una clase, necesitarías preocuparte por retención cíclica, por herencia accidental, y por identidad (dos instancias con las mismas dependencias serían diferentes objetos). Con un struct, nada de eso aplica.
 
-La propiedad `authGateway` es `any AuthGateway` (un existential). En teoría esto tiene un pequeño overhead de runtime comparado con usar un genérico (`struct LoginUseCase<Gateway: AuthGateway>`). En la práctica, este overhead es negligible para un caso de uso que se ejecuta una vez por acción del usuario. Si algún día el profiler mostrara que es un cuello de botella (spoiler: no lo será), lo cambiaríamos a genérico. Pero no optimizamos sin datos.
+La propiedad `authRepository` es `any AuthRepository` (un existential). En teoría esto tiene un pequeño overhead de runtime comparado con usar un genérico (`struct AuthenticateUserUseCase<Gateway: AuthRepository>`). En la práctica, este overhead es negligible para un caso de uso que se ejecuta una vez por acción del usuario. Si algún día el profiler mostrara que es un cuello de botella (spoiler: no lo será), lo cambiaríamos a genérico. Pero no optimizamos sin datos.
 
 ---
 
@@ -711,13 +711,13 @@ La propiedad `authGateway` es `any AuthGateway` (un existential). En teoría est
 
 Tenemos ahora la capa Application completa de la feature Login:
 
-Un protocolo `AuthGateway` que define la interfaz de autenticación, sin acoplamiento a ninguna implementación concreta.
+Un protocolo `AuthRepository` que define la interfaz de autenticación, sin acoplamiento a ninguna implementación concreta.
 
-Un caso de uso `LoginUseCase` que orquesta todo el flujo: valida con Value Objects, delega al gateway, traduce errores. No importa SwiftUI. No importa URLSession. No sabe nada de UI ni de red.
+Un caso de uso `AuthenticateUserUseCase` que orquesta todo el flujo: valida con Value Objects, delega al gateway, traduce errores. No importa SwiftUI. No importa URLSession. No sabe nada de UI ni de red.
 
 Siete tests XCTest que cubren todos los escenarios BDD: happy path, validación local, errores de gateway, y verificación de que el gateway no se invoca cuando los datos son inválidos.
 
-Un stub (`AuthGatewayStub`) que permite testear el caso de uso de forma aislada, rápida, y determinista.
+Un stub (`AuthRepositoryStub`) que permite testear el caso de uso de forma aislada, rápida, y determinista.
 
 ---
 
@@ -725,7 +725,7 @@ Un stub (`AuthGatewayStub`) que permite testear el caso de uso de forma aislada,
 
 > **Enterprise (Etapa 2+):** Esta sección describe un patrón que **no se implementa en Etapa 1**. Lo introducimos aquí como contexto porque los escenarios BDD de seguridad lo mencionan. La implementación real de `SessionRepository` y `KeychainClient` se aborda a partir de Etapa 2.
 
-El `LoginUseCase` devuelve una `Session` al llamante. Pero ¿quién decide dónde se guarda esa sesión? Y más importante: ¿cómo debe guardarse de forma segura?
+El `AuthenticateUserUseCase` devuelve una `UserSession` al llamante. Pero ¿quién decide dónde se guarda esa sesión? Y más importante: ¿cómo debe guardarse de forma segura?
 
 ### No uses UserDefaults para tokens
 
@@ -746,7 +746,7 @@ Apple proporciona **Keychain Services** como solución oficial para almacenar da
 - Se excluye de backups no cifrados.
 - Se integra con Face ID / Touch ID para acceder a datos sensibles.
 
-Para una `Session` que contiene `accessToken`, el patrón enterprise es:
+Para una `UserSession` que contiene `accessToken`, el patrón enterprise es:
 
 ```swift
 // Infrastructure/SessionRepositoryKeychain.swift
@@ -757,16 +757,16 @@ final class SessionRepositoryKeychain: SessionRepository {
         self.keychain = keychain
     }
     
-    func save(_ session: Session) async throws {
+    func save(_ session: UserSession) async throws {
         try keychain.set(session.token, forKey: "user_session_token")
     }
     
-    func load() async throws -> Session? {
+    func load() async throws -> UserSession? {
         guard let token = try keychain.get("user_session_token") else {
             return nil
         }
         // Simplificado: en producción también persiste el userId/email
-        return Session(token: token, email: "")
+        return UserSession(token: token, email: "")
     }
     
     func clear() async throws {
@@ -826,10 +826,10 @@ Acabas de construir el caso de uso y el puerto de autenticación. Ahora los ves 
 
 En Xcode, dentro de `Sources/FeatureLoginDomain/`:
 
-| Tu implementación (lección) | Scaffold | Qué cambia |
+| Tu implementación (lección) | Scaffold | Diferencia clave |
 |---|---|---|
-| `AuthGateway` (protocol) | `AuthRepository.swift` | Nombre (`Gateway` → `Repository`) y método (`login` → `authenticate`) |
-| `LoginUseCase` | `AuthenticateUserUseCase.swift` | Nombre más explícito; no devuelve `LoginEvent`, lanza directamente `LoginError` |
+| `AuthRepository` (protocol) | `AuthRepository.swift` | Mismo diseño: protocolo `Sendable`, `async throws -> UserSession`; en scaffold vive dentro de `FeatureLoginDomain` (no en `Application/Ports/`) |
+| `AuthenticateUserUseCase` | `AuthenticateUserUseCase.swift` | Mismo diseño: struct `Sendable`, `execute` recibe `String` crudos y construye VOs internamente; diferencia: scaffold NO tiene `do/catch` de traducción — `LoginError.invalidEmail` sale directamente del init de `EmailAddress` |
 
 Abre `AuthRepository.swift`:
 
@@ -839,7 +839,7 @@ public protocol AuthRepository: Sendable {
 }
 ```
 
-Compara con el `AuthGateway` que diseñaste. El patrón es idéntico: un protocolo que desacopla Application de Infrastructure, con `async throws` para gestionar asincronía y errores.
+Compara con el `AuthRepository` que diseñaste. El patrón es idéntico: un protocolo que desacopla Application de Infrastructure, con `async throws` para gestionar asincronía y errores.
 
 Abre `AuthenticateUserUseCase.swift`:
 
@@ -885,5 +885,5 @@ Solo depende de `CoreDomain`. Ni rastro de `Foundation` extendido, ni de `URLSes
 
 ## Qué sigue
 
-La siguiente lección, [Feature Login: Capa Infrastructure](03-infrastructure.md), implementa `RemoteAuthGateway` — la implementación real del protocolo `AuthGateway` que hace la petición HTTP al servidor — y un `StubAuthGateway` para desarrollo sin conexión.
+La siguiente lección, [Feature Login: Capa Infrastructure](03-infrastructure.md), implementa `AuthHTTPRepository` — la implementación real del protocolo `AuthRepository` que hace la petición HTTP al servidor — y un `InMemoryAuthRepository` para desarrollo sin conexión.
 

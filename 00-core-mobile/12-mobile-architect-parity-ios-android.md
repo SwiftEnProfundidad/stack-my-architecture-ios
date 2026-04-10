@@ -95,7 +95,7 @@ Bajo este marco, el valor del Mobile Architect no se mide por cantidad de códig
 
 ```bash
 # La capa Domain no tiene ningún import específico de iOS
-grep -n "^import" apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/LoginUseCase.swift
+grep -n "^import" apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift
 
 # Solo Foundation/Testing — sin UIKit, sin SwiftUI, sin AppKit
 ```

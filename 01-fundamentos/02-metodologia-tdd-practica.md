@@ -33,7 +33,7 @@ Después del refactor, vuelves al Paso 1 con el siguiente comportamiento. Y así
 
 ### Un ejemplo concreto con XCTest para que quede claro
 
-Vamos a ver cómo funciona TDD en la práctica con un ejemplo muy sencillo: el Value Object `Email`. Queremos que `Email` solo pueda crearse si el string tiene formato válido. Si el formato es inválido, queremos que lance un error.
+Vamos a ver cómo funciona TDD en la práctica con un ejemplo muy sencillo: el Value Object `EmailAddress`. Queremos que `EmailAddress` solo pueda crearse si el string tiene formato válido. Si el formato es inválido, queremos que lance un error.
 
 **Iteración 1 — Red:** escribimos el primer test.
 
@@ -42,7 +42,7 @@ import XCTest
 
 final class EmailTests: XCTestCase {
     func test_init_with_valid_email_creates_email_successfully() {
-        let email = try? Email("user@example.com")
+        let email = try? EmailAddress("user@example.com")
         
         XCTAssertNotNil(email)
         XCTAssertEqual(email?.value, "user@example.com")
@@ -50,12 +50,12 @@ final class EmailTests: XCTestCase {
 }
 ```
 
-Ejecutamos. El test no compila porque `Email` no existe. Eso es el "rojo" en TDD: puede ser un fallo de compilación o un `XCTAssertEqual` que no se cumple. Ambos cuentan como rojo.
+Ejecutamos. El test no compila porque `EmailAddress` no existe. Eso es el "rojo" en TDD: puede ser un fallo de compilación o un `XCTAssertEqual` que no se cumple. Ambos cuentan como rojo.
 
 **Iteración 1 — Green:** implementamos lo mínimo.
 
 ```swift
-struct Email: Equatable {
+struct EmailAddress: Equatable {
     let value: String
     
     init(_ rawValue: String) throws {
@@ -64,7 +64,7 @@ struct Email: Equatable {
 }
 ```
 
-Ejecutamos. El test pasa. ¿Es la implementación completa? No, ni de lejos. No valida nada. Pero el test que tenemos solo pide que se pueda crear un `Email` con un string válido, y eso funciona. Lo mínimo para que pase.
+Ejecutamos. El test pasa. ¿Es la implementación completa? No, ni de lejos. No valida nada. Pero el test que tenemos solo pide que se pueda crear un `EmailAddress` con un string válido, y eso funciona. Lo mínimo para que pase.
 
 **Iteración 1 — Refactor:** ¿hay algo que mejorar? Todavía no, son dos líneas.
 
@@ -72,18 +72,18 @@ Ejecutamos. El test pasa. ¿Es la implementación completa? No, ni de lejos. No 
 
 ```swift
 func test_init_with_string_without_at_sign_throws_error() {
-    XCTAssertThrowsError(try Email("invalid-email")) { error in
-        XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
+    XCTAssertThrowsError(try EmailAddress("invalid-email")) { error in
+        XCTAssertEqual(error as? EmailAddress.ValidationError, .invalidFormat)
     }
 }
 ```
 
-Ejecutamos. Falla porque `Email.ValidationError` no existe y porque el `init` actual acepta cualquier string.
+Ejecutamos. Falla porque `EmailAddress.ValidationError` no existe y porque el `init` actual acepta cualquier string.
 
 **Iteración 2 — Green:** añadimos la validación.
 
 ```swift
-struct Email: Equatable {
+struct EmailAddress: Equatable {
     let value: String
     
     enum ValidationError: Error, Equatable {
@@ -107,8 +107,8 @@ Ejecutamos. Ambos tests pasan.
 
 ```swift
 func test_init_with_empty_string_throws_error() {
-    XCTAssertThrowsError(try Email("")) { error in
-        XCTAssertEqual(error as? Email.ValidationError, .invalidFormat)
+    XCTAssertThrowsError(try EmailAddress("")) { error in
+        XCTAssertEqual(error as? EmailAddress.ValidationError, .invalidFormat)
     }
 }
 ```
@@ -131,14 +131,14 @@ Cuando un test se rompe por un cambio que no debería afectarle, estás testeand
 
 Antes de seguir, necesitas entender un concepto fundamental que vas a usar en **cada test** del curso: los **test doubles**. Un test double es un objeto falso que sustituye a una dependencia real durante un test. Es como un actor de reparto que hace el papel de otro personaje en una escena de ensayo.
 
-¿Por qué necesitas objetos falsos? Imagina que quieres testear el `LoginUseCase`. El UseCase necesita un `AuthGateway` para autenticar al usuario. El `AuthGateway` real llama a un servidor por internet. Si usaras el real en tus tests:
+¿Por qué necesitas objetos falsos? Imagina que quieres testear el `AuthenticateUserUseCase`. El UseCase necesita un `AuthRepository` para autenticar al usuario. El `AuthRepository` real llama a un servidor por internet. Si usaras el real en tus tests:
 
 - Los tests **tardarían segundos** en vez de milisegundos (hay que esperar a la red).
 - Los tests **fallarían sin internet** (no puedes testear en un avión o en el metro).
 - Los tests **no serían deterministas**: a veces el servidor responde, a veces no, a veces tarda mucho.
 - **No podrías controlar** qué responde el servidor. ¿Cómo testeas el escenario de "credenciales incorrectas" si el servidor decide que son correctas?
 
-La solución es crear un **objeto falso** que se comporta como el `AuthGateway` real pero que tú controlas completamente. Ese objeto falso es un **test double**.
+La solución es crear un **objeto falso** que se comporta como el `AuthRepository` real pero que tú controlas completamente. Ese objeto falso es un **test double**.
 
 Hay 5 tipos de test doubles. Cada uno tiene un propósito diferente:
 
@@ -170,7 +170,7 @@ struct DummyLogger: Logger {
 }
 
 // Lo usas así en el test:
-let useCase = LoginUseCase(gateway: stubGateway, logger: DummyLogger())
+let useCase = AuthenticateUserUseCase(repository: stubGateway, logger: DummyLogger())
 // El DummyLogger solo está ahí para que compile. No verificas nada sobre él.
 ```
 
@@ -181,12 +181,12 @@ let useCase = LoginUseCase(gateway: stubGateway, logger: DummyLogger())
 Un **stub** es un objeto que **devuelve datos predefinidos** que tú configuras. Es como un actor que siempre dice la misma frase, sin importar qué le preguntes. Tú le dices "cuando te pidan autenticar, devuelve esta sesión" o "cuando te pidan autenticar, lanza este error".
 
 ```swift
-// Ejemplo: un stub del AuthGateway
-struct AuthGatewayStub: AuthGateway {
+// Ejemplo: un stub del AuthRepository
+struct AuthRepositoryStub: AuthRepository {
     // Tú configuras qué resultado devuelve:
-    let result: Result<Session, Error>
+    let result: Result<UserSession, Error>
     
-    func authenticate(credentials: Credentials) async throws -> Session {
+    func authenticate(credentials: Credentials) async throws -> UserSession {
         // Siempre devuelve lo que tú le configuraste.
         // No llama a ningún servidor. No hace nada más.
         return try result.get()
@@ -196,9 +196,9 @@ struct AuthGatewayStub: AuthGateway {
 // En el test, lo usas así:
 func test_login_exitoso_devuelve_session() async throws {
     // ARRANGE: configuro el stub para que devuelva éxito
-    let sessionEsperada = Session(token: "abc123", email: "user@test.com")
-    let stub = AuthGatewayStub(result: .success(sessionEsperada))
-    let useCase = LoginUseCase(gateway: stub)
+    let sessionEsperada = UserSession(token: "abc123", email: "user@test.com")
+    let stub = AuthRepositoryStub(result: .success(sessionEsperada))
+    let useCase = AuthenticateUserUseCase(repository: stub)
     
     // ACT: ejecuto el caso de uso
     let resultado = try await useCase.execute(email: "user@test.com", password: "Pass1234")
@@ -217,19 +217,19 @@ func test_login_exitoso_devuelve_session() async throws {
 Un **spy** es un stub que además **registra las llamadas que recibe**. Es como un espía que devuelve la respuesta correcta pero también apunta en su libreta: "me llamaron con estos parámetros, a esta hora, tantas veces".
 
 ```swift
-// Ejemplo: un spy del AuthGateway
-final class AuthGatewaySpy: AuthGateway, @unchecked Sendable {
-    let result: Result<Session, Error>
+// Ejemplo: un spy del AuthRepository
+final class AuthRepositorySpy: AuthRepository, @unchecked Sendable {
+    let result: Result<UserSession, Error>
     
     // El spy registra las llamadas:
     private(set) var authenticateCallCount = 0
     private(set) var receivedCredentials: [Credentials] = []
     
-    init(result: Result<Session, Error>) {
+    init(result: Result<UserSession, Error>) {
         self.result = result
     }
     
-    func authenticate(credentials: Credentials) async throws -> Session {
+    func authenticate(credentials: Credentials) async throws -> UserSession {
         // Registra que fue llamado:
         authenticateCallCount += 1
         receivedCredentials.append(credentials)
@@ -242,9 +242,9 @@ final class AuthGatewaySpy: AuthGateway, @unchecked Sendable {
 // En el test, verificas que se llamó correctamente:
 func test_usecase_envia_credenciales_al_gateway() async throws {
     // ARRANGE
-    let session = Session(token: "abc", email: "user@test.com")
-    let spy = AuthGatewaySpy(result: .success(session))
-    let useCase = LoginUseCase(gateway: spy)
+    let session = UserSession(token: "abc", email: "user@test.com")
+    let spy = AuthRepositorySpy(result: .success(session))
+    let useCase = AuthenticateUserUseCase(repository: spy)
     
     // ACT
     _ = try await useCase.execute(email: "user@test.com", password: "Pass1234")
@@ -266,7 +266,7 @@ Un **mock** es un spy que además **verifica automáticamente que se cumplieron 
 
 ```swift
 // Ejemplo conceptual de un mock (NO lo usamos en este curso):
-let mock = MockAuthGateway()
+let mock = MockAuthRepository()
 mock.expect(.authenticate, calledTimes: 1, withArguments: credentials)
 
 // Después de ejecutar el código...
@@ -367,16 +367,16 @@ Fíjate en la dirección: **del centro hacia fuera**. Domain primero (las reglas
 ```mermaid
 graph LR
     subgraph EDGE["Periferia - dependencias reales"]
-        INFRA["Infrastructure<br/>RemoteAuthGateway"]
+        INFRA["Infrastructure<br/>AuthHTTPRepository"]
         UI["Interface<br/>LoginView"]
     end
 
     subgraph MIDDLE["Orquestacion"]
-        APP["Application<br/>LoginUseCase"]
+        APP["Application<br/>AuthenticateUserUseCase"]
     end
 
     subgraph CORE["Core - sin dependencias"]
-        DOMAIN["Domain<br/>Email, Password<br/>AuthGateway protocol"]
+        DOMAIN["Domain<br/>EmailAddress, Password<br/>AuthRepository protocol"]
     end
 
     INFRA ==> APP

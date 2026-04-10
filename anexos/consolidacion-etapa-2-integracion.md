@@ -55,7 +55,7 @@ Porque:
 El Composition Root centraliza la creación de dependencias, permitiendo:
 - **Inversión de dependencias**: Domain/Application no conocen implementaciones concretas
 - **Testabilidad**: Podemos inyectar mocks cambiando 1 línea
-- **Cambio de implementación**: Cambiar `RemoteAuthRepository` por `MockAuthRepository` es trivial
+- **Cambio de implementación**: Cambiar `AuthHTTPRepository` por `MockAuthRepository` es trivial
 
 Si creamos dependencias en Views, violamos Dependency Inversion y acoplamos las capas.
 

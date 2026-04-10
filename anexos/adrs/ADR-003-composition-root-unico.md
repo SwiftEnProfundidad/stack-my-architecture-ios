@@ -57,14 +57,14 @@ Cada View/ViewModel crea sus propias dependencias.
 // ❌ Anti-patrón
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel(
-        useCase: LoginUseCase(repository: RemoteAuthRepository())
+        useCase: AuthenticateUserUseCase(repository: AuthHTTPRepository())
     )
 }
 ```
 
 - **Pros:** Simple en apps pequeñas, no necesitas archivos extra
 - **Contras:**
-  - Views conocen implementaciones concretas (RemoteAuthRepository)
+  - Views conocen implementaciones concretas (AuthHTTPRepository)
   - Imposible cambiar implementación sin modificar views
   - Tests requieren modificar el código productivo
 
@@ -76,8 +76,8 @@ Un único lugar (generalmente en la capa de aplicación/main) donde se crean tod
 // ✅ Patrón correcto
 struct AppCompositionRoot {
     func makeLoginView() -> LoginView {
-        let repository = RemoteAuthRepository()
-        let useCase = LoginUseCase(repository: repository)
+        let repository = AuthHTTPRepository()
+        let useCase = AuthenticateUserUseCase(repository: repository)
         let viewModel = LoginViewModel(useCase: useCase)
         return LoginView(viewModel: viewModel)
     }
@@ -123,7 +123,7 @@ struct AppCompositionRoot {
     
     // MARK: - Login Feature
     func makeLoginView(coordinator: AppCoordinator) -> LoginView {
-        let repository = RemoteAuthRepository(httpClient: httpClient)
+        let repository = AuthHTTPRepository(httpClient: httpClient)
         let useCase = AuthenticateUserUseCase(repository: repository)
         let viewModel = LoginViewModel(useCase: useCase, coordinator: coordinator)
         return LoginView(viewModel: viewModel)
@@ -149,7 +149,7 @@ struct AppCompositionRoot {
 ### Positivas
 
 - **Separación de responsabilidades**: Crear objetos ≠ Usar objetos
-- **Flexibilidad**: Cambiar `RemoteAuthRepository` por `MockAuthRepository` requiere cambiar 1 línea
+- **Flexibilidad**: Cambiar `AuthHTTPRepository` por `MockAuthRepository` requiere cambiar 1 línea
 - **Testabilidad**: Tests de integración pueden usar `TestCompositionRoot` con stubs
 - **Documentación viva**: El Composition Root muestra el grafo de dependencias completo
 

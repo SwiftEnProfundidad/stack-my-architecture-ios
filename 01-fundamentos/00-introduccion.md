@@ -85,7 +85,7 @@ Al completar la Etapa 1, habrás construido tu primera feature completa (un Logi
 
 **Primero, entender el problema.** Antes de abrir Xcode, antes de crear un archivo, antes de escribir un `struct`, vas a sentarte a definir qué tiene que hacer tu código. Vas a escribir escenarios concretos: "cuando el usuario mete un email válido y un password correcto, el sistema le deja entrar". "Cuando el usuario mete un email que no tiene arroba, el sistema le dice que el formato es inválido". Esto se llama BDD (Behavior-Driven Development) y es lo primero que haremos con cada feature.
 
-**Segundo, diseñar los contratos.** Una vez que sabes qué tiene que pasar, defines las piezas: qué tipos vas a necesitar (un `Email`, un `Password`, un `Session`), qué errores pueden ocurrir (`InvalidCredentials`, `Connectivity`), y qué protocolos (interfaces) van a conectar las piezas entre sí. Todavía no has escrito implementación. Solo has definido las fronteras.
+**Segundo, diseñar los contratos.** Una vez que sabes qué tiene que pasar, defines las piezas: qué tipos vas a necesitar (un `EmailAddress`, un `Password`, un `UserSession`), qué errores pueden ocurrir (`InvalidCredentials`, `Connectivity`), y qué protocolos (interfaces) van a conectar las piezas entre sí. Todavía no has escrito implementación. Solo has definido las fronteras.
 
 **Tercero, escribir los tests antes del código.** Esto es TDD (Test-Driven Development). Escribes un test que dice "cuando le paso un email válido y un password correcto al caso de uso de login, debería devolverme una sesión". Ese test falla porque el caso de uso no existe todavía. Entonces escribes lo mínimo para que pase. Y luego limpias. Red, Green, Refactor. Así con cada comportamiento.
 
@@ -105,6 +105,34 @@ Si te reconoces en algo de esto, este curso es para ti. No vamos a asumir que sa
 
 ---
 
+## Cómo funciona el modelo de aprendizaje
+
+Este curso usa un modelo de **dos pistas paralelas**:
+
+**Pista 1 — Tú construyes.** Cada lección te guía paso a paso para que construyas tu propia implementación en Xcode. Escribes los tests, escribes el código, tomas las decisiones. Esta es la pista de aprendizaje activo — donde realmente se aprende.
+
+**Pista 2 — El scaffold como referencia.** El repositorio incluye una implementación de referencia completa en `apps/ios/ArchitectureKit/`. Es un proyecto iOS real, modular, con todos los módulos SPM, todos los tests en verde y toda la arquitectura aplicada. **No la copies — úsala para evaluarte.**
+
+### Cómo usar el scaffold
+
+Al terminar cada lección, compara tu implementación con la del scaffold:
+
+```bash
+# Ver la implementación de referencia de Feature Login
+open apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/
+open apps/ios/ArchitectureKit/Sources/FeatureLoginData/
+open apps/ios/ArchitectureKit/Sources/FeatureLoginUI/
+
+# Ejecutar los tests de referencia
+swift test --package-path apps/ios/ArchitectureKit
+```
+
+Si tu código hace lo mismo que el scaffold (los tests pasan, los tipos son coherentes, las capas respetan sus fronteras), estás en el camino correcto. Si hay diferencias, no entres en pánico — las diferencias son oportunidades de aprendizaje.
+
+> **Regla de oro:** El scaffold no es la única solución correcta. Es una solución correcta, bien documentada, ejecutable. Tu solución puede diferir en detalles de implementación mientras respete los mismos principios.
+
+---
+
 ## Qué vas a construir en esta etapa
 
 En la Etapa 1 vas a construir una **feature de Login** completa. "Completa" no significa "con animaciones bonitas y social login". Significa que va a tener todas las piezas que necesita una feature profesional.
@@ -113,7 +141,7 @@ En la Etapa 1 vas a construir una **feature de Login** completa. "Completa" no s
 
 En esta anatomía, cada subgraph tiene un rol explícito: **Especificacion BDD** define comportamiento, **Domain** define reglas puras, **Application** orquesta, **Infrastructure** conecta con el mundo real, **Interface** presenta estado en SwiftUI y **ADR** captura decisiones de arquitectura.
 
-Fíjate en nombres concretos del diagrama porque aparecerán en toda la etapa: `Email`, `Password`, `AuthGateway`, `LoginUseCase`, `RemoteAuthGateway`, `StubAuthGateway`, `LoginViewModel` y `LoginView`. Estos son nombres **pedagógicos**; en el scaffold real (`apps/ios/ArchitectureKit`) algunos difieren (por ejemplo, `AuthGateway` → `AuthRepository`, `Email` → `EmailAddress`). Cada lección indica la correspondencia exacta, y puedes consultar la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
+Fíjate en nombres concretos del diagrama porque aparecerán en toda la etapa: `EmailAddress`, `Password`, `AuthRepository`, `AuthenticateUserUseCase`, `AuthHTTPRepository`, `InMemoryAuthRepository`, `LoginViewModel` y `LoginView`. Estos nombres coinciden exactamente con el scaffold real (`apps/ios/ArchitectureKit`). Puedes consultar la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
 
 ```mermaid
 graph TD
@@ -123,19 +151,19 @@ graph TD
 
     subgraph DOMAIN["Domain - reglas puras"]
         direction LR
-        VO["Value Objects<br/>Email, Password"]
+        VO["Value Objects<br/>EmailAddress, Password"]
         ERR["Errores<br/>InvalidCredentials, Connectivity"]
-        PROTO["Protocolos<br/>AuthGateway"]
+        PROTO["Protocolos<br/>AuthRepository"]
     end
 
     subgraph APPLICATION["Application - orquestacion"]
-        UC["LoginUseCase<br/>Recibe datos, valida, delega"]
+        UC["AuthenticateUserUseCase<br/>Recibe datos, valida, delega"]
     end
 
     subgraph INFRASTRUCTURE["Infrastructure - mundo real"]
         direction LR
-        REMOTE["RemoteAuthGateway<br/>Habla con el servidor"]
-        STUB["StubAuthGateway<br/>Datos falsos para tests"]
+        REMOTE["AuthHTTPRepository<br/>Habla con el servidor"]
+        STUB["InMemoryAuthRepository<br/>Datos falsos para tests"]
     end
 
     subgraph INTERFACE["Interface - lo que ve el usuario"]
@@ -166,7 +194,7 @@ Cada caja del diagrama es algo que vas a construir con tus manos. Cuando termine
 
 Una **especificación de comportamiento** escrita antes de tocar código, que describe exactamente qué debe pasar en cada escenario posible: qué pasa cuando el login es exitoso, qué pasa cuando las credenciales son incorrectas, qué pasa cuando no hay internet, qué pasa cuando el email no tiene formato válido, qué pasa cuando el password está vacío.
 
-Un **dominio** con modelos que se protegen a sí mismos. Un `Email` que no puede existir si no tiene formato válido. Un `Password` que no puede existir si está vacío. Esto se llama "validez por construcción": si el objeto existe, es válido. No necesitas validar después.
+Un **dominio** con modelos que se protegen a sí mismos. Un `EmailAddress` que no puede existir si no tiene formato válido. Un `Password` que no puede existir si está vacío. Esto se llama "validez por construcción": si el objeto existe, es válido. No necesitas validar después.
 
 Un **caso de uso** que orquesta el flujo: recibe los datos crudos del usuario (strings), intenta construir los Value Objects del dominio, y si son válidos, delega la autenticación a un servicio externo a través de un protocolo. El caso de uso no sabe ni le importa si la autenticación va por internet, por un fake, o por una paloma mensajera. Solo sabe que tiene un protocolo que puede llamar.
 
@@ -232,12 +260,12 @@ Cada forma en un diagrama tiene un significado:
 
 ```mermaid
 graph LR
-    A["Rectangulo: una ACCION o COMPONENTE<br/>Ejemplo: LoginUseCase, CatalogView"]
+    A["Rectangulo: una ACCION o COMPONENTE<br/>Ejemplo: AuthenticateUserUseCase, CatalogView"]
     B{"Rombo: una DECISION<br/>Ejemplo: Es valido el email?"}
     C(("Circulo: un punto de INICIO o FIN"))
 ```
 
-- **Rectángulo**: representa **componentes**, **acciones** o **datos**. Es la forma más común. Cuando ves una caja rectangular que dice “LoginUseCase”, significa que hay un componente con esa responsabilidad.
+- **Rectángulo**: representa **componentes**, **acciones** o **datos**. Es la forma más común. Cuando ves una caja rectangular que dice “AuthenticateUserUseCase”, significa que hay un componente con esa responsabilidad.
 - **Rombo**: representa **decisiones** o **preguntas**. Siempre tiene dos o más flechas saliendo, una por cada resultado posible. Por ejemplo: “¿Usuario autenticado?” con salida “sí” y salida “no”.
 - **Círculo**: representa **inicio** o **fin** de flujo. Es la forma de marcar “aquí empieza” o “aquí termina”.
 

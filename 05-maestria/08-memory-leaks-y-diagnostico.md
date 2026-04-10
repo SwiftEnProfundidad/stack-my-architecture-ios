@@ -126,7 +126,7 @@ addTeardownBlock { [weak instance] in
 
 Todo `makeSUT` que cree objetos de referencia (clases, actors) debe llamar a `trackForMemoryLeaks`. Los structs no necesitan tracking porque son value types sin identidad de referencia.
 
-**Etapa 1 — RemoteAuthGatewayTests:**
+**Etapa 1 — AuthHTTPRepositoryTests:**
 
 ```swift
 private func makeSUT(
@@ -134,9 +134,9 @@ private func makeSUT(
     statusCode: Int = 200,
     file: StaticString = #filePath,
     line: UInt = #line
-) throws -> (sut: RemoteAuthGateway, client: HTTPClientStub) {
+) throws -> (sut: AuthHTTPRepository, client: HTTPClientStub) {
     let client = HTTPClientStub(data: data, statusCode: statusCode)
-    let sut = RemoteAuthGateway(httpClient: client, baseURL: baseURL)
+    let sut = AuthHTTPRepository(httpClient: client, baseURL: baseURL)
     
     trackForMemoryLeaks(client, file: file, line: line)
     // sut es un struct → no necesita tracking

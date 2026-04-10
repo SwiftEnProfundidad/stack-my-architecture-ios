@@ -185,7 +185,7 @@ flowchart TD
     
     WHO -->|"Nadie después de init<br/>(solo let)"| FINAL["✅ final class: Sendable<br/>con propiedades let"]
 
-    STRUCT -.->|"Ejemplos"| SE["Product, Email, Password,<br/>Price, Credentials, Session,<br/>AuthRequest, AuthResponse,<br/>RemoteAuthGateway, LoginUseCase"]
+    STRUCT -.->|"Ejemplos"| SE["Product, Email, Password,<br/>Price, Credentials, Session,<br/>AuthRequest, AuthResponse,<br/>AuthHTTPRepository, AuthenticateUserUseCase"]
     
     MA -.->|"Ejemplos"| MAE["LoginViewModel,<br/>CatalogViewModel"]
     

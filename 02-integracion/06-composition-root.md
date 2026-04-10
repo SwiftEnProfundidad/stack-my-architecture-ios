@@ -14,7 +14,7 @@ En palabras simples: el Composition Root es el "director de orquesta" que decide
 
 ## Definición simple
 
-El Composition Root es el punto de la aplicación donde se crean todas las dependencias y se conectan entre sí. Es el único lugar que sabe que `AuthGateway` se implementa con `RemoteAuthGateway`, que `ProductRepository` se implementa con `RemoteProductRepository`, y que `HTTPClient` se implementa con `URLSessionHTTPClient`.
+El Composition Root es el punto de la aplicación donde se crean todas las dependencias y se conectan entre sí. Es el único lugar que sabe que `AuthRepository` se implementa con `AuthHTTPRepository`, que `ProductRepository` se implementa con `RemoteProductRepository`, y que `HTTPClient` se implementa con `URLSessionHTTPClient`.
 
 Ninguna otra capa sabe estas cosas. Domain no sabe. Application no sabe. Interface no sabe. Solo el Composition Root.
 
@@ -35,9 +35,9 @@ Si el Domain supiera cómo se fabrica cada pieza, estaría acoplado al proceso d
 ```mermaid
 flowchart TD
     CR["Composition Root<br/>Punto de entrada de la app"] -.-> HTTP["Crea URLSessionHTTPClient"]
-    CR -.-> AUTH["Crea RemoteAuthGateway<br/>inyecta httpClient"]
+    CR -.-> AUTH["Crea AuthHTTPRepository<br/>inyecta httpClient"]
     CR -.-> PROD["Crea RemoteProductRepository<br/>inyecta httpClient"]
-    CR -.-> LUC["Crea LoginUseCase<br/>inyecta authGateway"]
+    CR -.-> LUC["Crea AuthenticateUserUseCase<br/>inyecta authRepository"]
     CR -.-> PUC["Crea LoadProductsUseCase<br/>inyecta productRepository"]
     CR -.-> LVM["Crea LoginViewModel<br/>inyecta loginUseCase + closure"]
     CR -.-> CVM["Crea CatalogViewModel<br/>inyecta loadProductsUseCase + closure"]
@@ -49,8 +49,8 @@ flowchart TD
 Lectura paso a paso:
 
 1. `CR -.- HTTP`: el Composition Root crea `URLSessionHTTPClient` una sola vez. Los puntos de la flecha indican que es creación/wiring, no una dependencia de runtime — `URLSessionHTTPClient` no forma parte del API de ninguna capa; solo existe en el Composition Root.
-2. `CR -.- AUTH / PROD`: el root crea `RemoteAuthGateway` y `RemoteProductRepository`, inyectando el `httpClient` ya creado. Las implementaciones concretas solo existen aquí — ninguna otra capa las importa.
-3. `CR -.- LUC / PUC`: el root crea los casos de uso inyectando los gateways/repositories. A partir de aquí, Application solo ve los protocolos (`AuthGateway`, `ProductRepository`), no las implementaciones.
+2. `CR -.- AUTH / PROD`: el root crea `AuthHTTPRepository` y `RemoteProductRepository`, inyectando el `httpClient` ya creado. Las implementaciones concretas solo existen aquí — ninguna otra capa las importa.
+3. `CR -.- LUC / PUC`: el root crea los casos de uso inyectando los gateways/repositories. A partir de aquí, Application solo ve los protocolos (`AuthRepository`, `ProductRepository`), no las implementaciones.
 4. `CR -.- LVM / CVM`: los ViewModels reciben sus casos de uso. El ViewModel no sabe si detrás hay red real, cache, o un stub.
 5. `CR -.- COORD`: el coordinador recibe los closures que conectan los eventos de las features con las transiciones de navegación.
 
@@ -66,13 +66,13 @@ Problemas del Service Locator:
 
 - **Acoplamiento oculto:** No sabes qué dependencias tiene un componente hasta que lo ejecutas y falla. El `init` no te dice nada.
 - **Tests difíciles:** Tienes que mutar un estado global para inyectar stubs, lo cual introduce fragilidad y orden de ejecución en los tests.
-- **Dependencias invisibles:** Un `LoginUseCase` que accede a un localizador global no declara en su `init` que necesita un `AuthGateway`. Lo descubres leyendo toda la implementación.
+- **Dependencias invisibles:** Un `AuthenticateUserUseCase` que accede a un localizador global no declara en su `init` que necesita un `AuthRepository`. Lo descubres leyendo toda la implementación.
 
 Con Composition Root + constructor injection:
 
 ```swift
 // Dependencias explícitas: ves todo en el init
-let useCase = LoginUseCase(gateway: authGateway)
+let useCase = AuthenticateUserUseCase(repository: authRepository)
 ```
 
 Beneficios:
@@ -94,16 +94,16 @@ struct CompositionRoot {
     private let httpClient: HTTPClient = URLSessionHTTPClient()  // ← solo aquí
     private let baseURL = URL(string: "https://api.example.com")!
 
-    func makeLoginView(onLoginSucceeded: @MainActor @escaping (Session) -> Void) -> LoginView {
-        let gateway = RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)
-        // RemoteAuthGateway solo se instancia aquí — LoginUseCase solo conoce el protocolo AuthGateway
-        let useCase = LoginUseCase(gateway: gateway)
-        let viewModel = LoginViewModel(useCase: useCase, onLoginSucceeded: onLoginSucceeded)
+    func makeLoginView(navigator: any LoginNavigating) -> LoginView {
+        let gateway = AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)
+        // AuthHTTPRepository solo se instancia aquí — AuthenticateUserUseCase solo conoce el protocolo AuthRepository
+        let useCase = AuthenticateUserUseCase(repository: gateway)
+        let viewModel = LoginViewModel(useCase: useCase, navigator: navigator)
         return LoginView(viewModel: viewModel)
     }
 }
 // Si quieres cambiar de URLSession a Alamofire o a Firebase Auth:
-// cambias una línea en CompositionRoot. LoginUseCase, LoginViewModel y LoginView no se tocan.
+// cambias una línea en CompositionRoot. AuthenticateUserUseCase, LoginViewModel y LoginView no se tocan.
 ```
 
 ### Cuándo NO
@@ -112,8 +112,8 @@ struct CompositionRoot {
 // ❌ Crear dependencias dentro de los componentes — rompe la inyección
 @Observable @MainActor
 final class LoginViewModel {
-    private let useCase = LoginUseCase(
-        gateway: RemoteAuthGateway(  // ❌ ViewModel conoce RemoteAuthGateway
+    private let useCase = AuthenticateUserUseCase(
+        repository: AuthHTTPRepository(  // ❌ ViewModel conoce AuthHTTPRepository
             httpClient: URLSessionHTTPClient(),  // ❌ ViewModel instancia URLSession
             baseURL: URL(string: "https://api.example.com")!
         )
@@ -172,20 +172,20 @@ Cada feature tiene su propia factory (metodo que crea la cadena completa):
 ```swift
 extension CompositionRoot {
 
-    func makeLoginView(onLoginSucceeded: @MainActor @escaping (Session) -> Void) -> LoginView {
+    func makeLoginView(navigator: any LoginNavigating) -> LoginView {
         // 1. Crear el gateway (Infrastructure)
-        let authGateway = RemoteAuthGateway(
+        let authRepository = AuthHTTPRepository(
             httpClient: httpClient,
             baseURL: baseURL
         )
 
         // 2. Crear el caso de uso (Application)
-        let loginUseCase = LoginUseCase(gateway: authGateway)
+        let loginUseCase = AuthenticateUserUseCase(repository: authRepository)
 
         // 3. Crear el ViewModel (Interface)
         let viewModel = LoginViewModel(
-            loginUseCase: loginUseCase,
-            onLoginSucceeded: onLoginSucceeded
+            useCase: loginUseCase,
+            navigator: navigator
         )
 
         // 4. Crear la vista
@@ -196,12 +196,12 @@ extension CompositionRoot {
 
 **Qué pasa aquí:**
 
-1. Creamos `RemoteAuthGateway` inyectando el `httpClient` compartido.
-2. Creamos `LoginUseCase` inyectando el gateway. El UseCase no sabe que es un `RemoteAuthGateway`; solo sabe que conforma `AuthGateway`.
-3. Creamos `LoginViewModel` inyectando el UseCase y el closure de navegación.
+1. Creamos `AuthHTTPRepository` inyectando el `httpClient` compartido.
+2. Creamos `AuthenticateUserUseCase` inyectando el gateway. El UseCase no sabe que es un `AuthHTTPRepository`; solo sabe que conforma `AuthRepository`.
+3. Creamos `LoginViewModel` inyectando el UseCase y el navigator.
 4. Creamos `LoginView` inyectando el ViewModel.
 
-**El closure `onLoginSucceeded`** es lo que conecta Login con el resto de la app. El Composition Root decide qué pasa cuando el login tiene éxito (por ejemplo, navegar al Catálogo). Login no lo sabe ni le importa.
+**El navigator `LoginNavigating`** es lo que conecta Login con el resto de la app. El Composition Root inyecta el `AppCoordinator` (que implementa `LoginNavigating`). Login no sabe qué pasa después del login exitoso; solo llama a `navigator?.goToCatalog()`.
 
 ### Paso 3: Factory de Catalog
 
@@ -287,9 +287,9 @@ sequenceDiagram
     APP->>CR: init()
     Note over CR: Crea httpClient + baseURL
 
-    APP->>CR: makeLoginView(onLoginSucceeded)
-    CR->>CR: RemoteAuthGateway(httpClient)
-    CR->>CR: LoginUseCase(gateway)
+    APP->>CR: makeLoginView(navigator: coordinator)
+    CR->>CR: AuthHTTPRepository(httpClient)
+    CR->>CR: AuthenticateUserUseCase(gateway)
     CR->>CR: LoginViewModel(useCase, closure)
     CR->>CR: LoginView(viewModel)
     CR-->>APP: LoginView lista
@@ -310,12 +310,12 @@ sequenceDiagram
 Lectura del sequenceDiagram paso a paso:
 
 1. `APP ->> CR: init()` — al arrancar la app, el Composition Root se construye: crea `httpClient` y `baseURL`. Estas son las únicas dependencias compartidas por todas las features.
-2. `APP ->> CR: makeLoginView(onLoginSucceeded)` — el `@main` pide la vista de Login. El root construye la cadena completa: Gateway → UseCase → ViewModel → View. El closure `onLoginSucceeded` queda capturado en el ViewModel.
-3. El usuario hace login. El closure dispara al coordinator.
+2. `APP ->> CR: makeLoginView(navigator: coordinator)` — el `@main` pide la vista de Login. El root construye la cadena completa: Gateway → UseCase → ViewModel → View. El coordinator queda inyectado como `weak var navigator` en el ViewModel.
+3. El usuario hace login. `LoginViewModel` llama a `navigator?.goToCatalog()`. El `AppCoordinator` (navigator) navega.
 4. `APP ->> COORD: handle(.loginSucceeded)` — el coordinator hace `path.append(.catalog)`. SwiftUI detecta el cambio y busca el `navigationDestination` correspondiente.
 5. `APP ->> CR: makeCatalogView(onProductSelected)` — SwiftUI solicita la vista de Catalog. El root construye otra cadena independiente, reutilizando el mismo `httpClient`.
 
-Nótese que `RemoteAuthGateway` y `RemoteProductRepository` se crean dentro de `makeLoginView` y `makeCatalogView` respectivamente — no en `init()`. Son objetos de vida corta, creados cuando se necesitan. El `httpClient` sí es de vida larga (se crea en `init` y se reutiliza).
+Nótese que `AuthHTTPRepository` y `RemoteProductRepository` se crean dentro de `makeLoginView` y `makeCatalogView` respectivamente — no en `init()`. Son objetos de vida corta, creados cuando se necesitan. El `httpClient` sí es de vida larga (se crea en `init` y se reutiliza).
 
 ---
 
@@ -326,16 +326,16 @@ En producción, el Composition Root crea implementaciones reales:
 ```swift
 // Producción: red real
 let httpClient = URLSessionHTTPClient()
-let authGateway = RemoteAuthGateway(httpClient: httpClient, baseURL: prodURL)
+let authRepository = AuthHTTPRepository(httpClient: httpClient, baseURL: prodURL)
 ```
 
 En tests, cada test crea su propia cadena con stubs:
 
 ```swift
 // Tests: sin red, sin servidor
-let authGateway = AuthGatewayStub(result: .success(session))
-let useCase = LoginUseCase(gateway: authGateway)
-let viewModel = LoginViewModel(loginUseCase: useCase, onLoginSucceeded: { _ in })
+let authRepository = AuthRepositoryStub(result: .success(session))
+let useCase = AuthenticateUserUseCase(repository: authRepository)
+let viewModel = LoginViewModel(useCase: useCase, navigator: LoginNavigatorSpy())
 ```
 
 No hay un "Composition Root de tests". Cada test monta exactamente la cadena que necesita con el helper `makeSUT`. Eso es lo que hemos hecho en todas las lecciones anteriores: el patrón `makeSUT` ES un mini-composition-root local para cada test.
@@ -362,7 +362,7 @@ final class CompositionRootTests: XCTestCase {
         // CompositionRoot no existe aún → test no compila → guía el diseño del init
         // view es LoginView — confirma que el factory devuelve el tipo correcto
         XCTAssertNotNil(view)
-        // No probamos el login real aquí — eso es responsabilidad de LoginUseCaseTests
+        // No probamos el login real aquí — eso es responsabilidad de AuthenticateUserUseCaseTests
     }
 }
 ```
@@ -373,10 +373,10 @@ final class CompositionRootTests: XCTestCase {
 
 ```swift
 func test_makeLoginView_closureConnectsToCompositionRoot() {
-    let authGateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e@test.com")))
+    let authRepository = AuthRepositoryStub(result: .success(Session(token: "t", email: "e@test.com")))
     // Para testear el closure necesitamos inyectar un stub en el CompositionRoot.
     // Esto requiere que CompositionRoot exponga un init con dependencias inyectables.
-    let sut = CompositionRoot(authGateway: authGateway)
+    let sut = CompositionRoot(authRepository: authRepository)
     var loginSucceededCalled = false
     _ = sut.makeLoginView { _ in loginSucceededCalled = true }
     // En un integration test real, simularíamos el login y verificaríamos que el closure se llama
@@ -533,7 +533,7 @@ public struct AppCompositionRoot {
 
 **Diferencias clave a entender:**
 
-1. **`InMemoryAuthRepository` por defecto** — el scaffold usa un repositorio en memoria, no un `RemoteAuthGateway` con `URLSession`. Esto hace el scaffold funcional sin configurar ningún servidor. Cuando implementes la red real (Etapa 3+), cambias solo este parámetro del `init`.
+1. **`InMemoryAuthRepository` por defecto** — el scaffold usa un repositorio en memoria, no un `AuthHTTPRepository` con `URLSession`. Esto hace el scaffold funcional sin configurar ningún servidor. Cuando implementes la red real (Etapa 3+), cambias solo este parámetro del `init`.
 
 2. **`CatalogViewModel?` opcional** — el catalogo puede no existir si no se pasa un `catalogRepository`. Esto permite lanzar la app con solo Login mientras el catálogo está en desarrollo.
 

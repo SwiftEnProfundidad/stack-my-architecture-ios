@@ -10,7 +10,7 @@ En lenguaje simple: el coordinador es el mapa de la ciudad. Las features son los
 
 ## El problema de la navegación acoplada
 
-En la Etapa 1, la feature Login tenía un closure `onLoginSucceeded: (Session) -> Void` que el Composition Root inyectaba. Ese closure hacía un `print`. Ahora necesitamos que haga algo real: navegar a la pantalla del Catalog. Pero hay una restricción: Login no puede conocer Catalog. Si `LoginView` hiciera un `NavigationLink(destination: CatalogView(...))`, Login dependería de Catalog, violando el principio de independencia entre features.
+En la Etapa 1, la feature Login ya definía el protocolo `LoginNavigating` con el método `goToCatalog()`. La implementación era un simple `PrintNavigator` que solo hacía un `print`. Ahora necesitamos que el `AppCoordinator` implemente `LoginNavigating` y haga navegación real hacia la pantalla del Catalog. Pero hay una restricción: Login no puede conocer Catalog. Si `LoginView` hiciera un `NavigationLink(destination: CatalogView(...))`, Login dependería de Catalog, violando el principio de independencia entre features.
 
 La solución es un **coordinador**: un componente que conoce todas las features y decide la navegación en función de los eventos que emiten. Las features no saben a dónde van; el coordinador decide.
 
@@ -29,7 +29,7 @@ graph LR
 
     subgraph Decoupled["Navegacion por eventos"]
         direction TB
-        LV2["LoginView"] -->|"onLoginSucceeded session"| COORD["AppCoordinator"]
+        LV2["LoginView"] -->|"₱navigator.goToCatalog()"| COORD["AppCoordinator"]
         CV2["CatalogView"] -->|"onProductSelected product"| COORD
         COORD -->|"path.append catalog"| CV2
         COORD -->|"path.append detail"| DV2["DetailView"]
@@ -55,9 +55,8 @@ sequenceDiagram
     User->>LV: Pulsa "Login"
     LV->>VM: await submit()
     VM->>VM: Login exitoso, obtiene Session
-    VM->>CR: onLoginSucceeded session
-    Note over CR: El closure fue inyectado<br/>por el Composition Root
-    CR->>COORD: handleLoginSuccess session
+    VM->>COORD: navigator?.goToCatalog()
+    Note over COORD: AppCoordinator implementa LoginNavigating<br/>inyectado por el Composition Root
     COORD->>COORD: isAuthenticated = true, path.append catalog
     Note over COORD: NavigationStack detecta<br/>el cambio en path
     COORD->>CV: Muestra CatalogView
@@ -102,7 +101,7 @@ import SwiftUI
 
 @Observable
 @MainActor
-final class AppCoordinator {
+final class AppCoordinator: LoginNavigating {
     var path = NavigationPath()
     var isAuthenticated = false
     
@@ -112,9 +111,9 @@ final class AppCoordinator {
         self.compositionRoot = compositionRoot
     }
     
-    // MARK: - Navigation Actions
+    // MARK: - LoginNavigating
     
-    func handleLoginSuccess(_ session: Session) {
+    func goToCatalog() {
         isAuthenticated = true
         path.append(AppDestination.catalog)
     }
@@ -131,11 +130,7 @@ final class AppCoordinator {
     // MARK: - View Factory
     
     func makeLoginView() -> LoginView {
-        compositionRoot.makeLoginView(
-            onLoginSucceeded: { [weak self] session in
-                self?.handleLoginSuccess(session)
-            }
-        )
+        compositionRoot.makeLoginView(navigator: self)
     }
     
     func makeCatalogView() -> CatalogView {
@@ -156,9 +151,9 @@ Vamos a analizar las decisiones de diseño:
 
 **`NavigationPath`** — es el stack de navegación. Cuando hacemos `path.append(.catalog)`, SwiftUI hace push de la pantalla del catálogo. Cuando hacemos `path.removeLast()`, hace pop.
 
-**View Factory** — el coordinador crea las vistas usando el `CompositionRoot`, inyectando closures que conectan los eventos de las features con las acciones de navegación. Cuando Login emite `onLoginSucceeded`, el coordinador llama a `handleLoginSuccess`, que hace push del catálogo.
+**View Factory** — el coordinador crea las vistas usando el `CompositionRoot` e inyectándose a sí mismo como navigator. Como `AppCoordinator: LoginNavigating`, puede pasar `self` directamente. Cuando `LoginViewModel` llama a `navigator?.goToCatalog()`, el coordinador hace push del catálogo.
 
-**`[weak self]`** — usamos weak self en los closures para evitar retención cíclica. El coordinador retiene a las vistas (indirectamente, a través del NavigationPath), y las vistas retienen closures que referencian al coordinador. Sin `[weak self]`, habría un ciclo de retención.
+**Sin `[weak self]`** — el `LoginViewModel` ya declara `private weak var navigator`. El coordinador pasa `self` y el ViewModel lo retiene como `weak`. No hay ciclo de retención.
 
 ### El Composition Root actualizado
 
@@ -173,15 +168,13 @@ import SwiftUI
 struct CompositionRoot {
     private let baseURL = URL(string: "https://api.example.com")!
     
-    func makeLoginView(
-        onLoginSucceeded: @MainActor @escaping (Session) -> Void
-    ) -> LoginView {
+    func makeLoginView(navigator: any LoginNavigating) -> LoginView {
         let httpClient = URLSessionHTTPClient()
-        let gateway = RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)
-        let useCase = LoginUseCase(authGateway: gateway)
+        let gateway = AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)
+        let useCase = AuthenticateUserUseCase(repository: gateway)
         let viewModel = LoginViewModel(
-            login: useCase,
-            onLoginSucceeded: onLoginSucceeded
+            useCase: useCase,
+            navigator: navigator
         )
         return LoginView(viewModel: viewModel)
     }
@@ -254,8 +247,8 @@ struct StackMyArchitectureApp: App {
 El flujo completo es:
 
 1. La app arranca y muestra `LoginView` (la raíz del `NavigationStack`).
-2. El usuario hace login. `LoginViewModel` llama a `onLoginSucceeded(session)`.
-3. El closure llega a `AppCoordinator.handleLoginSuccess`, que hace `path.append(.catalog)`.
+2. El usuario hace login. `LoginViewModel` llama a `navigator?.goToCatalog()`.
+3. `AppCoordinator.goToCatalog()` hace `isAuthenticated = true` y `path.append(.catalog)`.
 4. SwiftUI detecta el cambio en `path` y busca el `navigationDestination` que maneja `.catalog`.
 5. El coordinador crea `CatalogView` y SwiftUI la muestra con animación de push.
 
@@ -383,21 +376,21 @@ class EventBus {
 EventBus.shared.publish(LoginSucceededEvent(session: session))
 // ¿Quién escucha esto? ¿Siempre hay alguien? El compilador no lo sabe.
 
-// ✅ Closures tipados — explícito, trazable, testeable
+// ✅ Protocolo tipado — explícito, trazable, testeable
 final class LoginViewModel {
-    private let onLoginSucceeded: @MainActor (Session) -> Void  // ← tipado, visible
-    // Cuando llamamos onLoginSucceeded(session), sabemos exactamente qué pasa:
-    // el Composition Root lo conectó al AppCoordinator.handleLoginSuccess
+    private weak var navigator: (any LoginNavigating)?  // ← protocolo, visible
+    // Cuando llamamos navigator?.goToCatalog(), sabemos exactamente qué pasa:
+    // el Composition Root inyectó AppCoordinator que hace path.append(.catalog)
 }
 ```
 
-Nuestro enfoque con closures directos tiene tres ventajas clave:
+Nuestro enfoque con protocolos tipados tiene tres ventajas clave:
 
 - **Tipado en compilación** — si el tipo del closure no coincide, el compilador falla antes de ejecutar;
 - **Trazabilidad directa** — para saber qué pasa cuando Login tiene éxito, miras el coordinador y ves `path.append(.catalog)`. Sin indirección invisible;
 - **Tests simples** — el coordinador es un objeto normal; no hay singleton que limpiar entre tests.
 
-Si en el futuro la app crece a 20+ features con eventos cross-cutting (analytics, logging, deep links), consideraremos un bus de eventos formal con tipos sealed. Pero para 2-3 features, los closures son la solución correcta.
+Si en el futuro la app crece a 20+ features con eventos cross-cutting (analytics, logging, deep links), consideraremos un bus de eventos formal con tipos sealed. Pero para 2-3 features, los protocolos de navegación son la solución correcta.
 
 ---
 
@@ -407,7 +400,7 @@ Mantén siempre un inventario de las rutas definidas en el coordinador. Esta tab
 
 | Destino | Evento disparador | Feature emisora | Precondición | Test que lo cubre |
 | --- | --- | --- | --- | --- |
-| `.catalog` | `onLoginSucceeded(Session)` | Login | — | `test_handleLoginSuccess_sets_authenticated_and_pushes_catalog` |
+| `.catalog` | `navigator.goToCatalog()` | Login | — | `test_goToCatalog_sets_authenticated_and_pushes_catalog` |
 | `.productDetail(Product)` | `onProductSelected(Product)` | Catalog | Autenticado | `test_handleProductSelected_pushes_product_detail` |
 
 Cuando añadas una nueva ruta, actualiza esta tabla antes de tocar el código. Si la tabla tiene una entrada sin test asociado, la ruta está incompleta.
@@ -493,16 +486,15 @@ final class AppCoordinator {
 
 Los tipos que cruzan la frontera entre el contexto async del ViewModel (donde ocurre el login) y el `@MainActor` del coordinador deben ser `Sendable`:
 
-- `Session` — cruza desde el contexto async de `LoginUseCase` al `@MainActor` del coordinador. Debe ser `Sendable` (es un struct con `let` → automático).
+- `Session` — cruza desde el contexto async de `AuthenticateUserUseCase` al `@MainActor` del coordinador. Debe ser `Sendable` (es un struct con `let` → automático).
 - `AppDestination` — se almacena en `NavigationPath` que vive en `@MainActor`. Debe ser `Hashable + Sendable`.
-- El closure `onLoginSucceeded: @MainActor (Session) -> Void` — la anotación `@MainActor` en el closure garantiza que cuando se ejecute, estará en el hilo principal. Sin ella, el cierre se ejecutaría en el contexto que lo llame, que puede ser cualquiera.
+- El método `@MainActor func goToCatalog()` del protocolo `LoginNavigating` — la anotación `@MainActor` en el protocolo garantiza que cualquier implementación ejecute la navegación en el hilo principal. El compilador lo exige.
 
 ```swift
-// ✅ Closure con @MainActor garantiza que handleLoginSuccess ocurre en el hilo correcto
-func makeLoginView(onLoginSucceeded: @MainActor @escaping (Session) -> Void) -> LoginView {
-    // El ViewModel llama a onLoginSucceeded(session) desde cualquier contexto.
-    // La anotación @MainActor hace que la ejecución salta al main thread antes de llamar.
-    // Sin esta anotación, podrías llamar handleLoginSuccess desde un hilo background.
+// ✅ Protocolo con @MainActor garantiza que goToCatalog ocurre en el hilo correcto
+func makeLoginView(navigator: any LoginNavigating) -> LoginView {
+    // El ViewModel es @MainActor y llama a navigator?.goToCatalog().
+    // La anotación @MainActor en el protocolo hace que Swift valide la aislación.
 }
 ```
 
@@ -522,15 +514,15 @@ func submit() async {
         guard let self, !Task.isCancelled else { return }
         do {
             let session = try await loginUseCase.execute(...)
-            guard !Task.isCancelled else { return }  // verificar antes de emitir evento
-            await onLoginSucceeded(session)           // @MainActor closure
+            guard !Task.isCancelled else { return }  // verificar antes de navegar
+            navigator?.goToCatalog()                   // @MainActor (seguro desde VM @MainActor)
         } catch { ... }
     }
 }
 // Si el usuario navega atrás antes de que execute() complete:
 // 1. loginTask?.cancel() cancela la tarea anterior
-// 2. Task.isCancelled = true antes de llamar onLoginSucceeded
-// 3. El guard previene que el coordinador reciba un evento de una tarea cancelada
+// 2. Task.isCancelled = true antes de llamar goToCatalog
+// 3. El guard previene que el coordinador reciba la llamada de una tarea cancelada
 ```
 
 ---
@@ -559,7 +551,7 @@ struct LoginView: View {
     var body: some View {
         Button("Entrar") {
             Task { await viewModel.submit() }
-            // viewModel.onLoginSucceeded(session) → coordinador → path.append(.catalog)
+            // viewModel.navigator?.goToCatalog() → AppCoordinator → path.append(.catalog)
         }
     }
 }
@@ -581,14 +573,14 @@ final class LoginViewModel {
     }
 }
 
-// ✅ Bien — ViewModel emite un resultado; el exterior decide qué hacer con él
+// ✅ Bien — ViewModel delega la navegación al navigator; el exterior decide qué hacer
 @Observable @MainActor
 final class LoginViewModel {
-    private let onLoginSucceeded: @MainActor (Session) -> Void  // ← closure opaco
+    private weak var navigator: (any LoginNavigating)?  // ← protocolo opaco
 
     func submit() async {
-        let session = try await loginUseCase.execute(...)
-        onLoginSucceeded(session)  // ✅ el ViewModel no sabe qué pasa después
+        _ = try await useCase.execute(...)
+        navigator?.goToCatalog()  // ✅ el ViewModel no sabe qué pasa después
     }
 }
 ```
@@ -733,13 +725,13 @@ Trigger para evolucionar de A hacia un bus de eventos formal:
 
 ## Implementación en tu proyecto
 
-El scaffold real tiene el sistema de navegación en `Sources/AppContracts/` y `Sources/AppComposition/`. El enfoque difiere del patrón de closures directos enseñado en esta lección — usa protocolos para el contrato de navegación:
+El scaffold real tiene el sistema de navegación en `Sources/AppContracts/` y `Sources/AppComposition/`. Ambos usan el protocolo `LoginNavigating` — el mismo patrón que esta lección. Las diferencias son de naming y estructura:
 
 | Concepto en lección | Fichero en scaffold | Diferencia clave |
 |---|---|---|
 | `AppDestination` enum | `Sources/AppContracts/NavigationContracts.swift` → `AppRoute` | Sin `productDetail` asociado; casos: `login`, `catalog` |
 | `AppCoordinator` | `Sources/AppComposition/NavigationStore.swift` → `NavigationStore` | Usa `routes: [AppRoute]` en lugar de `NavigationPath` |
-| Closure `onLoginSucceeded` | Protocolo `LoginNavigating` con `func goToCatalog()` | Protocolo en lugar de closure — más explícito pero más verboso |
+| Protocolo `LoginNavigating` | Protocolo `LoginNavigating` | Alineado — leción y scaffold usan el mismo patrón |
 
 ```swift
 // Lo que ya existe en el scaffold

@@ -452,13 +452,13 @@ Si una regla no puede explicarse en una frase clara y verificarse automáticamen
 
 ```bash
 # 1. Añade un import prohibido en cualquier archivo de Domain
-echo "import InfraHTTP" >> apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/LoginUseCase.swift
+echo "import InfraHTTP" >> apps/ios/ArchitectureKit/Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift
 
 # 2. Ejecuta el script de verificación
 ./scripts/check-dependencies.sh
 
 # Salida esperada (fallo):
-# [VIOLATION] Domain import prohibido en Sources/FeatureLoginDomain/LoginUseCase.swift
+# [VIOLATION] Domain import prohibido en Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift
 # Total violations: 1
 
 # 3. Elimina el import añadido

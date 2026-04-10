@@ -85,8 +85,8 @@ flowchart TB
         LUI["Login Interface"]
         LAPP["Login Application"]
         LDOM["Login Domain"]
-        LPORT["AuthGateway protocol"]
-        LINF["RemoteAuthGateway adapter"]
+        LPORT["AuthRepository protocol"]
+        LINF["AuthHTTPRepository adapter"]
     end
 
     subgraph CATALOG["Catalog feature"]

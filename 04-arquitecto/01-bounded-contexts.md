@@ -505,7 +505,7 @@ Diagrama resultante de los bounded contexts del scaffold:
 
 ```mermaid
 graph TD
-    CD["CoreDomain"] --> FLD["FeatureLoginDomain<br/>(Email, Password, Session, AuthError)"]
+    CD["CoreDomain"] --> FLD["FeatureLoginDomain<br/>(Email, Password, Session, LoginError)"]
     CD --> FCD["FeatureCatalogDomain<br/>(Product, CatalogError)"]
     FLD -.->|"NO import"| FCD
     FCD -.->|"NO import"| FLD

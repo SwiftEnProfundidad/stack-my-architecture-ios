@@ -1,61 +1,46 @@
 # Equivalencias: nombres pedagógicos ↔ scaffold real
 
-Las lecciones del curso usan **nombres pedagógicos** elegidos por su claridad didáctica.
-El scaffold real (`apps/ios/ArchitectureKit/`) usa nombres ligeramente distintos para reflejar
-convenciones de un proyecto enterprise real.
-
-Esta tabla es la referencia canónica. Cuando una lección diga `LoginUseCase`, busca
-`AuthenticateUserUseCase` en el scaffold.
+> **Estado (Fase 1 completada):** Los nombres de Feature Login ya están unificados entre lecciones y scaffold. Esta tabla documenta las **diferencias que persisten** (principalmente arquitectura de errores y nombres de Feature Catalog/navegación).
 
 ---
 
-## Tabla de equivalencias — Feature Login
+## Feature Login — Diferencias restantes
 
-| Nombre en lecciones | Nombre en scaffold | Ruta en scaffold |
-|---|---|---|
-| `Email` | `EmailAddress` | `Sources/FeatureLoginDomain/EmailAddress.swift` |
-| `Password` | `Password` | `Sources/FeatureLoginDomain/Password.swift` |
-| `Credentials` | `Credentials` | `Sources/FeatureLoginDomain/Credentials.swift` |
-| `Session` | `UserSession` | `Sources/FeatureLoginDomain/UserSession.swift` |
-| `AuthError` | `LoginError` | `Sources/FeatureLoginDomain/LoginError.swift` |
-| `Email.ValidationError.invalidFormat` | `LoginError.invalidEmail` | `Sources/FeatureLoginDomain/LoginError.swift` |
-| `Password.ValidationError.empty` | `LoginError.invalidPassword` | `Sources/FeatureLoginDomain/LoginError.swift` |
-| `AuthGateway` (protocol/puerto) | `AuthRepository` | `Sources/FeatureLoginDomain/AuthRepository.swift` |
-| `LoginUseCase` | `AuthenticateUserUseCase` | `Sources/FeatureLoginDomain/AuthenticateUserUseCase.swift` |
-| `RemoteAuthGateway` | `AuthHTTPRepository` | `Sources/FeatureLoginData/AuthHTTPRepository.swift` |
-| `StubAuthGateway` | `InMemoryAuthRepository` | `Sources/FeatureLoginData/InMemoryAuthRepository.swift` |
-| `LoginViewModel` | `LoginViewModel` | `Sources/FeatureLoginUI/LoginViewModel.swift` |
-| `LoginView` | `LoginView` | `Sources/FeatureLoginUI/LoginView.swift` |
-| `@testable import StackMyArchitecture` | `@testable import FeatureLoginDomain` | en cada test |
+La mayoría de nombres de Feature Login coinciden ahora con el scaffold. Las únicas divergencias son:
+
+| Aspecto | Lecciones | Scaffold | Motivo |
+|---|---|---|---|
+| Arquitectura de errores de VO | `EmailAddress.ValidationError.invalidFormat`, `Password.ValidationError.empty` | `LoginError.invalidEmail`, `LoginError.invalidPassword` | Pedagógico: la lección enseña errores anidados primero; el scaffold usa enum unificado desde el inicio |
+| Case de error de red | `LoginError.connectivity` | `LoginError.network` | Pedagógico: nombre más descriptivo en la lección |
+| Import en tests | `@testable import StackMyArchitecture` | `@testable import FeatureLoginDomain/Data/UI` | Modularización: la lección usa un único target Xcode |
+
+### Nombres ya unificados ✅
+
+`EmailAddress`, `Password`, `Credentials`, `UserSession`, `LoginError`, `AuthRepository`, `AuthenticateUserUseCase`, `AuthHTTPRepository`, `InMemoryAuthRepository`, `LoginViewModel`, `LoginView`, `LoginNavigating`
 
 ---
 
-## Diferencias estructurales
+## Diferencias estructurales (independiente de nombres)
 
 | Aspecto | Lecciones | Scaffold |
 |---|---|---|
 | Capas | Domain / Application / Infrastructure / Interface | Domain / Data / UI |
-| Protocolo `AuthGateway` vive en | `Application/Ports/` | `FeatureLoginDomain/` (dentro del módulo Domain) |
-| Errores de validación | Cada VO tiene su propio `ValidationError` anidado | Enum unificado `LoginError` en el módulo Domain |
+| Protocolo `AuthRepository` vive en | `Application/Ports/` | `FeatureLoginDomain/` (dentro del módulo Domain) |
+| Errores de VO | Cada VO tiene su propio `ValidationError` anidado | Enum unificado `LoginError` en el módulo Domain |
 | Modularización | Carpetas dentro de un único target Xcode | 13 targets SPM independientes |
 | Import en Domain | Domain no importa Foundation (regla didáctica pura) | `EmailAddress` y `Password` importan Foundation para `trimmingCharacters` |
 
 ---
 
-## Por qué existen estas diferencias
+## Por qué persisten estas diferencias
 
-**Los nombres pedagógicos** (`AuthGateway`, `LoginUseCase`, `Email`) son más cortos y directos,
-facilitando la comprensión cuando se aprende el patrón por primera vez.
+Las diferencias restantes son **intencionales por razones pedagógicas**:
 
-**Los nombres del scaffold** (`AuthRepository`, `AuthenticateUserUseCase`, `EmailAddress`) siguen
-convenciones enterprise habituales en proyectos iOS reales:
-- `AuthRepository` es la nomenclatura estándar en proyectos Clean Architecture iOS.
-- `AuthenticateUserUseCase` es más explícito sobre la acción que realiza.
-- `EmailAddress` evita colisión de nombres con otros contextos que puedan tener un tipo `Email`.
-- `LoginError` unificado reduce la proliferación de tipos de error por cada Value Object.
+- La lección enseña `ValidationError` anidado en los VOs para mostrar cómo un VO puede ser autónomo y auto-validante. El scaffold lo simplifica con un `LoginError` unificado para mostrar el resultado final enterprise. Ambos patrones son correctos — la lección muestra el camino, el scaffold muestra el destino.
+- `LoginError.connectivity` vs `.network`: diferencia de naming sin impacto arquitectónico.
+- La modularización en targets SPM es la arquitectura real, pero añade complejidad irrelevante en la fase de aprendizaje del patrón.
 
-**El patrón es idéntico en ambos casos.** Solo cambia la nomenclatura y algunas decisiones
-de convención que serían naturales al evolucionar el código pedagógico hacia producción.
+**El patrón arquitectónico es idéntico en ambos casos.** Solo cambia la nomenclatura y algunas decisiones de convención que serían naturales al evolucionar el código pedagógico hacia producción.
 
 ---
 

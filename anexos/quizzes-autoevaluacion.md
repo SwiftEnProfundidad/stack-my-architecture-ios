@@ -106,7 +106,7 @@ Lo que NO debe hacer es depender de implementaciones concretas; debe depender de
 Una buena respuesta incluye:
 
 - **Exhaustividad**: Con `switch` el compilador fuerza a manejar todos los casos
-- **Semántica**: `AuthError.invalidCredentials` comunica más que `Error(code: 401)`
+- **Semántica**: `LoginError.invalidCredentials` comunica más que `Error(code: 401)`
 - **Testabilidad**: Los tests pueden verificar casos específicos
 - **UX**: Diferentes errores pueden mostrar diferentes mensajes al usuario
 

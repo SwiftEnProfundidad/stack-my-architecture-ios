@@ -82,7 +82,7 @@ func submit() async {
         let session = try await loginUseCase.execute(credentials: credentials)
         
         // Breakpoint 4: ¿Login exitoso?
-        onLoginSucceeded(session)
+        navigator?.goToCatalog()
         
     } catch {
         // Breakpoint 5: ¿Qué error ocurrió?
@@ -114,7 +114,7 @@ La consola de Xcode no solo muestra prints. Es un intérprete de comandos LLDB d
 
 // Inspeccionar objeto completo
 (lldb) po loginUseCase
-<LoginUseCase: 0x600003b180a0>
+<AuthenticateUserUseCase: 0x600003b180a0>
 
 // Evaluar expresión
 (lldb) po email.isEmpty
@@ -126,9 +126,9 @@ false
   - value: "test@test.com"
 
 // Castear y explorar
-(lldb) po error as? AuthError
-▿ Optional(AuthError.invalidEmail)
-  - some: AuthError.invalidEmail
+(lldb) po error as? LoginError
+▿ Optional(LoginError.invalidEmail)
+  - some: LoginError.invalidEmail
 ```
 
 ### `po` vs `p`
@@ -204,20 +204,19 @@ Detecta memory leaks (objetos que no se liberan) y ciclos de retención.
 Busca objetos que deberían haberse liberado pero siguen en memoria:
 
 ```swift
-// Memory leak típico
-class LoginViewModel {
-    var onLoginSucceeded: (Session) -> Void  // Retiene el closure
+// El patrón `weak var navigator` evita el retain cycle:
+final class LoginViewModel {
+    private weak var navigator: (any LoginNavigating)?  // weak rompe el ciclo
     
-    init(onLoginSucceeded: @escaping (Session) -> Void) {
-        self.onLoginSucceeded = onLoginSucceeded
-        // Si el closure captura self del coordinador,
-        // y el ViewModel retiene el closure,
-        // hay un ciclo: Coordinator ↔ ViewModel
+    init(useCase: AuthenticateUserUseCase, navigator: any LoginNavigating) {
+        self.navigator = navigator
+        // weak var: si el coordinador desaparece, navigator
+        // se pone a nil automáticamente. No hay ciclo.
     }
 }
 ```
 
-**Solución:** `[weak self]` en el closure.
+**Por qué `weak`:** El coordinador posee el ViewModel (lo crea y lo retiene). Si el ViewModel tuviera una referencia `strong` al coordinador, habría un ciclo. `weak var` rompe el ciclo: cuando el coordinador desaparece, el ViewModel no lo impide.
 
 ---
 
@@ -249,7 +248,7 @@ Para problemas de rendimiento: CPU, memoria, red, batería.
 ```text
 ┌────────────────────────────────────────┐
 │ 95% - LoginViewModel.submit()           │
-│   └─ 90% - LoginUseCase.execute()       │
+│   └─ 90% - AuthenticateUserUseCase.execute()       │
 │        └─ 85% - URLSession.data()       │
 │             └─ 80% - _CFReadStreamRead │
 └────────────────────────────────────────┘

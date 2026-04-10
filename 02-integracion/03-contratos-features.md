@@ -34,11 +34,12 @@ final class LoginViewModel {
 
 // ✅ Con contrato: Login solo publica una intención tipada
 final class LoginViewModel {
-    var onEvent: ((AppEvent) -> Void)?
+    private weak var navigator: (any LoginNavigating)?
 
-    func onSuccess(session: Session) {
-        onEvent?(.loginSucceeded(session))
-        // Login no sabe qué pantalla sigue. Solo dice "el login fue exitoso".
+    func submit() async {
+        // ...
+        navigator?.goToCatalog()
+        // Login no sabe qué pantalla sigue. Solo llama al navigator.
         // El coordinator decide el resto.
     }
 }
@@ -189,7 +190,7 @@ sequenceDiagram
     participant K as SharedKernel
     participant G as CatalogFeature
 
-    L->>C: onLoginSucceeded(Session)
+    L->>C: navigator.goToCatalog()
     C->>K: guarda Session
     C->>G: crea Catalog con dependencias
     G-->>C: onProductSelected(ProductID)
@@ -198,7 +199,7 @@ sequenceDiagram
 
 Lectura paso a paso:
 
-1. `L->>C: onLoginSucceeded(Session)` — Login emite el evento con la sesión. Login no sabe qué ocurre después; solo publica el resultado de la autenticación.
+1. `L->>C: navigator.goToCatalog()` — Login llama al coordinator (via `LoginNavigating`). Login no sabe qué ocurre después; solo delega la navegación.
 2. `C->>K: guarda Session` — el Coordinator persiste la sesión en el Shared Kernel (estado global de autenticación). A partir de aquí, cualquier feature puede leer el token si lo necesita.
 3. `C->>G: crea Catalog con dependencias` — el Coordinator instancia el módulo Catalog inyectándole sus dependencias (repositorio, sesión). Catalog no se crea solo; el Coordinator controla cuándo y cómo.
 4. `G-->>C: onProductSelected(ProductID)` — Catalog emite una selección. La flecha `-->>` (punteada) indica que es una respuesta o callback, no una llamada directa de vuelta.
@@ -570,28 +571,26 @@ final class LoginViewModel: ObservableObject {
 }
 // → renombrar CatalogViewModel rompe LoginViewModel
 
-// ✅ Login emite evento; el coordinator decide qué sigue
+// ✅ Login delega la navegación al navigator; el coordinator decide qué sigue
 @MainActor
 final class LoginViewModel: ObservableObject {
-    var onEvent: ((AppEvent) -> Void)?
+    private weak var navigator: (any LoginNavigating)?
 
-    func loginSuccess(session: Session) {
-        onEvent?(.loginSucceeded(session))  // Login no sabe qué viene después
+    func submit() async {
+        // ...
+        navigator?.goToCatalog()  // Login no sabe qué viene después
     }
 }
 
-// El coordinator conecta sin acoplamiento lateral
-func handle(event: AppEvent) {
-    switch event {
-    case .loginSucceeded(let session):
-        state.session = session
+// El coordinator implementa LoginNavigating — sin acoplamiento lateral
+final class AppCoordinator: LoginNavigating {
+    func goToCatalog() {
         path.append(.catalog)
-    default: break
     }
 }
 ```
 
-La clave del ✅ es que `LoginViewModel` no tiene ninguna referencia a tipos de Catalog. Su closure `onEvent` acepta `AppEvent` — un tipo del contrato compartido, no de ninguna feature concreta. Si mañana Catalog se renombra a `ProductBrowser`, `LoginViewModel` no necesita cambiar ni recompilar.
+La clave del ✅ es que `LoginViewModel` no tiene ninguna referencia a tipos de Catalog. Su `navigator` conforma `LoginNavigating` — un protocolo definido en la feature Login, no en ninguna feature concreta. Si mañana Catalog se renombra a `ProductBrowser`, `LoginViewModel` no necesita cambiar ni recompilar.
 
 ### Anti-patrón 3: contratos sin owner
 
@@ -702,35 +701,26 @@ Costes:
 - requiere disciplina de diseño; más indirección que A.
 
 ```swift
-// Opción B: Login emite evento tipado; el coordinator decide
+// Opción B: Login usa protocolo tipado; el coordinator lo implementa
 
 // En LoginViewModel — sin import de Catalog
 @MainActor
 final class LoginViewModel: ObservableObject {
-    var onEvent: ((AppEvent) -> Void)?
+    private weak var navigator: (any LoginNavigating)?
 
-    func loginSuccess(session: Session) {
-        onEvent?(.loginSucceeded(session))
+    func submit() async {
+        // ...
+        navigator?.goToCatalog()
     }
 }
 
 // En AppCoordinator — único lugar que conoce la ruta
 @MainActor
-final class AppCoordinator: ObservableObject {
+final class AppCoordinator: ObservableObject, LoginNavigating {
     @Published private(set) var path = NavigationPath()
-    private var session: Session?
 
-    func handle(event: AppEvent) {
-        switch event {
-        case .loginSucceeded(let session):
-            self.session = session
-            path.append(AppDestination.catalog)
-        case .logoutRequested:
-            session = nil
-            path = NavigationPath()
-        case .productSelected(let id):
-            path.append(AppDestination.productDetail(id))
-        }
+    func goToCatalog() {
+        path.append(AppDestination.catalog)
     }
 }
 // Login y Catalog no se conocen entre sí; el coordinator es el único que sabe de ambos

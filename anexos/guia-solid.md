@@ -290,21 +290,21 @@ class LoginViewModel {
 }
 
 // ✅ DESPUÉS: Dependencia de abstracción
-protocol AuthGateway {
+protocol AuthRepository {
     func authenticate(credentials: Credentials) async throws -> Session
 }
 
 class LoginViewModel {
-    private let gateway: AuthGateway  // Abstracción
+    private let gateway: AuthRepository  // Abstracción
     
-    init(gateway: AuthGateway) {
+    init(gateway: AuthRepository) {
         self.gateway = gateway  // Inyectado, swappeable
     }
 }
 
 // Implementaciones (detalles dependen de abstracción)
-class RemoteAuthGateway: AuthGateway { ... }  // Usa URLSession internamente
-class StubAuthGateway: AuthGateway { ... }   // Devuelve datos fake para tests
+class AuthHTTPRepository: AuthRepository { ... }    // Usa URLSession internamente
+class InMemoryAuthRepository: AuthRepository { ... } // Devuelve datos fake para tests
 ```
 
 ### ¿Dónde Aparece en el Curso?

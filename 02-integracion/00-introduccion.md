@@ -6,6 +6,8 @@
 - `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
 - `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
+> **Modelo de aprendizaje:** En esta etapa añades la feature Catalog sobre el Login que construiste en Etapa 1. Tú construyes tu versión lección a lección; el scaffold (`apps/ios/ArchitectureKit/`) muestra cómo quedan Login + Catalog integrados con navegación por eventos y contratos compartidos. Úsalo para comparar y auto-evaluarte, no para copiar.
+
 ## Por qué esta etapa cambia el juego
 
 En la Etapa 1 construiste una feature completa (Login) con límites limpios, tests y flujo end-to-end. Eso te dio una base sólida, pero todavía estabas en un entorno controlado: una feature aislada se parece a entrenar en gimnasio. La Etapa 2 es salir a jugar partido real: ahora hay dos features, contratos compartidos, navegación cross-feature y decisiones de composición.
@@ -253,16 +255,16 @@ final class LoginViewModel {
 // Si Catalog cambia su init, Login deja de compilar.
 // Si Catalog mueve su módulo, Login se rompe también.
 
-// ✅ Login emite un evento; el coordinador decide la ruta:
+// ✅ Login delega la navegación al navigator; el coordinador decide la ruta:
 final class LoginViewModel {
-    var onLoginSucceeded: ((Session) -> Void)?
+    private weak var navigator: (any LoginNavigating)?
 
-    func onLoginSuccess(session: Session) {
-        onLoginSucceeded?(session)
-        // Login solo comunica lo que pasó. No sabe nada de Catalog.
+    func submit() async {
+        _ = try await useCase.execute(...)
+        navigator?.goToCatalog()  // Login solo comunica qué acción hacer.
     }
 }
-// AppCoordinator escucha el evento y navega a Catalog.
+// AppCoordinator implementa LoginNavigating y navega a Catalog.
 // Cambiar o eliminar Catalog no toca LoginViewModel ni una línea.
 ```
 

@@ -74,7 +74,7 @@ let saved = try await fetchUser(id: newUser.id)
 class LoginUseCase {
     func execute(credentials: Credentials) async throws -> Session {
         // Valida, autentica, CREA sesión (muta)
-        let session = try await authGateway.authenticate(credentials)
+        let session = try await authRepository.authenticate(credentials)
         await analytics.track(.loginSuccess)
         return session  // Devuelve identificador de la mutación, no datos de consulta
     }

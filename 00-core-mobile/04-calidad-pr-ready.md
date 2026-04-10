@@ -66,6 +66,10 @@ cd apps/ios/ArchitectureKit && swift test 2>&1 | tail -3
 
 Estos dos comandos son los gates de PR mínimos del scaffold: dependencias limpias y tests en verde. Si los dos pasan, el código es PR-ready según los criterios de esta lección.
 
+## Anexo — Gobernanza automatizada con Pumuki (opcional)
+
+Si tu equipo ya opera gates en CI y quieres una capa **determinista** de enforcement (Facts → Rules → Gate → evidencia) sobre repos reales, el curso **Pumuki** del hub Stack My Architecture (`/pumuki/`, `courseId` `stack-my-architecture-pumuki`) enlaza con esta lección sin sustituir Swift ni la arquitectura de la app.
+
 ---
 
 ## Qué sigue

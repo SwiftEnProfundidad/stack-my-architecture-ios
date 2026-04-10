@@ -2,17 +2,17 @@
 
 ## Donde el código habla con el mundo real
 
-En las lecciones anteriores construimos el Domain (modelos puros, Value Objects, errores) y la Application (el caso de uso que orquesta el flujo y el puerto `AuthGateway`). Todo eso es código que no sabe nada del mundo exterior: no sabe de HTTP, ni de JSON, ni de URLs, ni de `URLSession`.
+En las lecciones anteriores construimos el Domain (modelos puros, Value Objects, errores) y la Application (el caso de uso que orquesta el flujo y el puerto `AuthRepository`). Todo eso es código que no sabe nada del mundo exterior: no sabe de HTTP, ni de JSON, ni de URLs, ni de `URLSession`.
 
 Ahora llegamos a la capa Infrastructure. Esta es la capa que **implementa los puertos** definidos por Application. Es donde vive el código que habla con servidores, que parsea JSON, que persiste datos en disco. Es la capa más "sucia" en el sentido de que depende de frameworks de Apple, de formatos de datos externos, y de servicios que pueden fallar de formas impredecibles.
 
 En esta lección vamos a construir tres cosas:
 
-El **`RemoteAuthGateway`**, que implementa el protocolo `AuthGateway` llamando a un servidor HTTP real. El **`StubAuthGateway`**, que implementa el mismo protocolo devolviendo datos falsos, útil para desarrollo sin servidor y para SwiftUI Previews. Y los **DTOs** (Data Transfer Objects), que son los tipos que representan el formato de datos que el servidor envía y recibe, separados de los modelos del Domain.
+El **`AuthHTTPRepository`**, que implementa el protocolo `AuthRepository` llamando a un servidor HTTP real. El **`InMemoryAuthRepository`**, que implementa el mismo protocolo devolviendo datos falsos, útil para desarrollo sin servidor y para SwiftUI Previews. Y los **DTOs** (Data Transfer Objects), que son los tipos que representan el formato de datos que el servidor envía y recibe, separados de los modelos del Domain.
 
 Todo con tests XCTest.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `AuthGateway` → `AuthRepository`, `RemoteAuthGateway` → `AuthHTTPRepository`, `StubAuthGateway` → `InMemoryAuthRepository`, `Session` → `UserSession`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `AuthRepository` → `AuthRepository`, `AuthHTTPRepository` → `AuthHTTPRepository`, `InMemoryAuthRepository` → `InMemoryAuthRepository`, `UserSession` → `UserSession`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -27,14 +27,14 @@ En esta capa se ve muy claro el **Principio 4** de [Principios de ingeniería](.
 ```mermaid
 graph LR
     subgraph Clean["Mundo limpio - Application"]
-        UC["LoginUseCase"]
-        PROTO["AuthGateway protocol<br/>authenticate Credentials, devuelve Session"]
+        UC["AuthenticateUserUseCase"]
+        PROTO["AuthRepository protocol<br/>authenticate Credentials, devuelve UserSession"]
     end
 
     subgraph Adapter["Adaptador - Infrastructure"]
-        REMOTE["RemoteAuthGateway"]
+        REMOTE["AuthHTTPRepository"]
         MAP_IN["Credentials a AuthRequest<br/>Domain a JSON"]
-        MAP_OUT["AuthResponse a Session<br/>JSON a Domain"]
+        MAP_OUT["AuthResponse a UserSession<br/>JSON a Domain"]
     end
 
     subgraph Dirty["Mundo sucio - Servidor"]
@@ -53,9 +53,9 @@ graph LR
     style Dirty fill:#f8d7da,stroke:#dc3545
 ```
 
-El adaptador es el **traductor** entre dos idiomas: el idioma limpio del Domain (`Credentials`, `Session`) y el idioma del servidor (JSON, HTTP status codes, URLs). Si el servidor cambia su JSON, solo cambias el adaptador. El UseCase ni se entera.
+El adaptador es el **traductor** entre dos idiomas: el idioma limpio del Domain (`Credentials`, `UserSession`) y el idioma del servidor (JSON, HTTP status codes, URLs). Si el servidor cambia su JSON, solo cambias el adaptador. El UseCase ni se entera.
 
-En la terminología de Hexagonal Architecture (Ports and Adapters), la Infrastructure contiene los **adaptadores**: implementaciones concretas de los puertos que adaptan el mundo exterior a la interfaz que el caso de uso espera. El `RemoteAuthGateway` es un adaptador: adapta una API HTTP (con URLs, JSON, status codes) a la interfaz limpia del protocolo `AuthGateway` (que solo habla de `Credentials` y `Session`).
+En la terminología de Hexagonal Architecture (Ports and Adapters), la Infrastructure contiene los **adaptadores**: implementaciones concretas de los puertos que adaptan el mundo exterior a la interfaz que el caso de uso espera. El `AuthHTTPRepository` es un adaptador: adapta una API HTTP (con URLs, JSON, status codes) a la interfaz limpia del protocolo `AuthRepository` (que solo habla de `Credentials` y `UserSession`).
 
 Esta separación es importante porque el mundo exterior cambia constantemente. El servidor puede cambiar el formato de su JSON. Puede cambiar de REST a GraphQL. Puede cambiar la URL del endpoint. Puede añadir headers de autenticación. Cada uno de estos cambios afecta **solo** a la Infrastructure. El Domain y la Application no se enteran.
 
@@ -65,11 +65,11 @@ Esta separación es importante porque el mundo exterior cambia constantemente. E
 
 Antes de implementar el gateway, necesitamos definir los tipos que representan los datos que el servidor envía y recibe. En DDD, estos tipos se llaman DTOs (Data Transfer Objects). Son distintos de los modelos del Domain:
 
-Los modelos del Domain (`Email`, `Password`, `Credentials`, `Session`) representan **conceptos de negocio**. Tienen validación, invariantes, y semántica rica.
+Los modelos del Domain (`EmailAddress`, `Password`, `Credentials`, `UserSession`) representan **conceptos de negocio**. Tienen validación, invariantes, y semántica rica.
 
 Los DTOs (`AuthRequest`, `AuthResponse`) representan **el formato de los datos en tránsito**. Son la representación exacta del JSON que el servidor espera recibir y del JSON que el servidor envía. No tienen validación, no tienen lógica. Son contenedores de datos.
 
-¿Por qué no usar directamente los modelos del Domain como DTOs? Porque si lo haces, estás acoplando tu dominio al formato del servidor. Si el servidor cambia el nombre de un campo de "email" a "user_email", tendrías que cambiar el modelo `Email` del Domain. Eso es inaceptable: el Domain no debería cambiar por caprichos del API.
+¿Por qué no usar directamente los modelos del Domain como DTOs? Porque si lo haces, estás acoplando tu dominio al formato del servidor. Si el servidor cambia el nombre de un campo de "email" a "user_email", tendrías que cambiar el modelo `EmailAddress` del Domain. Eso es inaceptable: el Domain no debería cambiar por caprichos del API.
 
 ### AuthRequest: lo que enviamos al servidor
 
@@ -82,7 +82,7 @@ struct AuthRequest: Codable, Sendable {
 }
 ```
 
-El `AuthRequest` es el cuerpo de la petición HTTP que enviamos al servidor. Es `Encodable` porque lo vamos a serializar a JSON. Fíjate en que usa `String`, no `Email` ni `Password`. ¿Por qué? Porque al servidor le enviamos strings planos en JSON. La validación ya ocurrió en la capa Domain. Para cuando los datos llegan aquí, ya sabemos que son válidos.
+El `AuthRequest` es el cuerpo de la petición HTTP que enviamos al servidor. Es `Encodable` porque lo vamos a serializar a JSON. Fíjate en que usa `String`, no `EmailAddress` ni `Password`. ¿Por qué? Porque al servidor le enviamos strings planos en JSON. La validación ya ocurrió en la capa Domain. Para cuando los datos llegan aquí, ya sabemos que son válidos.
 
 ### AuthResponse: lo que el servidor nos devuelve
 
@@ -101,7 +101,7 @@ El `AuthResponse` es el body de la respuesta HTTP del servidor. Es `Decodable` p
 
 ## El protocolo HTTPClient
 
-El `RemoteAuthGateway` necesita hacer peticiones HTTP. Pero si usara `URLSession` directamente, no podríamos testearlo sin un servidor real. Así que definimos un protocolo `HTTPClient` que abstraiga la petición HTTP:
+El `AuthHTTPRepository` necesita hacer peticiones HTTP. Pero si usara `URLSession` directamente, no podríamos testearlo sin un servidor real. Así que definimos un protocolo `HTTPClient` que abstraiga la petición HTTP:
 
 ```swift
 // StackMyArchitecture/Features/Login/Infrastructure/HTTPClient.swift
@@ -117,16 +117,16 @@ Este protocolo dice: "dame un URLRequest, te devuelvo los datos y la respuesta H
 
 ---
 
-## Implementación del RemoteAuthGateway
+## Implementación del AuthHTTPRepository
 
 Ahora implementamos el gateway real. Este es el código que en producción hará la petición HTTP al servidor.
 
 ```swift
-// StackMyArchitecture/Features/Login/Infrastructure/RemoteAuthGateway.swift
+// StackMyArchitecture/Features/Login/Infrastructure/AuthHTTPRepository.swift
 
 import Foundation
 
-struct RemoteAuthGateway: AuthGateway, Sendable {
+struct AuthHTTPRepository: AuthRepository, Sendable {
     private let httpClient: any HTTPClient
     private let baseURL: URL
     
@@ -135,7 +135,7 @@ struct RemoteAuthGateway: AuthGateway, Sendable {
         self.baseURL = baseURL
     }
     
-    func authenticate(credentials: Credentials) async throws -> Session {
+    func authenticate(credentials: Credentials) async throws -> UserSession {
         let url = baseURL.appendingPathComponent("auth/login")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -152,42 +152,42 @@ struct RemoteAuthGateway: AuthGateway, Sendable {
         do {
             (data, response) = try await httpClient.execute(request)
         } catch {
-            throw AuthError.connectivity
+            throw LoginError.connectivity
         }
         
         guard response.statusCode == 200 else {
-            throw AuthError.invalidCredentials
+            throw LoginError.invalidCredentials
         }
         
         let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
         
         guard let token = authResponse.token else {
-            throw AuthError.invalidCredentials
+            throw LoginError.invalidCredentials
         }
         
-        // Nota pedagógica: aquí usamos Session(token:email:) por simplicidad.
+        // Nota pedagógica: aquí usamos UserSession(token:email:) por simplicidad.
         // En el scaffold real, el servidor devuelve un campo `user_id` y la sesión
         // se construye como UserSession(userId: dto.userId, token: dto.token).
         // No hay campo `email` en UserSession — el userId viene del servidor, no del cliente.
-        return Session(token: token, email: credentials.email.value)
+        return UserSession(token: token, email: credentials.email.value)
     }
 }
 ```
 
-**Explicación línea por línea del RemoteAuthGateway:**
+**Explicación línea por línea del AuthHTTPRepository:**
 
-Este es el componente más "sucio" de la feature Login: es el que habla con el mundo exterior (el servidor HTTP). Su trabajo es traducir entre dos idiomas: el idioma limpio del Domain (`Credentials`, `Session`) y el idioma de la red (`URLRequest`, `Data`, `HTTPURLResponse`, JSON).
+Este es el componente más "sucio" de la feature Login: es el que habla con el mundo exterior (el servidor HTTP). Su trabajo es traducir entre dos idiomas: el idioma limpio del Domain (`Credentials`, `UserSession`) y el idioma de la red (`URLRequest`, `Data`, `HTTPURLResponse`, JSON).
 
 ```mermaid
 flowchart LR
-    DOMAIN["Domain<br/>Credentials, Session<br/>tipos limpios"] --> GATEWAY["RemoteAuthGateway<br/>TRADUCTOR"] --> HTTP["Servidor HTTP<br/>JSON, status codes<br/>URLs, headers"]
+    DOMAIN["Domain<br/>Credentials, UserSession<br/>tipos limpios"] --> GATEWAY["AuthHTTPRepository<br/>TRADUCTOR"] --> HTTP["Servidor HTTP<br/>JSON, status codes<br/>URLs, headers"]
 
     style DOMAIN fill:#d4edda,stroke:#28a745
     style GATEWAY fill:#cce5ff,stroke:#007bff
     style HTTP fill:#fff3cd,stroke:#ffc107
 ```
 
-`struct RemoteAuthGateway: AuthGateway, Sendable` — Conforma el protocolo/puerto `AuthGateway` (definido en Application). Esto significa que implementa el método `authenticate(credentials:)`. Es `Sendable` para poder usarse en funciones `async`.
+`struct AuthHTTPRepository: AuthRepository, Sendable` — Conforma el protocolo/puerto `AuthRepository` (definido en Application). Esto significa que implementa el método `authenticate(credentials:)`. Es `Sendable` para poder usarse en funciones `async`.
 
 `private let httpClient: any HTTPClient` — La dependencia para hacer peticiones HTTP. Es un protocolo, no `URLSession` directamente. En producción será un wrapper de `URLSession`. En tests será un `HTTPClientStub`. El gateway no sabe cuál es.
 
@@ -203,35 +203,35 @@ flowchart LR
 
 `request.setValue("application/json", forHTTPHeaderField: "Content-Type")` — Le decimos al servidor que el cuerpo de la petición es JSON. Sin este header, el servidor no sabría interpretar los bytes que le enviamos.
 
-`let body = AuthRequest(email: credentials.email.value, password: credentials.password.value)` — Creamos el DTO `AuthRequest` a partir de los Value Objects del Domain. `credentials.email.value` extrae el string del `Email`. **Aquí ocurre el mapping Domain a Infrastructure:** los tipos ricos del Domain (`Email`, `Password`) se convierten en strings planos que el servidor entiende.
+`let body = AuthRequest(email: credentials.email.value, password: credentials.password.value)` — Creamos el DTO `AuthRequest` a partir de los Value Objects del Domain. `credentials.email.value` extrae el string del `EmailAddress`. **Aquí ocurre el mapping Domain a Infrastructure:** los tipos ricos del Domain (`EmailAddress`, `Password`) se convierten en strings planos que el servidor entiende.
 
 `request.httpBody = try JSONEncoder().encode(body)` — Convertimos el DTO a bytes JSON. `JSONEncoder` usa las propiedades del struct para generar algo como `{"email":"user@example.com","password":"pass123"}`. Esos bytes se ponen como cuerpo de la petición HTTP.
 
 **Fase 2: Ejecutar la petición**
 
-`do { (data, response) = try await httpClient.execute(request) } catch { throw AuthError.connectivity }` — Enviamos la petición y esperamos la respuesta. Si **cualquier** error ocurre (sin internet, timeout, DNS no resuelve, el servidor no responde...), capturamos el error y lanzamos `AuthError.connectivity`. No nos importa el detalle del error de red. Desde la perspectiva del Domain, cualquier fallo de red es simplemente "no pudimos conectar".
+`do { (data, response) = try await httpClient.execute(request) } catch { throw LoginError.connectivity }` — Enviamos la petición y esperamos la respuesta. Si **cualquier** error ocurre (sin internet, timeout, DNS no resuelve, el servidor no responde...), capturamos el error y lanzamos `LoginError.connectivity`. No nos importa el detalle del error de red. Desde la perspectiva del Domain, cualquier fallo de red es simplemente "no pudimos conectar".
 
 **Fase 3: Interpretar la respuesta**
 
-`guard response.statusCode == 200 else { throw AuthError.invalidCredentials }` — Si el servidor respondió con un código que no es 200 (éxito), asumimos que las credenciales fueron rechazadas. Un 401 (Unauthorized) o un 500 (Server Error) se traducen ambos a `invalidCredentials`. Simplificamos intencionalmente: el Domain no necesita saber la diferencia entre "servidor caído" y "credenciales rechazadas".
+`guard response.statusCode == 200 else { throw LoginError.invalidCredentials }` — Si el servidor respondió con un código que no es 200 (éxito), asumimos que las credenciales fueron rechazadas. Un 401 (Unauthorized) o un 500 (Server Error) se traducen ambos a `invalidCredentials`. Simplificamos intencionalmente: el Domain no necesita saber la diferencia entre "servidor caído" y "credenciales rechazadas".
 
 `let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data)` — Parseamos los bytes de la respuesta como JSON y los convertimos al DTO `AuthResponse`. Si el JSON no tiene el formato esperado, `JSONDecoder` lanza un error que se propaga.
 
-`guard let token = authResponse.token else { throw AuthError.invalidCredentials }` — Verificamos que el token está presente. Si el servidor respondió 200 pero no envió token (un caso raro pero posible), lanzamos error.
+`guard let token = authResponse.token else { throw LoginError.invalidCredentials }` — Verificamos que el token está presente. Si el servidor respondió 200 pero no envió token (un caso raro pero posible), lanzamos error.
 
-`return Session(token: token, email: credentials.email.value)` — Si todo fue bien, construimos y devolvemos una `Session` del Domain. **Aquí ocurre el mapping inverso: Infrastructure a Domain.** Los datos del servidor (strings planos del JSON) se convierten en un tipo rico del Domain (`Session`).
+`return UserSession(token: token, email: credentials.email.value)` — Si todo fue bien, construimos y devolvemos una `UserSession` del Domain. **Aquí ocurre el mapping inverso: Infrastructure a Domain.** Los datos del servidor (strings planos del JSON) se convierten en un tipo rico del Domain (`UserSession`).
 
 **El flujo completo de traducción:**
 
 ```mermaid
 flowchart TD
-    IN["Credentials<br/>Email + Password<br/>Domain"] --> MAP1["AuthRequest<br/>email: String<br/>password: String<br/>DTO"]
+    IN["Credentials<br/>EmailAddress + Password<br/>Domain"] --> MAP1["AuthRequest<br/>email: String<br/>password: String<br/>DTO"]
     MAP1 --> JSON["JSONEncoder<br/>Bytes JSON"]
     JSON --> HTTP["httpClient.execute<br/>Peticion HTTP POST"]
-    HTTP -->|"Error de red"| ERR1["AuthError.connectivity"]
-    HTTP -->|"Status != 200"| ERR2["AuthError.invalidCredentials"]
+    HTTP -->|"Error de red"| ERR1["LoginError.connectivity"]
+    HTTP -->|"Status != 200"| ERR2["LoginError.invalidCredentials"]
     HTTP -->|"200 OK"| PARSE["JSONDecoder<br/>AuthResponse"]
-    PARSE --> MAP2["Session<br/>token + email<br/>Domain"]
+    PARSE --> MAP2["UserSession<br/>token + email<br/>Domain"]
 
     style IN fill:#d4edda,stroke:#28a745
     style MAP2 fill:#d4edda,stroke:#28a745
@@ -241,23 +241,23 @@ flowchart TD
 
 ---
 
-## Implementación del StubAuthGateway
+## Implementación del InMemoryAuthRepository
 
 Para desarrollo sin servidor y para SwiftUI Previews, necesitamos una implementación que devuelva datos falsos sin hacer ninguna petición de red:
 
 ```swift
-// StackMyArchitecture/Features/Login/Infrastructure/StubAuthGateway.swift
+// StackMyArchitecture/Features/Login/Infrastructure/InMemoryAuthRepository.swift
 
-struct StubAuthGateway: AuthGateway, Sendable {
+struct InMemoryAuthRepository: AuthRepository, Sendable {
     private let delay: UInt64
     
     init(delayNanoseconds: UInt64 = 500_000_000) {
         self.delay = delayNanoseconds
     }
     
-    func authenticate(credentials: Credentials) async throws -> Session {
+    func authenticate(credentials: Credentials) async throws -> UserSession {
         try await Task.sleep(nanoseconds: delay)
-        return Session(
+        return UserSession(
             token: "stub-token-\(UUID().uuidString)",
             email: credentials.email.value
         )
@@ -267,11 +267,11 @@ struct StubAuthGateway: AuthGateway, Sendable {
 
 El stub tiene un delay configurable que por defecto es 0.5 segundos. ¿Por qué no devolver el resultado inmediatamente? Porque queremos que el desarrollo con el stub sea lo más parecido posible a la producción. En producción, la petición de red tarda un tiempo. Si el stub devuelve instantáneamente, no detectarás problemas de UX: estados de loading que no se muestran, animaciones que se saltan, condiciones de carrera cuando el usuario pulsa dos veces el botón. El delay simulado te obliga a manejar estos casos durante el desarrollo, no en producción cuando ya es tarde.
 
-Para los tests unitarios, puedes configurar el delay a 0 para que los tests sean rápidos: `StubAuthGateway(delayNanoseconds: 0)`.
+Para los tests unitarios, puedes configurar el delay a 0 para que los tests sean rápidos: `InMemoryAuthRepository(delayNanoseconds: 0)`.
 
 ---
 
-## Tests de contrato del RemoteAuthGateway
+## Tests de contrato del AuthHTTPRepository
 
 Los tests de contrato verifican que la implementación del gateway traduce correctamente las respuestas HTTP a los tipos del Domain. Necesitamos un stub de `HTTPClient`:
 
@@ -308,7 +308,7 @@ final class HTTPClientStub: HTTPClient, @unchecked Sendable {
 
 **Explicación línea por línea del HTTPClientStub:**
 
-Este stub hace exactamente lo mismo que el `AuthGatewayStub` pero para un nivel más bajo: simula la red HTTP en vez de simular la autenticación.
+Este stub hace exactamente lo mismo que el `AuthRepositoryStub` pero para un nivel más bajo: simula la red HTTP en vez de simular la autenticación.
 
 `final class HTTPClientStub: HTTPClient, @unchecked Sendable` — Conforma el protocolo `HTTPClient`. El gateway real usará `URLSession` para hacer peticiones HTTP reales. Este stub devuelve datos que tú configuras, sin tocar la red.
 
@@ -321,12 +321,12 @@ El stub tiene **dos constructores**: uno para simular respuestas exitosas (`init
 Y ahora los tests. Presta especial atención al patrón `makeSUT` que es un helper que vamos a usar en **todos** los archivos de tests del curso:
 
 ```swift
-// StackMyArchitectureTests/Features/Login/Infrastructure/RemoteAuthGatewayTests.swift
+// StackMyArchitectureTests/Features/Login/Infrastructure/AuthHTTPRepositoryTests.swift
 
 import XCTest
 @testable import StackMyArchitecture
 
-final class RemoteAuthGatewayTests: XCTestCase {
+final class AuthHTTPRepositoryTests: XCTestCase {
     
     private let baseURL = URL(string: "https://api.example.com")!
     
@@ -335,21 +335,21 @@ final class RemoteAuthGatewayTests: XCTestCase {
     private func makeSUT(
         data: Data = Data(),
         statusCode: Int = 200
-    ) throws -> (sut: RemoteAuthGateway, client: HTTPClientStub) {
+    ) throws -> (sut: AuthHTTPRepository, client: HTTPClientStub) {
         let client = HTTPClientStub(data: data, statusCode: statusCode)
-        let sut = RemoteAuthGateway(httpClient: client, baseURL: baseURL)
+        let sut = AuthHTTPRepository(httpClient: client, baseURL: baseURL)
         return (sut, client)
     }
     
-    private func makeSUT(error: Error) -> (sut: RemoteAuthGateway, client: HTTPClientStub) {
+    private func makeSUT(error: Error) -> (sut: AuthHTTPRepository, client: HTTPClientStub) {
         let client = HTTPClientStub(error: error)
-        let sut = RemoteAuthGateway(httpClient: client, baseURL: baseURL)
+        let sut = AuthHTTPRepository(httpClient: client, baseURL: baseURL)
         return (sut, client)
     }
     
     private func makeCredentials() throws -> Credentials {
         Credentials(
-            email: try Email("user@example.com"),
+            email: try EmailAddress("user@example.com"),
             password: try Password("pass123")
         )
     }
@@ -364,20 +364,20 @@ final class RemoteAuthGatewayTests: XCTestCase {
 
 `makeSUT` es un **helper** (función auxiliar) que crea el componente bajo prueba (SUT) junto con sus dependencias. Existe por tres razones:
 
-1. **Reduce duplicación.** Sin `makeSUT`, cada test tendría que crear el `HTTPClientStub`, el `RemoteAuthGateway`, y conectarlos. Con 6 tests, son 18 líneas repetidas. Con `makeSUT`, cada test llama a una sola función.
+1. **Reduce duplicación.** Sin `makeSUT`, cada test tendría que crear el `HTTPClientStub`, el `AuthHTTPRepository`, y conectarlos. Con 6 tests, son 18 líneas repetidas. Con `makeSUT`, cada test llama a una sola función.
 
-2. **Centraliza la creación.** Si mañana el constructor de `RemoteAuthGateway` cambia (por ejemplo, se añade un nuevo parámetro), solo cambias `makeSUT`. Sin el helper, tendrías que cambiar 6 tests.
+2. **Centraliza la creación.** Si mañana el constructor de `AuthHTTPRepository` cambia (por ejemplo, se añade un nuevo parámetro), solo cambias `makeSUT`. Sin el helper, tendrías que cambiar 6 tests.
 
 3. **Hace los tests más legibles.** El test se enfoca en lo que es **diferente** en cada escenario (qué datos devuelve el stub, qué status code), no en la plomería repetitiva de crear objetos.
 
-`makeSUT` devuelve una **tupla** `(sut: RemoteAuthGateway, client: HTTPClientStub)`. Una tupla es simplemente varios valores empaquetados juntos. Usamos nombres (`sut:` y `client:`) para poder acceder a cada valor por nombre: `result.sut` y `result.client`. O, más comúnmente, desestructuramos la tupla directamente: `let (sut, client) = try makeSUT(...)`.
+`makeSUT` devuelve una **tupla** `(sut: AuthHTTPRepository, client: HTTPClientStub)`. Una tupla es simplemente varios valores empaquetados juntos. Usamos nombres (`sut:` y `client:`) para poder acceder a cada valor por nombre: `result.sut` y `result.client`. O, más comúnmente, desestructuramos la tupla directamente: `let (sut, client) = try makeSUT(...)`.
 
 `makeCredentials()` y `makeSuccessJSON(...)` son otros helpers que crean datos de prueba reutilizables. El objetivo es el mismo: que cada test solo contenga lo que es **único** de ese escenario.
 
-Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTests`:
+Los tests van en el mismo archivo, dentro de la misma clase `AuthHTTPRepositoryTests`:
 
 ```swift
-    // MARK: - Happy Path  (continuación de RemoteAuthGatewayTests)
+    // MARK: - Happy Path  (continuación de AuthHTTPRepositoryTests)
     
     func test_authenticate_on_200_with_valid_json_returns_session() async throws {
         let json = makeSuccessJSON(token: "abc-123", email: "user@example.com")
@@ -428,8 +428,8 @@ Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTe
         
         do {
             _ = try await sut.authenticate(credentials: credentials)
-            XCTFail("Expected AuthError.connectivity but succeeded")
-        } catch let error as AuthError {
+            XCTFail("Expected LoginError.connectivity but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .connectivity)
         } catch {
             XCTFail("Unexpected error: \(error)")
@@ -442,8 +442,8 @@ Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTe
         
         do {
             _ = try await sut.authenticate(credentials: credentials)
-            XCTFail("Expected AuthError.invalidCredentials but succeeded")
-        } catch let error as AuthError {
+            XCTFail("Expected LoginError.invalidCredentials but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .invalidCredentials)
         } catch {
             XCTFail("Unexpected error: \(error)")
@@ -456,8 +456,8 @@ Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTe
         
         do {
             _ = try await sut.authenticate(credentials: credentials)
-            XCTFail("Expected AuthError.invalidCredentials but succeeded")
-        } catch let error as AuthError {
+            XCTFail("Expected LoginError.invalidCredentials but succeeded")
+        } catch let error as LoginError {
             XCTAssertEqual(error, .invalidCredentials)
         } catch {
             XCTFail("Unexpected error: \(error)")
@@ -468,13 +468,13 @@ Los tests van en el mismo archivo, dentro de la misma clase `RemoteAuthGatewayTe
 
 ### Por qué usamos helpers en los tests
 
-Fíjate en los métodos `makeSUT(...)`, `makeCredentials()`, y `makeSuccessJSON(...)`. Estos son **helpers de test** que reducen la duplicación. Cada test crea un SUT, unas credenciales, y algún dato de respuesta. En lugar de repetir la misma configuración en cada test, lo extraemos a helpers. Esto tiene dos ventajas: los tests son más cortos y fáciles de leer, y si cambia la forma de crear un `RemoteAuthGateway` (por ejemplo, si añadimos un parámetro al constructor), solo cambiamos el helper, no los 6 tests.
+Fíjate en los métodos `makeSUT(...)`, `makeCredentials()`, y `makeSuccessJSON(...)`. Estos son **helpers de test** que reducen la duplicación. Cada test crea un SUT, unas credenciales, y algún dato de respuesta. En lugar de repetir la misma configuración en cada test, lo extraemos a helpers. Esto tiene dos ventajas: los tests son más cortos y fáciles de leer, y si cambia la forma de crear un `AuthHTTPRepository` (por ejemplo, si añadimos un parámetro al constructor), solo cambiamos el helper, no los 6 tests.
 
 ### Qué verifican estos tests
 
 Estos tests no verifican que `URLSession` funciona (eso es responsabilidad de Apple). Verifican que nuestro **mapping** es correcto:
 
-Que una respuesta 200 con un JSON válido se convierte correctamente en una `Session`. Que la petición se envía al URL correcto con el método correcto. Que las credenciales se serializan correctamente en el body JSON. Que un error de red se traduce a `AuthError.connectivity`. Que un status code no-200 se traduce a `AuthError.invalidCredentials`.
+Que una respuesta 200 con un JSON válido se convierte correctamente en una `UserSession`. Que la petición se envía al URL correcto con el método correcto. Que las credenciales se serializan correctamente en el body JSON. Que un error de red se traduce a `LoginError.connectivity`. Que un status code no-200 se traduce a `LoginError.invalidCredentials`.
 
 Estos son **contract tests**: verifican que el adaptador cumple el contrato que define el puerto. Si el día de mañana el servidor cambia el formato del JSON, estos tests fallarán y nos dirán exactamente qué cambió y qué necesitamos ajustar.
 
@@ -488,17 +488,17 @@ En muchos tutoriales, el modelo de dominio es el mismo que se usa para parsear J
 
 ```swift
 // ❌ Esto es lo que NO hacemos
-struct Session: Codable {
+struct UserSession: Codable {
     let token: String
     let email: String
 }
 ```
 
-Si `Session` es `Codable`, se puede usar directamente para parsear la respuesta del servidor. Parece eficiente: un solo tipo para todo. Pero tiene un problema grave: estás acoplando tu modelo de dominio al formato de datos del servidor.
+Si `UserSession` es `Codable`, se puede usar directamente para parsear la respuesta del servidor. Parece eficiente: un solo tipo para todo. Pero tiene un problema grave: estás acoplando tu modelo de dominio al formato de datos del servidor.
 
-¿Qué pasa si el servidor cambia el nombre del campo de "token" a "access_token"? Necesitas cambiar `Session`, que es un tipo del Domain. Pero `Session` lo usan los casos de uso, los tests del Domain, los tests de Application, los ViewModels. Un cambio en el formato del API impacta en cascada a todo el sistema.
+¿Qué pasa si el servidor cambia el nombre del campo de "token" a "access_token"? Necesitas cambiar `UserSession`, que es un tipo del Domain. Pero `UserSession` lo usan los casos de uso, los tests del Domain, los tests de Application, los ViewModels. Un cambio en el formato del API impacta en cascada a todo el sistema.
 
-Con DTOs separados, el cambio solo afecta al DTO y al mapping dentro del gateway:
+Con DTOs separados, el cambio solo afecta al DTO y al mapping dentro del repository:
 
 ```swift
 // ✅ Esto es lo que hacemos
@@ -509,18 +509,18 @@ struct AuthResponse: Decodable, Sendable {
 }
 
 // El mapping se ajusta dentro del gateway
-return Session(token: authResponse.access_token!, email: credentials.email.value)
+return UserSession(token: authResponse.access_token!, email: credentials.email.value)
 
-// Session no cambia. El Domain no se entera.
+// UserSession no cambia. El Domain no se entera.
 ```
 
 El coste de esta separación es escribir unos pocos tipos adicionales y un mapping. El beneficio es que tu Domain es estable e independiente del mundo exterior. En un proyecto enterprise que dura años, este beneficio se paga con creces.
 
 ---
 
-## Por qué el StubAuthGateway tiene delay configurable
+## Por qué el InMemoryAuthRepository tiene delay configurable
 
-El `StubAuthGateway` simula un delay de 0.5 segundos por defecto. Esto puede parecer un detalle menor, pero es una decisión deliberada de diseño.
+El `InMemoryAuthRepository` simula un delay de 0.5 segundos por defecto. Esto puede parecer un detalle menor, pero es una decisión deliberada de diseño.
 
 En desarrollo con el stub, quieres que la experiencia sea lo más parecida posible a producción. Si el stub devuelve datos instantáneamente, te pierdes toda una categoría de problemas:
 
@@ -534,7 +534,7 @@ El delay configurable permite tener lo mejor de ambos mundos: delay realista par
 
 Tenemos ahora la capa Infrastructure completa de la feature Login:
 
-Un `RemoteAuthGateway` que traduce entre el mundo HTTP/JSON y la interfaz limpia del protocolo `AuthGateway`. Un protocolo `HTTPClient` que permite testear el gateway sin hacer peticiones de red reales. DTOs separados (`AuthRequest`, `AuthResponse`) que aíslan el Domain de los cambios en el formato del API. Un `StubAuthGateway` para desarrollo sin servidor y previews. Tests de contrato que verifican el mapping correcto en todos los escenarios: éxito, error de credenciales, error de conectividad, URL correcta, body correcto.
+Un `AuthHTTPRepository` que traduce entre el mundo HTTP/JSON y la interfaz limpia del protocolo `AuthRepository`. Un protocolo `HTTPClient` que permite testear el gateway sin hacer peticiones de red reales. DTOs separados (`AuthRequest`, `AuthResponse`) que aíslan el Domain de los cambios en el formato del API. Un `InMemoryAuthRepository` para desarrollo sin servidor y previews. Tests de contrato que verifican el mapping correcto en todos los escenarios: éxito, error de credenciales, error de conectividad, URL correcta, body correcto.
 
 En la siguiente lección llegaremos a la última capa: Interface. Allí construiremos el `LoginViewModel` y la `LoginView` con SwiftUI, conectando todo el flujo desde la UI hasta el Domain.
 
@@ -551,8 +551,8 @@ En `Sources/FeatureLoginData/` hay dos archivos:
 
 | Tu implementación (lección) | Scaffold | Diferencia principal |
 |---|---|---|
-| `StubAuthGateway` (struct) | `InMemoryAuthRepository.swift` | Es un **`actor`** (thread-safe) con latencia configurable |
-| `RemoteAuthGateway` | `AuthHTTPRepository.swift` | Guarda sesión en `SessionStore` tras autenticar; DTOs privados |
+| `InMemoryAuthRepository` (struct) | `InMemoryAuthRepository.swift` | Es un **`actor`** (thread-safe) con latencia configurable |
+| `AuthHTTPRepository` | `AuthHTTPRepository.swift` | Guarda sesión en `SessionStore` tras autenticar; DTOs privados |
 
 **Paso 2 — Diferencia importante: `InMemoryAuthRepository` es un `actor`**
 
@@ -580,5 +580,5 @@ Hasta aquí, el scaffold tiene compilando y con tests en verde:
 
 ## Qué sigue
 
-La siguiente lección, [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md), construye el `LoginViewModel` y la `LoginView` — la capa más externa de la feature que conecta la UI con el `LoginUseCase`.
+La siguiente lección, [Feature Login: Capa Interface SwiftUI](04-interface-swiftui.md), construye el `LoginViewModel` y la `LoginView` — la capa más externa de la feature que conecta la UI con el `AuthenticateUserUseCase`.
 

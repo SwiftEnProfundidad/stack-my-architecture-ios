@@ -6,13 +6,13 @@ A lo largo de las últimas cuatro lecciones hemos implementado la feature Login 
 
 Esta lección no tiene código nuevo. Es una lección de reflexión y consolidación. Si te la saltas, los siguientes capítulos funcionarán igual, pero entenderás menos el "por qué" detrás de cada decisión.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los nombres que aparecen a lo largo de esta lección (y de toda la Feature Login) son pedagógicos. En el scaffold `apps/ios/ArchitectureKit`: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`, `AuthGateway` → `AuthRepository`, `LoginUseCase` → `AuthenticateUserUseCase`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Los nombres usados en esta lección (`EmailAddress`, `UserSession`, `LoginError`, `AuthRepository`, `AuthenticateUserUseCase`) coinciden exactamente con el scaffold `apps/ios/ArchitectureKit`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ---
 
 ### Diagrama: mapa de tests por capa de la feature Login
 
-El mapa distribuye evidencia por capa para evitar huecos: **Domain** valida reglas (`EmailTests`, `PasswordTests`), **Application** valida orquestación (`LoginUseCaseTests`), **Infrastructure** valida integración remota (`RemoteAuthGatewayTests`) y **Interface** valida estado/UI (`LoginViewModelTests`).
+El mapa distribuye evidencia por capa para evitar huecos: **Domain** valida reglas (`EmailTests`, `PasswordTests`), **Application** valida orquestación (`AuthenticateUserUseCaseTests`), **Infrastructure** valida integración remota (`AuthHTTPRepositoryTests`) y **Interface** valida estado/UI (`LoginViewModelTests`).
 
 ```mermaid
 graph TD
@@ -22,11 +22,11 @@ graph TD
     end
 
     subgraph Application["Application - 7 tests"]
-        A1["LoginUseCaseTests<br/>credenciales validas ok,<br/>email invalido throws,<br/>password vacio throws,<br/>no llama gateway si invalido,<br/>rechazado throws, sin red throws"]
+        A1["AuthenticateUserUseCaseTests<br/>credenciales validas ok,<br/>email invalido throws,<br/>password vacio throws,<br/>no llama gateway si invalido,<br/>rechazado throws, sin red throws"]
     end
 
     subgraph Infrastructure["Infrastructure - 6 tests"]
-        I1["RemoteAuthGatewayTests<br/>200 ok, URL correcta,<br/>body JSON correcto,<br/>error de red, 401, 500"]
+        I1["AuthHTTPRepositoryTests<br/>200 ok, URL correcta,<br/>body JSON correcto,<br/>error de red, 401, 500"]
     end
 
     subgraph Interface["Interface - 8 tests"]
@@ -71,7 +71,7 @@ Siete tests. Se ejecutan en milisegundos. No necesitan simulador, ni red, ni bas
 ### Tests de Application (Caso de uso)
 
 ```text
-LoginUseCaseTests
+AuthenticateUserUseCaseTests
 ├── test_execute_with_valid_credentials_returns_session
 ├── test_execute_sends_validated_credentials_to_gateway
 ├── test_execute_with_invalid_email_throws_invalidEmail
@@ -86,7 +86,7 @@ Siete tests. También rápidos (usan un stub, no hacen red real). Verifican que 
 ### Tests de Infrastructure (Gateway)
 
 ```text
-RemoteAuthGatewayTests
+AuthHTTPRepositoryTests
 ├── test_authenticate_on_200_with_valid_json_returns_session
 ├── test_authenticate_sends_post_to_correct_url
 ├── test_authenticate_sends_credentials_as_json_body
@@ -102,7 +102,7 @@ Seis tests. Usan un stub de HTTPClient. Verifican el mapping entre HTTP/JSON y l
 ```text
 LoginViewModelTests
 ├── test_init_starts_with_empty_fields_and_no_error
-├── test_submit_with_valid_credentials_calls_onLoginSucceeded
+├── test_submit_with_valid_credentials_navigates_to_catalog
 ├── test_submit_with_invalid_email_shows_email_error_message
 ├── test_submit_with_empty_password_shows_password_error_message
 ├── test_submit_with_rejected_credentials_shows_credentials_error
@@ -123,7 +123,7 @@ Si miras la secuencia en la que escribimos los tests y el código, verás un pat
 
 ### Los tests nos obligaron a crear un tipo de error unificado para el UseCase
 
-Cuando escribimos el test de email inválido en el `LoginUseCaseTests`, podríamos haber dejado que el error `Email.ValidationError.invalidFormat` se propagara directamente a la UI. El test habría pasado. Pero decidimos que el test pidiera un error propio del caso de uso (en la lección, `LoginUseCase.Error.invalidEmail`), porque eso es lo que tiene sentido desde la perspectiva de la feature. Esa decisión nos obligó a crear un enum de errores y a hacer traducción de errores.
+Cuando escribimos el test de email inválido en el `AuthenticateUserUseCaseTests`, podríamos haber dejado que el error `EmailAddress.ValidationError.invalidFormat` se propagara directamente a la UI. El test habría pasado. Pero decidimos que el test pidiera un error propio del caso de uso (en la lección, `LoginError.invalidEmail`), porque eso es lo que tiene sentido desde la perspectiva de la feature. Esa decisión nos obligó a crear un enum de errores y a hacer traducción de errores.
 
 > **Nomenclatura scaffold:** En el scaffold `apps/ios/ArchitectureKit`, este enum de errores no es un tipo anidado en el UseCase — es el enum independiente `LoginError` definido en `FeatureLoginDomain/LoginError.swift`. El principio es el mismo (unificar errores de la feature en un solo tipo), pero el scaffold lo ubica en Domain directamente en lugar de en el UseCase. Ambas estrategias son válidas; el scaffold elige la ubicación en Domain para que todas las capas puedan importarlo sin crear dependencias circulares.
 
@@ -135,7 +135,7 @@ El test `test_execute_with_invalid_email_does_not_call_gateway` verifica que cua
 
 ### Los tests definieron la interfaz pública antes de la implementación
 
-Cuando escribimos el primer test del `LoginUseCase`, decidimos que la interfaz fuera `execute(email: String, password: String) async throws -> Session`. Esa decisión se tomó en el test, no en la implementación. Primero decidimos cómo queremos usar el componente (la perspectiva del consumidor), y después implementamos para satisfacer esa interfaz.
+Cuando escribimos el primer test del `AuthenticateUserUseCase`, decidimos que la interfaz fuera `execute(email: String, password: String) async throws -> UserSession`. Esa decisión se tomó en el test, no en la implementación. Primero decidimos cómo queremos usar el componente (la perspectiva del consumidor), y después implementamos para satisfacer esa interfaz.
 
 Esto es fundamentalmente diferente de escribir primero la implementación y luego los tests. Cuando escribes primero la implementación, tiendes a diseñar para la comodidad del implementador. Cuando escribes primero el test, diseñas para la comodidad del consumidor. Y en la mayoría de los casos, diseñar para el consumidor produce mejores interfaces.
 
@@ -167,15 +167,15 @@ func test_execute_with_valid_credentials_returns_session() async throws {
     // ARRANGE (preparar el escenario)
     // ══════════════════════════════════════════════════════════════
     // 1. Creo la sesión que espero recibir como resultado
-    let expectedSession = Session(token: "valid-token", email: "user@example.com")
+    let expectedSession = UserSession(token: "valid-token", email: "user@example.com")
     
     // 2. Creo el stub del gateway y lo configuro para que devuelva éxito
     //    Es como decirle a un actor: "cuando te pregunten, di esta frase"
-    let gateway = AuthGatewayStub(result: .success(expectedSession))
+    let gateway = AuthRepositoryStub(result: .success(expectedSession))
     
     // 3. Creo el componente que quiero testear (SUT = System Under Test)
     //    Le inyecto el stub como si fuera el gateway real
-    let sut = LoginUseCase(authGateway: gateway)
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     // ══════════════════════════════════════════════════════════════
     // ACT (ejecutar la acción — siempre UNA sola línea)
@@ -200,13 +200,13 @@ func test_execute_with_valid_credentials_returns_session() async throws {
 
 ### El patrón makeSUT
 
-En cada archivo de tests, definimos un helper `makeSUT(...)` que crea el SUT con sus dependencias. Imagina que tienes 6 tests y cada uno necesita crear un `RemoteAuthGateway` con un `HTTPClientStub` y una URL base. Sin `makeSUT`, tendrías 6 veces el mismo bloque de 3 líneas. Con `makeSUT`, cada test llama a una sola función:
+En cada archivo de tests, definimos un helper `makeSUT(...)` que crea el SUT con sus dependencias. Imagina que tienes 6 tests y cada uno necesita crear un `AuthHTTPRepository` con un `HTTPClientStub` y una URL base. Sin `makeSUT`, tendrías 6 veces el mismo bloque de 3 líneas. Con `makeSUT`, cada test llama a una sola función:
 
 ```swift
 // SIN makeSUT (mucha repetición):
 func test_1() {
     let client = HTTPClientStub(data: json, statusCode: 200)
-    let sut = RemoteAuthGateway(httpClient: client, baseURL: url)  // repetido 6 veces
+    let sut = AuthHTTPRepository(httpClient: client, baseURL: url)  // repetido 6 veces
     // ...
 }
 
@@ -225,14 +225,14 @@ Tres beneficios concretos:
 
 ### El patrón de stub configurable
 
-Nuestros stubs (`AuthGatewayStub`, `HTTPClientStub`) se configuran **en el constructor** con el resultado que deben devolver:
+Nuestros stubs (`AuthRepositoryStub`, `HTTPClientStub`) se configuran **en el constructor** con el resultado que deben devolver:
 
 ```swift
 // Quiero testear el caso feliz → configuro éxito
-let stub = AuthGatewayStub(result: .success(session))
+let stub = AuthRepositoryStub(result: .success(session))
 
 // Quiero testear un error → configuro fallo
-let stub = AuthGatewayStub(result: .failure(.invalidCredentials))
+let stub = AuthRepositoryStub(result: .failure(.invalidCredentials))
 ```
 
 Cada test crea su propio stub con su propia configuración. No hay estado compartido entre tests. Esto garantiza que cada test es **independiente**: puedes ejecutarlos en cualquier orden y el resultado es siempre el mismo.
@@ -256,8 +256,8 @@ Esto nos permite verificar no solo **qué resultado** devuelve el SUT, sino **c�
 
 ```swift
 func test_execute_with_invalid_email_does_not_call_gateway() async {
-    let gateway = AuthGatewayStub(result: .success(Session(token: "t", email: "e@e.com")))
-    let sut = LoginUseCase(authGateway: gateway)
+    let gateway = AuthRepositoryStub(result: .success(UserSession(token: "t", email: "e@e.com")))
+    let sut = AuthenticateUserUseCase(repository: gateway)
     
     _ = try? await sut.execute(email: "sin-arroba", password: "pass")
     
@@ -270,7 +270,7 @@ func test_execute_with_invalid_email_does_not_call_gateway() async {
 
 ## Cuándo un test pasa sin cambiar código
 
-En nuestro ciclo, varios tests pasaron sin necesidad de modificar el código de producción (tests 3, 4, 5 y 6 del `LoginUseCase`). ¿Eso significa que esos tests no tienen valor?
+En nuestro ciclo, varios tests pasaron sin necesidad de modificar el código de producción (tests 3, 4, 5 y 6 del `AuthenticateUserUseCase`). ¿Eso significa que esos tests no tienen valor?
 
 No. Un test que pasa sin cambiar código tiene valor **documental** y **protector**:
 
@@ -304,11 +304,11 @@ Por ahora, nuestra pirámide es ancha en la base (muchos tests unitarios rápido
 
 A lo largo del desarrollo de esta feature, hay varios errores comunes que el proceso TDD nos ayudó a evitar:
 
-**Testear la implementación en vez del comportamiento.** No testeamos que el `LoginUseCase` usa `Email` internamente. Testeamos que con un email inválido devuelve un error. Si mañana cambiamos la implementación interna (por ejemplo, validamos con regex en vez de con un Value Object), los tests siguen pasando porque verifican el comportamiento externo, no los detalles internos.
+**Testear la implementación en vez del comportamiento.** No testeamos que el `AuthenticateUserUseCase` usa `EmailAddress` internamente. Testeamos que con un email inválido devuelve un error. Si mañana cambiamos la implementación interna (por ejemplo, validamos con regex en vez de con un Value Object), los tests siguen pasando porque verifican el comportamiento externo, no los detalles internos.
 
 **Compartir estado entre tests.** Cada test crea su propio SUT y sus propios stubs. No hay propiedades compartidas que se mutan entre tests. Esto garantiza que cada test es independiente: puedes ejecutarlos en cualquier orden, puedes ejecutar uno solo, y el resultado siempre es el mismo.
 
-**Testear demasiado o demasiado poco.** No testeamos que `Credentials` almacena sus propiedades (eso es trivial y no tiene valor). Sí testeamos que el `LoginUseCase` traduce errores (eso tiene comportamiento real con valor de negocio). El criterio es: si el código tiene una decisión (un `if`, un `switch`, un `catch`), probablemente merece un test. Si solo almacena datos, no.
+**Testear demasiado o demasiado poco.** No testeamos que `Credentials` almacena sus propiedades (eso es trivial y no tiene valor). Sí testeamos que el `AuthenticateUserUseCase` traduce errores (eso tiene comportamiento real con valor de negocio). El criterio es: si el código tiene una decisión (un `if`, un `switch`, un `catch`), probablemente merece un test. Si solo almacena datos, no.
 
 **No testear los sad paths.** Es tentador escribir solo el test del happy path y considerar la feature "terminada". Pero los sad paths son donde viven los bugs de producción. Un login exitoso es sencillo; lo difícil es manejar correctamente todos los modos de fallo. Nuestros tests cubren 6 escenarios de error y solo 1 de éxito.
 
@@ -342,9 +342,9 @@ Estas son las lecciones que extraemos de la feature Login y que aplicaremos a ca
 
 Para cerrar, unas métricas que dan perspectiva:
 
-**Archivos de producción:** 15 (Domain: Email, Password, Credentials, Session, AuthError, LoginEvent — Application: AuthGateway, LoginUseCase — Infrastructure: RemoteAuthGateway, StubAuthGateway, HTTPClient, AuthRequest, AuthResponse — Interface: LoginViewModel, LoginView — App: CompositionRoot)
+**Archivos de producción:** 15 (Domain: EmailAddress, Password, Credentials, UserSession, LoginError, LoginEvent — Application: AuthRepository, AuthenticateUserUseCase — Infrastructure: AuthHTTPRepository, InMemoryAuthRepository, HTTPClient, AuthRequest, AuthResponse — Interface: LoginViewModel, LoginView — App: CompositionRoot)
 
-**Archivos de test:** 5 (EmailTests, PasswordTests, LoginUseCaseTests, RemoteAuthGatewayTests, LoginViewModelTests + stubs)
+**Archivos de test:** 5 (EmailTests, PasswordTests, AuthenticateUserUseCaseTests, AuthHTTPRepositoryTests, LoginViewModelTests + stubs)
 
 **Tests totales:** 28
 
@@ -420,7 +420,7 @@ Resultado esperado: **todos los targets en verde**. Si algún target falla, el e
 ```
 
 Prueba el flujo completo:
-- Email inválido → el ViewModel muestra mensaje de error sin llegar al servidor
+- EmailAddress inválido → el ViewModel muestra mensaje de error sin llegar al servidor
 - Credenciales correctas (definidas en `InMemoryAuthRepository`) → navegación al catálogo
 - Cierra y reabre → el estado inicial es limpio (sin sesión persistida en esta fase)
 

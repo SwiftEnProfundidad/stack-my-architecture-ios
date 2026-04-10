@@ -122,7 +122,7 @@ class LoginViewModel {
 
 // ✅ Con caso de uso - "modo orden"
 class LoginViewModel {
-    let loginUseCase: LoginUseCase  // Application layer
+    let loginUseCase: AuthenticateUserUseCase  // Application layer
     
     func buttonTapped() {
         Task {
@@ -137,7 +137,7 @@ class LoginViewModel {
 
 | ❌ Imperativo (Cómo) | ✅ Declarativo (Qué) |
 |---------------------|---------------------|
-| Valida email, hashea password, llama API, guarda token... | Ejecuta `LoginUseCase` |
+| Valida email, hashea password, llama API, guarda token... | Ejecuta `AuthenticateUserUseCase` |
 | Muestra loader, fetch products, parse JSON, mapea a modelos... | Ejecuta `GetCatalogUseCase` |
 | Verifica conexión, limpia cache, descarga imagen... | Ejecuta `SyncOfflineDataUseCase` |
 
@@ -217,7 +217,7 @@ class GetCatalogUseCase {
 
 **Traduce del Domain al UI:**
 ```swift
-// Domain dice: Result<User, AuthError>
+// Domain dice: Result<User, LoginError>
 // ViewModel traduce a:
 enum LoginState {
     case idle
@@ -259,10 +259,10 @@ class LoginViewModel {
 
 // ✅ Con inversión - Te inyectan lo que necesitas
 class LoginViewModel {
-    let loginUseCase: LoginUseCase  // Te dan esto listo
+    let loginUseCase: AuthenticateUserUseCase  // Te dan esto listo
     let validator: InputValidator   // Configurado externamente
     
-    init(loginUseCase: LoginUseCase, validator: InputValidator) {
+    init(loginUseCase: AuthenticateUserUseCase, validator: InputValidator) {
         self.loginUseCase = loginUseCase  // "Nosotros te llamamos"
         self.validator = validator
     }
@@ -286,10 +286,10 @@ enum CompositionRoot {
     static func makeLoginView() -> some View {
         // Infrastructure
         let httpClient = HTTPClient(baseURL: "...")
-        let authRepository = RemoteAuthRepository(client: httpClient)
+        let authRepository = AuthHTTPRepository(client: httpClient)
         
         // Application
-        let loginUseCase = LoginUseCase(repository: authRepository)
+        let loginUseCase = AuthenticateUserUseCase(repository: authRepository)
         
         // Interface
         let viewModel = LoginViewModel(useCase: loginUseCase)

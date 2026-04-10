@@ -36,13 +36,13 @@ graph TB
     subgraph ADAPT["Adaptadores: Infrastructure + Interface"]
         direction TB
         VM["ViewModels<br/>LoginViewModel<br/>CatalogViewModel"]
-        REPO["Repositories concretos<br/>RemoteAuthGateway<br/>RemoteProductRepository"]
+        REPO["Repositories concretos<br/>AuthHTTPRepository<br/>RemoteProductRepository"]
     end
 
     subgraph APP["Application: Casos de uso y puertos"]
         direction TB
-        UC["UseCases<br/>LoginUseCase<br/>LoadProductsUseCase"]
-        PORT["Puertos / Protocolos<br/>AuthGateway<br/>ProductRepository"]
+        UC["UseCases<br/>AuthenticateUserUseCase<br/>LoadProductsUseCase"]
+        PORT["Puertos / Protocolos<br/>AuthRepository<br/>ProductRepository"]
     end
 
     subgraph DOMAIN["Domain: Reglas de negocio puras"]
@@ -79,30 +79,30 @@ Sin inversión de dependencias, Application dependería directamente de Infrastr
 ```mermaid
 graph LR
     subgraph SIN_INV["SIN inversion: acoplamiento directo"]
-        UC1["LoginUseCase"] --> RG1["RemoteAuthGateway"]
+        UC1["AuthenticateUserUseCase"] --> RG1["AuthHTTPRepository"]
         RG1 --> URL1["URLSession"]
     end
 
     style SIN_INV fill:#f8d7da,stroke:#dc3545
 ```
 
-Problema: si cambias la implementación de `RemoteAuthGateway` (por ejemplo, migras de URLSession a Firebase), tienes que **tocar LoginUseCase**. Y si tocas LoginUseCase, tienes que re-testear todo el flujo.
+Problema: si cambias la implementación de `AuthHTTPRepository` (por ejemplo, migras de URLSession a Firebase), tienes que **tocar AuthenticateUserUseCase**. Y si tocas AuthenticateUserUseCase, tienes que re-testear todo el flujo.
 
 Con inversión de dependencias, Application define un protocolo y no sabe quién lo implementa:
 
 ```mermaid
 graph LR
     subgraph CON_INV["CON inversion: desacoplamiento por protocolo"]
-        UC2["LoginUseCase"] -.-> PROTO["AuthGateway<br/>(protocolo)"]
-        PROTO -.->|"implementa"| RG2["RemoteAuthGateway"]
-        PROTO -.->|"implementa"| STUB["AuthGatewayStub<br/>(tests)"]
+        UC2["AuthenticateUserUseCase"] -.-> PROTO["AuthRepository<br/>(protocolo)"]
+        PROTO -.->|"implementa"| RG2["AuthHTTPRepository"]
+        PROTO -.->|"implementa"| STUB["AuthRepositoryStub<br/>(tests)"]
         RG2 --> URL2["URLSession"]
     end
 
     style CON_INV fill:#d4edda,stroke:#28a745
 ```
 
-**La flecha de dependencia se invierte:** ahora `RemoteAuthGateway` depende de `AuthGateway` (el protocolo que vive en Application), no al revés. LoginUseCase solo conoce el protocolo.
+**La flecha de dependencia se invierte:** ahora `AuthHTTPRepository` depende de `AuthRepository` (el protocolo que vive en Application), no al revés. AuthenticateUserUseCase solo conoce el protocolo.
 
 Beneficios concretos:
 
@@ -121,8 +121,8 @@ sequenceDiagram
     participant U as Usuario
     participant V as LoginView
     participant VM as LoginViewModel
-    participant UC as LoginUseCase
-    participant GW as RemoteAuthGateway
+    participant UC as AuthenticateUserUseCase
+    participant GW as AuthHTTPRepository
     participant HTTP as URLSession
     participant API as Servidor
 
@@ -145,7 +145,7 @@ sequenceDiagram
     UC-->>VM: Session
 
     VM->>VM: state = success
-    VM->>VM: onLoginSucceeded(session)
+    VM->>VM: navigator?.goToCatalog()
     V-->>U: Navega al Catalogo
 ```
 
@@ -228,8 +228,8 @@ graph TD
     end
 
     subgraph APP_LOGIN["Application: Login"]
-        AuthGW["AuthGateway<br/>(protocolo)"]
-        LoginUC["LoginUseCase"]
+        AuthGW["AuthRepository<br/>(protocolo)"]
+        LoginUC["AuthenticateUserUseCase"]
     end
 
     subgraph APP_CATALOG["Application: Catalog"]
@@ -240,7 +240,7 @@ graph TD
     subgraph INFRA["Infrastructure"]
         HTTPClient["HTTPClient<br/>(protocolo)"]
         URLSessionHTTP["URLSessionHTTPClient"]
-        RemoteAuth["RemoteAuthGateway"]
+        RemoteAuth["AuthHTTPRepository"]
         RemoteProd["RemoteProductRepository"]
         SessionDTO["SessionDTO + Mapper"]
         ProductDTO["ProductDTO + Mapper"]
@@ -461,18 +461,18 @@ La semántica clave de este grafo es que `AppComposition` conecta wiring, mientr
 
 ## 8. Backend Firebase encapsulado en Infrastructure
 
-Este diagrama separa tres fronteras: **Domain** (Session, Product, AuthGateway, ProductRepository), **Infrastructure** (implementaciones concretas) y **BackendFirebase** (adaptadores Firebase y configuración). La idea clave es que los puertos del Domain no dependen de Firebase.
+Este diagrama separa tres fronteras: **Domain** (Session, Product, AuthRepository, ProductRepository), **Infrastructure** (implementaciones concretas) y **BackendFirebase** (adaptadores Firebase y configuración). La idea clave es que los puertos del Domain no dependen de Firebase.
 
-Lee el flujo así: `FirebaseAuthGateway` y `FirestoreProductRepository` viven en Infrastructure, implementan puertos del Domain y delegan en `FirebaseAuthAdapter`, `FirestoreProductAdapter` y `FirebaseConfig` dentro de BackendFirebase.
+Lee el flujo así: `FirebaseAuthRepository` y `FirestoreProductRepository` viven en Infrastructure, implementan puertos del Domain y delegan en `FirebaseAuthAdapter`, `FirestoreProductAdapter` y `FirebaseConfig` dentro de BackendFirebase.
 
-En términos de contrato, `AuthGateway` y `ProductRepository` siguen siendo puertos del Domain; `FirebaseAuthGateway` y `FirestoreProductRepository` son adaptadores de Infrastructure, y `FirebaseAuthAdapter`, `FirestoreProductAdapter` junto con `FirebaseConfig` quedan encapsulados en BackendFirebase.
+En términos de contrato, `AuthRepository` y `ProductRepository` siguen siendo puertos del Domain; `FirebaseAuthRepository` y `FirestoreProductRepository` son adaptadores de Infrastructure, y `FirebaseAuthAdapter`, `FirestoreProductAdapter` junto con `FirebaseConfig` quedan encapsulados en BackendFirebase.
 
 ```mermaid
 graph TD
     subgraph DOMAIN["Domain (no sabe de Firebase)"]
         Session_D["Session"]
         Product_D["Product"]
-        AuthGW_D["AuthGateway (protocolo)"]
+        AuthGW_D["AuthRepository (protocolo)"]
         ProdRepo_D["ProductRepository (protocolo)"]
     end
 
@@ -483,7 +483,7 @@ graph TD
     end
 
     subgraph INFRA["Infrastructure (conecta puertos con backends)"]
-        AuthImpl["FirebaseAuthGateway<br/>implementa AuthGateway"]
+        AuthImpl["FirebaseAuthRepository<br/>implementa AuthRepository"]
         ProdImpl["FirestoreProductRepository<br/>implementa ProductRepository"]
     end
 
@@ -500,7 +500,7 @@ graph TD
     style INFRA fill:#fff3cd,stroke:#ffc107
 ```
 
-**Principio clave:** Domain y Application no saben que Firebase existe. Solo conocen `AuthGateway` y `ProductRepository` (protocolos). Infrastructure es quien conecta esos protocolos con los adaptadores concretos de Firebase.
+**Principio clave:** Domain y Application no saben que Firebase existe. Solo conocen `AuthRepository` y `ProductRepository` (protocolos). Infrastructure es quien conecta esos protocolos con los adaptadores concretos de Firebase.
 
 Si mañana migras de Firebase a Supabase, solo cambias `BackendFirebase` por `BackendSupabase` y las implementaciones en Infrastructure. **Domain, Application e Interface no se tocan.**
 

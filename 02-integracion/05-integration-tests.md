@@ -336,7 +336,7 @@ final class LoginIntegrationTests: XCTestCase {
             {"token": "abc123", "email": "user@test.com"}
         """.utf8)
         let http = HTTPClientStub(data: json, statusCode: 200)
-        let sut = makeLoginUseCase(http: http)
+        let sut = makeAuthUseCase(http: http)
 
         let session = try await sut.execute(email: "user@test.com", password: "pass123")
 
@@ -349,7 +349,7 @@ final class LoginIntegrationTests: XCTestCase {
     // Escenario 2: error de red → LoginError.connectivity
     func test_login_deliversConnectivityOnTransportError() async {
         let http = HTTPClientStub(error: URLError(.notConnectedToInternet))
-        let sut = makeLoginUseCase(http: http)
+        let sut = makeAuthUseCase(http: http)
 
         do {
             _ = try await sut.execute(email: "u@test.com", password: "p")
@@ -362,7 +362,7 @@ final class LoginIntegrationTests: XCTestCase {
     // Escenario 3: dominio rechaza credenciales vacías antes de tocar red
     func test_login_deliversValidationErrorOnEmptyCredentials() async {
         let http = HTTPClientStub(data: Data(), statusCode: 200)  // no debería llamarse
-        let sut = makeLoginUseCase(http: http)
+        let sut = makeAuthUseCase(http: http)
 
         do {
             _ = try await sut.execute(email: "", password: "")
@@ -374,9 +374,9 @@ final class LoginIntegrationTests: XCTestCase {
         // Se puede verificar adicionalmente que el stub no fue llamado.
     }
 
-    private func makeLoginUseCase(http: any HTTPClient) -> LoginUseCase {
+    private func makeAuthUseCase(http: any HTTPClient) -> AuthenticateUserUseCase {
         let gateway = RemoteLoginGateway(httpClient: http, baseURL: URL(string: "https://api.example.com")!)
-        return LoginUseCase(gateway: gateway)
+        return AuthenticateUserUseCase(repository: gateway)
     }
 }
 ```

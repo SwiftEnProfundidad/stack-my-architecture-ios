@@ -387,7 +387,7 @@ graph TD
 | `Money` | `Price` | E1: Value Objects |
 | `IBAN` | `Email` | E1: Value Objects |
 | `Account` | `Product` | E1: Domain |
-| `TransferFundsUseCase` | `LoginUseCase` | E1: Application |
+| `TransferFundsUseCase` | `AuthenticateUserUseCase` | E1: Application |
 | `AccountRepository` | `ProductRepository` | E1: Puertos |
 | `LedgerError` | `CatalogError` | E1: Domain |
 | Bounded contexts | Identity vs Catalog | E4: Bounded Contexts |

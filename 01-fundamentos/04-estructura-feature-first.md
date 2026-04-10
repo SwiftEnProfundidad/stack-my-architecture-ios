@@ -62,19 +62,19 @@ Aquí va a vivir toda la feature de Login. Contiene cuatro subcarpetas, una por 
 
 **`Domain/`** contendrá los tipos puros del dominio de autenticación. Dentro tiene tres subcarpetas:
 
-`Models/` es donde vivirán los Value Objects (`Email.swift`, `Password.swift`), los modelos compuestos (`Credentials.swift`, `Session.swift`), y cualquier entidad que necesitemos. Los modelos del dominio son tipos Swift puros: no importan SwiftUI, no importan Foundation (salvo lo estrictamente necesario como `Equatable`), no dependen de nada externo. Son el corazón del sistema y lo más estable del proyecto.
+`Models/` es donde vivirán los Value Objects (`EmailAddress.swift`, `Password.swift`), los modelos compuestos (`Credentials.swift`, `UserSession.swift`), y cualquier entidad que necesitemos. Los modelos del dominio son tipos Swift puros: no importan SwiftUI, no importan Foundation (salvo lo estrictamente necesario como `Equatable`), no dependen de nada externo. Son el corazón del sistema y lo más estable del proyecto.
 
-`Errors/` es donde vivirán los errores tipados del dominio (`AuthError.swift`). Los errores son enums que conforman `Error` y `Equatable`, y representan las cosas que pueden ir mal desde la perspectiva del negocio: credenciales inválidas, falta de conectividad. No son errores técnicos genéricos; son errores de dominio con significado de negocio.
+`Errors/` es donde vivirán los errores tipados del dominio (`LoginError.swift`). Los errores son enums que conforman `Error` y `Equatable`, y representan las cosas que pueden ir mal desde la perspectiva del negocio: credenciales inválidas, falta de conectividad. No son errores técnicos genéricos; son errores de dominio con significado de negocio.
 
 `Events/` es donde vivirán los eventos del dominio (`LoginEvent.swift`). Los eventos representan hechos que ya ocurrieron y que son relevantes para el sistema: el login fue exitoso, el login falló. Los eventos permiten desacoplar la feature de lo que ocurre después: Login emite un evento, y un componente externo (coordinador) decide qué hacer con él.
 
 **`Application/`** contendrá la lógica de orquestación de la feature. Dentro tiene dos subcarpetas:
 
-`Ports/` es donde vivirán los protocolos que definen las interfaces que el caso de uso necesita. Un "puerto" es una abstracción que dice "necesito algo que pueda autenticar credenciales y devolver una sesión". No dice cómo se hace esa autenticación. El protocolo `AuthGateway.swift` vivirá aquí.
+`Ports/` es donde vivirán los protocolos que definen las interfaces que el caso de uso necesita. Un "puerto" es una abstracción que dice "necesito algo que pueda autenticar credenciales y devolver una sesión". No dice cómo se hace esa autenticación. El protocolo `AuthRepository.swift` vivirá aquí.
 
-`UseCases/` es donde vivirán los casos de uso. Un caso de uso es una operación de negocio completa: recibe datos de entrada (email y password como strings), los valida, delega la autenticación al puerto, y devuelve el resultado. `LoginUseCase.swift` vivirá aquí.
+`UseCases/` es donde vivirán los casos de uso. Un caso de uso es una operación de negocio completa: recibe datos de entrada (email y password como strings), los valida, delega la autenticación al puerto, y devuelve el resultado. `AuthenticateUserUseCase.swift` vivirá aquí.
 
-**`Infrastructure/`** contendrá las implementaciones concretas de los puertos. `RemoteAuthGateway.swift` (que habla con un servidor real) y `StubAuthGateway.swift` (que devuelve datos falsos para desarrollo) vivirán aquí. Esta carpeta es la única que tiene dependencias de frameworks de Apple (Foundation para URLSession, por ejemplo).
+**`Infrastructure/`** contendrá las implementaciones concretas de los puertos. `AuthHTTPRepository.swift` (que habla con un servidor real) y `InMemoryAuthRepository.swift` (que devuelve datos falsos para desarrollo) vivirán aquí. Esta carpeta es la única que tiene dependencias de frameworks de Apple (Foundation para URLSession, por ejemplo).
 
 **`Interface/`** contendrá la vista SwiftUI y el ViewModel. `LoginView.swift` y `LoginViewModel.swift` vivirán aquí. La vista es la capa más externa: muestra datos y recoge acciones del usuario. No contiene lógica de negocio. El ViewModel adapta los datos del caso de uso al formato que necesita la vista.
 
@@ -98,14 +98,14 @@ StackMyArchitectureTests/
 │       │   ├── EmailTests.swift
 │       │   └── PasswordTests.swift
 │       ├── Application/
-│       │   └── LoginUseCaseTests.swift
+│       │   └── AuthenticateUserUseCaseTests.swift
 │       ├── Infrastructure/
-│       │   └── RemoteAuthGatewayTests.swift
+│       │   └── AuthHTTPRepositoryTests.swift
 │       └── Helpers/
-│           └── AuthGatewayStub.swift
+│           └── AuthRepositoryStub.swift
 ```
 
-Fíjate en la carpeta `Helpers/`. Aquí vivirán los dobles de test (stubs, spies) que necesitemos. Un stub es una implementación falsa de un protocolo que devuelve valores predeterminados. Por ejemplo, `AuthGatewayStub` será una implementación de `AuthGateway` que podemos configurar para que devuelva un éxito o un error, sin hacer ninguna petición de red real.
+Fíjate en la carpeta `Helpers/`. Aquí vivirán los dobles de test (stubs, spies) que necesitemos. Un stub es una implementación falsa de un protocolo que devuelve valores predeterminados. Por ejemplo, `AuthRepositoryStub` será una implementación de `AuthRepository` que podemos configurar para que devuelva un éxito o un error, sin hacer ninguna petición de red real.
 
 Los helpers de test son específicos de cada feature. Los stubs de Login van dentro de `Tests/Features/Login/Helpers/`, no en una carpeta global `TestHelpers/`. Si dos features necesitan el mismo helper, lo extraemos a un directorio compartido. Pero empezamos local.
 
@@ -176,7 +176,7 @@ Si rompes esta regla (por ejemplo, si Domain importa Foundation para usar URLSes
 
 Estas reglas de dependencia no son burocracia. Tienen consecuencias prácticas directas:
 
-Si Domain no importa nada, puedes testearlo en milisegundos, sin simuladores, sin red, sin nada. Un `XCTestCase` que testea el Value Object `Email` se ejecuta en 0.001 segundos. Eso es feedback instantáneo.
+Si Domain no importa nada, puedes testearlo en milisegundos, sin simuladores, sin red, sin nada. Un `XCTestCase` que testea el Value Object `EmailAddress` se ejecuta en 0.001 segundos. Eso es feedback instantáneo.
 
 Si Application solo depende de Domain y de protocolos, puedes testear un caso de uso inyectando stubs en lugar de implementaciones reales. No necesitas un servidor para testear que el login falla con credenciales inválidas. Le pasas un stub que devuelve un error, y verificas que el caso de uso lo traduce correctamente.
 

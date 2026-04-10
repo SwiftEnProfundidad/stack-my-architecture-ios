@@ -410,12 +410,12 @@ En la Etapa 3, el Composition Root crea el `CachedProductRepository` de forma se
 // Antes: secuencial
 func makeAppDependencies() async throws -> AppDependencies {
     let httpClient = URLSessionHTTPClient()
-    let authGateway = RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)
+    let authRepository = AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)
     let productRepo = RemoteProductRepository(httpClient: httpClient, baseURL: baseURL)
     let store = FileProductStore(directory: cacheDirectory)
     let cachedRepo = CachedProductRepository(remote: productRepo, store: store)
     
-    return AppDependencies(auth: authGateway, catalog: cachedRepo)
+    return AppDependencies(auth: authRepository, catalog: cachedRepo)
 }
 
 // Después: paralelización donde tiene sentido
@@ -423,14 +423,14 @@ func makeAppDependencies() async throws -> AppDependencies {
     let httpClient = URLSessionHTTPClient()
     
     // Auth y Catalog no dependen entre sí → paralelo
-    async let authGateway = makeAuthGateway(httpClient: httpClient)
+    async let authRepository = makeAuthRepository(httpClient: httpClient)
     async let catalogRepo = makeCatalogRepository(httpClient: httpClient)
     
-    return try await AppDependencies(auth: authGateway, catalog: catalogRepo)
+    return try await AppDependencies(auth: authRepository, catalog: catalogRepo)
 }
 
-private func makeAuthGateway(httpClient: any HTTPClient) -> some AuthGateway {
-    RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)
+private func makeAuthRepository(httpClient: any HTTPClient) -> some AuthRepository {
+    AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)
 }
 
 private func makeCatalogRepository(httpClient: any HTTPClient) -> some ProductRepository {

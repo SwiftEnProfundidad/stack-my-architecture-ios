@@ -202,7 +202,7 @@ Fíjate en la línea: `state = products.isEmpty ? .empty : .loaded(products)`. A
 
 ### El closure onProductSelected
 
-Como en Login con `onLoginSucceeded`, el Catalog no sabe qué pasa cuando el usuario pulsa un producto. El closure `onProductSelected` se lo inyecta el Composition Root. En la Etapa 2, lo conectaremos al coordinador que navegará a la pantalla de detalle (cuando la implementemos).
+Como en Login con `navigator.goToCatalog()`, el Catalog no sabe qué pasa cuando el usuario pulsa un producto. El closure `onProductSelected` se lo inyecta el Composition Root. En la Etapa 2, lo conectaremos al coordinador que navegará a la pantalla de detalle (cuando la implementemos).
 
 ---
 
@@ -522,7 +522,7 @@ final class CatalogViewModelTests: XCTestCase {
 | Inicio de la acción | Botón del usuario | Automático con `.task` |
 | Layout principal | Form con campos | List con filas |
 | Estados de error | Un string de error | ContentUnavailableView con retry |
-| Evento de salida | `onLoginSucceeded(Session)` | `onProductSelected(Product)` |
+| Evento de salida | `navigator.goToCatalog()` | `onProductSelected(Product)` |
 
 Ambas features siguen el mismo patrón arquitectónico (ViewModel con @Observable, vista que delega al ViewModel, closure para navegación), pero la implementación de la UI es diferente porque las necesidades son diferentes. Eso es exactamente lo que queremos: la arquitectura es consistente, pero la implementación es flexible.
 

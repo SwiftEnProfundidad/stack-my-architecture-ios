@@ -2,13 +2,13 @@
 
 ## El momento de la verdad: ver tu trabajo en el simulador
 
-Has construido la feature Login completa con sus 4 capas: Domain con `Email` y `Password`, Application con `LoginUseCase`, Infrastructure con `RemoteAuthGateway` y `StubAuthGateway`, y Interface con `LoginViewModel` y `LoginView`. Todo testeado, todo desacoplado.
+Has construido la feature Login completa con sus 4 capas: Domain con `EmailAddress` y `Password`, Application con `AuthenticateUserUseCase`, Infrastructure con `AuthHTTPRepository` y `InMemoryAuthRepository`, y Interface con `LoginViewModel` y `LoginView`. Todo testeado, todo desacoplado.
 
 Pero hasta ahora has estado trabajando **en la oscuridad**. Has visto tests pasar en la consola, pero no has visto nada en el simulador de iOS. Esta lección es el puente: vamos a conectar todo para que tu app compile, se ejecute, y veas el formulario de login en pantalla.
 
 > **Objetivo de esta lección:** Al terminar, tendrás una app iOS funcional que muestra el login. Será un **milestone visible** que confirma que todo lo construido hasta ahora realmente funciona.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Esta lección usa los nombres pedagógicos: `LoginUseCase`, `AuthGateway`, `StubAuthGateway`, `Session`. En el scaffold `apps/ios/ArchitectureKit` los equivalentes son `AuthenticateUserUseCase`, `AuthRepository`, `StubAuthRepository`, `UserSession`. Consulta la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Esta lección usa los nombres pedagógicos: `AuthenticateUserUseCase`, `AuthRepository`, `InMemoryAuthRepository`, `UserSession`. En el scaffold `apps/ios/ArchitectureKit` los equivalentes son `AuthenticateUserUseCase`, `AuthRepository`, `InMemoryAuthRepository`, `UserSession`. Consulta la [tabla de equivalencias completa](../anexos/equivalencias-scaffold.md).
 
 ---
 
@@ -32,6 +32,7 @@ struct StackMyArchitectureApp: App {
     // la vida de la aplicación. Si lo creáramos dentro de body,
     // se recrearía cada vez que SwiftUI reconstruye la vista.
     private let compositionRoot = CompositionRoot()
+    private let navigator = PrintNavigator()
     
     // @SceneBuilder es un property wrapper que permite definir
     // la estructura de ventanas de la app. WindowGroup es la escena
@@ -39,9 +40,9 @@ struct StackMyArchitectureApp: App {
     var body: some Scene {
         WindowGroup {
             // Aquí conectamos el CompositionRoot con la primera vista.
-            // compositionRoot.makeLoginView() devuelve una LoginView
+            // compositionRoot.makeLoginView(navigator:) devuelve una LoginView
             // completamente configurada con su ViewModel y dependencias.
-            compositionRoot.makeLoginView()
+            compositionRoot.makeLoginView(navigator: navigator)
         }
     }
 }
@@ -76,68 +77,70 @@ struct CompositionRoot {
     // Creamos el gateway stub para desarrollo local.
     // Usamos 'private' porque nadie fuera de CompositionRoot
     // necesita acceder directamente al gateway.
-    private func makeAuthGateway() -> any AuthGateway {
-        // StubAuthGateway simula login sin red.
+    private func makeAuthRepository() -> any AuthRepository {
+        // InMemoryAuthRepository simula login sin red.
         // Útil para desarrollo: no necesitas servidor backend.
         // El delay de 1 segundo simula latencia real.
-        return StubAuthGateway(delayNanoseconds: 1_000_000_000)
+        return InMemoryAuthRepository(delayNanoseconds: 1_000_000_000)
     }
     
     // MARK: - Use Cases (Application)
     
-    private func makeLoginUseCase() -> LoginUseCase {
-        // LoginUseCase depende de AuthGateway (inyectado por constructor).
+    private func makeAuthUseCase() -> AuthenticateUserUseCase {
+        // AuthenticateUserUseCase depende de AuthRepository (inyectado por constructor).
         // No sabe si es stub o real - eso es desacoplamiento.
-        return LoginUseCase(authGateway: makeAuthGateway())
+        return AuthenticateUserUseCase(repository: makeAuthRepository())
     }
     
     // MARK: - View Models (Interface)
     
-    func makeLoginViewModel() -> LoginViewModel {
-        // El ViewModel necesita el use case para ejecutar login.
-        // También recibe un closure que se llama cuando el login tiene éxito.
+    func makeLoginViewModel(navigator: any LoginNavigating) -> LoginViewModel {
+        // El ViewModel necesita el use case y un navigator que implemente LoginNavigating.
+        // En E2 (Integración) el AppCoordinator implementará LoginNavigating.
         return LoginViewModel(
-            login: makeLoginUseCase(),
-            onLoginSucceeded: { session in
-                // Por ahora, solo imprimimos en consola.
-                // En E2 (Integración) conectaremos la navegación real.
-                print("Login exitoso! Token: \(session.token)")
-            }
+            useCase: makeAuthUseCase(),
+            navigator: navigator
         )
     }
     
     // MARK: - Views (Interface)
     
-    func makeLoginView() -> some View {
+    func makeLoginView(navigator: any LoginNavigating) -> some View {
         // LoginView es una struct, así que la creamos directamente.
         // Su ViewModel se crea aquí y se pasa a la vista.
-        return LoginView(viewModel: makeLoginViewModel())
+        return LoginView(viewModel: makeLoginViewModel(navigator: navigator))
     }
+}
+
+// Placeholder para Etapa 1 (sin coordinador real).
+// En Etapa 2, AppCoordinator implementará LoginNavigating con NavigationPath.
+final class PrintNavigator: LoginNavigating {
+    func goToCatalog() { print("Login exitoso — navegando al catálogo (E2)") }
 }
 ```
 
 **Cómo evolucionas a un backend real (sin tocar nada más)**
 
-El poder del desacoplamiento se ve aquí. Cuando tengas un servidor real, el único cambio es en `makeAuthGateway()`. El resto del grafo — use case, view model, vista — no sabe ni que ocurrió:
+El poder del desacoplamiento se ve aquí. Cuando tengas un servidor real, el único cambio es en `makeAuthRepository()`. El resto del grafo — use case, view model, vista — no sabe ni que ocurrió:
 
 ```swift
 // Ahora (desarrollo): stub sin red
-private func makeAuthGateway() -> any AuthGateway {
-    return StubAuthGateway(delayNanoseconds: 1_000_000_000)
+private func makeAuthRepository() -> any AuthRepository {
+    return InMemoryAuthRepository(delayNanoseconds: 1_000_000_000)
 }
 
 // Después (producción): backend real, mismo protocolo
-private func makeAuthGateway() -> any AuthGateway {
+private func makeAuthRepository() -> any AuthRepository {
     let httpClient = URLSessionHTTPClient()
     let baseURL = URL(string: "https://api.tuapp.com")!
-    return RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)
-    // LoginUseCase, LoginViewModel y LoginView no cambian ni una línea.
+    return AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)
+    // AuthenticateUserUseCase, LoginViewModel y LoginView no cambian ni una línea.
     // Solo cambia el ensamblador — CompositionRoot — que es exactamente
     // el único lugar que debería saber qué implementación usar.
 }
 ```
 
-Este es el momento en que la inversión de dependencia se paga: Domain define `AuthGateway`, Infrastructure lo implementa, y CompositionRoot decide cuál usar según el entorno.
+Este es el momento en que la inversión de dependencia se paga: Domain define `AuthRepository`, Infrastructure lo implementa, y CompositionRoot decide cuál usar según el entorno.
 
 ---
 
@@ -148,11 +151,11 @@ Este es el momento en que la inversión de dependencia se paga: Domain define `A
 ```swift
 // ❌ CompositionRoot como class con estado compartido:
 final class CompositionRoot {
-    private var cachedGateway: (any AuthGateway)?
+    private var cachedGateway: (any AuthRepository)?
 
-    func makeAuthGateway() -> any AuthGateway {
+    func makeAuthRepository() -> any AuthRepository {
         if let existing = cachedGateway { return existing }
-        let new = StubAuthGateway(delayNanoseconds: 1_000_000_000)
+        let new = InMemoryAuthRepository(delayNanoseconds: 1_000_000_000)
         cachedGateway = new   // mutación compartida entre llamadas
         return new
     }
@@ -165,8 +168,8 @@ final class CompositionRoot {
 
 // ✅ CompositionRoot como struct: sin estado, sin riesgos:
 struct CompositionRoot {
-    func makeAuthGateway() -> any AuthGateway {
-        return StubAuthGateway(delayNanoseconds: 1_000_000_000)
+    func makeAuthRepository() -> any AuthRepository {
+        return InMemoryAuthRepository(delayNanoseconds: 1_000_000_000)
         // Cada llamada crea una instancia fresca.
         // Los tests son deterministas: no hay estado residual entre ellos.
     }
@@ -191,7 +194,7 @@ import SwiftUI
 **En `CompositionRoot.swift`:**
 ```swift
 import SwiftUI
-// AuthGateway, LoginUseCase, etc. están en el mismo target,
+// AuthRepository, AuthenticateUserUseCase, etc. están en el mismo target,
 // así que no necesitas imports adicionales
 ```
 
@@ -205,17 +208,22 @@ import SwiftUI
 2. Verifica que los protocolos y structs tengan visibilidad `internal` o `public`:
 
 ```swift
-// En AuthGateway.swift
-protocol AuthGateway { ... }  // internal por defecto, accesible dentro del target
+// En AuthRepository.swift
+protocol AuthRepository { ... }  // internal por defecto, accesible dentro del target
 ```
 
 ---
 
 ## Paso 4: Ajustar el LoginView para navegación (placeholder)
 
-El `LoginViewModel` que construimos en la lección anterior espera un closure `onLoginSucceeded`. Asegúrate de que tu `LoginViewModel` tenga este init:
+El `LoginViewModel` que construimos en la lección anterior utiliza el protocolo `LoginNavigating`. Asegúrate de que tu `LoginViewModel` tenga este init:
 
 ```swift
+// En Features/Login/Interface/LoginNavigating.swift
+protocol LoginNavigating: AnyObject {
+    @MainActor func goToCatalog()
+}
+
 // En Features/Login/Interface/LoginViewModel.swift
 
 @Observable
@@ -226,15 +234,15 @@ final class LoginViewModel {
     var isLoading = false
     var errorMessage: String?
     
-    private let login: LoginUseCase
-    private let onLoginSucceeded: @MainActor (Session) -> Void
+    private let useCase: AuthenticateUserUseCase
+    private weak var navigator: (any LoginNavigating)?
     
     init(
-        login: LoginUseCase,
-        onLoginSucceeded: @MainActor @escaping (Session) -> Void
+        useCase: AuthenticateUserUseCase,
+        navigator: any LoginNavigating
     ) {
-        self.login = login
-        self.onLoginSucceeded = onLoginSucceeded
+        self.useCase = useCase
+        self.navigator = navigator
     }
     
     func submit() async {
@@ -242,9 +250,9 @@ final class LoginViewModel {
         errorMessage = nil
         
         do {
-            let session = try await login.execute(email: email, password: password)
-            onLoginSucceeded(session)
-        } catch let error as LoginUseCase.Error {
+            _ = try await useCase.execute(email: email, password: password)
+            navigator?.goToCatalog()
+        } catch let error as LoginError {
             errorMessage = Self.message(for: error)
         } catch {
             errorMessage = "Error inesperado. Inténtalo de nuevo."
@@ -253,7 +261,7 @@ final class LoginViewModel {
         isLoading = false
     }
     
-    private static func message(for error: LoginUseCase.Error) -> String {
+    private static func message(for error: LoginError) -> String {
         switch error {
         case .invalidEmail:
             return "El email no tiene un formato válido."
@@ -270,38 +278,22 @@ final class LoginViewModel {
 
 **Nota:** Este es exactamente el mismo `LoginViewModel` que implementamos en la [lección de Interface](05-feature-login/04-interface-swiftui.md). Si ya lo tienes, solo verifica que el init coincide.
 
-**¿Qué pasa si olvidas `@MainActor` en el closure?**
+**¿Por qué `@MainActor` en la firma del protocolo?**
 
-El parámetro `onLoginSucceeded` está marcado `@MainActor @escaping`. Esto no es decorativo: le dice al compilador que ese closure *solo puede ejecutarse en el hilo principal*. En Swift 6, si lo olvidas, el compilador te para en seco:
+El método `goToCatalog()` está marcado `@MainActor` en el protocolo. Esto no es decorativo: garantiza que cualquier implementación del protocolo ejecute la navegación en el hilo principal. En Swift 6, esto previene data races en la UI.
 
 ```swift
-// ❌ Closure sin @MainActor — Swift 6 error en compile time:
-func makeLoginViewModel() -> LoginViewModel {
-    return LoginViewModel(
-        login: makeLoginUseCase(),
-        onLoginSucceeded: { session in
-            // Error: "Converting non-sendable function value to '@MainActor @Sendable (Session) -> Void'"
-            // Swift 6 detecta que este closure podría ejecutarse en cualquier hilo,
-            // pero el tipo lo exige en main actor. No compila.
-            print("Login exitoso!")
-        }
-    )
-}
-
-// ✅ Con @MainActor explícito en el closure — compila y es seguro:
-func makeLoginViewModel() -> LoginViewModel {
-    return LoginViewModel(
-        login: makeLoginUseCase(),
-        onLoginSucceeded: { @MainActor session in
-            // Ahora Swift garantiza que este código se ejecuta en el hilo principal.
-            // Aquí puedes actualizar UI, navegar, o modificar @Observable objects.
-            print("Login exitoso! Token: \(session.token)")
-        }
-    )
+// ✅ El protocolo exige @MainActor — la implementación hereda la restricción:
+final class AppCoordinator: LoginNavigating {
+    func goToCatalog() {
+        // Swift garantiza que este código se ejecuta en el hilo principal.
+        // Aquí puedes hacer path.append(.catalog) o isAuthenticated = true
+        print("Navegando al catálogo...")
+    }
 }
 ```
 
-En proyectos reales, este closure es donde lanzas la navegación post-login. Como la navegación toca UI, necesita main actor. Swift 6 te lo exige; si compilas en Swift 5, no ves el error hasta runtime.
+En la Etapa 2 implementarás `AppCoordinator: LoginNavigating` y harás la navegación real. Por ahora, el `PrintNavigator` es suficiente para verificar el flujo.
 
 ---
 
@@ -330,8 +322,8 @@ En proyectos reales, este closure es donde lanzas la navegación post-login. Com
 | Error | Solución |
 |-------|----------|
 | "Cannot find 'CompositionRoot' in scope" | Verifica que `CompositionRoot.swift` esté en el target correcto |
-| "Cannot find 'AuthGateway' in scope" | Revisa que los archivos de Infrastructure estén en el target |
-| "Missing argument 'onLoginSucceeded'" | Añade el parámetro al init de LoginViewModel |
+| "Cannot find 'AuthRepository' in scope" | Revisa que los archivos de Infrastructure estén en el target |
+| "Missing argument 'navigator'" | Crea un objeto que implemente `LoginNavigating` y pásale al init |
 | "No such module 'SwiftUI'" | Este archivo no está en un target de app |
 
 ---
@@ -341,13 +333,13 @@ En proyectos reales, este closure es donde lanzas la navegación post-login. Com
 Una vez que la app corre en el simulador:
 
 1. **Prueba el happy path:**
-   - Email: `user@test.com`
+   - EmailAddress: `user@test.com`
    - Password: `password123`
    - Pulsa "Iniciar sesión"
    - Deberías ver el spinner, y luego en la consola de Xcode: `Login exitoso! Token: ...`
 
 2. **Prueba un error:**
-   - Email: `invalid-email`
+   - EmailAddress: `invalid-email`
    - Pulsa "Iniciar sesión"
    - Deberías ver el mensaje de error en rojo debajo del formulario
 
@@ -381,7 +373,7 @@ En Xcode: selecciona el scheme `AppComposition` (o el scheme de la app si existe
 **Paso 3 — Verifica el flujo completo**
 
 - [ ] Formulario de login visible con dos campos y un botón
-- [ ] Email inválido → mensaje de error sin llamar al servidor
+- [ ] EmailAddress inválido → mensaje de error sin llamar al servidor
 - [ ] Credenciales correctas (definidas en `InMemoryAuthRepository`) → pantalla de catálogo
 - [ ] `Cmd + U` → todos los tests en verde
 

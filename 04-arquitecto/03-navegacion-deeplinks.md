@@ -590,22 +590,22 @@ final class LoginToCatalogFlowTests: XCTestCase {
         // Verificar que el módulo FeatureLoginUI compila sin FeatureCatalogUI
         // Este test es estructural: si LoginViewModel importara CatalogUI,
         // el script check-dependencies.sh lo detectaría y CI fallaría.
-        // Aquí simplemente instanciamos LoginViewModel con un closure que no
+        // Aquí simplemente instanciamos LoginViewModel con un spy que no
         // hace nada de Catalog, demostrando que la firma no lo requiere.
-        var navigated = false
+        let spy = LoginNavigatorSpy()
         let vm = LoginViewModel(
-            loginUseCase: LoginUseCaseStub(),
-            onLoginSucceeded: { _ in navigated = true }
+            useCase: AuthUseCaseStub(),
+            navigator: spy
         )
-        // El ViewModel existe y compila; el closure es la única interfaz.
-        XCTAssertFalse(navigated)
+        // El ViewModel existe y compila; el navigator es la única interfaz.
+        XCTAssertEqual(spy.goToCatalogCallCount, 0)
     }
 }
 ```
 
-El patrón fundamental es: `LoginViewModel` recibe `onLoginSucceeded: (Session) -> Void`. La `AppComposition` conecta ese closure con la presentación de Catalog a través del `AppCoordinator`. El test de smoke verifica que al invocar el closure con una sesión válida, el coordinador navega a Catalog. Esto permite que Login y Catalog evolucionen completamente independientes: si mañana Catalog renombra su pantalla raíz, Login no compila diferente.
+El patrón fundamental es: `LoginViewModel` recibe `navigator: any LoginNavigating`. La `AppComposition` conecta el `AppCoordinator` (que implementa `LoginNavigating`) con la navegación a Catalog. El test de smoke verifica que al llamar a `goToCatalog()` el coordinador apila el destino correcto. Esto permite que Login y Catalog evolucionen completamente independientes: si mañana Catalog renombra su pantalla raíz, Login no compila diferente.
 
-**Resultado esperado**: el test de smoke pasa, `grep -r "import FeatureCatalog" Sources/FeatureLoginUI` devuelve 0 resultados, y el coordinador apila exactamente 1 destino tras `handleLoginSuccess`.
+**Resultado esperado**: el test de smoke pasa, `grep -r "import FeatureCatalog" Sources/FeatureLoginUI` devuelve 0 resultados, y el coordinador apila exactamente 1 destino tras `goToCatalog()`.
 
 </details>
 

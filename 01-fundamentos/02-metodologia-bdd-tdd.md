@@ -131,9 +131,9 @@ Veamos la traducción completa del escenario del happy path:
 ```text
 BDD:                                          TEST SWIFT:
 ─────────────────────────────────────────     ─────────────────────────────────────────
-Given un usuario con email válido             let gateway = AuthGatewayStub(
+Given un usuario con email válido             let gateway = AuthRepositoryStub(
   And un password válido                          result: .success(expectedSession))
-                                              let sut = LoginUseCase(authGateway: gateway)
+                                              let sut = AuthenticateUserUseCase(repository: gateway)
 
 When el usuario envía credenciales            let session = try await sut.execute(
                                                   email: "user@example.com",
@@ -148,7 +148,7 @@ Y la traducción de un sad path:
 ```text
 BDD:                                          TEST SWIFT:
 ─────────────────────────────────────────     ─────────────────────────────────────────
-Given un email sin formato válido             let sut = LoginUseCase(authGateway: gateway)
+Given un email sin formato válido             let sut = AuthenticateUserUseCase(repository: gateway)
   "esto-no-es-email"
 
 When intenta construir credenciales           do {
@@ -158,7 +158,7 @@ When intenta construir credenciales           do {
                                                   XCTFail("Expected error")
 
 Then rechaza el email                         } catch {
-  And devuelve error email inválido               XCTAssertEqual(error as? LoginUseCase.Error,
+  And devuelve error email inválido               XCTAssertEqual(error as? LoginError,
                                                       .invalidEmail)
                                               }
 ```

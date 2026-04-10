@@ -6,7 +6,7 @@ Un contrato API es como un acuerdo comercial entre dos empresas: define qué se 
 
 ## Ejemplo en el scaffold
 
-En `ArchitectureKit`, el `HTTPClient` protocol en `InfraHTTP` define el contrato entre la app y el backend: `func execute(_ request: URLRequest) async throws -> (Data, HTTPResponse)`. El `AuthHTTPGateway` en `FeatureLoginData` traduce respuestas HTTP a tipos de dominio (`Session` o `AuthError`). Los `FeatureLoginDataIntegrationTests` verifican que esta traducción respeta el contrato. La implementación completa se detalla en [Infra real de red — Etapa 2](../02-integracion/04-infra-real-network.md).
+En `ArchitectureKit`, el `HTTPClient` protocol en `InfraHTTP` define el contrato entre la app y el backend: `func execute(_ request: URLRequest) async throws -> (Data, HTTPResponse)`. El `AuthHTTPGateway` en `FeatureLoginData` traduce respuestas HTTP a tipos de dominio (`Session` o `LoginError`). Los `FeatureLoginDataIntegrationTests` verifican que esta traducción respeta el contrato. La implementación completa se detalla en [Infra real de red — Etapa 2](../02-integracion/04-infra-real-network.md).
 
 ## Cuándo sí / cuándo no
 
@@ -65,7 +65,7 @@ cat apps/ios/ArchitectureKit/Sources/FeatureLoginData/LoginResponseDTO.swift
 # Si existiera v2, el parser estaría en Infrastructure — Domain no cambiaría
 ```
 
-`LoginResponseDTO` es el contrato con el servidor. Cualquier cambio breaking en la API (renombrar campos, cambiar tipos) se absorbe en este archivo sin tocar `LoginUseCase` ni `UserSession`. Eso es versionado de contratos en práctica.
+`LoginResponseDTO` es el contrato con el servidor. Cualquier cambio breaking en la API (renombrar campos, cambiar tipos) se absorbe en este archivo sin tocar `AuthenticateUserUseCase` ni `UserSession`. Eso es versionado de contratos en práctica.
 
 ---
 

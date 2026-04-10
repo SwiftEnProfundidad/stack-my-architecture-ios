@@ -31,11 +31,11 @@ Imagina que Domain es tu empresa. Application es tu equipo interno. Infrastructu
 graph LR
     subgraph CORE["Tu app (no sabe de Firebase)"]
         D["Domain<br/>Product, Session, Email"]
-        A["Application<br/>LoginUseCase, LoadProductsUseCase"]
+        A["Application<br/>AuthenticateUserUseCase, LoadProductsUseCase"]
     end
 
     subgraph INFRA["Infrastructure (traduce)"]
-        FBA["FirebaseAuthGateway<br/>implementa AuthGateway"]
+        FBA["FirebaseAuthRepository<br/>implementa AuthRepository"]
         FBR["FirestoreProductRepository<br/>implementa ProductRepository"]
     end
 
@@ -57,9 +57,9 @@ graph LR
 
 Lectura del diagrama:
 
-→ **CORE (verde)** es tu app: Domain define `Product`, `Session`, `Email` como tipos puros. Application orquesta con `LoginUseCase` y `LoadProductsUseCase`. Ninguno de los dos sabe que Firebase existe — solo conocen protocolos (`AuthGateway`, `ProductRepository`).
+→ **CORE (verde)** es tu app: Domain define `Product`, `Session`, `Email` como tipos puros. Application orquesta con `AuthenticateUserUseCase` y `LoadProductsUseCase`. Ninguno de los dos sabe que Firebase existe — solo conocen protocolos (`AuthRepository`, `ProductRepository`).
 
-→ **Infrastructure (amarillo)** traduce: `FirebaseAuthGateway` implementa `AuthGateway` llamando al SDK de Firebase Auth. `FirestoreProductRepository` implementa `ProductRepository` leyendo de Firestore. Cada uno convierte tipos de Firebase a tipos de Domain.
+→ **Infrastructure (amarillo)** traduce: `FirebaseAuthRepository` implementa `AuthRepository` llamando al SDK de Firebase Auth. `FirestoreProductRepository` implementa `ProductRepository` leyendo de Firestore. Cada uno convierte tipos de Firebase a tipos de Domain.
 
 → **Firebase SDK (rojo)** es externo y reemplazable. Las flechas van de Infrastructure hacia el SDK, nunca al revés. Si mañana cambias Firebase por Supabase, solo reescribes los archivos amarillos.
 
@@ -162,15 +162,15 @@ struct StackMyArchitectureApp: App {
 
 ---
 
-## Paso 2: FirebaseAuthGateway (implementa AuthGateway)
+## Paso 2: FirebaseAuthRepository (implementa AuthRepository)
 
 ```swift
-// StackMyArchitecture/Features/Login/Infrastructure/FirebaseAuthGateway.swift
+// StackMyArchitecture/Features/Login/Infrastructure/FirebaseAuthRepository.swift
 
 import Foundation
 import FirebaseAuth
 
-struct FirebaseAuthGateway: AuthGateway, Sendable {
+struct FirebaseAuthRepository: AuthRepository, Sendable {
 
     func authenticate(_ credentials: Credentials) async throws -> Session {
         let result: AuthDataResult
@@ -210,7 +210,7 @@ struct FirebaseAuthGateway: AuthGateway, Sendable {
 
 **Linea por linea:**
 
-- `struct FirebaseAuthGateway: AuthGateway, Sendable` — Implementa el mismo protocolo `AuthGateway` que usaba `RemoteAuthGateway`. El UseCase no sabe la diferencia.
+- `struct FirebaseAuthRepository: AuthRepository, Sendable` — Implementa el mismo protocolo `AuthRepository` que usaba `AuthHTTPRepository`. El UseCase no sabe la diferencia.
 - `Auth.auth().signIn(withEmail:password:)` — Llama al SDK de Firebase Auth. Es `async` nativo en versiones recientes del SDK.
 - `credentials.email.value` — Usamos los Value Objects de Domain. Firebase recibe strings, pero nosotros ya validamos en el UseCase.
 - `mapAuthError` — Traduce errores técnicos de Firebase a errores semánticos de Domain (`LoginError`). El UseCase nunca ve `AuthErrorCode`; solo ve `LoginError`.
@@ -400,13 +400,13 @@ struct FirebaseConfig {
 extension CompositionRoot {
 
     func makeLoginViewWithFirebase(
-        onLoginSucceeded: @MainActor @escaping (Session) -> Void
+        navigator: any LoginNavigating
     ) -> LoginView {
-        let authGateway = FirebaseAuthGateway()
-        let loginUseCase = LoginUseCase(gateway: authGateway)
+        let authRepository = FirebaseAuthRepository()
+        let loginUseCase = AuthenticateUserUseCase(repository: authRepository)
         let viewModel = LoginViewModel(
-            loginUseCase: loginUseCase,
-            onLoginSucceeded: onLoginSucceeded
+            useCase: loginUseCase,
+            navigator: navigator
         )
         return LoginView(viewModel: viewModel)
     }
@@ -429,7 +429,7 @@ extension CompositionRoot {
 
 | Etapa 2 (HTTP genérico) | Etapa 3 (Firebase) |
 |---|---|
-| `RemoteAuthGateway(httpClient: httpClient, baseURL: baseURL)` | `FirebaseAuthGateway()` |
+| `AuthHTTPRepository(httpClient: httpClient, baseURL: baseURL)` | `FirebaseAuthRepository()` |
 | `RemoteProductRepository(httpClient: httpClient, baseURL: baseURL)` | `FirestoreProductRepository()` |
 
 **UseCase, ViewModel y View no cambian.** Esa es la prueba de que la arquitectura por capas funciona.
@@ -494,7 +494,7 @@ fi
 ### Con emuladores (recomendado)
 
 ```swift
-final class FirebaseAuthGatewayIntegrationTests: XCTestCase {
+final class FirebaseAuthRepositoryIntegrationTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -509,7 +509,7 @@ final class FirebaseAuthGatewayIntegrationTests: XCTestCase {
             password: "Pass1234"
         )
 
-        let sut = FirebaseAuthGateway()
+        let sut = FirebaseAuthRepository()
         let credentials = Credentials(
             email: try Email("test@example.com"),
             password: try Password("Pass1234")
@@ -580,7 +580,7 @@ Solución: Verificar en Firebase Console que los documentos tienen la estructura
 ## ADR-004: Firebase como backend principal encapsulado en Infrastructure
 - Estado: Aprobado
 - Contexto: necesidad de backend gratuito para Auth y datos de Catalog
-- Decision: Firebase Auth + Firestore, encapsulados detras de AuthGateway y ProductRepository
+- Decision: Firebase Auth + Firestore, encapsulados detras de AuthRepository y ProductRepository
 - Alternativa: Supabase (Postgres + RLS), documentada en apendice
 - Consecuencias: setup rapido, plan gratuito generoso, vendor lock-in mitigado por encapsulacion; si migramos, solo cambian archivos de Infrastructure
 - Fecha: 2026-02-07
@@ -680,7 +680,7 @@ Firebase no forma parte del scaffold actual — el scaffold usa `InMemoryCatalog
 | Lección | Scaffold real |
 |---|---|
 | `ProductRepository.loadAll()` | `CatalogRepository.fetchCatalog()` |
-| `AuthGateway.authenticate(_:)` | `AuthRepository.authenticate(credentials:) -> UserSession` |
+| `AuthRepository.authenticate(_:)` | `AuthRepository.authenticate(credentials:) -> UserSession` |
 | `Product(id:name:price:imageURL:)` | `Product(id:title:price:)` con `Double` |
 | `Price(amount: Decimal, currency: String)` | `price: Double` — sin tipo `Price` |
 | `LoadProductsUseCase` | No hay UseCase separado — el ViewModel llama al repositorio directamente |
@@ -690,7 +690,7 @@ Firebase no forma parte del scaffold actual — el scaffold usa `InMemoryCatalog
 
 1. Crea un módulo `FeatureCatalogFirebase` (o añádelo a `FeatureCatalogData`)
 2. Implementa `CatalogRepository` con Firestore (equivalente a `FirestoreProductRepository` del curso)
-3. Implementa `AuthRepository` con Firebase Auth (equivalente a `FirebaseAuthGateway` del curso)
+3. Implementa `AuthRepository` con Firebase Auth (equivalente a `FirebaseAuthRepository` del curso)
 4. En `AppCompositionRoot`, pasa las implementaciones Firebase en lugar de las `InMemory`:
 
 ```swift

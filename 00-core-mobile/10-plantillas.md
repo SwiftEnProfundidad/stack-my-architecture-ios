@@ -171,7 +171,7 @@ Build:
 Compila en CI y local sin warnings críticos de concurrencia.
 
 Tests:
-Unit tests de `Email`, `Password` y `LoginUseCase` pasando.
+Unit tests de `Email`, `Password` y `AuthenticateUserUseCase` pasando.
 
 Quality gates:
 Dependencias correctas + strict concurrency + coverage crítica.

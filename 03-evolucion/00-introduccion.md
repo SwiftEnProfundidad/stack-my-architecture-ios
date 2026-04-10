@@ -6,6 +6,8 @@
 - `apps/ios/ArchitectureKit/Tests/` para validación y regresión de contratos.
 - `apps/ios/ArchitectureHostApp/` cuando la lección impacta navegación/UI integrada.
 
+> **Modelo de aprendizaje:** En esta etapa añades cache, resiliencia y observabilidad sobre el sistema de Etapa 2. Tú construyes tu versión lección a lección; el scaffold (`apps/ios/ArchitectureKit/`) muestra el estado final con todos los módulos operativos, incluyendo `CachedCatalogRepository`, métricas y tests avanzados. Úsalo para comparar y auto-evaluarte, no para copiar.
+
 ## Por qué esta etapa separa a un equipo “correcto” de un equipo “confiable”
 
 Hasta Etapa 2 ya tienes arquitectura limpia, integración entre features, navegación desacoplada y base de tests. Eso es mucho. Pero todavía hay una diferencia importante entre "funciona" y "resiste":

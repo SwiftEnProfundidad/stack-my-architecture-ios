@@ -31,15 +31,15 @@ Implementar Login como una feature vertical completa con cuatro capas (Domain, A
 
 ## Decisiones específicas y alternativas consideradas
 
-### 1. Value Objects para Email y Password
+### 1. Value Objects para EmailAddress y Password
 
-**Decisión:** Usar structs con validación en el `init` que lanzan errores tipados. Si el `init` no lanza, el objeto es válido. No existe un `Email` o `Password` inválido en el sistema.
+**Decisión:** Usar structs con validación en el `init` que lanzan errores tipados. Si el `init` no lanza, el objeto es válido. No existe un `EmailAddress` o `Password` inválido en el sistema.
 
 **Alternativas consideradas:**
 
 **`init?` (failable initializer).** Devuelve `nil` si la validación falla. El problema es que pierde información: el llamante solo sabe que falló, pero no por qué. ¿El email no tenía arroba? ¿No tenía punto en el dominio? ¿Estaba vacío? Con `nil` no hay forma de distinguir. Descartada por pérdida de información.
 
-**Validación en el Use Case.** En lugar de que `Email` se valide a sí mismo, el caso de uso podría validar el string antes de crear el `Email`. El problema es que esto permite crear un `Email` inválido si alguien se salta la validación. La responsabilidad se dispersa y se duplica. Descartada por fragilidad.
+**Validación en el Use Case.** En lugar de que `EmailAddress` se valide a sí mismo, el caso de uso podría validar el string antes de crear el `EmailAddress`. El problema es que esto permite crear un `EmailAddress` inválido si alguien se salta la validación. La responsabilidad se dispersa y se duplica. Descartada por fragilidad.
 
 **Usar `String` directamente.** Sin Value Objects, el email y el password serían simples strings. Esto permite pasar un email donde se espera un password (ambos son `String`), no centraliza la validación, y no impide estados inválidos. Descartada por falta de seguridad de tipos.
 
@@ -57,15 +57,15 @@ Implementar Login como una feature vertical completa con cuatro capas (Domain, A
 
 **Justificación:** Los errores tipados combinados con `throws` son la forma más idiomática en Swift de comunicar fallos recuperables con información precisa sobre la causa.
 
-### 3. Protocolo AuthGateway como puerto
+### 3. Protocolo AuthRepository como puerto
 
-**Decisión:** Definir un protocolo `AuthGateway` en la capa Application que el caso de uso consume, e implementarlo en la capa Infrastructure.
+**Decisión:** Definir un protocolo `AuthRepository` en la capa Application que el caso de uso consume, e implementarlo en la capa Infrastructure.
 
 **Alternativas consideradas:**
 
 **Llamar a `URLSession` directamente desde el caso de uso.** Más simple, menos archivos. Pero acopla el caso de uso a la red: no se puede testear sin servidor, no se pueden hacer previews sin conexión, no se puede cambiar la implementación de red sin modificar el caso de uso. Descartada por acoplamiento.
 
-**Usar un genérico en lugar de un existential.** `struct LoginUseCase<Gateway: AuthGateway>` en lugar de `any AuthGateway`. Esto elimina el overhead del existential box. Pero hace que el tipo del caso de uso dependa del tipo del gateway, lo que complica la composición. El overhead del existential es negligible para una operación que se ejecuta una vez por acción del usuario. Descartada por complejidad innecesaria.
+**Usar un genérico en lugar de un existential.** `struct AuthenticateUserUseCase<Gateway: AuthRepository>` en lugar de `any AuthRepository`. Esto elimina el overhead del existential box. Pero hace que el tipo del caso de uso dependa del tipo del gateway, lo que complica la composición. El overhead del existential es negligible para una operación que se ejecuta una vez por acción del usuario. Descartada por complejidad innecesaria.
 
 **Justificación:** El protocolo como puerto es la materialización del principio de inversión de dependencias. Permite testear, previsualizar, y cambiar implementaciones sin afectar a la lógica de negocio.
 
@@ -81,31 +81,31 @@ Implementar Login como una feature vertical completa con cuatro capas (Domain, A
 
 **Justificación:** `@Observable` es más eficiente, más limpio (no necesita `@Published` en cada propiedad), y es la dirección en la que Apple está llevando SwiftUI.
 
-### 5. Navegación por closure inyectado
+### 5. Navegación por protocolo `LoginNavigating`
 
-**Decisión:** El ViewModel recibe un closure `onLoginSucceeded: (Session) -> Void` que el Composition Root inyecta. La feature Login no sabe a dónde se navega después del éxito.
+**Decisión:** El ViewModel recibe `navigator: any LoginNavigating` que el Composition Root inyecta. La feature Login define el protocolo pero no sabe qué coordinador lo implementa.
 
 **Alternativas consideradas:**
 
 **`NavigationLink` directo en la vista.** `LoginView` tendría un `NavigationLink(destination: HomeView())`. Simple, pero acopla Login a Home. Si Home cambia, Login se ve afectado. Si quieres reutilizar Login en otro contexto, no puedes sin modificarlo. Descartada por acoplamiento.
 
-**Coordinator/Router como dependencia del ViewModel.** El ViewModel recibiría un protocolo `Navigator` que define acciones de navegación. Esto es más formal que un closure, pero para una sola acción ("login exitoso") un closure es suficiente. Un protocolo de navegación tiene sentido cuando hay múltiples destinos posibles desde una feature. Lo consideraremos en la Etapa 2 cuando haya navegación más compleja. Descartada por sobreingeniería en esta etapa.
+**Closure inyectado.** El ViewModel recibiría `onLoginSucceeded: (UserSession) -> Void`. Es más simple que un protocolo pero oculta el contrato: no queda explícito qué puede hacer el llamador. Con un protocolo, cada método documentado describe una intención de navegación concreta y es fácilmente espíable en tests con un `LoginNavigatorSpy`.
 
-**Justificación:** Un closure es la forma más simple y desacoplada de comunicar un evento sin crear abstracciónes innecesarias. Es suficiente para la Etapa 1 y se puede evolucionar a un coordinador formal cuando la complejidad lo requiera.
+**Justificación:** El protocolo `LoginNavigating` hace el contrato de navegación explícito, testeable con spy (sin necesidad de capturar closures), y alineado con el patrón de Coordinator que se usará en Etapa 2.
 
 ### 6. DTOs separados de los modelos de Domain
 
-**Decisión:** `AuthRequest` y `AuthResponse` son tipos separados de `Credentials` y `Session`. El mapping se hace dentro del gateway.
+**Decisión:** `AuthRequest` y `AuthResponse` son tipos separados de `Credentials` y `UserSession`. El mapping se hace dentro del gateway.
 
 **Alternativas consideradas:**
 
-**Hacer `Session` conforme a `Codable`.** Permite usar `Session` directamente para parsear JSON. Menos archivos, menos mapping. Pero acopla el Domain al formato del API. Si el servidor cambia el nombre de un campo, el modelo de Domain tiene que cambiar, lo que afecta en cascada a tests, casos de uso, y ViewModels. Descartada por acoplamiento.
+**Hacer `UserSession` conforme a `Codable`.** Permite usar `UserSession` directamente para parsear JSON. Menos archivos, menos mapping. Pero acopla el Domain al formato del API. Si el servidor cambia el nombre de un campo, el modelo de Domain tiene que cambiar, lo que afecta en cascada a tests, casos de uso, y ViewModels. Descartada por acoplamiento.
 
 **Justificación:** La separación entre modelos de Domain y DTOs de Infrastructure aísla el core de negocio de los cambios en servicios externos. El coste es unos pocos tipos adicionales y un mapping; el beneficio es estabilidad del Domain a largo plazo.
 
-### 7. StubAuthGateway con delay configurable
+### 7. InMemoryAuthRepository con delay configurable
 
-**Decisión:** Crear un `StubAuthGateway` con un delay por defecto de 0.5 segundos, configurable.
+**Decisión:** Crear un `InMemoryAuthRepository` con un delay por defecto de 0.5 segundos, configurable.
 
 **Justificación:** El stub permite desarrollo sin servidor, previews de SwiftUI instantáneas, y tests de integración rápidos. El delay simula latencia real para detectar problemas de UX durante el desarrollo. El delay se puede poner a 0 para tests unitarios que necesitan ser rápidos.
 

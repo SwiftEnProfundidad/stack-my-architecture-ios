@@ -6,7 +6,7 @@ Esta es la primera lección donde aplicamos BDD en la práctica. Vamos a sentarn
 
 Al terminar esta lección tendrás una especificación completa del Login: todos los casos posibles (éxito, errores, edge cases), los términos del dominio que usaremos en el código, las decisiones de diseño que los escenarios nos obligan a tomar, y una tabla de trazabilidad que conecta cada escenario con el test que lo verificará.
 
-> **Nota de nomenclatura lección ↔ scaffold:** Los términos del dominio que definimos aquí (`Email`, `Password`, `Session`, `AuthError`, `Credentials`) son los nombres pedagógicos del curso. En el scaffold `apps/ios/ArchitectureKit` algunos tienen nombres distintos: `Email` → `EmailAddress`, `Session` → `UserSession`, `AuthError` → `LoginError`. Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
+> **Nota de nomenclatura lección ↔ scaffold:** Los términos del dominio usados aquí (`EmailAddress`, `Password`, `UserSession`, `LoginError`, `Credentials`) coinciden exactamente con el scaffold `apps/ios/ArchitectureKit`. Puedes consultar la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
 ### Recordatorio de principios
 
@@ -32,7 +32,7 @@ Antes de escribir los escenarios, vamos a definir los términos que usaremos. Es
 
 **Credenciales** es el par formado por un email y un password. No es un string suelto ni un diccionario. Es un concepto de negocio que agrupa dos valores validados.
 
-**Email** es una dirección de correo electrónico con formato válido. No es un string cualquiera. Si el formato no es válido, no puede existir como Email. Es un Value Object.
+**EmailAddress** es una dirección de correo electrónico con formato válido. No es un string cualquiera. Si el formato no es válido, no puede existir como EmailAddress. Es un Value Object.
 
 **Password** es la contraseña del usuario. No puede estar vacía. Es otro Value Object.
 
@@ -40,9 +40,9 @@ Antes de escribir los escenarios, vamos a definir los términos que usaremos. Es
 
 **Sesión** es el resultado de una autenticación exitosa. Contiene un token de acceso y el email del usuario autenticado. La sesión es lo que el sistema necesita para saber que el usuario está identificado.
 
-**AuthError** es un error de autenticación. Hay dos tipos: credenciales inválidas (el servidor las rechazó) y conectividad (no se pudo llegar al servidor).
+**LoginError** es un error de autenticación. Hay dos tipos: credenciales inválidas (el servidor las rechazó) y conectividad (no se pudo llegar al servidor).
 
-Fíjate en que cada término tiene una definición precisa. No es casualidad. En las próximas lecciones, estos mismos términos aparecerán como nombres de tipos Swift: `Email`, `Password`, `Credentials`, `Session`, `AuthError`. Si alguien lee el código y no ha leído estos escenarios, debería poder entender de qué trata cada tipo simplemente por su nombre. Esa es la promesa del lenguaje ubicuo.
+Fíjate en que cada término tiene una definición precisa. No es casualidad. En las próximas lecciones, estos mismos términos aparecerán como nombres de tipos Swift: `EmailAddress`, `Password`, `Credentials`, `UserSession`, `LoginError`. Si alguien lee el código y no ha leído estos escenarios, debería poder entender de qué trata cada tipo simplemente por su nombre. Esa es la promesa del lenguaje ubicuo.
 
 ---
 
@@ -59,7 +59,7 @@ flowchart TD
 
     SEND --> SERVER{"Respuesta del servidor"}
 
-    SERVER -->|"200 OK + token"| SUCCESS["Login exitoso: Session"]
+    SERVER -->|"200 OK + token"| SUCCESS["Login exitoso: UserSession"]
     SERVER -->|"401 Unauthorized"| ERR_CREDS["Error: credenciales incorrectas"]
     SERVER -->|"Sin conexion"| ERR_NET["Error: sin conectividad"]
 
@@ -192,13 +192,13 @@ Estos escenarios no aparecen en tutoriales básicos, pero son obligatorios en cu
 ```text
 Scenario: La sesión recibida del servidor no contiene token de acceso
   Given el servidor responde con un payload que no incluye accessToken
-  When el sistema intenta construir una Session
+  When el sistema intenta construir una UserSession
   Then el sistema devuelve un error de tipo malformedSession
   And no se crea ninguna sesión
   And NO se persiste nada en almacenamiento local
 ```
 
-Este escenario protege la app de respuestas corruptas o inesperadas del backend. Una `Session` sin token es inválida por construcción — el Value Object no puede existir en ese estado.
+Este escenario protege la app de respuestas corruptas o inesperadas del backend. Una `UserSession` sin token es inválida por construcción — el Value Object no puede existir en ese estado.
 
 ```text
 Scenario: El token de sesión expira durante el uso de la app
@@ -246,19 +246,19 @@ Después de escribir los escenarios, si los lees con atención, descubrirás que
 
 Los escenarios dejan claro que hay validación **local** (formato del email, password no vacío) y validación **remota** (el servidor acepta o rechaza las credenciales). La validación local es instantánea y no depende de la red. La validación remota requiere una petición HTTP y puede fallar por conectividad.
 
-Esta separación se traduce directamente en el código: los Value Objects (`Email`, `Password`) se encargan de la validación local. El caso de uso (`LoginUseCase`) orquesta ambas: primero intenta crear los Value Objects (validación local), y solo si pasan, llama al servidor (validación remota).
+Esta separación se traduce directamente en el código: los Value Objects (`EmailAddress`, `Password`) se encargan de la validación local. El caso de uso (`AuthenticateUserUseCase`) orquesta ambas: primero intenta crear los Value Objects (validación local), y solo si pasan, llama al servidor (validación remota).
 
 ### Hay cuatro tipos de error diferentes
 
 De los escenarios extraemos cuatro errores, cada uno con un origen diferente:
 
-`Email.ValidationError.invalidFormat` ocurre cuando el string no tiene formato de email. Viene del Value Object `Email`, vive en la capa Domain.
+`EmailAddress.ValidationError.invalidFormat` ocurre cuando el string no tiene formato de email. Viene del Value Object `EmailAddress`, vive en la capa Domain.
 
 `Password.ValidationError.empty` ocurre cuando el password es un string vacío. Viene del Value Object `Password`, vive en la capa Domain.
 
-`AuthError.invalidCredentials` ocurre cuando el servidor rechaza las credenciales. Viene de la infraestructura (la respuesta HTTP), se traduce a un error de dominio.
+`LoginError.invalidCredentials` ocurre cuando el servidor rechaza las credenciales. Viene de la infraestructura (la respuesta HTTP), se traduce a un error de dominio.
 
-`AuthError.connectivity` ocurre cuando no se puede conectar con el servidor. Viene de la infraestructura (fallo de red), se traduce a un error de dominio.
+`LoginError.connectivity` ocurre cuando no se puede conectar con el servidor. Viene de la infraestructura (fallo de red), se traduce a un error de dominio.
 
 ### La operación es asíncrona y cancelable
 
@@ -276,15 +276,15 @@ Cada escenario debe poder rastrearse hasta un test automatizado. Esta tabla mues
 
 | Escenario | Nombre del test XCTest | Componente | Etapa |
 |-----------|----------------------|------------|-------|
-| Login exitoso | `test_execute_with_valid_credentials_returns_session` | `LoginUseCaseTests` | 1 |
-| Credenciales rechazadas | `test_execute_with_rejected_credentials_returns_invalidCredentials` | `LoginUseCaseTests` | 1 |
-| Sin conectividad | `test_execute_without_connectivity_returns_connectivityError` | `LoginUseCaseTests` | 1 |
-| Email inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` | 1 |
+| Login exitoso | `test_execute_with_valid_credentials_returns_session` | `AuthenticateUserUseCaseTests` | 1 |
+| Credenciales rechazadas | `test_execute_with_rejected_credentials_returns_invalidCredentials` | `AuthenticateUserUseCaseTests` | 1 |
+| Sin conectividad | `test_execute_without_connectivity_returns_connectivityError` | `AuthenticateUserUseCaseTests` | 1 |
+| EmailAddress inválido | `test_init_with_invalid_format_throws_invalidFormat` | `EmailTests` | 1 |
 | Password vacío | `test_init_with_empty_string_throws_empty` | `PasswordTests` | 1 |
-| Cancelación | `test_execute_cancellation_does_not_return_result` | `LoginUseCaseTests` | 1 |
+| Cancelación | `test_execute_cancellation_does_not_return_result` | `AuthenticateUserUseCaseTests` | 1 |
 | Sesión sin token | `test_session_init_without_token_throws_malformedSession` | `SessionTests` | 2 |
 | Token expirado | `test_adapter_on401_after_login_throws_sessionExpired` | `AuthAdapterTests` | 2 |
-| Cuenta bloqueada | `test_execute_on_account_locked_returns_accountLocked` | `LoginUseCaseTests` | 2 |
+| Cuenta bloqueada | `test_execute_on_account_locked_returns_accountLocked` | `AuthenticateUserUseCaseTests` | 2 |
 | Persistencia segura | `test_session_is_stored_in_keychain_not_userdefaults` | `SessionRepositoryTests` | 3 |
 
 Los escenarios de **Etapa 2 y 3** los especificamos aquí porque aparecen en los escenarios de seguridad, pero sus tests no se implementan hasta que el stack tenga persistencia real y un adaptador HTTP completo. En Etapa 1 solo implementamos los seis primeros.
@@ -299,14 +299,14 @@ Para visualizar el flujo completo, aquí tienes un diagrama de secuencia que mue
 
 ```text
 ┌──────────┐     ┌───────────────┐      ┌──────────────┐      ┌────────────┐
-│  Usuario │     │  LoginUseCase │      │ AuthGateway  │      │  Servidor  │
+│  Usuario │     │  AuthenticateUserUseCase │      │ AuthRepository  │      │  Servidor  │
 │  (UI)    │     │ (Application) │      │   (Puerto)   │      │  (Remoto)  │
 └────┬─────┘     └───────┬───────┘      └──────┬───────┘      └─────┬──────┘
      │                   │                     │                    │
      │ envía email+pass  │                     │                    │
      │──────────────────>│                     │                    │
      │                   │                     │                    │
-     │                   │ 1. Crea Email(VO)   │                    │
+     │                   │ 1. Crea EmailAddress(VO)   │                    │
      │                   │    ¿formato OK?     │                    │
      │                   │    Sí → continúa    │                    │
      │                   │    No → error local │                    │
@@ -326,15 +326,15 @@ Para visualizar el flujo completo, aquí tienes un diagrama de secuencia que mue
      │                   │                     │ o timeout/error    │
      │                   │                     │<───────────────────│
      │                   │                     │                    │
-     │                   │ Session o AuthError │                    │
+     │                   │ UserSession o LoginError │                    │
      │                   │<────────────────────│                    │
      │                   │                     │                    │
-     │ Session o Error   │                     │                    │
+     │ UserSession o Error   │                     │                    │
      │<──────────────────│                     │                    │
      │                   │                     │                    │
 ```
 
-El diagrama muestra claramente los dos puntos de fallo local (pasos 1 y 2: validación de Value Objects) y el punto de fallo remoto (paso 3: autenticación contra el servidor). Cuando implementemos el código, esta separación se verá reflejada en la estructura del `LoginUseCase`.
+El diagrama muestra claramente los dos puntos de fallo local (pasos 1 y 2: validación de Value Objects) y el punto de fallo remoto (paso 3: autenticación contra el servidor). Cuando implementemos el código, esta separación se verá reflejada en la estructura del `AuthenticateUserUseCase`.
 
 ---
 
@@ -344,7 +344,7 @@ Sin escribir ni una línea de Swift, ahora tenemos:
 
 Una lista completa de todos los comportamientos que el Login debe soportar. Un vocabulario preciso (lenguaje ubicuo) que usaremos en el código. Decisiones de diseño concretas que se derivan de los escenarios (validación local antes que remota, errores tipados, operación cancelable). Una tabla de trazabilidad que conecta cada escenario con un test concreto. Y un diagrama que visualiza el flujo de datos entre componentes.
 
-En la siguiente lección empezaremos a implementar, empezando por la capa Domain: los Value Objects `Email` y `Password`, con TDD usando XCTest.
+En la siguiente lección empezaremos a implementar, empezando por la capa Domain: los Value Objects `EmailAddress` y `Password`, con TDD usando XCTest.
 
 
 ---
@@ -362,7 +362,7 @@ ls apps/ios/ArchitectureKit/Tests/
 
 | Escenario BDD | Target de test en scaffold | Qué verifica |
 |---|---|---|
-| Email inválido / válido | `FeatureLoginDomainTests` | `EmailAddress` — validación de formato |
+| EmailAddress inválido / válido | `FeatureLoginDomainTests` | `EmailAddress` — validación de formato |
 | Password vacío / válido | `FeatureLoginDomainTests` | `Password` — invariante de no-vacío |
 | Credenciales rechazadas | `FeatureLoginDomainTests` | `AuthenticateUserUseCase` con stub de fallo |
 | Sin conectividad | `FeatureLoginDomainTests` | UseCase captura error de red |
@@ -382,5 +382,5 @@ Verde. Los 6 escenarios BDD de esta lección tienen tests pasando. En las leccio
 
 ## Qué sigue
 
-La siguiente lección, [Feature Login: Capa Domain](01-domain.md), implementa los primeros seis escenarios con TDD: los Value Objects `Email` y `Password` y los errores de dominio `AuthError`.
+La siguiente lección, [Feature Login: Capa Domain](01-domain.md), implementa los primeros seis escenarios con TDD: los Value Objects `EmailAddress` y `Password` y los errores de dominio `LoginError`.
 

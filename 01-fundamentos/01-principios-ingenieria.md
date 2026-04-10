@@ -44,7 +44,7 @@ Este principio dice algo que parece obvio pero que en la práctica casi nadie ap
 
 Para entender por qué esto importa, piensa en lo contrario. Imagina que decides implementar toda la feature de Login de golpe: la validación del email, la validación del password, el caso de uso, la llamada al servidor, el manejo de errores, la vista de SwiftUI, la navegación al home, todo junto. Te pasas tres días escribiendo código. Cuando por fin ejecutas la app, algo no funciona. ¿Dónde está el error? Podría estar en cualquiera de las decenas de archivos que has tocado. Depurar va a ser una pesadilla. Y si resulta que el enfoque que tomaste en la validación del email no era el correcto, tienes que deshacer tres días de trabajo que se construyó sobre esa base.
 
-Ahora imagina el enfoque de lotes pequeños. Primero implementas solo el Value Object `Email` con su validación. Escribes los tests, los ejecutas, verificas que funcionan. Tardas 15 minutos. Luego implementas el Value Object `Password`. Otros 10 minutos. Luego el caso de uso que usa ambos. Otros 20 minutos. En cada paso, tienes certeza de que lo anterior funciona. Si algo falla, sabes exactamente dónde buscar: en lo último que has cambiado. Y si descubres que tu enfoque de validación del email no era correcto, solo deshaces 15 minutos de trabajo, no tres días.
+Ahora imagina el enfoque de lotes pequeños. Primero implementas solo el Value Object `EmailAddress` con su validación. Escribes los tests, los ejecutas, verificas que funcionan. Tardas 15 minutos. Luego implementas el Value Object `Password`. Otros 10 minutos. Luego el caso de uso que usa ambos. Otros 20 minutos. En cada paso, tienes certeza de que lo anterior funciona. Si algo falla, sabes exactamente dónde buscar: en lo último que has cambiado. Y si descubres que tu enfoque de validación del email no era correcto, solo deshaces 15 minutos de trabajo, no tres días.
 
 ### Cómo saber si tu lote es demasiado grande
 
@@ -117,17 +117,17 @@ graph LR
 
     subgraph Bajo["Bajo acoplamiento - enchufado"]
         direction TB
-        VM2["LoginViewModel"] ==>|"contrato"| AUTH["any AuthGateway"]
+        VM2["LoginViewModel"] ==>|"contrato"| AUTH["any AuthRepository"]
         VM2 -->|"closure"| ONLOGIN["onLoginSuccess closure"]
-        AUTH -.->|"impl. A"| REMOTE["RemoteAuthGateway<br/>URLSession"]
-        AUTH -.->|"impl. B"| STUB["StubAuthGateway<br/>datos falsos"]
+        AUTH -.->|"impl. A"| REMOTE["AuthHTTPRepository<br/>URLSession"]
+        AUTH -.->|"impl. B"| STUB["InMemoryAuthRepository<br/>datos falsos"]
     end
 
     style Alto fill:#f8d7da,stroke:#dc3545
     style Bajo fill:#d4edda,stroke:#28a745
 ```
 
-En el primer caso, si quieres testear el ViewModel, necesitas un servidor HTTP real, acceso a UserDefaults, y una jerarquía de navegación. En el segundo, le pasas un `StubAuthGateway` que devuelve lo que tú quieras, y verificas el resultado. **La diferencia no es estilo: es la diferencia entre "puedo testear esto en 1 segundo" y "necesito 30 minutos montando infraestructura".**
+En el primer caso, si quieres testear el ViewModel, necesitas un servidor HTTP real, acceso a UserDefaults, y una jerarquía de navegación. En el segundo, le pasas un `InMemoryAuthRepository` que devuelve lo que tú quieras, y verificas el resultado. **La diferencia no es estilo: es la diferencia entre "puedo testear esto en 1 segundo" y "necesito 30 minutos montando infraestructura".**
 
 ### El test mental del acoplamiento
 
