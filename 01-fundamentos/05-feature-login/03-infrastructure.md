@@ -265,6 +265,8 @@ struct InMemoryAuthRepository: AuthRepository, Sendable {
 }
 ```
 
+> **Divergencia scaffold:** En el scaffold real, `InMemoryAuthRepository` es un `actor` (no `struct`), el parámetro se llama `latencyNanoseconds` (no `delayNanoseconds`), y el init acepta `validEmail:` y `validPassword:` para validar credenciales reales en vez de devolver siempre éxito. La lección simplifica para enseñar el patrón; el checkpoint de Xcode muestra la versión de producción.
+
 El stub tiene un delay configurable que por defecto es 0.5 segundos. ¿Por qué no devolver el resultado inmediatamente? Porque queremos que el desarrollo con el stub sea lo más parecido posible a la producción. En producción, la petición de red tarda un tiempo. Si el stub devuelve instantáneamente, no detectarás problemas de UX: estados de loading que no se muestran, animaciones que se saltan, condiciones de carrera cuando el usuario pulsa dos veces el botón. El delay simulado te obliga a manejar estos casos durante el desarrollo, no en producción cuando ya es tarde.
 
 Para los tests unitarios, puedes configurar el delay a 0 para que los tests sean rápidos: `InMemoryAuthRepository(delayNanoseconds: 0)`.

@@ -6,20 +6,19 @@ En la lección anterior definimos los escenarios BDD del Login. Ahora vamos a em
 
 En esta lección vamos a construir los siguientes tipos, todos con TDD (test primero, implementación después, usando XCTest):
 
-El Value Object `EmailAddress`, que garantiza que un email tiene formato válido. El Value Object `Password`, que garantiza que una contraseña no está vacía. El tipo `Credentials` que agrupa ambos. El enum `LoginError` con los errores de autenticación. El enum `LoginEvent` con los eventos del dominio. Y el struct `UserSession` que representa una autenticación exitosa.
+El Value Object `EmailAddress`, que garantiza que un email tiene formato válido. El Value Object `Password`, que garantiza que una contraseña no está vacía. El tipo `Credentials` que agrupa ambos. El enum `LoginError` con todos los errores de la feature (validación + autenticación). El enum `LoginEvent` con los eventos del dominio. Y el struct `UserSession` que representa una autenticación exitosa.
 
 > **Nota de nomenclatura lección ↔ scaffold:** Los tipos que construyes en esta lección usan nombres y diseños pedagógicos. En el scaffold `apps/ios/ArchitectureKit` hay diferencias que van más allá del nombre:
 >
 > | Lección | Scaffold | Qué cambia |
 > |---|---|---|
-> | `EmailAddress` | `EmailAddress` | Solo nombre |
-> | `Password` — valida `!isEmpty` | `Password` — valida `count >= 8` | Regla de negocio más estricta |
-> | `EmailAddress.ValidationError` / `Password.ValidationError` (errores anidados por VO) | `LoginError` (enum unificado con `.invalidEmail`, `.invalidPassword`, `.invalidCredentials`, `.network`) | Arquitectura de errores: anidada → unificada |
-> | `UserSession(token:, email:)` | `UserSession(userId:, token:)` | Campos distintos (`email` → `userId`) |
-> | `LoginError { invalidCredentials, connectivity }` | Integrado en `LoginError { ..., .network }` | Enum separado → unificado |
+> | `EmailAddress` — valida `@` y punto en dominio | `EmailAddress` | Mismo patrón |
+> | `Password` — valida `!isEmpty` | `Password` — valida `count >= 8` | Regla más estricta en scaffold |
+> | `LoginError { invalidEmail, emptyPassword, invalidCredentials, connectivity }` | `LoginError { invalidEmail, invalidPassword, invalidCredentials, network }` | Nombres de casos distintos |
+> | `UserSession(token:, email:)` | `UserSession(userId:, token:)` | Scaffold usa `userId` en lugar de `email` |
 > | `LoginEvent { success, failure }` | No existe — el ViewModel maneja el resultado directamente | Tipo pedagógico sin equivalente en scaffold |
 >
-> **¿Por qué la lección enseña un diseño diferente?** Porque el patrón de errores anidados por Value Object y los eventos de dominio explícitos son más puros desde DDD y enseñan mejor los principios. El scaffold usa un enum unificado porque en un proyecto real con 4 casos de error, la pragmática pesa más que la pureza. Ambos diseños son válidos — la diferencia es intencional y entenderla es parte del aprendizaje.
+> **¿Por qué la lección enseña `LoginEvent`?** Porque los eventos de dominio explícitos son un patrón DDD importante en sistemas más grandes donde múltiples componentes reaccionan al mismo hecho. El scaffold lo simplifica porque con dos pantallas (Login → Catalog), el desacoplamiento extra no aporta valor proporcional.
 >
 > Consulta la [tabla de equivalencias completa](../../anexos/equivalencias-scaffold.md).
 
@@ -49,7 +48,7 @@ graph TD
     end
     
     subgraph Errors["Errores tipados"]
-        AUTHERR["LoginError<br/>enum: invalidCredentials,<br/>connectivity"]
+        AUTHERR["LoginError<br/>invalidEmail, emptyPassword,<br/>invalidCredentials, connectivity"]
     end
     
     subgraph Events["Eventos de dominio"]
@@ -497,24 +496,26 @@ No escribimos tests para `Credentials` porque no tiene comportamiento propio. Es
 
 ---
 
-## Los errores de autenticación
+## Los errores de login
 
-De los escenarios BDD extrajimos que hay dos tipos de error que ocurren **después** de pasar la validación local: el servidor rechaza las credenciales (`invalidCredentials`) o no se puede conectar con el servidor (`connectivity`).
+`LoginError` es el tipo de error público de la feature Login. Centraliza todos los casos que la UI puede recibir: errores de validación local (antes de ir a la red) y errores de autenticación remota (después de ir a la red).
 
 ```swift
 // StackMyArchitecture/Features/Login/Domain/Errors/LoginError.swift
 
 enum LoginError: Error, Equatable, Sendable {
-    case invalidCredentials
-    case connectivity
+    case invalidEmail        // email no tiene formato válido
+    case emptyPassword       // password está vacío
+    case invalidCredentials  // el servidor rechaza las credenciales
+    case connectivity        // no se puede conectar con el servidor
 }
 ```
 
-Estos errores son diferentes de los errores de validación de los Value Objects (`EmailAddress.ValidationError.invalidFormat`, `Password.ValidationError.empty`). Los errores de los Value Objects son errores de **formato**: los datos del usuario no pasan la validación local. `LoginError` son errores de **autenticación**: los datos pasaron la validación local pero algo falló en la comunicación con el servidor.
+¿Por qué un enum unificado? Porque la UI solo necesita conocer **un** tipo de error, no los tipos internos de los Value Objects. Sin esta capa, la pantalla de login tendría que importar `EmailAddress.ValidationError`, `Password.ValidationError` y los errores de red — acoplamiento innecesario. Con `LoginError`, la capa Interface solo importa la feature pública.
 
-¿Por qué esta distinción? Porque el manejo es diferente. Si el email tiene formato inválido, la UI puede mostrar el error inmediatamente sin hacer ninguna petición de red. Si el servidor rechaza las credenciales, la UI muestra un mensaje diferente ("email o contraseña incorrectos"). Si no hay conectividad, la UI muestra otro mensaje diferente ("sin conexión a internet, inténtalo de nuevo").
+Los cuatro casos mapean directamente a mensajes de usuario distintos: "email inválido", "contraseña vacía", "credenciales incorrectas", "sin conexión". Cada caso tiene un mensaje diferente porque el usuario necesita información diferente para corregir el problema.
 
-> **Divergencia scaffold:** En el scaffold real, los errores de validación de VOs y los de autenticación están **unificados** en un solo `LoginError { invalidEmail, invalidPassword, invalidCredentials, network }`. La lección separa `EmailAddress.ValidationError` + `Password.ValidationError` + `LoginError` como tres tipos porque es más fiel al principio de Single Responsibility y enseña mejor la distinción entre error de formato y error de autenticación. En un proyecto real con solo 4 casos de error, la pragmática de un enum unificado puede pesar más. Comprende ambos diseños: la pureza de la lección y la pragmática del scaffold.
+> **Divergencia scaffold:** En el scaffold real, `LoginError` usa `invalidPassword` (en lugar de `emptyPassword`) y `network` (en lugar de `connectivity`). El scaffold también valida longitud mínima de 8 caracteres, no solo vacío. La lógica y la estructura son idénticas; solo cambian los nombres de casos y el umbral de validación.
 
 ---
 
@@ -625,7 +626,7 @@ En el navigator de Xcode, dentro de `Sources/FeatureLoginDomain/`, encontrarás 
 | `Password` (valida `!isEmpty`) | `Password.swift` | Regla más estricta: mínimo 8 caracteres |
 | `Credentials` | `Credentials.swift` | Mismo diseño |
 | `UserSession(token:, email:)` | `UserSession.swift` | Campo `userId` en lugar de `email` |
-| `LoginError` + `EmailAddress.ValidationError` | `LoginError.swift` | Enum unificado con 4 casos |
+| `LoginError` (4 casos: invalidEmail, emptyPassword, invalidCredentials, connectivity) | `LoginError.swift` | Scaffold usa `invalidPassword`/`network` |
 | `LoginEvent` | _(no existe)_ | El ViewModel lo gestiona directamente |
 
 Abre cada archivo. Lee el código. Entiende cada diferencia — no son errores del scaffold, son decisiones de diseño explicadas al inicio de la lección.

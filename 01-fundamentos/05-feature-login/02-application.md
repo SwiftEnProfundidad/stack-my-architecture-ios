@@ -116,6 +116,8 @@ Fíjate en que el UseCase hace **tres cosas** en orden:
 2. **Delega** la autenticación al gateway a través del protocolo/puerto
 3. **Propaga** el resultado (éxito o error) al caller
 
+En el scaffold `ArchitectureKit`, el error de red es `LoginError.network` (no `connectivity`); la semántica es la misma.
+
 No hace más. No navega. No muestra alertas. No guarda tokens en UserDefaults. Esas responsabilidades pertenecen a otras capas.
 
 ### Diagrama: por qué usamos un stub en los tests
@@ -249,17 +251,17 @@ Ejecutamos. No compila porque `AuthenticateUserUseCase` no existe. Eso es nuestr
 // StackMyArchitecture/Features/Login/Application/UseCases/AuthenticateUserUseCase.swift
 
 struct AuthenticateUserUseCase: Sendable {
-    private let authRepository: any AuthRepository
+    private let repository: any AuthRepository
     
-    init(authRepository: any AuthRepository) {
-        self.authRepository = authRepository
+    init(repository: any AuthRepository) {
+        self.repository = repository
     }
     
     func execute(email: String, password: String) async throws -> UserSession {
         let validEmail = try EmailAddress(email)
         let validPassword = try Password(password)
         let credentials = Credentials(email: validEmail, password: validPassword)
-        return try await authRepository.authenticate(credentials: credentials)
+        return try await repository.authenticate(credentials: credentials)
     }
 }
 ```
@@ -268,9 +270,9 @@ struct AuthenticateUserUseCase: Sendable {
 
 `struct AuthenticateUserUseCase: Sendable` — Es un struct, no una clase. ¿Por qué? Porque el UseCase no tiene estado mutable. Solo tiene una referencia al gateway (que es `let`, constante). Los structs son más ligeros que las clases y no necesitan gestión de memoria (ARC). `Sendable` le dice al compilador que este tipo es seguro para concurrencia (puede usarse desde funciones `async` sin problemas).
 
-`private let authRepository: any AuthRepository` — La dependencia del UseCase. Es un **protocolo** (`AuthRepository`), no un tipo concreto. La palabra `any` es obligatoria en Swift 5.7+ para indicar que es un "existential type" (un tipo que puede ser cualquier cosa que conforme el protocolo). Esto es la clave de la **inyección de dependencias**: el UseCase no sabe si el gateway es real (llama a un servidor) o un stub (devuelve datos fijos). Solo sabe que tiene un método `authenticate`.
+`private let repository: any AuthRepository` — La dependencia del UseCase. Es un **protocolo** (`AuthRepository`), no un tipo concreto. La palabra `any` es obligatoria en Swift 5.7+ para indicar que es un "existential type" (un tipo que puede ser cualquier cosa que conforme el protocolo). Esto es la clave de la **inyección de dependencias**: el UseCase no sabe si el gateway es real (llama a un servidor) o un stub (devuelve datos fijos). Solo sabe que tiene un método `authenticate`.
 
-`init(authRepository: any AuthRepository)` — El constructor recibe el gateway como parámetro. No lo crea él. Esto es **inyección de dependencias por constructor**: alguien de fuera (el Composition Root o el test) le pasa la dependencia. Si el UseCase creara su propia dependencia (`let gateway = AuthHTTPRepository()`), no podríamos testearlo sin un servidor real.
+`init(repository: any AuthRepository)` — El constructor recibe el gateway como parámetro. No lo crea él. Esto es **inyección de dependencias por constructor**: alguien de fuera (el Composition Root o el test) le pasa la dependencia. Si el UseCase creara su propia dependencia (`let gateway = AuthHTTPRepository()`), no podríamos testearlo sin un servidor real.
 
 `func execute(email: String, password: String) async throws -> UserSession` — La interfaz pública del UseCase. Recibe strings crudos (lo que el usuario escribió en la UI), y devuelve una `UserSession` o lanza un error. `async` porque la autenticación es asíncrona (requiere una petición de red). `throws` porque puede fallar (email inválido, sin conexión, credenciales rechazadas).
 
@@ -280,7 +282,7 @@ struct AuthenticateUserUseCase: Sendable {
 
 `let credentials = Credentials(email: validEmail, password: validPassword)` — Creamos el tipo `Credentials` que agrupa email y password validados. Si llegamos hasta aquí, sabemos con certeza que tanto el email como el password son válidos. No necesitamos volver a validar nunca más.
 
-`return try await authRepository.authenticate(credentials: credentials)` — Delegamos al gateway. `try` porque el gateway puede lanzar `LoginError.connectivity` o `LoginError.invalidCredentials`. `await` porque es asíncrono. El gateway devuelve una `UserSession` que nosotros devolvemos directamente al que nos llamó (el ViewModel).
+`return try await repository.authenticate(credentials: credentials)` — Delegamos al gateway. `try` porque el gateway puede lanzar `LoginError.connectivity` o `LoginError.invalidCredentials`. `await` porque es asíncrono. El gateway devuelve una `UserSession` que nosotros devolvemos directamente al que nos llamó (el ViewModel).
 
 **El flujo completo en un diagrama:**
 
@@ -373,17 +375,10 @@ Ejecutamos. Falla porque `LoginError` no existe y el caso de uso no traduce erro
 
 ```swift
 struct AuthenticateUserUseCase: Sendable {
-    private let authRepository: any AuthRepository
+    private let repository: any AuthRepository
     
-    init(authRepository: any AuthRepository) {
-        self.authRepository = authRepository
-    }
-    
-    enum Error: Swift.Error, Equatable, Sendable {
-        case invalidEmail
-        case emptyPassword
-        case invalidCredentials
-        case connectivity
+    init(repository: any AuthRepository) {
+        self.repository = repository
     }
     
     func execute(email: String, password: String) async throws -> UserSession {
@@ -391,25 +386,22 @@ struct AuthenticateUserUseCase: Sendable {
         do {
             validEmail = try EmailAddress(email)
         } catch {
-            throw Error.invalidEmail
+            throw LoginError.invalidEmail
         }
         
         let validPassword: Password
         do {
             validPassword = try Password(password)
         } catch {
-            throw Error.emptyPassword
+            throw LoginError.emptyPassword
         }
         
         let credentials = Credentials(email: validEmail, password: validPassword)
         
         do {
-            return try await authRepository.authenticate(credentials: credentials)
+            return try await repository.authenticate(credentials: credentials)
         } catch let authError as LoginError {
-            switch authError {
-            case .invalidCredentials: throw Error.invalidCredentials
-            case .connectivity: throw Error.connectivity
-            }
+            throw authError  // reenvía directamente: invalidCredentials o connectivity
         }
     }
 }
@@ -458,7 +450,7 @@ func test_execute_with_invalid_email_does_not_call_gateway() async {
 }
 ```
 
-Ejecutamos. Pasa sin cambios, porque el `try EmailAddress(email)` falla antes de llegar a `authRepository.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
+Ejecutamos. Pasa sin cambios, porque el `try EmailAddress(email)` falla antes de llegar a `repository.authenticate(...)`. El gateway nunca es invocado, así que `receivedCredentials` sigue siendo `nil`.
 
 ### Iteración 6: Credenciales rechazadas por el servidor
 
@@ -482,7 +474,7 @@ func test_execute_with_rejected_credentials_throws_invalidCredentials() async {
 }
 ```
 
-Ejecutamos. Pasa sin cambios, porque la implementación ya captura `LoginError.invalidCredentials` y lo traduce a `LoginError.invalidCredentials`.
+Ejecutamos. Pasa sin cambios, porque la implementación captura el `LoginError` del gateway y lo reenvía directamente.
 
 ### Iteración 7: Sin conectividad
 
@@ -516,17 +508,10 @@ Ejecutamos. Pasa. Todos los escenarios BDD están cubiertos.
 // StackMyArchitecture/Features/Login/Application/UseCases/AuthenticateUserUseCase.swift
 
 struct AuthenticateUserUseCase: Sendable {
-    private let authRepository: any AuthRepository
+    private let repository: any AuthRepository
     
-    init(authRepository: any AuthRepository) {
-        self.authRepository = authRepository
-    }
-    
-    enum Error: Swift.Error, Equatable, Sendable {
-        case invalidEmail
-        case emptyPassword
-        case invalidCredentials
-        case connectivity
+    init(repository: any AuthRepository) {
+        self.repository = repository
     }
     
     func execute(email: String, password: String) async throws -> UserSession {
@@ -534,25 +519,22 @@ struct AuthenticateUserUseCase: Sendable {
         do {
             validEmail = try EmailAddress(email)
         } catch {
-            throw Error.invalidEmail
+            throw LoginError.invalidEmail
         }
         
         let validPassword: Password
         do {
             validPassword = try Password(password)
         } catch {
-            throw Error.emptyPassword
+            throw LoginError.emptyPassword
         }
         
         let credentials = Credentials(email: validEmail, password: validPassword)
         
         do {
-            return try await authRepository.authenticate(credentials: credentials)
+            return try await repository.authenticate(credentials: credentials)
         } catch let authError as LoginError {
-            switch authError {
-            case .invalidCredentials: throw Error.invalidCredentials
-            case .connectivity: throw Error.connectivity
-            }
+            throw authError  // reenvía directamente: invalidCredentials o connectivity
         }
     }
 }
@@ -703,7 +685,7 @@ El caso de uso es `Sendable` automáticamente (porque es un struct con propiedad
 
 Si el caso de uso fuera una clase, necesitarías preocuparte por retención cíclica, por herencia accidental, y por identidad (dos instancias con las mismas dependencias serían diferentes objetos). Con un struct, nada de eso aplica.
 
-La propiedad `authRepository` es `any AuthRepository` (un existential). En teoría esto tiene un pequeño overhead de runtime comparado con usar un genérico (`struct AuthenticateUserUseCase<Gateway: AuthRepository>`). En la práctica, este overhead es negligible para un caso de uso que se ejecuta una vez por acción del usuario. Si algún día el profiler mostrara que es un cuello de botella (spoiler: no lo será), lo cambiaríamos a genérico. Pero no optimizamos sin datos.
+La propiedad `repository` es `any AuthRepository` (un existential). En teoría esto tiene un pequeño overhead de runtime comparado con usar un genérico (`struct AuthenticateUserUseCase<Gateway: AuthRepository>`). En la práctica, este overhead es negligible para un caso de uso que se ejecuta una vez por acción del usuario. Si algún día el profiler mostrara que es un cuello de botella (spoiler: no lo será), lo cambiaríamos a genérico. Pero no optimizamos sin datos.
 
 ---
 

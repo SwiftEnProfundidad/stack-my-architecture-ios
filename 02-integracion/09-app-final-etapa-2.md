@@ -238,10 +238,7 @@ struct StackMyArchitectureApp: App {
     
     private func makeLoginViewModel() -> LoginViewModel {
         let authRepository = InMemoryAuthRepository(
-            behaviour: .successAfterDelay(
-                token: "demo-token",
-                delay: .seconds(1)
-            )
+            latencyNanoseconds: 1_000_000_000  // 1 segundo de latencia simulada
         )
         
         return LoginViewModel(

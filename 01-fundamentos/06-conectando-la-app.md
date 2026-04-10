@@ -114,6 +114,7 @@ struct CompositionRoot {
 
 // Placeholder para Etapa 1 (sin coordinador real).
 // En Etapa 2, AppCoordinator implementará LoginNavigating con NavigationPath.
+@MainActor
 final class PrintNavigator: LoginNavigating {
     func goToCatalog() { print("Login exitoso — navegando al catálogo (E2)") }
 }

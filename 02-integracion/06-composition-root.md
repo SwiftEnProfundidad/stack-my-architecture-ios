@@ -234,6 +234,8 @@ Mismo patrón que Login. Misma estructura. Esa consistencia es intencional: cuan
 
 ### Paso 4: Conectar con el AppCoordinator
 
+> **Alineación con el curso:** Este cableado es el mismo patrón que [Navegación por eventos](02-navegacion-eventos.md): Login usa el protocolo `LoginNavigating` (sin closure de éxito); el `AppCoordinator` se inyecta como `navigator` vía `CompositionRoot.makeLoginView(navigator:)`. Catalog puede seguir usando un closure `onProductSelected` hacia el coordinator.
+
 ```swift
 // StackMyArchitecture/App/StackMyArchitectureApp.swift
 
@@ -241,25 +243,25 @@ import SwiftUI
 
 @main
 struct StackMyArchitectureApp: App {
-    @State private var coordinator = AppCoordinator()
-    private let compositionRoot = CompositionRoot()
+    @State private var coordinator: AppCoordinator
+
+    init() {
+        let compositionRoot = CompositionRoot()
+        _coordinator = State(wrappedValue: AppCoordinator(compositionRoot: compositionRoot))
+    }
 
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                compositionRoot.makeLoginView { session in
-                    coordinator.handle(.loginSucceeded(session))
-                }
-                .navigationDestination(for: AppRoute.self) { route in
-                    switch route {
-                    case .catalog:
-                        compositionRoot.makeCatalogView { product in
-                            coordinator.handle(.productSelected(product))
+                coordinator.makeLoginView()
+                    .navigationDestination(for: AppDestination.self) { destination in
+                        switch destination {
+                        case .catalog:
+                            coordinator.makeCatalogView()
+                        case .productDetail(let product):
+                            Text("Detalle de \(product.name)")
                         }
-                    case .productDetail(let product):
-                        Text("Detalle de \(product.name)")
                     }
-                }
             }
         }
     }
@@ -268,11 +270,11 @@ struct StackMyArchitectureApp: App {
 
 **Línea por línea:**
 
-- `@State private var coordinator` — El coordinador gestiona la pila de navegación.
-- `private let compositionRoot` — Creado una vez al iniciar la app.
-- `compositionRoot.makeLoginView { session in ... }` — La primera pantalla es Login. Cuando el login tiene éxito, le decimos al coordinator.
-- `.navigationDestination(for: AppRoute.self)` — SwiftUI moderno: el coordinator empuja rutas, y aquí decidimos qué vista mostrar para cada ruta.
-- Cada vista se crea con su factory del CompositionRoot, y el closure de navegación se conecta al coordinator.
+- `init()` — Crea el `CompositionRoot` una vez y el `AppCoordinator` con referencia a ese root (factory de vistas y `LoginNavigating`).
+- `@State private var coordinator` — El coordinador es `@Observable` y posee el `NavigationPath`; SwiftUI reacciona cuando cambia.
+- `coordinator.makeLoginView()` — Delega en `compositionRoot.makeLoginView(navigator: self)`; el ViewModel recibe al coordinator como `any LoginNavigating`.
+- `.navigationDestination(for: AppDestination.self)` — Cuando `goToCatalog()` hace `path.append(.catalog)`, SwiftUI construye el destino aquí.
+- `coordinator.makeCatalogView()` — Igual patrón de factory; el closure `onProductSelected` vive dentro del coordinator (ver lección de navegación), no en la app raíz.
 
 ---
 
@@ -281,39 +283,42 @@ struct StackMyArchitectureApp: App {
 ```mermaid
 sequenceDiagram
     participant APP as @main App
-    participant CR as CompositionRoot
     participant COORD as AppCoordinator
+    participant CR as CompositionRoot
 
-    APP->>CR: init()
+    APP->>COORD: init(compositionRoot:)
+    COORD->>CR: retiene CompositionRoot
     Note over CR: Crea httpClient + baseURL
 
-    APP->>CR: makeLoginView(navigator: coordinator)
+    APP->>COORD: makeLoginView()
+    COORD->>CR: makeLoginView(navigator: self)
     CR->>CR: AuthHTTPRepository(httpClient)
-    CR->>CR: AuthenticateUserUseCase(gateway)
-    CR->>CR: LoginViewModel(useCase, closure)
+    CR->>CR: AuthenticateUserUseCase(repository:)
+    CR->>CR: LoginViewModel(useCase, navigator)
     CR->>CR: LoginView(viewModel)
-    CR-->>APP: LoginView lista
+    CR-->>COORD: LoginView
 
-    Note over APP: Usuario hace login exitoso...
+    Note over COORD: Usuario hace login exitoso...
 
-    APP->>COORD: handle(.loginSucceeded)
+    Note over CR,COORD: LoginViewModel llama navigator?.goToCatalog()
     COORD->>COORD: path.append(.catalog)
 
-    APP->>CR: makeCatalogView(onProductSelected)
+    APP->>COORD: makeCatalogView()
+    COORD->>CR: makeCatalogView(onProductSelected:)
     CR->>CR: RemoteProductRepository(httpClient)
     CR->>CR: LoadProductsUseCase(repository)
     CR->>CR: CatalogViewModel(useCase, closure)
     CR->>CR: CatalogView(viewModel)
-    CR-->>APP: CatalogView lista
+    CR-->>COORD: CatalogView
 ```
 
 Lectura del sequenceDiagram paso a paso:
 
-1. `APP ->> CR: init()` — al arrancar la app, el Composition Root se construye: crea `httpClient` y `baseURL`. Estas son las únicas dependencias compartidas por todas las features.
-2. `APP ->> CR: makeLoginView(navigator: coordinator)` — el `@main` pide la vista de Login. El root construye la cadena completa: Gateway → UseCase → ViewModel → View. El coordinator queda inyectado como `weak var navigator` en el ViewModel.
-3. El usuario hace login. `LoginViewModel` llama a `navigator?.goToCatalog()`. El `AppCoordinator` (navigator) navega.
-4. `APP ->> COORD: handle(.loginSucceeded)` — el coordinator hace `path.append(.catalog)`. SwiftUI detecta el cambio y busca el `navigationDestination` correspondiente.
-5. `APP ->> CR: makeCatalogView(onProductSelected)` — SwiftUI solicita la vista de Catalog. El root construye otra cadena independiente, reutilizando el mismo `httpClient`.
+1. `APP ->> COORD: init(compositionRoot:)` — al arrancar la app, el `AppCoordinator` recibe el `CompositionRoot` que centraliza `httpClient` y `baseURL`.
+2. `COORD ->> CR: makeLoginView(navigator: self)` — el coordinator pide la vista de Login al root. El root construye la cadena completa y deja al coordinator como `any LoginNavigating` en el ViewModel (`weak`).
+3. Tras un login exitoso, `LoginViewModel` llama a `navigator?.goToCatalog()` y el `AppCoordinator` ejecuta `path.append(...)`.
+4. SwiftUI reacciona al cambio de `NavigationPath` y resuelve `.navigationDestination(for: AppDestination.self)`.
+5. `COORD ->> CR: makeCatalogView(...)` — para el destino catálogo, el coordinator vuelve a delegar en el root; el closure de producto se configura en el coordinator, no en la vista raíz.
 
 Nótese que `AuthHTTPRepository` y `RemoteProductRepository` se crean dentro de `makeLoginView` y `makeCatalogView` respectivamente — no en `init()`. Son objetos de vida corta, creados cuando se necesitan. El `httpClient` sí es de vida larga (se crea en `init` y se reutiliza).
 
@@ -346,46 +351,45 @@ No hay un "Composition Root de tests". Cada test monta exactamente la cadena que
 
 El Composition Root es difícil de testear unitariamente porque es el único tipo que crea implementaciones concretas. Los tests a nivel de Composition Root son tests de integración: verifican que el ensamblaje produce una cadena funcional, no que cada pieza funcione en aislamiento (eso lo hacen los tests de cada capa).
 
-**Paso 1 — Red: test de ensamblaje de Login.**
+**Paso 1 — Red: test de ensamblaje de Login (proyecto pedagógico Etapa 1).**
 
 ```swift
-// AppCompositionTests.swift
+// CompositionRootTests.swift
 @MainActor
 final class CompositionRootTests: XCTestCase {
     func test_makeLoginView_producesViewWithFunctionalChain() {
         let sut = CompositionRoot()
-        var capturedSession: Session?
-
-        let view = sut.makeLoginView { session in
-            capturedSession = session
-        }
-        // CompositionRoot no existe aún → test no compila → guía el diseño del init
-        // view es LoginView — confirma que el factory devuelve el tipo correcto
+        let navigator = PrintNavigator()
+        let view = sut.makeLoginView(navigator: navigator)
         XCTAssertNotNil(view)
-        // No probamos el login real aquí — eso es responsabilidad de AuthenticateUserUseCaseTests
     }
 }
 ```
 
-**Paso 2 — Green:** implementar `CompositionRoot` con `makeLoginView`. El test pasa cuando el factory devuelve una instancia válida de `LoginView`.
+**Paso 2 — Green:** implementar `CompositionRoot` con `makeLoginView(navigator: any LoginNavigating)` como en [Conectando la app](../../01-fundamentos/06-conectando-la-app.md). El test pasa cuando el factory devuelve una instancia válida de `LoginView`.
 
-**Paso 3 — Red: test de ensamblaje con stub para verificar el closure.**
+**Paso 3 — Ensamblaje real en el scaffold (Etapa 2+):** el `AppCompositionRoot` del SPM ya cablea `AuthenticateUserUseCase`, `LoginViewModel` y `NavigationStore` sin closures. Los tests de integración viven en `Tests/AppCompositionTests/AppCompositionRootTests.swift` y comprueban rutas tras `submit()`:
 
 ```swift
-func test_makeLoginView_closureConnectsToCompositionRoot() {
-    let authRepository = AuthRepositoryStub(result: .success(Session(token: "t", email: "e@test.com")))
-    // Para testear el closure necesitamos inyectar un stub en el CompositionRoot.
-    // Esto requiere que CompositionRoot exponga un init con dependencias inyectables.
-    let sut = CompositionRoot(authRepository: authRepository)
-    var loginSucceededCalled = false
-    _ = sut.makeLoginView { _ in loginSucceededCalled = true }
-    // En un integration test real, simularíamos el login y verificaríamos que el closure se llama
+import AppContracts
+import XCTest
+@testable import AppComposition
+
+@MainActor
+final class AppCompositionRootTests: XCTestCase {
+    func test_loginFlow_wiresNavigation_fromLoginToCatalog() async {
+        let sut = AppCompositionRoot()
+        sut.loginViewModel.email = "student@course.dev"
+        sut.loginViewModel.password = "Passw0rd!"
+        await sut.loginViewModel.submit()
+        XCTAssertEqual(sut.navigation.routes, [.login, .catalog])
+    }
 }
 ```
 
-**Paso 4 — Reflexión:** si el test anterior resulta muy difícil de escribir porque `CompositionRoot` es rígido, eso es una señal de diseño. La solución es hacer inyectable el `CompositionRoot` para tests — ver el patrón del scaffold.
+**Paso 4 — Reflexión:** si tu `CompositionRoot` pedagógico no admite inyectar un `AuthRepository` para tests, añadir un `init(authRepository:)` opcional (como `AppCompositionRoot`) desbloquea el mismo patrón sin tocar UseCase ni ViewModel.
 
-**Paso 5 — Refactor:** extraer la creación del `httpClient` a un método sobreescribible o un parámetro del `init`. Los tests de integración del scaffold lo hacen inyectando `InMemoryAuthRepository` directamente.
+**Paso 5 — Refactor:** centralizar el `HTTPClient` compartido y los `baseURL` en propiedades del root; sustituir solo `makeAuthRepository()` al pasar a red real.
 
 ---
 
@@ -470,7 +474,7 @@ El Composition Root es el punto de máxima flexibilidad: puedes cambiar toda la 
 ## ADR-003: Composition Root centralizado con factories por feature
 - Estado: Aprobado
 - Contexto: necesidad de ensamblar Login + Catalog sin acoplar features entre si ni con implementaciones concretas
-- Decisión: un único CompositionRoot con factory methods por feature, inyección por constructor, closures de navegación hacia AppCoordinator
+- Decisión: un único CompositionRoot con factory methods por feature, inyección por constructor, Login con `LoginNavigating` y eventos de Catalog vía closures desde el coordinator
 - Consecuencias: ensamblaje explícito y testeable; el único punto que conoce todas las implementaciones; fácil de extender con nuevas features o backends
 - Fecha: 2026-02-07
 ```
@@ -482,7 +486,7 @@ El Composition Root es el punto de máxima flexibilidad: puedes cambiar toda la 
 - [ ] El Composition Root es el único lugar que importa implementaciones concretas.
 - [ ] Ningún ViewModel, UseCase ni Gateway crea sus propias dependencias.
 - [ ] Cada feature tiene su factory method independiente.
-- [ ] Los closures de navegación conectan features sin que estas se conozcan.
+- [ ] Login usa `LoginNavigating` (sin closure de éxito); los closures de Catalog (p. ej. `onProductSelected`) viven en el coordinator, no en las features.
 - [ ] En tests, cada test monta su propia cadena con stubs (patron makeSUT).
 - [ ] El Composition Root está marcado como `@MainActor`.
 
@@ -537,7 +541,7 @@ public struct AppCompositionRoot {
 
 2. **`CatalogViewModel?` opcional** — el catalogo puede no existir si no se pasa un `catalogRepository`. Esto permite lanzar la app con solo Login mientras el catálogo está en desarrollo.
 
-3. **`navigator: navigation`** — el `LoginViewModel` recibe el `NavigationStore` directamente como `LoginNavigating`. En la lección, el ViewModel recibe un closure. El protocolo es más explícito sobre el contrato; el closure es más simple de leer.
+3. **`navigator: navigation`** — el `LoginViewModel` recibe el `NavigationStore` directamente como `LoginNavigating`. En Etapa 1 el proyecto pedagógico usa un `PrintNavigator` u otro tipo que conforma el mismo protocolo; el contrato es siempre `LoginNavigating`, no un closure.
 
 **Qué hacer ahora:**
 1. Abre `Sources/AppComposition/AppCompositionRoot.swift` — lee el ensamblaje completo.

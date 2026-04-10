@@ -181,7 +181,7 @@ final class LoginViewModel {
 ```mermaid
 flowchart TD
     START["Usuario pulsa Submit"] --> LOADING["isLoading = true<br/>errorMessage = nil"]
-    LOADING --> TRY["try await login.execute<br/>email, password"]
+    LOADING --> TRY["try await useCase.execute<br/>email, password"]
     TRY -->|"Exito"| SUCCESS["navigator?.goToCatalog()<br/>Navega a la siguiente pantalla"]
     TRY -->|"LoginError"| KNOWN["errorMessage = mensaje especifico<br/>Email invalido / Password vacio /<br/>Credenciales incorrectas / Sin conexion"]
     TRY -->|"Otro error"| UNKNOWN["errorMessage = Error inesperado"]
@@ -199,7 +199,7 @@ flowchart TD
 
 `errorMessage = nil` — Limpia cualquier error previo. Si el usuario vio "Email inválido", corrigió el email, y volvió a pulsar submit, no queremos que el error anterior siga visible mientras se procesa la nueva petición.
 
-`do { let session = try await login.execute(...) }` — Ejecuta el UseCase. `try` porque puede lanzar errores. `await` porque es asíncrono (el UseCase llama al gateway que simula una petición de red). Si todo va bien, `session` contiene la sesión del servidor.
+`do { _ = try await useCase.execute(email: email, password: password) }` — Ejecuta el UseCase. `try` porque puede lanzar errores. `await` porque es asíncrono (el UseCase llama al repositorio que puede simular red). Si todo va bien, el login fue exitoso y el flujo continúa hacia la navegación.
 
 `navigator?.goToCatalog()` — Si llegamos aquí, el login fue exitoso. Llamamos al navigator para que realice la navegación. El navigator (`any LoginNavigating`) no sabe nada de HTTP ni de Domain; solo sabe navegar. En producción será el coordinador. En tests, un spy que registra si se llamó.
 
@@ -338,6 +338,7 @@ import XCTest
 
 // MARK: - Test Doubles
 
+@MainActor
 final class LoginNavigatorSpy: LoginNavigating {
     private(set) var goToCatalogCallCount = 0
     func goToCatalog() { goToCatalogCallCount += 1 }
@@ -421,9 +422,7 @@ Este test verifica que cuando el usuario escribe credenciales válidas y pulsa s
 
 `sut.email = "user@example.com"` y `sut.password = "pass123"` — Simulamos que el usuario escribió en los campos de texto. En la app real, esto lo haría SwiftUI a través de los bindings. En el test, lo hacemos directamente.
 
-`await sut.submit()` — Ejecutamos el submit. Usamos `await` porque `submit()` es `async`. El test espera a que termine toda la ejecución (incluyendo la llamada al UseCase y al gateway stub) antes de continuar.
-
-`XCTAssertEqual(receivedSession, expectedSession)` — Verificamos que la trampa capturó la sesión correcta. Si `receivedSession` sigue siendo `nil`, significa que el closure nunca se ejecutó (lo cual sería un bug). Si contiene una sesión diferente, también es un bug.
+`await sut.submit()` — Ejecutamos el submit. Usamos `await` porque `submit()` es `async`. El test espera a que termine toda la ejecución (incluyendo la llamada al UseCase y al repositorio stub) antes de continuar.
 
 `XCTAssertNil(sut.errorMessage)` — Verificamos que no hay mensaje de error. En el happy path, todo sale bien, así que no debería haber error.
 
@@ -524,11 +523,12 @@ Que el estado inicial es correcto (campos vacíos, no loading, sin error). Que u
 
 ## La Preview con Stub
 
-Una de las grandes ventajas de nuestra arquitectura es que las previews de SwiftUI funcionan sin servidor, sin red, y de forma instantánea. Esto es posible porque podemos inyectar el `InMemoryAuthRepository` en lugar del gateway real:
+Una de las grandes ventajas de nuestra arquitectura es que las previews de SwiftUI funcionan sin servidor, sin red, y de forma instantánea. Esto es posible porque podemos inyectar el `InMemoryAuthRepository` en lugar del gateway real. Si sigues el scaffold `ArchitectureKit`, el parámetro de latencia es `latencyNanoseconds`. Si tu `InMemoryAuthRepository` pedagógico de la lección de Infrastructure usa `delayNanoseconds`, sustituye el label en la preview por el tuyo.
 
 ```swift
 // StackMyArchitecture/Features/Login/Interface/LoginView+Preview.swift
 
+@MainActor
 private final class PreviewNavigator: LoginNavigating {
     func goToCatalog() { print("Preview: login exitoso — navegando a Catalog") }
 }
@@ -538,7 +538,7 @@ private final class PreviewNavigator: LoginNavigating {
         LoginView(
             viewModel: LoginViewModel(
                 useCase: AuthenticateUserUseCase(
-                    authRepository: InMemoryAuthRepository(delayNanoseconds: 1_000_000_000)
+                    repository: InMemoryAuthRepository(latencyNanoseconds: 1_000_000_000)
                 ),
                 navigator: PreviewNavigator()
             )
@@ -659,7 +659,7 @@ Para que veas cómo todas las capas trabajan juntas, vamos a trazar el flujo com
 
 7. El `AuthenticateUserUseCase` crea un `Credentials(email: email, password: password)`.
 
-8. El `AuthenticateUserUseCase` llama a `authRepository.authenticate(credentials: credentials)`. En producción, esto llega al `AuthHTTPRepository`.
+8. El `AuthenticateUserUseCase` llama a `repository.authenticate(credentials: credentials)`. En producción, esto llega al `AuthHTTPRepository`.
 
 9. El `AuthHTTPRepository` construye un `URLRequest` con método POST, URL `https://api.example.com/auth/login`, header `Content-Type: application/json`, y body `{"email":"user@example.com","password":"pass123"}`.
 
