@@ -49,7 +49,7 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 
 ---
 
-## Fase 2 — Modelo pedagógico explícito ⏳
+## Fase 2 — Modelo pedagógico explícito ✅
 
 > Dejar claro en el curso que el scaffold es la solución de referencia, y guiar al estudiante sobre cómo usarlo.
 
@@ -135,15 +135,15 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 | 6.6 Barrido `04-arquitecto` | ✅ | Intro *Tu proyecto y scaffold*; recuadros 🔭; entregables/checkpoint; mermaid `UserSession`/`EmailAddress` en bounded contexts; tabla rollout incluye `00-introduccion` |
 | 6.7 Barrido `05-maestria` | ✅ | *Ruta scaffold* sustituida; recuadros 🔭 (incl. títulos *El scaffold…*); `09` sin Ruta previa; rubrica-final + entregables + checkpoint |
 | 6.8 Barrido `06-proyecto-final` + anexos docentes | ✅ | Proyecto final: *Tu proyecto* + *Scaffold* en 00–02 y 🔨; anexos (4) con convención + enlaces intro |
-| 6.9 Criterio de cierre | ✅ | Tabla `rollout-enterprise-snippet-convencion.md` al 100% ✅; rebuild HTML + `build-hub.sh --mode fast` (iOS/Android/SDD), Governance solo HTML en `hub/governance/`, Pumuki `build-html.py` (2026-04-11); falta commit/push del hub si quieres publicar en Vercel. |
+| 6.9 Criterio de cierre | ✅ | Tabla `rollout-enterprise-snippet-convencion.md` al 100% ✅; rebuild HTML + `build-hub.sh --mode fast` (iOS/Android/SDD), Governance solo HTML en `hub/governance/`, Pumuki `build-html.py` (2026-04-11); hub `main` publicado con CI (`hub-ci-verify-published` + `validate-course-surface-guard`; ref `e3f2c86`). |
 
 **Criterio de cierre:** cada fila del rollout en ✅; `grep -r "🔨 Checkpoint\|🔭 Explora"` revisado con etiqueta scaffold donde toque.
 
 ---
 
-## Estado final del plan (Fases 1–5) ✅
+## Estado final del plan (Fases 1–6) ✅
 
-**Fases 1–5 completadas** (nomenclatura, modelo pedagógico, checkpoints, deploy). La Fase 6 amplía el modelo a **todo** el curso. El curso iOS está:
+**Fases 1–6 completadas** (nomenclatura, modelo pedagógico, checkpoints, deploy, convención enterprise de snippets en todo el curso). El curso iOS está:
 - Con nomenclatura 100% unificada con el scaffold real (~860 reemplazos)
 - Con 73/91 lecciones con checkpoints (`🔨` o `🔭`)
 - Con modelo pedagógico explícito en intros E1-E3
@@ -177,3 +177,4 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 | 2026-04-11 | **Hub QA:** `verify-hub-build.py` exige cinco cursos (HTML + assets + hash `dist` ↔ hub + `course-id`); portada `index.html` enlaza Governance y Pumuki; `smoke-hub-runtime.sh` comprueba `/governance` y `/pumuki`. |
 | 2026-04-11 | **Hub CI:** workflow `hub-ci-verify-published.yml` (`HUB_VERIFY_SKIP_SOURCE=1`); `validate-course-surface-guard` tolera `?v=` ±1s entre iOS/Android/SDD, `hub-auth-bar` en portada; push hub `e939b08`. |
 | 2026-04-11 | **Hub CI + surface guard:** `validate-course-surface-guard.sh` exporta `HUB_VERIFY_SKIP_SOURCE=1` por defecto cuando `GITHUB_ACTIONS=true` (el job `hub-surface-guard-qa` ya no falla por falta de `dist/` hermanos); `hub-ci-verify-published.yml` ejecuta también la guarda de superficie tras `verify-hub-build.py`; push hub `e3f2c86`. |
+| 2026-04-11 | **Plan coherencia:** cabecera Fase 2 corregida a ✅; criterio 6.9 y bloque *Estado final* alineados a Fases 1–6 y hub con CI (`e3f2c86`). |
