@@ -26,7 +26,7 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 
 ---
 
-## Fase 1 — Unificación de nomenclatura (Opción C) 🚧
+## Fase 1 — Unificación de nomenclatura (Opción C) ✅
 
 > Alinear los nombres de todos los snippets de código y referencias en prosa con los nombres reales del scaffold. Eliminar la necesidad de `equivalencias-scaffold.md` como tabla de emergencia.
 
@@ -121,9 +121,29 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 
 ---
 
-## Estado final del plan ✅
+## Fase 6 — Convención enterprise de snippets (todo el curso) ✅
 
-**Todas las fases completadas.** El curso iOS está:
+> Objetivo: misma línea que Feature Login (`P1.9` / plan maestro `P3.1`): *Tu proyecto (Xcode)* vs *Scaffold (solo referencia)*, just-in-time, en **todas** las lecciones con código o checkpoints de referencia.
+
+| Tarea | Estado | Notas |
+| --- | --- | --- |
+| 6.1 Checklist y seguimiento | ✅ | `plans/rollout-enterprise-snippet-convencion.md` |
+| 6.2 Barrido `01-fundamentos` (fuera de Feature Login ya cerrada) | ✅ | Convención aplicada en toda la carpeta `01-fundamentos/` (incl. setup, intros, principios, BDD/TDD, TDD práctica, stack, estructura, entregables, bitácora, ADR-001, Feature Login, conexión app) |
+| 6.3 Barrido `02-integracion` | ✅ | Recuadros *Tu proyecto* / *Scaffold*, intros y 🔭 07b/07c/08; tabla rollout E2 al 100% |
+| 6.4 Barrido `00-core-mobile` | ✅ | Convención + recuadros 🔭; alineación nombres (`AuthHTTPRepository`, `UserSession`, `CatalogRepository`, `EmailAddress`) donde tocaba |
+| 6.5 Barrido `03-evolucion` | ✅ | Intro *Tu proyecto y scaffold*; recuadros 🔭/🔨; sustitución *Ruta scaffold* engañosa en 00, 04, entregables |
+| 6.6 Barrido `04-arquitecto` | ✅ | Intro *Tu proyecto y scaffold*; recuadros 🔭; entregables/checkpoint; mermaid `UserSession`/`EmailAddress` en bounded contexts; tabla rollout incluye `00-introduccion` |
+| 6.7 Barrido `05-maestria` | ✅ | *Ruta scaffold* sustituida; recuadros 🔭 (incl. títulos *El scaffold…*); `09` sin Ruta previa; rubrica-final + entregables + checkpoint |
+| 6.8 Barrido `06-proyecto-final` + anexos docentes | ✅ | Proyecto final: *Tu proyecto* + *Scaffold* en 00–02 y 🔨; anexos (4) con convención + enlaces intro |
+| 6.9 Criterio de cierre | ✅ | Tabla `rollout-enterprise-snippet-convencion.md` al 100% ✅; rebuild HTML + `build-hub.sh --mode fast` (iOS/Android/SDD), Governance solo HTML en `hub/governance/`, Pumuki `build-html.py` (2026-04-11); falta commit/push del hub si quieres publicar en Vercel. |
+
+**Criterio de cierre:** cada fila del rollout en ✅; `grep -r "🔨 Checkpoint\|🔭 Explora"` revisado con etiqueta scaffold donde toque.
+
+---
+
+## Estado final del plan (Fases 1–5) ✅
+
+**Fases 1–5 completadas** (nomenclatura, modelo pedagógico, checkpoints, deploy). La Fase 6 amplía el modelo a **todo** el curso. El curso iOS está:
 - Con nomenclatura 100% unificada con el scaffold real (~860 reemplazos)
 - Con 73/91 lecciones con checkpoints (`🔨` o `🔭`)
 - Con modelo pedagógico explícito en intros E1-E3
@@ -143,3 +163,15 @@ Objetivo: convertir el curso en un material sin ambigüedades donde el estudiant
 | 2026-04-10 | **FASE 5 COMPLETADA** — Merge, rebuild HTML (2348 KB), deploy Vercel `edc93f7` |
 | 2026-04-10 | **Auditoría snippets (post-cierre):** Preview Login alineada a `latencyNanoseconds` + nota dual pedagógico/scaffold; diagrama `LoginError` 4 casos en `01-domain.md`; prosa `network` vs `connectivity` en `02-application.md`; flujo submit sin label `login` en `04-interface-swiftui.md`; eliminado párrafo stale `receivedSession`; `PrintNavigator` con `@MainActor`; `06-composition-root.md` — plan TDD y diagrama sin `Session`/closure obsoletos; tabla scaffold corregida (`LoginNavigating`). |
 | 2026-04-10 | **`06-composition-root.md` Paso 4 + secuencia:** `StackMyArchitectureApp` alineado con la lección `02-integracion/02-navegacion-eventos.md` (`AppCoordinator` + `makeLoginView()` + `AppDestination`); diagrama mermaid sin `handle(.loginSucceeded)`; checklist y ADR-003 coherentes. **Convención curso:** tests en lecciones = **XCTest** (no Swift Testing). |
+| 2026-04-10 | **Fase 6 abierta (`P3.1`):** plan maestro Fase 4 multi-curso; checklist `plans/rollout-enterprise-snippet-convencion.md`; `00-setup.md` enlaza convención de snippets; `P1.9` acotado a slice Login. |
+| 2026-04-10 | **Fase 6.2 (`01-fundamentos`):** recuadros *Tu proyecto* / *Scaffold* + texto introductorio en principios, BDD, TDD práctica, stack, estructura, entregables, bitácora, ADR-001; corrección prosa intro (checkpoints ≠ pegar en scaffold) y decisión principal ADR (navegación por protocolo). |
+| 2026-04-10 | **Fase 6.3 (`02-integracion`):** cierre convención enterprise en `07b`/`07c`/`08` (nota *Cómo leer los swift* + recuadro *Scaffold* en 🔭); nota *Tu proyecto* en `09-app-final-etapa-2.md`; `rollout-enterprise-snippet-convencion.md` — filas E2 en ✅. |
+| 2026-04-10 | **Fase 6.4 (`00-core-mobile`):** bloque *Convención del curso* + recuadros bajo cada 🔭 (Scaffold vs material `01-fundamentos/`); correcciones menores de nomenclatura en `05`, `07`, `10`. |
+| 2026-04-10 | **Fase 6.5 (`03-evolucion`):** convención + *Tu proyecto y scaffold* en intro/entregables/04; recuadros bajo 🔭 y 🔨; checkpoint/bitácora con enlace a entregables e intro. |
+| 2026-04-10 | **Fase 6.6 (`04-arquitecto`):** misma convención en 00–06, entregables y checkpoint; 🔭 con *Scaffold*; diagrama bounded contexts alineado a nomenclatura vigente. |
+| 2026-04-10 | **Fase 6.7 (`05-maestria`):** *Tu proyecto y scaffold* en 00–12, `09`, entregables, rubrica-final (3); recuadros bajo todos los 🔭; checkpoint con enlace a entregables e intro; rollout desglosa rubrica por archivo. |
+| 2026-04-10 | **Fase 6.8–6.9:** `06-proyecto-final` (00–02, 🔨) + anexos operativos del rollout (`guia-solid`, `guia-recuperacion-ios`, `equivalencias-scaffold`, `atlas-arquitectura`); cierre Fase 6 — checklist rollout iOS 100% (rebuild HTML/hub pendiente de pipeline). |
+| 2026-04-10 | **Plan coherencia:** cabecera Fase 1 corregida a ✅ (estaba 🚧 con trabajo ya cerrado). **Ecosistema:** `P3.5` Pumuki cerrado en plan maestro; `stack-my-architecture-pumuki/scripts/check-links.py` omite jsDelivr `pumuki@*` (HEAD/404); `validate-course-structure` + `check-links` en verde en ese repo. |
+| 2026-04-11 | **Hub local:** `build-hub.sh --mode fast` + `SKIP_RUNTIME_SMOKE=1` (iOS ~2044 KB, Android ~773 KB, SDD ~2044 KB); Governance `build-html.py` y copia **solo** `curso-*.html` + `index.html` a `hub/governance/` (no `rsync --delete` sobre `governance/`: el `dist/assets` del curso está vacío y borraría diagramas del hub); Pumuki `build-html.py` → `hub/pumuki/`. `verify-hub-build.py` OK. |
+| 2026-04-11 | **`build-hub.sh` unificado:** pasos [7/11] Governance (HTML only) y [8/11] Pumuki integrados en `stack-my-architecture-hub/scripts/build-hub.sh`; manifiesto incluye `governance` y `pumuki`; README del hub actualizado. |
+| 2026-04-11 | **Hub QA:** `verify-hub-build.py` exige cinco cursos (HTML + assets + hash `dist` ↔ hub + `course-id`); portada `index.html` enlaza Governance y Pumuki; `smoke-hub-runtime.sh` comprueba `/governance` y `/pumuki`. |
